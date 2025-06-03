@@ -34,8 +34,8 @@ const Sidebar = () => {
             name: 'Phòng',
             icon: '🛏️',
             children: [
-                { name: 'Danh sách Room', path: '/list-room', icon: '📋' },
-                { name: 'Thêm Room', path: '/add-room', icon: '➕' },
+                { name: 'Danh sách phòng', path: '/list-room', icon: '📋' },
+                { name: 'Thêm phòng', path: '/add-room', icon: '➕' },
             ],
         },
         {
@@ -43,7 +43,7 @@ const Sidebar = () => {
             icon: '🌐',
             children: [
                 { name: 'Danh sách chuyến', path: '/list-transport', icon: '📋' },
-                { name: 'Thêm Hotel', path: '/add-transport', icon: '➕' },
+                { name: 'Thêm chuyến', path: '/add-transport', icon: '➕' },
             ],
         },
     ];
@@ -101,7 +101,7 @@ const Sidebar = () => {
                                         to={child.path}
                                         className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm transition-all
                                             hover:bg-white/10 ${location.pathname === child.path
-                                                ? 'bg-white/20 text-yellow-200 font-semibold'
+                                                ? 'bg-white/20 text-red-600 font-semibold'
                                                 : ''}`}
                                     >
                                         <span>{child.icon}</span>
