@@ -10,7 +10,7 @@ const connectDB = async () => {
             throw new Error("MONGODB_URI is not defined in .env file");
         }
 
-        await mongoose.connect(`${MONGODB_URI}/HotelBooking`);
+        await mongoose.connect(`${MONGODB_URI}/TourBooking`);
 
         mongoose.connection.on('connected', () => {
             console.log('MongoDB connected successfully');
