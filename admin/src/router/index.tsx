@@ -6,6 +6,7 @@ import AddRoom from "../pages/Room/AddRoom"
 import EditRoom from "../pages/Room/EditRoom"
 import ListTour from "../pages/Tour/ListTour"
 import AddTour from "../pages/Tour/AddTour"
+import EditTour from "../pages/Tour/EditTour"
 
 
 
@@ -23,6 +24,7 @@ const Router = () => {
 
                     <Route path="/list-tour" element={<ListTour />} />
                     <Route path="/add-tour" element={<AddTour />} />
+                    <Route path="/edit-tour/:id" element={<EditTour />} />
 
                 </Route>
             </Routes>

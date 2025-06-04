@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import connectDB from "./config/mongodb";
 import RouterRoom from "./router/RoomRouter";
 import TourRouter from "./router/TourRouter";
+import TransportRouter from "./router/TransportRouter";
 
 const app = express();
 app.use(express.json());
@@ -17,5 +18,6 @@ connectDB();
 
 app.use('/api/', RouterRoom)
 app.use('/api/', TourRouter)
+app.use('/api/', TransportRouter)
 
 export const viteNodeApp = app;
