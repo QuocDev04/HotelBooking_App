@@ -14,6 +14,8 @@ import ListTSchedule from "../pages/TransportSchedule/ListTSchedule"
 import AddTSchedule from "../pages/TransportSchedule/AddTSchedule"
 import EditTSchedule from "../pages/TransportSchedule/EditTSchedule"
 import AddTourSchedule from "../pages/TourSchedule/AddTourSchedule"
+import ListTourSchedule from "../pages/TourSchedule/ListTourSchedule"
+import EditTourSchedule from "../pages/TourSchedule/EditTourSchedule"
 
 
 
@@ -42,7 +44,9 @@ const Router = () => {
                     <Route path="/add-Transport_Schedule" element={<AddTSchedule />} />
                     <Route path="/edit-Transport_Schedule/:id" element={<EditTSchedule />} />
 
+                    <Route path="/list-tourschedule" element={<ListTourSchedule />} />
                     <Route path="/add-tourschedule" element={<AddTourSchedule />} />
+                    <Route path="/edit-tourschedule/:id" element={<EditTourSchedule />} />
 
 
                 </Route>

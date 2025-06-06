@@ -6,7 +6,7 @@ import TourScheduleModel from "../models/TourScheduleModel";
 
 export const GetTourScheduleAll = async (req,res) => {
    try {
-           const tourSchedule = await TourScheduleModel.find().populate('tour');
+           const tourSchedule = await TourScheduleModel.find().populate('Tour');
            return res.status(StatusCodes.OK).json({
                success: true,
                message: "Tour add successfully",

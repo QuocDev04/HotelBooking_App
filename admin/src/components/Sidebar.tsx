@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 type SidebarLink = {
@@ -34,7 +34,7 @@ const Sidebar = () => {
             name: 'Lịch Trình Các Chuyến Tham Quan',
             icon: '🗓️', // Lịch – biểu tượng cho lịch trình
             children: [
-                { name: 'Danh sách Lịch Trình Các Chuyến Tham Quan', path: '/list-tour-schedule', icon: '📅' },
+                { name: 'Danh sách Lịch Trình Các Chuyến Tham Quan', path: '/list-tourschedule', icon: '📅' },
                 { name: 'Thêm Lịch Trình Các Chuyến Tham Quan', path: '/add-tourschedule', icon: '✍️' },
             ],
         },

@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
 
 const ScheduleSchema = new mongoose.Schema({
-    dayNumber: { type: Number, required: true }, 
+    dayNumber: { type: String, required: true }, 
     activity: { type: String, required: true },
     location: { type: String, required: true },
-    imageTourSchedule: { type: [String] }  
+    imageTourSchedule: [{ type: String }]
 });
 
 const TourScheduleSchema = new mongoose.Schema({

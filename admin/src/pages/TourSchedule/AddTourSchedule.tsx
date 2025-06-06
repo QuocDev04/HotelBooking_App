@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Form, Input, Button, InputNumber, message, notification, Select, type UploadFile, type UploadProps, type GetProp, Upload, Image, Modal, Row, Col } from 'antd';
+import { Form, Input, Button, message, notification, Select, type UploadFile, type UploadProps, type GetProp, Upload, Image, Modal, Row, Col } from 'antd';
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import instance from '../../configs/axios';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -52,9 +52,7 @@ const AddTourSchedule = () => {
     };
 
     // Hàm xử lý thay đổi fileList cho từng ngày
-    const handleChange = (index: number): UploadProps["onChange"] => ({ fileList: newFileList }) => {
-        setFileLists(prev => ({ ...prev, [index]: newFileList }));
-    };
+
 
     const { data: tour } = useQuery({
         queryKey: ['tour'],
@@ -96,6 +94,7 @@ const AddTourSchedule = () => {
         // Map từng lịch trình, gán ảnh tương ứng từ fileLists
         const schedules = values.schedules.map((schedule: any, index: number) => ({
             ...schedule,
+            dayNumber: `Ngày ${index + 1}`,
             imageTourSchedule: (fileLists[index] || [])
                 .filter(file => file.status === "done")
                 .map(file => file.response?.secure_url)
@@ -149,7 +148,7 @@ const AddTourSchedule = () => {
                                         <Select
                                             size="large"
                                             placeholder="Chọn tour"
-                                            options={tour?.data?.tours?.map((tour:any) => ({
+                                            options={tour?.data?.tours?.map((tour: any) => ({
                                                 label: tour.nameTour,
                                                 value: tour._id,
                                             }))}
@@ -168,14 +167,7 @@ const AddTourSchedule = () => {
                                             >
                                                 <div className="flex items-center justify-between mb-4">
                                                     <div className="flex items-center space-x-3">
-                                                        <h3 className="font-semibold text-lg">Ngày thứ {index + 1}</h3>
-                                                        <Form.Item
-                                                            {...restField}
-                                                            name={[name, 'dayNumber']}
-                                                            style={{ marginBottom: 0, width: 70 }}
-                                                        >
-                                                            <InputNumber min={1} disabled style={{ width: '100%' }} />
-                                                        </Form.Item>
+                                                        <h3 className="font-semibold text-lg" >Ngày thứ {index + 1}</h3>
                                                     </div>
 
                                                     <MinusCircleOutlined
@@ -185,26 +177,27 @@ const AddTourSchedule = () => {
                                                                 okText: 'Có',
                                                                 cancelText: 'Không',
                                                                 onOk() {
-                                                                    remove(name);
+                                                                    remove(name); // Xoá trong Form.List
 
                                                                     setFileLists((prev) => {
                                                                         const copy = { ...prev };
-                                                                        delete copy[name];
+                                                                        delete copy[key]; // ✅ Xoá theo key, không dùng index
                                                                         return copy;
                                                                     });
 
+                                                                    // Cập nhật lại dayNumber nếu cần
                                                                     const schedules = form.getFieldValue('schedules') || [];
-                                                                    const updatedSchedules = schedules.map((schedule:any, idx:any) => ({
+                                                                    const updatedSchedules = schedules.map((schedule: any, idx: any) => ({
                                                                         ...schedule,
-                                                                        dayNumber: idx + 1,
+                                                                        dayNumber: `Ngày ${idx + 1}`,
                                                                     }));
-
                                                                     form.setFieldsValue({ schedules: updatedSchedules });
-                                                                },
+
+                                                                }
                                                             });
-                                                        }}
-                                                        style={{ fontSize: 20, color: 'red', cursor: 'pointer' }}
+                                                        }} style={{ fontSize: 20, color: 'red', cursor: 'pointer' }}
                                                     />
+
                                                 </div>
 
                                                 <Row gutter={16}>
@@ -238,21 +231,27 @@ const AddTourSchedule = () => {
                                                     label="Ảnh Tour"
                                                     name={[name, 'imageTourSchedule']}
                                                     valuePropName="fileList"
-                                                    getValueFromEvent={() => fileLists[name] || []}
+                                                    getValueFromEvent={() => fileLists[key] || []} // ✅ dùng key thay vì name
                                                     extra="Tối đa 8 ảnh, định dạng JPG/PNG"
+                                                    key={key}
                                                 >
                                                     <Upload
                                                         listType="picture-card"
                                                         action="https://api.cloudinary.com/v1_1/ecommercer2021/image/upload"
                                                         data={{ upload_preset: 'demo-upload' }}
                                                         onPreview={handlePreview}
-                                                        onChange={handleChange(name)}
+                                                        onChange={({ fileList }) => {
+                                                            setFileLists((prev) => ({
+                                                                ...prev,
+                                                                [key]: fileList, // ✅ dùng key
+                                                            }));
+                                                        }}
                                                         multiple
                                                         accept="image/png, image/jpeg"
-                                                        fileList={fileLists[name] || []}
+                                                        fileList={fileLists[key] || []} // ✅ dùng key
                                                         style={{ width: '120px', height: '120px' }}
                                                     >
-                                                        {(fileLists[name]?.length || 0) >= 8 ? null : uploadButton}
+                                                        {(fileLists[key]?.length || 0) >= 8 ? null : uploadButton}
                                                     </Upload>
 
                                                     {previewImage && (
