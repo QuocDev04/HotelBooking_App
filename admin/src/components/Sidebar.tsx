@@ -23,35 +23,50 @@ const Sidebar = () => {
     const sidebarLinks: SidebarLink[] = [
         { name: 'Hệ Thống', path: '/', icon: '💻' },
         {
-            name: 'Tour',
-            icon: '🌍',
+            name: 'Các Chuyến Tham Quan',
+            icon: '🧭', // La bàn, biểu tượng cho tour/khám phá
             children: [
-                { name: 'Danh sách Tour', path: '/list-tour', icon: '📜' },
-                { name: 'Thêm Tour', path: '/add-tour', icon: '➕' },
+                { name: 'Danh sách Các Chuyến Tham Quan', path: '/list-tour', icon: '📋' },
+                { name: 'Thêm Các Chuyến Tham Quan', path: '/add-tour', icon: '🆕' },
+            ],
+        },
+        {
+            name: 'Lịch Trình Các Chuyến Tham Quan',
+            icon: '🗓️', // Lịch – biểu tượng cho lịch trình
+            children: [
+                { name: 'Danh sách Lịch Trình Các Chuyến Tham Quan', path: '/list-tour-schedule', icon: '📅' },
+                { name: 'Thêm Lịch Trình Các Chuyến Tham Quan', path: '/add-tourschedule', icon: '✍️' },
             ],
         },
         {
             name: 'Phòng',
-            icon: '🛏️',
+            icon: '🏨', // Khách sạn
             children: [
                 { name: 'Danh sách phòng', path: '/list-room', icon: '📋' },
                 { name: 'Thêm phòng', path: '/add-room', icon: '➕' },
             ],
         },
         {
-            name: 'Vận Chuyển',
-            icon: '🌐',
+            name: 'Phương Tiện',
+            icon: '🚌', // Xe buýt – phương tiện đi lại
             children: [
-                { name: 'Danh sách chuyến', path: '/list-transport', icon: '📋' },
-                { name: 'Thêm chuyến', path: '/add-transport', icon: '➕' },
+                { name: 'Danh sách chuyến', path: '/list-transport', icon: '📃' },
+                { name: 'Thêm chuyến', path: '/add-transport', icon: '🛠️' },
             ],
         },
+        {
+            name: 'Lịch trình vận chuyển',
+            icon: '🛣️', // Biểu tượng đường đi, đại diện lịch trình vận chuyển
+            children: [
+                { name: 'Danh sách Lịch trình', path: '/list-transport-schedule', icon: '📝' },
+                { name: 'Thêm Lịch trình', path: '/add-transport-schedule', icon: '🆕' },
+            ],
+        }
     ];
-
     return (
         <div
             className={`h-screen bg-white text-black transition-all duration-300 ease-in-out
-            ${collapsed ? 'w-16' : 'w-64'} flex flex-col shadow-lg`}
+            ${collapsed ? 'w-20' : 'w-72'} flex flex-col shadow-lg`}
         >
             <div className="p-3 flex justify-end">
                 <button

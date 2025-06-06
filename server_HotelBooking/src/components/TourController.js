@@ -54,7 +54,7 @@ export const DeleteTour = async (req,res) => {
 
 export const UpdateTour = async (req, res) => {
     try {
-        const tour = await TourModel.findByIdAndUpdate(req.params.id, res.body);
+        const tour = await TourModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
         return res.status(StatusCodes.OK).json({
 
             success: true,
@@ -71,7 +71,7 @@ export const UpdateTour = async (req, res) => {
 
 export const GetTourById = async (req,res) => {
     try {
-        const tour = await TourModel.findById(req.params.id);
+        const tour = await TourModel.findById(req.params.id, req.body);
         return res.status(StatusCodes.OK).json({
 
             success: true,

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, Checkbox, Col, Empty, Form, Image, Input, message, Row, Select, Upload, type FormProps, type GetProp, type SelectProps, type UploadFile, type UploadProps } from 'antd'
 import { useState } from 'react'
 import ReactQuill from "react-quill";

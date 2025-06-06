@@ -7,6 +7,8 @@ import connectDB from "./config/mongodb";
 import RouterRoom from "./router/RoomRouter";
 import TourRouter from "./router/TourRouter";
 import TransportRouter from "./router/TransportRouter";
+import TransportSchedulemodel from "./router/TransportScheduleModel";
+import TourSchedule from "./router/TourScheduleRouter";
 
 const app = express();
 app.use(express.json());
@@ -19,5 +21,7 @@ connectDB();
 app.use('/api/', RouterRoom)
 app.use('/api/', TourRouter)
 app.use('/api/', TransportRouter)
+app.use('/api/', TransportSchedulemodel)
+app.use('/api/', TourSchedule)
 
 export const viteNodeApp = app;

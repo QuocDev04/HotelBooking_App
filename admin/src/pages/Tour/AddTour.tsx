@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { PlusOutlined } from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
 import { Button, Col, Form, Image, Input, InputNumber, message, Row, Select, Upload, type FormProps, type GetProp, type UploadFile, type UploadProps } from "antd";

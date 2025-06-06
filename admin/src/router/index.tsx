@@ -7,6 +7,13 @@ import EditRoom from "../pages/Room/EditRoom"
 import ListTour from "../pages/Tour/ListTour"
 import AddTour from "../pages/Tour/AddTour"
 import EditTour from "../pages/Tour/EditTour"
+import ListTransport from "../pages/Transport/ListTransport"
+import AddTransport from "../pages/Transport/AddTransport"
+import EditTransport from "../pages/Transport/EditTransport"
+import ListTSchedule from "../pages/TransportSchedule/ListTSchedule"
+import AddTSchedule from "../pages/TransportSchedule/AddTSchedule"
+import EditTSchedule from "../pages/TransportSchedule/EditTSchedule"
+import AddTourSchedule from "../pages/TourSchedule/AddTourSchedule"
 
 
 
@@ -25,6 +32,18 @@ const Router = () => {
                     <Route path="/list-tour" element={<ListTour />} />
                     <Route path="/add-tour" element={<AddTour />} />
                     <Route path="/edit-tour/:id" element={<EditTour />} />
+
+                    <Route path="/list-transport" element={<ListTransport />} />
+                    <Route path="/add-transport" element={<AddTransport />} />
+                    <Route path="/edit-transport/:id" element={<EditTransport />} />
+
+
+                    <Route path="/list-Transport_Schedule" element={<ListTSchedule />} />
+                    <Route path="/add-Transport_Schedule" element={<AddTSchedule />} />
+                    <Route path="/edit-Transport_Schedule/:id" element={<EditTSchedule />} />
+
+                    <Route path="/add-tourschedule" element={<AddTourSchedule />} />
+
 
                 </Route>
             </Routes>

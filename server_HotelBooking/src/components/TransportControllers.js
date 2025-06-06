@@ -12,27 +12,32 @@ export const GetTransportAll = async (req, res) => {
             transport: transport
         })
     } catch (error) {
-
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: error.message
+        })
     }
 }
 
 export const AddTransport = async (req, res) => {
     try {
-        const transport = await TransportModel.create();
+        const transport = await TransportModel.create(req.body);
         return res.status(StatusCodes.OK).json({
-
             success: true,
             message: "Tour add successfully",
             transport: transport
         })
     } catch (error) {
-
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: error.message
+        })
     }
 }
 
 export const UpdateTransport = async (req, res) => {
     try {
-        const transport = await TransportModel.findByIdAndUpdate(req.params.id, res.body);
+        const transport = await TransportModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
         return res.status(StatusCodes.OK).json({
 
             success: true,
@@ -40,13 +45,16 @@ export const UpdateTransport = async (req, res) => {
             transport: transport
         })
     } catch (error) {
-
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: error.message
+        })
     }
 }
 
 export const GetTransportById = async (req, res) => {
     try {
-        const transport = await TransportModel.findById(req.params.id);
+        const transport = await TransportModel.findById(req.params.id, req.body);
         return res.status(StatusCodes.OK).json({
 
             success: true,
@@ -54,13 +62,16 @@ export const GetTransportById = async (req, res) => {
             transport: transport
         })
     } catch (error) {
-
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: error.message
+        })
     }
 }
 
 export const DeleteTransport = async (req, res) => {
     try {
-        const transport = await TransportModel.findByIdAndDelete(req.params.id, res.body);
+        const transport = await TransportModel.findByIdAndDelete(req.params.id);
         return res.status(StatusCodes.OK).json({
 
             success: true,
@@ -68,6 +79,9 @@ export const DeleteTransport = async (req, res) => {
             transport: transport
         })
     } catch (error) {
-
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: error.message
+        })
     }
 }
