@@ -1,9 +1,9 @@
-import React from 'react'
+import Router from "./router"
 
 const App = () => {
   return (
-    <div className='bg-red-500'>
-      app
+    <div>
+      <Router/>
     </div>
   )
 }
