@@ -92,7 +92,7 @@ const ListTransport = () => {
       render: (_: any, transport: any) => {
         return (
           <div>
-            <Link to={`/edit-transport/${transport._id}`}>
+            <Link to={`/admin/edit-transport/${transport._id}`}>
               <Button type="primary" className="mr-2">
                 <AiFillEdit className="text-xl" />
               </Button>

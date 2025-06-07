@@ -94,6 +94,7 @@ const AddTSchedule = () => {
               </Col>
               <Col span={8}>
                 <Form.Item
+                      required={false}
                   label={requiredLabel('Thời Gian đi')}
                   name="departureTime"
                   rules={[
@@ -113,6 +114,7 @@ const AddTSchedule = () => {
 
               <Col span={8}>
                     <Form.Item
+                      required={false}
                       label={requiredLabel('Thời Gian đến')}
                       name="arrivalTime"
                       dependencies={['departureTime']}

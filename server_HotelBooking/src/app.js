@@ -9,6 +9,7 @@ import TourRouter from "./router/TourRouter";
 import TransportRouter from "./router/TransportRouter";
 import TransportSchedulemodel from "./router/TransportScheduleModel";
 import TourSchedule from "./router/TourScheduleRouter";
+import AdminRouter from "./router/AdminRouter";
 
 const app = express();
 app.use(express.json());
@@ -23,5 +24,6 @@ app.use('/api/', TourRouter)
 app.use('/api/', TransportRouter)
 app.use('/api/', TransportSchedulemodel)
 app.use('/api/', TourSchedule)
+app.use('/api/', AdminRouter)
 
 export const viteNodeApp = app;

@@ -158,7 +158,7 @@ const ListRoom = () => {
       render: (_: any, room: any) => {
         return (
           <div>
-            <Link to={`/edit-room/${room._id}`}>
+            <Link to={`/admin/edit-room/${room._id}`}>
               <Button type="primary" className="mr-2">
                 <AiFillEdit className="text-xl" />
               </Button>

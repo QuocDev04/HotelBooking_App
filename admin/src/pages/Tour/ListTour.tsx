@@ -151,7 +151,7 @@ const ListTour = () => {
       render: (_: any, tour: any) => {
         return (
           <div>
-            <Link to={`/edit-tour/${tour._id}`}>
+            <Link to={`/admin/edit-tour/${tour._id}`}>
               <Button type="primary" className="mr-2">
                 <AiFillEdit className="text-xl" />
               </Button>

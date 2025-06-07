@@ -101,7 +101,7 @@ const ListTSchedule = () => {
       render: (_: any, transportSchedule: any) => {
         return (
           <div>
-            <Link to={`/edit-Transport_Schedule/${transportSchedule._id}`}>
+            <Link to={`/admin/edit-Transport_Schedule/${transportSchedule._id}`}>
               <Button type="primary" className="mr-2">
                 <AiFillEdit className="text-xl" />
               </Button>

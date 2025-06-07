@@ -16,38 +16,56 @@ import EditTSchedule from "../pages/TransportSchedule/EditTSchedule"
 import AddTourSchedule from "../pages/TourSchedule/AddTourSchedule"
 import ListTourSchedule from "../pages/TourSchedule/ListTourSchedule"
 import EditTourSchedule from "../pages/TourSchedule/EditTourSchedule"
+import Login from "../components/Login"
+import { useUser } from "@clerk/clerk-react"
+import AdminRoute from "../components/AdminRouter"
 
 
 
 
 const Router = () => {
+    const { isSignedIn } = useUser();
+
+    // Nếu chưa đăng nhập, luôn chuyển về Login page
+    if (!isSignedIn) {
+        return (
+            <Routes>
+                <Route path="/" element={<Login />} />
+            </Routes>
+        );
+    }
     return (
        <>
             <Routes>
-                <Route path="/" element={<Layout/>}>
-                    <Route path="/" element={<ListDashboad/>}/>
+                <Route path="/admin"
+                    element={
+                        <AdminRoute>
+                            <Layout />
+                        </AdminRoute>
+                    }>
 
-                    <Route path="/list-room" element={<ListRoom />} />
-                    <Route path="/add-room" element={<AddRoom />} />
-                    <Route path="/edit-room/:id" element={<EditRoom />} />
+                    <Route path="/admin/dashboad" element={<ListDashboad/>}/>
 
-                    <Route path="/list-tour" element={<ListTour />} />
-                    <Route path="/add-tour" element={<AddTour />} />
-                    <Route path="/edit-tour/:id" element={<EditTour />} />
+                    <Route path="/admin/list-room" element={<ListRoom />} />
+                    <Route path="/admin/add-room" element={<AddRoom />} />
+                    <Route path="/admin/edit-room/:id" element={<EditRoom />} />
 
-                    <Route path="/list-transport" element={<ListTransport />} />
-                    <Route path="/add-transport" element={<AddTransport />} />
-                    <Route path="/edit-transport/:id" element={<EditTransport />} />
+                    <Route path="/admin/list-tour" element={<ListTour />} />
+                    <Route path="/admin/add-tour" element={<AddTour />} />
+                    <Route path="/admin/edit-tour/:id" element={<EditTour />} />
+
+                    <Route path="/admin/list-transport" element={<ListTransport />} />
+                    <Route path="/admin/add-transport" element={<AddTransport />} />
+                    <Route path="/admin/edit-transport/:id" element={<EditTransport />} />
 
 
-                    <Route path="/list-Transport_Schedule" element={<ListTSchedule />} />
-                    <Route path="/add-Transport_Schedule" element={<AddTSchedule />} />
-                    <Route path="/edit-Transport_Schedule/:id" element={<EditTSchedule />} />
+                    <Route path="/admin/list-Transport_Schedule" element={<ListTSchedule />} />
+                    <Route path="/admin/add-Transport_Schedule" element={<AddTSchedule />} />
+                    <Route path="/admin/edit-Transport_Schedule/:id" element={<EditTSchedule />} />
 
-                    <Route path="/list-tourschedule" element={<ListTourSchedule />} />
-                    <Route path="/add-tourschedule" element={<AddTourSchedule />} />
-                    <Route path="/edit-tourschedule/:id" element={<EditTourSchedule />} />
-
+                    <Route path="/admin/list-tourschedule" element={<ListTourSchedule />} />
+                    <Route path="/admin/add-tourschedule" element={<AddTourSchedule />} />
+                    <Route path="/admin/edit-tourschedule/:id" element={<EditTourSchedule />} />
 
                 </Route>
             </Routes>

@@ -97,7 +97,7 @@ const ListTourSchedule = () => {
             render: (_: any, tour: any) => {
                 return (
                     <div>
-                        <Link to={`/edit-tourschedule/${tour._id}`}>
+                        <Link to={`/admin/edit-tourschedule/${tour._id}`}>
                             <Button type="primary" className="mr-2">
                                 <AiFillEdit className="text-xl" />
                             </Button>
