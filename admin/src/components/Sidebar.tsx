@@ -10,21 +10,18 @@ type SidebarLink = {
 
 const Sidebar = () => {
     const location = useLocation();
-    const [openMenus, setOpenMenus] = useState<{ [key: number]: boolean }>({});
+    const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
     const [collapsed, setCollapsed] = useState<boolean>(false);
 
     const toggleMenu = (index: number) => {
-        setOpenMenus((prev) => ({
-            ...prev,
-            [index]: !prev[index],
-        }));
+        setOpenMenuIndex(prevIndex => (prevIndex === index ? null : index));
     };
 
     const sidebarLinks: SidebarLink[] = [
         { name: 'Hệ Thống', path: '/admin/dashboad', icon: '💻' },
         {
             name: 'Các Chuyến Tham Quan',
-            icon: '🧭', // La bàn, biểu tượng cho tour/khám phá
+            icon: '🧭',
             children: [
                 { name: 'Danh sách Các Chuyến Tham Quan', path: '/admin/list-tour', icon: '📋' },
                 { name: 'Thêm Các Chuyến Tham Quan', path: '/admin/add-tour', icon: '🆕' },
@@ -32,7 +29,7 @@ const Sidebar = () => {
         },
         {
             name: 'Lịch Trình Các Chuyến Tham Quan',
-            icon: '🗓️', // Lịch – biểu tượng cho lịch trình
+            icon: '🗓️',
             children: [
                 { name: 'Danh sách Lịch Trình Các Chuyến Tham Quan', path: '/admin/list-tourschedule', icon: '📅' },
                 { name: 'Thêm Lịch Trình Các Chuyến Tham Quan', path: '/admin/add-tourschedule', icon: '✍️' },
@@ -40,7 +37,7 @@ const Sidebar = () => {
         },
         {
             name: 'Phòng',
-            icon: '🏨', // Khách sạn
+            icon: '🏨',
             children: [
                 { name: 'Danh sách phòng', path: '/admin/list-room', icon: '📋' },
                 { name: 'Thêm phòng', path: '/admin/add-room', icon: '➕' },
@@ -48,7 +45,7 @@ const Sidebar = () => {
         },
         {
             name: 'Phương Tiện',
-            icon: '🚌', // Xe buýt – phương tiện đi lại
+            icon: '🚌',
             children: [
                 { name: 'Danh sách chuyến', path: '/admin/list-transport', icon: '📃' },
                 { name: 'Thêm chuyến', path: '/admin/add-transport', icon: '🛠️' },
@@ -56,43 +53,48 @@ const Sidebar = () => {
         },
         {
             name: 'Lịch trình vận chuyển',
-            icon: '🛣️', // Biểu tượng đường đi, đại diện lịch trình vận chuyển
+            icon: '🛣️',
             children: [
                 { name: 'Danh sách Lịch trình', path: '/admin/list-Transport_Schedule', icon: '📝' },
                 { name: 'Thêm Lịch trình', path: '/admin/add-Transport_Schedule', icon: '🆕' },
             ],
-        }
+        },
     ];
+
     return (
         <div
-            className={`h-screen bg-white text-black transition-all duration-300 ease-in-out
+            className={`h-screen bg-white text-black transition-all duration-300 ease-in-out 
             ${collapsed ? 'w-20' : 'w-72'} flex flex-col shadow-lg`}
         >
             <div className="p-3 flex justify-end">
                 <button
                     onClick={() => setCollapsed(!collapsed)}
-                    className="text-white hover:scale-110 transform duration-200"
+                    className="text-black hover:scale-110 transform duration-200"
                     title="Toggle Sidebar"
                 >
                     {collapsed ? '➡️' : '⬅️'}
                 </button>
             </div>
 
-            <nav className="flex flex-col gap-1 px-2 overflow-y-auto">
+            {/* Phần menu scrollable */}
+            <nav
+                className="flex flex-col gap-1 px-2 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
+                style={{ maxHeight: 'calc(100vh - 86px)', scrollbarWidth: 'none', msOverflowStyle: 'none' }} 
+            >
                 {sidebarLinks.map((link, index) => (
                     <div key={index}>
                         {link.children ? (
                             <div
                                 onClick={() => toggleMenu(index)}
                                 className={`flex items-center justify-between gap-3 px-3 py-2 cursor-pointer rounded-lg transition-all
-                                    hover:bg-white/10 ${openMenus[index] ? 'bg-white/10 font-semibold' : ''}`}
+                                    hover:bg-white/10 ${openMenuIndex === index ? 'bg-white/10 font-semibold' : ''}`}
                             >
                                 <div className="flex items-center gap-2">
                                     <span className="text-lg">{link.icon}</span>
                                     {!collapsed && <span>{link.name}</span>}
                                 </div>
                                 {!collapsed && (
-                                    <span className="text-sm">{openMenus[index] ? '▲' : '▼'}</span>
+                                    <span className="text-sm">{openMenuIndex === index ? '▲' : '▼'}</span>
                                 )}
                             </div>
                         ) : (
@@ -108,7 +110,7 @@ const Sidebar = () => {
                             )
                         )}
 
-                        {link.children && openMenus[index] && (
+                        {link.children && openMenuIndex === index && (
                             <div className="ml-8 flex flex-col gap-1 mt-1">
                                 {link.children.map((child, childIndex) => (
                                     <Link

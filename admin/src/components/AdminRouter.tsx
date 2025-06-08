@@ -24,16 +24,15 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
         const currentEmail = user?.emailAddresses?.[0]?.emailAddress;
 
         if (!user) {
-            // Nếu chưa đăng nhập thì về trang login
             navigate("/login", { replace: true });
             return;
         }
 
         if (currentEmail === allowedAdminEmail) {
-            // Nếu đúng admin thì chuyển về dashboard
-            navigate("/admin/dashboad", { replace: true });
+            if (location.pathname === "/admin") {
+                navigate("/admin/dashboad", { replace: true });
+            }
         } else {
-            // Nếu sai email admin thì hiện modal và logout
             setModalVisible(true);
             const timer = setTimeout(async () => {
                 setModalVisible(false);
@@ -43,7 +42,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
 
             return () => clearTimeout(timer);
         }
-    }, [isLoaded, user, signOut, navigate]);
+    }, [isLoaded, user, signOut, navigate, location.pathname]);
 
     if (!isLoaded) return null;
 

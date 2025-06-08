@@ -35,7 +35,7 @@ const Router = () => {
         );
     }
     return (
-       <>
+        <>
             <Routes>
                 <Route path="/admin"
                     element={
@@ -44,7 +44,7 @@ const Router = () => {
                         </AdminRoute>
                     }>
 
-                    <Route path="/admin/dashboad" element={<ListDashboad/>}/>
+                    <Route path="/admin/dashboad" element={<ListDashboad />} />
 
                     <Route path="/admin/list-room" element={<ListRoom />} />
                     <Route path="/admin/add-room" element={<AddRoom />} />
@@ -69,7 +69,7 @@ const Router = () => {
 
                 </Route>
             </Routes>
-       </>
+        </>
     )
 }
 export default Router
