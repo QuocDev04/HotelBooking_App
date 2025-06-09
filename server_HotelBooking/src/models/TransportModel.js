@@ -7,5 +7,6 @@ const TransportModel = new mongoose.Schema({
     transportNumber: { type: String, required: true },
     departureLocation: { type: String, required: true },
     arrivalLocation: { type: String, required: true },
+    imageTransport: { type: String, required: true },
 }, { timestamps: true })
 export default mongoose.model("Transport", TransportModel)

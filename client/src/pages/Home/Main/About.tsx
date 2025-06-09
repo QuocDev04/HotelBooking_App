@@ -19,7 +19,7 @@ const AboutUs = () => {
 
     return (
         <>
-            <div className="bg-gradient-to-b from-white via-slate-50 to-white px-4 mt-32 md:px-16 lg:px-32">
+            <div className="bg-gradient-to-b  px-4 mt-32 md:px-16 lg:px-32">
                 <div className="flex flex-col lg:flex-row items-start gap-12">
                     {/* Text Section */}
                     <motion.div

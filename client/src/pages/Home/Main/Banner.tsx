@@ -6,15 +6,14 @@ import {
 
 const Banner = () => {
   return (
-    <div className="relative mt-20">
+    <div className="relative">
       {/* Banner Image */}
       <div className="relative">
         <img
           src="https://i.pinimg.com/736x/68/ab/ee/68abee6113e0fdbe28c3b6be1906a426.jpg"
           alt="banner"
-          className="w-full h-[600px] object-cover brightness-90"
+          className="w-full h-[600px]"
         />
-
         {/* Overlay text */}
         <div className="absolute inset-0 bg-black/30 flex items-center px-4 sm:px-8 md:px-20 py-10">
           <div className="text-white max-w-3xl text-left">

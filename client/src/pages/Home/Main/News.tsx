@@ -30,7 +30,8 @@ const News = () => {
     ];
 
     return (
-        <div className="bg-gradient-to-b from-blue-50 to-white"><div className="max-w-screen-lg mx-auto py-16 px-4 md:px-8">
+        <div className="">
+            <div className="max-w-screen-lg mx-auto py-16 px-4 md:px-8">
             
             <div className="text-center mb-12">
                 <h2 className="text-4xl font-extrabold text-blue-600 mb-3">
