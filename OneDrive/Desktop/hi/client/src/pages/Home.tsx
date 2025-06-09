@@ -12,8 +12,32 @@ const Home = () => {
   }, []);
 
   return (
-     <div className="font-sans text-gray-800">
-        <div className="relative bg-cover bg-center h-[300px]" style={{ backgroundImage: "url('/banner.png')" }}>
+    <div className="font-sans text-gray-800">
+      {/* Header */}
+      <header className="flex justify-between items-center px-8 py-4 shadow-md">
+        <div className="flex items-center space-x-4">
+          <img src="/logo.png" alt="Logo" className="w-10 h-10" />
+          <span className="text-xl font-bold">Elite Travel</span>
+        </div>
+        <nav className="hidden md:flex flex-1 justify-center space-x-6 font-medium">
+          <Link to="/">Tìm du thuyền</Link>
+          <Link to="/flight-booking">Tìm vé máy bay</Link>
+          <Link to="/">Tìm khách sạn</Link>
+          <Link to="/">Doanh nghiệp</Link>
+          <Link to="/">Blog</Link>
+
+        </nav>
+        <div className="flex items-center space-x-4 text-sm">
+          <span>Hotline: 0392595555</span>
+          <button className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-full text-sm">
+            Liên hệ Elite Travel
+          </button>
+        </div>
+      </header>
+
+
+      {/* Banner and Search */}
+       <div className="relative bg-cover bg-center h-[300px]" style={{ backgroundImage: "url('/banner.png')" }}>
         <div className="absolute inset-0 bg-white bg-opacity-80 flex flex-col justify-center items-center text-center p-6">
           <h1 className="text-2xl md:text-3xl font-bold mb-2">Bạn lựa chọn du thuyền Hạ Long nào?</h1>
           <p className="text-gray-600 mb-6">Hơn 100 tour du thuyền hạng sang giá tốt đang chờ bạn</p>
@@ -98,8 +122,53 @@ const Home = () => {
           ))}
         </div>
       </section>
-     </div>
-    );
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white p-8">
+        <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div>
+            <img src="/logo.png" alt="Logo" className="w-16 h-16 mb-2" />
+            <p>Công ty TNHH Du lịch và Dịch Vụ Elite Travel</p>
+            <p className="mt-2 text-sm">
+              Tầng 7, số nhà 25, ngõ 38 phố Yên Lãng, phường Láng Hạ, quận Đống Đa, TP. Hà Nội
+            </p>
+            <p className="mt-2 text-sm">
+              Mã số doanh nghiệp: 0107367372 do Sở kế hoạch và Đầu tư Thành phố Hà Nội cấp ngày 05/06/2023
+            </p>
+          </div>
+          <div>
+            <h4 className="font-semibold mb-2">GIỚI THIỆU</h4>
+            <ul className="text-sm">
+              <li>Về chúng tôi</li>
+              <li>Điều khoản và điều kiện</li>
+              <li>Chính sách riêng tư</li>
+              <li>Hướng dẫn sử dụng</li>
+              <li>Hình thức thanh toán</li>
+              <li>Liên hệ</li>
+              <li>Hotline: 0392595555</li>
+              <li>Email: info@elitetravel.com</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold mb-2">ĐIỂM ĐẾN</h4>
+            <ul className="text-sm">
+              <li>Vịnh Hạ Long</li>
+              <li>Vịnh Lan Hạ</li>
+              <li>Đảo Cát Bà</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold mb-2">DU THUYỀN</h4>
+            <ul className="text-sm">
+              <li>Blog</li>
+              <li>Quy định chung và lưu ý</li>
+              <li>Câu hỏi thường gặp</li>
+            </ul>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+  );
 };
 
 export default Home;
