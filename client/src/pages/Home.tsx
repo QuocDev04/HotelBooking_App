@@ -1,5 +1,6 @@
 import React from 'react'
 import { useEffect, useState } from 'react';
+
 const Home = () => {
     const [tours, setTours] = useState([]);
 

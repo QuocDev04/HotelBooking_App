@@ -3,30 +3,29 @@ import { FaPlaneDeparture, FaCalendarAlt, FaUser } from 'react-icons/fa';
 const FlightBooking = () => {
   const [schedules, setSchedules] = useState([]);
   const [transports, setTransports] = useState([]);
+useEffect(() => {
+  Promise.all([
+    fetch('http://localhost:3000/Transport_Schedule').then((res) => res.json()),
+    fetch('http://localhost:3000/Transport').then((res) => res.json())
+  ])
+    .then(([scheduleData, transportData]) => {
+      const enriched = scheduleData.map((schedule) => {
+        const transport = transportData.find(t => t.transport_id === schedule.transport_id);
+        return {
+          ...schedule,
+          transport_name: transport?.name,
+          transport_type: transport?.transport_type,
+          number: transport?.number,
+          from: transport?.departure_location,
+          to: transport?.arrival_location
+        };
+      });
+      setSchedules(enriched);
+      setTransports(transportData);
+    })
+    .catch((error) => console.error("Lỗi khi fetch dữ liệu:", error));
+}, []);
 
-  useEffect(() => {
-    // Fetch data song song
-    Promise.all([
-      fetch('http://localhost:3000/Transport_Schedule').then((res) => res.json()),
-      fetch('http://localhost:3000/Transport').then((res) => res.json())
-    ])
-      .then(([scheduleData, transportData]) => {
-        // Gộp data theo transport_id
-        const enriched = scheduleData.map((schedule) => {
-          const transport = transportData.find(t => t.transport_id === schedule.transport_id);
-          return {
-            ...schedule,
-            transport_name: transport?.name,
-            transport_type: transport?.transport_type,
-            number: transport?.number,
-            from: transport?.departure_location,
-            to: transport?.arrival_location
-          };
-        });
-        setSchedules(enriched);
-      })
-      .catch((err) => console.error('Lỗi khi fetch dữ liệu:', err));
-  }, []);
 
   return (
     <div className="font-sans text-gray-800">
