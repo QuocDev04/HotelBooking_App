@@ -67,6 +67,25 @@ const ListTransport = () => {
       width: 150,
     },
     {
+      title: 'Ảnh Phương Tiện',
+      dataIndex: 'imageTransport',
+      key: 'imageTransport',
+      width: 150,
+      render: (image: string[]) => {
+        const firstImage =
+          image && image.length > 0 ? image[0] : "";
+        return firstImage ? (
+          <img
+            src={firstImage}
+            style={{ width: "100px", height: "auto" }}
+            alt="Ảnh phụ"
+          />
+        ) : (
+          "Không có ảnh nào"
+        );
+      },
+    },
+    {
       title: 'Mã Phương Tiện (Biển Số)',
       dataIndex: 'transportNumber',
       key: 'transportNumber',
