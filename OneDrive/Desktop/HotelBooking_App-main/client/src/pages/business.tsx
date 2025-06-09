@@ -4,7 +4,7 @@ const tourList = [
   {
     title: "Lịch trình phù hợp với yêu cầu của doanh nghiệp",
     desc: "Lựa chọn du thuyền phù hợp theo yêu cầu, số lượng người, thời gian và ngân sách.",
-    img: "https://www.google.com/imgres?q=%E1%BA%A3nh%20du%20l%E1%BB%8Bch&imgurl=http%3A%2F%2Fdulichtoday.vn%2Fwp-content%2Fuploads%2F2017%2F04%2Fvinh-Ha-Long.jpg&imgrefurl=https%3A%2F%2Fdulichtoday.vn%2Fblog%2Fhinh-anh-du-lich-viet-nam-hap-dan-qua-top-5-dia-diem-tuyet-voi.html&docid=VGLOnuhk5H-X5M&tbnid=gQnPC_7JieA4KM&vet=12ahUKEwjUn83Q4eONAxVEsFYBHR8FN-IQM3oECBwQAA..i&w=900&h=600&hcb=2&ved=2ahUKEwjUn83Q4eONAxVEsFYBHR8FN-IQM3oECBwQAA"
+    img: "/assets/tour1.jpg"
   },
   {
     title: "Lịch trình phù hợp với yêu cầu của doanh nghiệp",
