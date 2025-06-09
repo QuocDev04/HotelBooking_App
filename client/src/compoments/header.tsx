@@ -9,7 +9,7 @@ const Header = () => {
         <span className="text-xl font-bold">Elite Travel</span>
       </div>
       <nav className="hidden md:flex flex-1 justify-center space-x-6 font-medium">
-        <Link to="/cruise-list">Tìm du thuyền</Link>
+        <Link to="/cruise">Tìm du thuyền</Link>
         <Link to="/flight-booking">Tìm vé máy bay</Link>
         <Link to="/hotels">Tìm khách sạn</Link>
         <Link to="/business">Doanh nghiệp</Link>
