@@ -3,7 +3,7 @@ import logo from '../assets/logo.png';
 
 const Header = () => {
     const navLinks = [
-        { name: 'Tìm du thuyền', path: '/' },
+        { name: 'Tìm du thuyền', path: '/cruise' },
         { name: 'Tìm khách sạn', path: '/' },
         { name: 'Tìm địa điểm du lịch', path: '/' },
         { name: 'Doanh nghiệp', path: '/' },

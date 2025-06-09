@@ -4,14 +4,14 @@ import { useQuery } from '@tanstack/react-query';
 import instanceClient from './../../../configs/instance';
 
 const Cruise = () => {
-    const {data:tour} = useQuery({
-        queryKey:['tour'],
-        queryFn: async () => instanceClient.get('/tour')
+    const {data:transport} = useQuery({
+        queryKey: ['transport'],
+        queryFn: async () => instanceClient.get('/transport')
     })
-    console.log(tour?.data);
+    console.log(transport?.data);
     
     return (
-        <div className="font-sans text-gray-800">
+        <div className="font-sans text-gray-800 mt-32">
             {/* Banner tìm kiếm */}
             <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 max-w-5xl mx-auto mt-10">
                 <h2 className="text-xl md:text-2xl font-bold text-center">
@@ -59,7 +59,7 @@ const Cruise = () => {
                 <main className="lg:col-span-4">
                     <p className="font-semibold text-lg mb-4">Tìm thấy kết quả</p>
                     <div className="space-y-4">
-                        {tour?.data?.tours.map((tour:any) => (
+                        {transport?.data?.transport.map((tour:any) => (
                             <div key={tour.tour_id} className="flex bg-white border rounded-xl shadow-sm overflow-hidden">
                                 <img src={tour.imageTransport} alt={tour.transportName} className="w-48 h-32 object-cover" />
                                 <div className="p-4 flex flex-col justify-between w-full">
@@ -69,7 +69,7 @@ const Cruise = () => {
                                     </div>
                                     <div className="flex justify-between items-center mt-3">
                                         <span className="text-emerald-600 font-bold">
-                                            {tour.price.toLocaleString()}đ/khách
+                                            {/* {tour.price.toLocaleString()}đ/khách */}
                                         </span>
                                         <button className="bg-emerald-500 text-white px-4 py-1 rounded-full text-sm hover:bg-emerald-600">
                                             Đặt ngay
