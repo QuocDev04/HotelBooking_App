@@ -12,6 +12,10 @@ import {
   AiTwotoneDelete,
   AiFillEdit,
 } from "react-icons/ai";
+import { createStyles } from 'antd-style';
+
+
+
 const ListRoom = () => {
   const [api, contextHolder] = notification.useNotification();
   const openNotification =
@@ -25,9 +29,9 @@ const ListRoom = () => {
           pauseOnHover,
         });
       };
-  const {data} = useQuery({
-    queryKey:['room'],
-    queryFn: async() => instance.get('/room')
+  const { data } = useQuery({
+    queryKey: ['room'],
+    queryFn: async () => instance.get('/room')
   })
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
@@ -55,33 +59,46 @@ const ListRoom = () => {
         "Bạn Đã Xóa Thất Bại",
       ),
   });
-  console.log(data?.data?.rooms);
-  
+  const useStyle = createStyles(({ css, token }) => {
+    const { antCls } = token;
+    return {
+      customTable: css`
+        ${antCls}-table {
+          ${antCls}-table-container {
+            ${antCls}-table-body,
+            ${antCls}-table-content {
+              scrollbar-width: thin;
+              scrollbar-color: #eaeaea transparent;
+              scrollbar-gutter: stable;
+            }
+          }
+        }
+      `,
+    };
+  });
   const columns: ColumnsType<any> = [
     {
       title: 'Tên Phòng',
       dataIndex: 'nameRoom',
       key: 'nameRoom',
-      width: 150,
+      width: 160,
+      fixed: 'left'
     },
     {
       title: 'Giá Phòng',
       dataIndex: 'priceRoom',
       key: 'priceRoom',
-      width: 150,
       render: (priceRoom: number) => priceRoom.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
     },
     {
       title: 'Sức Chứa',
       dataIndex: 'capacityRoom',
       key: 'capacityRoom',
-      width: 150,
     },
     {
       title: 'Ảnh Phòng',
       dataIndex: 'imageRoom',
       key: 'imageRoom',
-      width: 150,
       render: (image: string[]) => {
         const firstImage =
           image && image.length > 0 ? image[0] : "";
@@ -100,19 +117,16 @@ const ListRoom = () => {
       title: 'Loại Phòng',
       dataIndex: 'typeRoom',
       key: 'typeRoom',
-      width: 150,
     },
     {
       title: 'Địa Chỉ',
       dataIndex: 'addressRoom',
       key: 'addressRoom',
-      width: 150,
     },
     {
       title: 'Dich Vụ Phòng',
       dataIndex: 'amenitiesRoom',
       key: 'amenitiesRoom',
-      width: 150,
       render: (amenitiesRoom) => {
         if (!Array.isArray(amenitiesRoom) || amenitiesRoom.length === 0) {
           return 'Không có tiện nghi';
@@ -132,7 +146,6 @@ const ListRoom = () => {
       title: 'Mô Tả Phòng',
       dataIndex: 'descriptionRoom',
       key: 'descriptionRoom',
-      width: 150,
       ellipsis: true,
       render: (_: any, room: any) => {
         const limitWords = (text: string, wordLimit: number) => {
@@ -189,13 +202,17 @@ const ListRoom = () => {
     key: room._id,
     ...room,
   }));
+  const { styles } = useStyle();
   return (
     <div>
+
       {contextHolder}
       <Table
+        className={styles.customTable}
         columns={columns}
         dataSource={dataSource}
         pagination={{ pageSize: 50 }}
+        scroll={{ x: 'max-content' }}
       />
     </div>
   )

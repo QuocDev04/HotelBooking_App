@@ -6,6 +6,7 @@ import { Button, notification, Popconfirm, Table, type TableColumnsType } from '
 import { AiFillEdit, AiTwotoneDelete } from 'react-icons/ai';
 import { Link } from 'react-router-dom';
 import instance from '../../configs/axios';
+import { createStyles } from 'antd-style';
 
 const ListTour = () => {
   const { data } = useQuery({
@@ -57,14 +58,12 @@ const ListTour = () => {
       dataIndex: 'nameTour',
       key: 'nameTour',
       fixed: 'left',
-      width: 150,
+      width: 350,
     },
     {
       title: 'Điểm Đến',
       dataIndex: 'destination',
       key: 'destination',
-      width: 150,
-      fixed: 'left',
     },
     {
       title: 'Nơi Xuất Phát',
@@ -182,15 +181,34 @@ const ListTour = () => {
     key: tours._id,
     ...tours,
   }));
+  const useStyle = createStyles(({ css, token }) => {
+    const { antCls } = token;
+    return {
+      customTable: css`
+        ${antCls}-table {
+          ${antCls}-table-container {
+            ${antCls}-table-body,
+            ${antCls}-table-content {
+              scrollbar-width: thin;
+              scrollbar-color: #eaeaea transparent;
+              scrollbar-gutter: stable;
+            }
+          }
+        }
+      `,
+    };
+  });
+  const { styles } = useStyle();
   return (
     <>
       {contextHolder}
       <div>
         <Table
+          className={styles.customTable}
           columns={columns}
           dataSource={dataSource}
           pagination={{ pageSize: 50 }}
-          scroll={{ x: 1000 }}
+          scroll={{ x: 'max-content' }}
         />
       </div>
     </>
