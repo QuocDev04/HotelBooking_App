@@ -98,7 +98,8 @@ const ListTour = () => {
       title: 'Giá Tour',
       dataIndex: 'price',
       key: 'price',
-    },
+      render: (price: number) => price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }),
+    },    
     {
       title: 'Số Lượng',
       dataIndex: 'maxPeople',

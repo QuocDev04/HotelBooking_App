@@ -6,7 +6,6 @@ import {
     ConfigProvider,
     DatePicker,
     Form,
-    Input,
     InputNumber,
     message,
     Row,
@@ -179,7 +178,19 @@ const EditTSchedule = () => {
                                             { pattern: /^[0-9]+$/, message: "Chỉ được nhập số" },
                                         ]}
                                     >
-                                        <Input disabled={isPending} placeholder="VD: 1500000" size="large" />
+                                        <InputNumber
+                                            disabled={isPending}
+                                            placeholder="VD: 2000000"
+                                            size="large"
+                                            style={{ width: "100%" }}
+                                            min={0}
+                                            formatter={(value) =>
+                                                value ? `${Number(value).toLocaleString("vi-VN")} ₫` : ""
+                                            }
+                                            parser={(value) =>
+                                                value ? value.replace(/[₫\s,.]/g, "") : ""
+                                            }
+                                        />
                                     </Form.Item>
                                 </Col>
 

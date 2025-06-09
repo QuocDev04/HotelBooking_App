@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Button, Col, ConfigProvider, DatePicker, Form, Input, InputNumber, message, Row, Select, type FormProps } from 'antd'
+import { Button, Col, ConfigProvider, DatePicker, Form,  InputNumber, message, Row, Select, type FormProps } from 'antd'
 import viVN from 'antd/locale/vi_VN';
 import instance from '../../configs/axios';
 import 'dayjs/locale/vi';
@@ -35,14 +35,14 @@ const AddTSchedule = () => {
     onSuccess: () => {
       messageApi.open({
         type: "success",
-        content: "Bạn thêm phòng thành công",
+        content: "Bạn thêm lịch trình vận chuyển thành công",
       });
       form.resetFields();
     },
     onError: () => {
       messageApi.open({
         type: "error",
-        content: "Bạn thêm phòng thất bại. Vui lòng thử lại sau!",
+        content: "Bạn thêm lịch trình vận chuyển thất bại. Vui lòng thử lại sau!",
       });
     },
   })
@@ -171,7 +171,19 @@ const AddTSchedule = () => {
                     },
                   ]}
                 >
-                  <Input disabled={isPending} placeholder="VD: 1500000" size="large" />
+                      <InputNumber
+                        disabled={isPending}
+                        placeholder="VD: 2000000"
+                        size="large"
+                        style={{ width: "100%" }}
+                        min={0}
+                        formatter={(value) =>
+                          value ? `${Number(value).toLocaleString("vi-VN")} ₫` : ""
+                        }
+                        parser={(value) =>
+                          value ? value.replace(/[₫\s,.]/g, "") : ""
+                        }
+                      />
                 </Form.Item>
               </Col>
               <Col span={12}>

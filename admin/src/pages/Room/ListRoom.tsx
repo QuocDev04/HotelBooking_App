@@ -69,6 +69,7 @@ const ListRoom = () => {
       dataIndex: 'priceRoom',
       key: 'priceRoom',
       width: 150,
+      render: (priceRoom: number) => priceRoom.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
     },
     {
       title: 'Sức Chứa',

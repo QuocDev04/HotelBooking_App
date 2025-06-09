@@ -42,7 +42,7 @@ const EditTour = () => {
         onSuccess: () => {
             messageApi.open({
                 type: "success",
-                content: "Bạn Sửa phòng thành công",
+                content: "Bạn Sửa Tour thành công",
             });
             queryClient.invalidateQueries({
                 queryKey: ["tour"],
@@ -51,7 +51,7 @@ const EditTour = () => {
         onError: () => {
             messageApi.open({
                 type: "error",
-                content: "Bạn Sửa phòng thất bại. Vui lòng thử lại sau!",
+                content: "Bạn Sửa Tour thất bại. Vui lòng thử lại sau!",
             });
         },
     })
@@ -312,13 +312,13 @@ const EditTour = () => {
 
                                 <Form.Item
                                     required={false}
-                                    label={requiredLabel("Ảnh Phòng")}
+                                    label={requiredLabel("Ảnh Tour")}
                                     name="imageTour"
                                     rules={[
                                         {
                                             validator: () => {
                                                 if (fileList.length === 0) {
-                                                    return Promise.reject(new Error('Vui lòng chọn ít nhất 1 ảnh phòng'));
+                                                    return Promise.reject(new Error('Vui lòng chọn ít nhất 1 ảnh Tour'));
                                                 }
                                                 // Kiểm tra các file đã upload thành công (status === 'done')
                                                 const hasSuccessFile = fileList.some(file => file.status === 'done');

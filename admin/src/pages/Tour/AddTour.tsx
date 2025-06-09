@@ -34,14 +34,14 @@ const AddTour = () => {
     onSuccess: () => {
       messageApi.open({
         type: "success",
-        content: "Bạn thêm phòng thành công",
+        content: "Bạn thêm Tour thành công",
       });
       form.resetFields();
     },
     onError: () => {
       messageApi.open({
         type: "error",
-        content: "Bạn thêm phòng thất bại. Vui lòng thử lại sau!",
+        content: "Bạn thêm Tour thất bại. Vui lòng thử lại sau!",
       });
     },
   })
@@ -206,6 +206,12 @@ const AddTour = () => {
                         size="large"
                         style={{ width: "100%" }}
                         min={0}
+                        formatter={(value) =>
+                          value ? `${Number(value).toLocaleString("vi-VN")} ₫` : ""
+                        }
+                        parser={(value) =>
+                          value ? value.replace(/[₫\s,.]/g, "") : ""
+                        }
                       />
                     </Form.Item>
                   </Col>
@@ -245,7 +251,18 @@ const AddTour = () => {
 
                   <Col span={8}>
                     <Form.Item label="Giá Khuyến Mãi" name="promotion_price">
-                      <Input type="number" placeholder="VD: 1200000" size="large" />
+                      <InputNumber
+                        placeholder="VD: 2000000"
+                        size="large"
+                        style={{ width: "100%" }}
+                        min={0}
+                        formatter={(value) =>
+                          value ? `${Number(value).toLocaleString("vi-VN")} ₫` : ""
+                        }
+                        parser={(value) =>
+                          value ? value.replace(/[₫\s,.]/g, "") : ""
+                        }
+                      />
                     </Form.Item>
                   </Col>
                 </Row>
@@ -279,13 +296,13 @@ const AddTour = () => {
 
                 <Form.Item
                   required={false}
-                  label={requiredLabel("Ảnh Phòng")}
+                  label={requiredLabel("Ảnh Tour")}
                   name="imageTour"
                   rules={[
                     {
                       validator: () => {
                         if (fileList.length === 0) {
-                          return Promise.reject(new Error('Vui lòng chọn ít nhất 1 ảnh phòng'));
+                          return Promise.reject(new Error('Vui lòng chọn ít nhất 1 ảnh Tour'));
                         }
                         // Kiểm tra các file đã upload thành công (status === 'done')
                         const hasSuccessFile = fileList.some(file => file.status === 'done');

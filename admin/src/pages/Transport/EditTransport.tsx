@@ -112,8 +112,10 @@ const EditTransport = () => {
                                             size="large"
                                             placeholder="Chọn loại Phương Tiện"
                                             options={[
-                                                { label: "Nội địa", value: "noidia" },
-                                                { label: "Quốc tế", value: "quocte" },
+                                                { label: "Máy Bay", value: "Máy Bay" },
+                                                { label: "Tàu Hỏa", value: "Tàu Hỏa" },
+                                                { label: "Thuyền", value: "Thuyền" },
+                                                { label: "Xe Khách", value: "Xe Khách" },
                                             ]}
                                         />
                                     </Form.Item>

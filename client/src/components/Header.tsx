@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import logo from '../assets/image.png';
-import { FiPhone } from 'react-icons/fi';
+import logo from '../assets/logo.png';
 
 const Header = () => {
     const navLinks = [
@@ -24,7 +23,7 @@ const Header = () => {
     }, []);
 
     return (
-        <nav className={`fixed top-0 left-0 w-full flex items-center justify-between px-4 md:px-16 lg:px-24 xl:px-32 transition-all duration-500 z-50 bg-white ${isScrolled ? "bg-white shadow-md text-gray-700 backdrop-blur-lg py-3 md:py-4" : "py-3 md:py-4"}`}>
+        <nav className={`fixed top-0 left-0 w-full flex items-center justify-between px-4 md:px-16 lg:px-24 xl:px-32 transition-all duration-500 z-50 bg-white ${isScrolled ? "bg-white shadow-md text-gray-700 backdrop-blur-lg py-3 md:py-4" : "py-1 md:py-4"}`}>
 
             <a href="/" className="flex items-center gap-2">
                 <img src={logo} alt="logo" className="h-20" />
@@ -39,11 +38,6 @@ const Header = () => {
             </div>
 
             <div className="hidden md:flex items-center gap-4">
-                <div className="flex items-center gap-2 text-gray-700">
-                    <FiPhone className="text-lg" />
-                    <p>Hotline: 0392595555</p>
-                </div>
-
                 <button className="bg-black text-white px-8 py-2 rounded-full ml-4 transition-all duration-500">
                     Login
                 </button>
@@ -70,10 +64,6 @@ const Header = () => {
                         {link.name}
                     </a>
                 ))}
-
-                <button className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all">
-                    Liên Hệ
-                </button>
 
                 <button className="bg-black text-white px-8 py-2.5 rounded-full transition-all duration-500">
                     Login

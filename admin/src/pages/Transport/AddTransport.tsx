@@ -24,14 +24,14 @@ const AddTransport = () => {
         onSuccess: () => {
             messageApi.open({
                 type: "success",
-                content: "Bạn thêm phòng thành công",
+                content: "Bạn thêm phương tiện thành công",
             });
             form.resetFields();
         },
         onError: () => {
             messageApi.open({
                 type: "error",
-                content: "Bạn thêm phòng thất bại. Vui lòng thử lại sau!",
+                content: "Bạn thêm phương tiện thất bại. Vui lòng thử lại sau!",
             });
           },
     })
@@ -63,7 +63,7 @@ const AddTransport = () => {
                                         name="transportName"
                                         rules={[{ required: true, message: "Tên Phương Tiện không được để trống" }]}
                                     >
-                                        <Input disabled={isPending} placeholder="VD: Phương Tiện Hạ Long 3N2Đ" size="large" />
+                                        <Input disabled={isPending} placeholder="VD: Phương Tiện Xe Khách" size="large" />
                                     </Form.Item>
                                 </Col>
 
@@ -92,8 +92,10 @@ const AddTransport = () => {
                                             size="large"
                                             placeholder="Chọn loại Phương Tiện"
                                             options={[
-                                                { label: "Nội địa", value: "noidia" },
-                                                { label: "Quốc tế", value: "quocte" },
+                                                { label: "Máy Bay", value: "Máy Bay" },
+                                                { label: "Tàu Hỏa", value: "Tàu Hỏa" },
+                                                { label: "Thuyền", value: "Thuyền" },
+                                                { label: "Xe Khách", value: "Xe Khách" },
                                             ]}
                                         />
                                     </Form.Item>

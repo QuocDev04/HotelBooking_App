@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, Checkbox, Col, Empty, Form, Image, Input, message, Row, Select, Upload, type FormProps, type GetProp, type SelectProps, type UploadFile, type UploadProps } from 'antd'
+import { Button, Checkbox, Col, Empty, Form, Image, Input, InputNumber, message, Row, Select, Upload, type FormProps, type GetProp, type SelectProps, type UploadFile, type UploadProps } from 'antd'
 import { useEffect, useState } from 'react'
 import ReactQuill from "react-quill";
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
@@ -79,10 +79,10 @@ const EditRoom = () => {
     </>
   );
   const options = [
-    { label: 'gold', value: 'gold' },
-    { label: 'lime', value: 'lime' },
-    { label: 'green', value: 'green' },
-    { label: 'cyan', value: 'cyan' },
+    { label: 'Phòng Đơn', value: 'Phòng Đơn' },
+    { label: 'Phòng Đôi', value: 'Phòng Đôi' },
+    { label: 'Phòng VIP', value: 'Phòng VIP' },
+    { label: 'Phòng Tập Thể', value: 'Phòng Tập Thể' },
   ];
   const labelRender: LabelRender = (props) => {
     const { label, value } = props;
@@ -189,7 +189,8 @@ const EditRoom = () => {
                 name="nameRoom"
                 rules={[{ required: true, message: 'Tên phòng không được để trống' }]}
               >
-                <Input placeholder="VD: Phòng Deluxe" disabled={isPending} />
+                <Input placeholder="VD: Phòng Deluxe" disabled={isPending} style={{ width: "100%" }}
+                  size="large" />
               </Form.Item>
 
               {/* Dòng chung cho "Sức Chứa" và "Giá mỗi đêm" */}
@@ -209,7 +210,8 @@ const EditRoom = () => {
                       },
                     ]}
                   >
-                    <Input type="number" placeholder="Số người tối đa" disabled={isPending} />
+                    <Input type="number" placeholder="Số người tối đa" disabled={isPending} style={{ width: "100%" }}
+                      size="large" />
                   </Form.Item>
                 </Col>
 
@@ -240,7 +242,19 @@ const EditRoom = () => {
                       }
                     ]}
                   >
-                    <Input type="number" placeholder="VD: 1500000" disabled={isPending} />
+                    <InputNumber
+                      disabled={isPending}
+                      placeholder="VD: 2000000"
+                      size="large"
+                      style={{ width: "100%" }}
+                      min={0}
+                      formatter={(value) =>
+                        value ? `${Number(value).toLocaleString("vi-VN")} ₫` : ""
+                      }
+                      parser={(value) =>
+                        value ? value.replace(/[₫\s,.]/g, "") : ""
+                      }
+                    />
                   </Form.Item>
                 </Col>
 
@@ -249,7 +263,7 @@ const EditRoom = () => {
                   <Form.Item
                     required={false}
                     label={requiredLabel("Địa Chỉ")}
-                    name="address"
+                    name="addressRoom"
                     rules={[
                       { required: true, message: 'Vui lòng nhập Địa Chỉ' },
                       {
@@ -262,7 +276,8 @@ const EditRoom = () => {
                       },
                     ]}
                   >
-                    <Input type="text" placeholder="VD: Số 123, Ngõ abc, ..." disabled={isPending} />
+                    <Input type="text" placeholder="VD: Số 123, Ngõ abc, ..." disabled={isPending} style={{ width: "100%" }}
+                      size="large" />
                   </Form.Item>
                 </Col>
 
@@ -290,7 +305,8 @@ const EditRoom = () => {
                 name="typeRoom"
                 rules={[{ required: true, message: 'Vui lòng nhập loại phòng' }]}
               >
-                <Select disabled={isPending} labelRender={labelRender} defaultValue="1" style={{ width: '100%' }} options={options} />
+                <Select disabled={isPending} labelRender={labelRender} defaultValue="1" style={{ width: '100%' }} options={options} style={{ width: "100%" }}
+                  size="large" />
               </Form.Item>
 
               <Form.Item

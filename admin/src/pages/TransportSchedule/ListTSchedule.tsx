@@ -6,7 +6,12 @@ import instance from '../../configs/axios'
 import { Link } from 'react-router-dom'
 import { AiFillEdit, AiTwotoneDelete } from 'react-icons/ai'
 import { QuestionCircleOutlined } from '@ant-design/icons'
+import dayjs from 'dayjs'
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 
+dayjs.extend(utc);
+dayjs.extend(timezone);
 const ListTSchedule = () => {
   const [api, contextHolder] = notification.useNotification();
   const queryClient = useQueryClient();
@@ -71,21 +76,23 @@ const ListTSchedule = () => {
       key: 'priceTransport',
       fixed: 'left',
       width: 150,
+      render: (priceTransport: number) => priceTransport.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
     },
     {
       title: 'Thời Gian đi',
       dataIndex: 'departureTime',
       key: 'departureTime',
-      fixed: 'left',
       width: 150,
+      render: (value) => value ? dayjs(value).tz("Asia/Ho_Chi_Minh").format("HH:mm DD/MM/YYYY") : "N/A"
     },
     {
       title: 'Thời Gian đến',
       dataIndex: 'arrivalTime',
       key: 'arrivalTime',
-      fixed: 'left',
       width: 150,
+      render: (value) => value ? dayjs(value).tz("Asia/Ho_Chi_Minh").format("HH:mm DD/MM/YYYY") : "N/A"
     },
+    
     {
       title: 'Sức chứa',
       dataIndex: 'availableSeats',
