@@ -1,22 +1,28 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMutation } from "@tanstack/react-query";
-import { Button, Col, Form, Input, message, Row, Select, type FormProps } from "antd"
+import { Button, Col, Form, Image, Input, message, Row, Select, Upload, type FormProps, type GetProp, type UploadProps } from "antd"
 import instance from "../../configs/axios";
+import { useState } from "react";
+import type { UploadFile } from "antd/lib";
+import { PlusOutlined } from "@ant-design/icons";
+type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
 const AddTransport = () => {
     const [form] = Form.useForm();
     const [messageApi, contextHolder] = message.useMessage();
-
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewImage, setPreviewImage] = useState("");
+    const [fileList, setFileList] = useState<UploadFile[]>([]);
     const requiredLabel = (text: string) => (
         <>
             {text} <span className="text-red-500">*</span>
         </>
     );
     const { mutate, isPending } = useMutation({
-        mutationFn: async (data:any) => {
+        mutationFn: async (data: any) => {
             try {
-                return await instance.post('/transport',data)
+                return await instance.post('/transport', data)
             } catch (error) {
                 throw new Error("Failed to add transport")
             }
@@ -33,14 +39,47 @@ const AddTransport = () => {
                 type: "error",
                 content: "Bạn thêm phương tiện thất bại. Vui lòng thử lại sau!",
             });
-          },
+        },
     })
+    const getBase64 = (file: FileType): Promise<string> =>
+        new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = (error) => reject(error);
+        });
+    const handlePreview = async (file: UploadFile) => {
+        if (!file.url && !file.preview) {
+            file.preview = await getBase64(file.originFileObj as FileType);
+        }
+        setPreviewImage(file.url || (file.preview as string));
+        setPreviewOpen(true);
+    };
+    const handleChange: UploadProps["onChange"] = ({
+        fileList: newFileList,
+    }) => {
+        setFileList(newFileList);
+    };
     const onFinish: FormProps<any>["onFinish"] = (values) => {
+        const imageUrls = fileList
+            .filter((file) => file.status === "done")
+            .map((file) => file.response?.secure_url);
+
         const newValues = {
             ...values,
+            imageTransport: imageUrls,
         };
+
+        console.log("Data being sent:", newValues);
         mutate(newValues);
     };
+    const uploadButton = (
+        <button style={{ border: 0, background: "none" }} type="button">
+            <PlusOutlined />
+            <div style={{ marginTop: 8 }}>Upload</div>
+        </button>
+    );
+
     return (
         <>
             <div className="bg-gray-50 min-h-screen p-6">
@@ -51,12 +90,12 @@ const AddTransport = () => {
                     {contextHolder}
                     <div className="bg-white p-8 rounded-xl shadow-md">
                         <Form layout="vertical"
-                        onFinish={onFinish}
-                        name="add-tour" validateTrigger="onBlur"
+                            onFinish={onFinish}
+                            name="add-tour" validateTrigger="onBlur"
                             form={form}>
-                                {/* Cột trái */}
+                            {/* Cột trái */}
                             <Row gutter={24}>
-                                 <Col span={8}>
+                                <Col span={8}>
                                     <Form.Item
                                         required={false}
                                         label={requiredLabel("Tên Phương Tiện")}
@@ -100,9 +139,9 @@ const AddTransport = () => {
                                         />
                                     </Form.Item>
                                 </Col>
-                                
-                                </Row>
-                                <Row gutter={24}>
+
+                            </Row>
+                            <Row gutter={24}>
                                 <Col span={12}>
                                     <Form.Item
                                         required={false}
@@ -129,7 +168,51 @@ const AddTransport = () => {
                                         <Input disabled={isPending} placeholder="VD: 29B-12345" size="large" />
                                     </Form.Item>
                                 </Col>
-                                </Row>
+                            </Row>
+                            <Form.Item
+                                required={false}
+                                label={requiredLabel("Ảnh Phương Tiện")}
+                                name="imageTransport"
+                                rules={[
+                                    {
+                                        validator: () => {
+                                            if (fileList.length === 0) {
+                                                return Promise.reject(new Error('Vui lòng chọn ít nhất 1 ảnh Phương Tiện'));
+                                            }
+                                            // Kiểm tra các file đã upload thành công (status === 'done')
+                                            const hasSuccessFile = fileList.some(file => file.status === 'done');
+                                            if (!hasSuccessFile) {
+                                                return Promise.reject(new Error('Vui lòng đợi ảnh upload xong hoặc chọn ảnh hợp lệ'));
+                                            }
+                                            return Promise.resolve();
+                                        }
+                                    }
+                                ]}
+                            >
+                                <Upload
+                                    listType="picture-card"
+                                    action="https://api.cloudinary.com/v1_1/ecommercer2021/image/upload"
+                                    data={{ upload_preset: 'demo-upload' }}
+                                    onPreview={handlePreview}
+                                    onChange={handleChange}
+                                    multiple
+                                    disabled={isPending}
+                                    accept="image/png, image/jpeg"
+                                >
+                                    {fileList.length >= 8 ? null : uploadButton}
+                                </Upload>
+                                {previewImage && (
+                                    <Image
+                                        wrapperStyle={{ display: "none" }}
+                                        preview={{
+                                            visible: previewOpen,
+                                            onVisibleChange: (visible) => setPreviewOpen(visible),
+                                            afterOpenChange: (visible) => !visible && setPreviewImage(""),
+                                        }}
+                                        src={previewImage}
+                                    />
+                                )}
+                            </Form.Item>
                             <Col span={24}>
                                 <Form.Item>
                                     <Button
