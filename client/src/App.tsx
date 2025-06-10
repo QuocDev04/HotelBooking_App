@@ -1,10 +1,23 @@
 import React from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import Layout from './compoments/layout'
+import Introduce from './pages/Introduce'
+import Clause from './pages/Clause'
+import Privacy from './pages/Privacy'
+import Use from './pages/Use'
 
 const App = () => {
   return (
-    <div className='bg-red-500'>
-      app
-    </div>
+    <Router>
+      <Layout>
+        <Routes>
+          <Route path="/introduce" element={<Introduce />} />
+          <Route path="/clause" element={<Clause />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/use" element={<Use />} />
+        </Routes>
+      </Layout>
+    </Router>
   )
 }
 
