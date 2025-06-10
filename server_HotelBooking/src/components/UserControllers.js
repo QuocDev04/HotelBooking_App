@@ -34,7 +34,7 @@ export const LoginUser = async (req, res) => {
             accessToken,
             refreshToken,
             email: user.email,
-            userId: user.id
+            username: user.username
         })
     } catch (error) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -45,7 +45,7 @@ export const LoginUser = async (req, res) => {
 }
 
 export const RegisterUser = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, username, phone_number } = req.body;
     try {
         //ktra xem đã có email hay chưa
         const exitUser = await UserModel.findOne({email});
@@ -61,6 +61,8 @@ export const RegisterUser = async (req, res) => {
         const user = await UserModel.create({
             ...req.body,
             password:hashedPassword,
+            username: username,
+            phone_number: phone_number,
         })
         return res.status(StatusCodes.OK).json({
             success: true,
