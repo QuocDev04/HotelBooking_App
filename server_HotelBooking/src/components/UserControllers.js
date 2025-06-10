@@ -74,3 +74,67 @@ export const RegisterUser = async (req, res) => {
         })
     }
 }
+
+export const GetAllUser = async (req, res) => {
+    try {
+        const user = await UserModel.find();
+        return res.status(StatusCodes.OK).json({
+            success: true,
+            message: "User all successfully",
+            user: user
+        })
+    } catch (error) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
+export const GetByIdUser = async (req, res) => {
+    try {
+        const user = await UserModel.findById(req.params.id);
+        return res.status(StatusCodes.OK).json({
+            success: true,
+            message: "User by id successfully",
+            user: user
+        })
+    } catch (error) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
+export const PutUser = async (req, res) => {
+    try {
+        const user = await UserModel.findById(req.params.id, req.body);
+        return res.status(StatusCodes.OK).json({
+            success: true,
+            message: "User put successfully",
+            user: user
+        })
+    } catch (error) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
+export const DeleteUser = async (req, res) => {
+    try {
+        const user = await UserModel.findById(req.params.id, req.body);
+        return res.status(StatusCodes.OK).json({
+            success: true,
+            message: "User delete successfully",
+            user: user
+        })
+    } catch (error) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
