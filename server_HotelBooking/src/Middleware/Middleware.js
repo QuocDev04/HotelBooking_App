@@ -10,7 +10,7 @@ export const verifyClerkToken = async (req, res, next) => {
 
         // Chỉ truyền apiKey thôi, Clerk tự xử lý JWK
         const jwtPayload = await verifyToken(token, {
-            apiKey: process.env.CLERK_API_KEY,
+            apiKey: process.env.CLERK_SECRET_KEY,
         });
 
         req.user = jwtPayload;

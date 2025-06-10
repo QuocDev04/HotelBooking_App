@@ -10,6 +10,7 @@ import TransportRouter from "./router/TransportRouter";
 import TransportSchedulemodel from "./router/TransportScheduleModel";
 import TourSchedule from "./router/TourScheduleRouter";
 import AdminRouter from "./router/AdminRouter";
+import UserRouter from "./router/UserRouter";
 
 const app = express();
 app.use(express.json());
@@ -19,6 +20,7 @@ app.use(morgan("tiny"));
 
 connectDB();
 
+app.use('/api', UserRouter)
 app.use('/api/', RouterRoom)
 app.use('/api/', TourRouter)
 app.use('/api/', TransportRouter)
