@@ -305,7 +305,7 @@ const EditRoom = () => {
                 name="typeRoom"
                 rules={[{ required: true, message: 'Vui lòng nhập loại phòng' }]}
               >
-                <Select disabled={isPending} labelRender={labelRender} defaultValue="1" style={{ width: '100%' }} options={options} style={{ width: "100%" }}
+                <Select disabled={isPending} labelRender={labelRender} defaultValue="1" style={{ width: '100%' }} options={options} 
                   size="large" />
               </Form.Item>
 
