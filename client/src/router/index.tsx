@@ -1,7 +1,6 @@
 import { Route, Routes } from "react-router-dom"
 import LayoutPages from "../pages/LayoutPages"
 import Home from "../pages/Home/LayoutHome"
-import Cruise from "../pages/Cruise/Cruise"
 
 
 const Router = () => {
@@ -9,7 +8,6 @@ const Router = () => {
          <Routes>
             <Route path="/" element={<LayoutPages/>}>
                 <Route path="/" element={<Home />} />
-                <Route path="/cruise" element={<Cruise />} />zz
             </Route>
         </Routes>
     )
