@@ -13,17 +13,18 @@ const Login = ({ onClose = () => { }, openRegister = () => { } }) => {
 
     return (
         <div className="fixed inset-0 bg-white/80 flex items-center justify-center z-50">
-            <div className="bg-white mx-auto text-gray-500 w-full max-w-96 md:p-6 p-4 text-left text-sm rounded-xl shadow-[0px_0px_10px_0px] shadow-black/10 relative">
+            <div className="bg-white mx-auto text-gray-500 w-full max-w-[400px] md:p-6 p-4 text-left text-sm rounded-xl shadow-[0px_0px_10px_0px] shadow-black/10 relative">
                 <button
                     onClick={onClose}
-                    className="absolute top-3 right-3 text-xl text-gray-500 hover:text-black"
+                    className="absolute top-3 right-3 text-4xl text-gray-500 hover:text-black"
                 >
                     &times;
                 </button>
 
                 <img src={logo} alt="" className="h-20 mx-auto" />
                 <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800">
-                    Welcome back Elite Travel
+                    Chào mừng đến với{" "}
+                    <span className="text-blue-600 font-bold">Elite Travel</span>
                 </h2>
 
                 <Form>
