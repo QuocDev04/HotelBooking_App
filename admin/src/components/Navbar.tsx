@@ -1,16 +1,15 @@
 import { Link } from 'react-router-dom';
-import logo from '../assets/image.png';
+import logo from '../assets/logo.png';
 import { useUser, UserButton } from "@clerk/clerk-react";
 
 const Navbar = () => {
     const { isSignedIn, user } = useUser();
 
     return (
-        <div className="flex items-center justify-between px-6 py-3 bg-white shadow-sm border-b border-gray-200">
+        <div className="flex items-center justify-between px-6  bg-blue-200 shadow-sm border-b border-gray-200">
             {/* Logo */}
             <Link to="/admin/dashboad" className="flex items-center gap-2">
-                <img src={logo} alt="Logo" className="h-12" />
-                <span className="text-lg font-semibold text-gray-800 hidden md:inline">EliteTravel</span>
+                <img src={logo} alt="Logo" className="h-16 ml-20" />
             </Link>
 
             {/* Right Section */}

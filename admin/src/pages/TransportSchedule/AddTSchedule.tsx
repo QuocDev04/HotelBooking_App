@@ -55,7 +55,7 @@ const AddTSchedule = () => {
   return (
     <>
     <ConfigProvider locale={viVN}>
-     <div className="bg-gray-50 min-h-screen p-6">
+     <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-blue-600">➕ Thêm Lịch Trình Mới</h1>

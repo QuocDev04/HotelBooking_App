@@ -63,31 +63,30 @@ const Sidebar = () => {
 
     return (
         <div
-            className={`h-screen bg-white text-black transition-all duration-300 ease-in-out 
-            ${collapsed ? 'w-20' : 'w-72'} flex flex-col shadow-lg`}
+            className={`h-screen bg-white/150 backdrop-blur-sm text-gray-900 transition-all duration-300 ease-in-out 
+  ${collapsed ? 'w-20' : 'w-72'} flex flex-col shadow-lg`}
         >
             <div className="p-3 flex justify-end">
                 <button
                     onClick={() => setCollapsed(!collapsed)}
-                    className="text-black hover:scale-110 transform duration-200"
+                    className="hover:scale-110 transform duration-200"
                     title="Toggle Sidebar"
                 >
                     {collapsed ? '➡️' : '⬅️'}
                 </button>
             </div>
 
-            {/* Phần menu scrollable */}
             <nav
                 className="flex flex-col gap-1 px-2 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
-                style={{ maxHeight: 'calc(100vh - 86px)', scrollbarWidth: 'none', msOverflowStyle: 'none' }} 
+                style={{ maxHeight: 'calc(100vh - 86px)' }}
             >
                 {sidebarLinks.map((link, index) => (
                     <div key={index}>
                         {link.children ? (
                             <div
                                 onClick={() => toggleMenu(index)}
-                                className={`flex items-center justify-between gap-3 px-3 py-2 cursor-pointer rounded-lg transition-all
-                                    hover:bg-white/10 ${openMenuIndex === index ? 'bg-white/10 font-semibold' : ''}`}
+                                className={`flex items-center justify-between gap-3 px-3 py-2 cursor-pointer rounded-lg 
+                                    transition-all hover:bg-white/20 ${openMenuIndex === index ? 'bg-white/30 font-semibold' : ''}`}
                             >
                                 <div className="flex items-center gap-2">
                                     <span className="text-lg">{link.icon}</span>
@@ -102,7 +101,7 @@ const Sidebar = () => {
                                 <Link
                                     to={link.path}
                                     className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all
-                                        hover:bg-white/10 ${location.pathname === link.path ? 'bg-white/20 font-semibold' : ''}`}
+                                        hover:bg-white/20 ${location.pathname === link.path ? 'bg-white/30 font-semibold' : ''}`}
                                 >
                                     <span className="text-lg">{link.icon}</span>
                                     {!collapsed && <span>{link.name}</span>}
@@ -117,8 +116,8 @@ const Sidebar = () => {
                                         key={childIndex}
                                         to={child.path}
                                         className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm transition-all
-                                            hover:bg-white/10 ${location.pathname === child.path
-                                                ? 'bg-white/20 text-red-600 font-semibold'
+                                            hover:bg-white/20 ${location.pathname === child.path
+                                                ? 'bg-white/40 text-pink-600 font-semibold'
                                                 : ''}`}
                                     >
                                         <span>{child.icon}</span>
