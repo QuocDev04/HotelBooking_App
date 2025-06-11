@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 
 const AdminSchema = new mongoose.Schema({
-    clerkId: { type: String, unique: true, sparse: true }, // clerkId có thể null nhưng nếu có thì phải unique
+    clerkId: { type: String, unique: true, sparse: true }, 
     email: { type: String, required: true, unique: true },
-    password_hash: { type: String },                        // có thể để trống nếu không dùng mật khẩu
+    password_hash: { type: String },                       
     firstName: { type: String },
     lastName: { type: String },
     full_name: { type: String },
