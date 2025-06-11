@@ -1,5 +1,6 @@
 import React from 'react'
 import { useEffect, useState } from 'react';
+import ReviewSection from '../compoments/reviewSection';
 import Footer from '../compoments/footer';
 
 const Home = () => {
@@ -86,43 +87,74 @@ const Home = () => {
       </section>
 
        {/* Đánh giá giả định */}
-      <section className="container mx-auto py-10 px-6">
-        <h2 className="text-3xl font-bold mb-4">Đánh giá từ người dùng</h2>
-        <div className="border-l-4 border-teal-400 pl-6 py-4 bg-white rounded-md shadow">
-          <h3 className="font-semibold text-lg text-teal-600">
-            Du thuyền Heritage Bình Chuẩn
-          </h3>
-          <p className="text-gray-600 mt-2">
-            Chị rất cảm ơn team đã tư vấn cho chị chọn du thuyền Heritage Bình
-            Chuẩn. Bố mẹ chị rất ưng ý em ạ! Tàu đẹp, mang đậm phong cách Á Đông.
-            Đồ ăn hợp khẩu vị. Nhân viên nhiệt tình và chu đáo.
-          </p>
-          <p className="font-bold mt-4">– Chị Thu Hà</p>
+      <ReviewSection />
+
+      {/* Điểm đến và tin tức */}
+       <section className="text-center my-16">
+        <h2 className="text-3xl font-bold">Các điểm đến của Elitetravel</h2>
+        <p className="text-gray-600 mt-2">
+          Khám phá vẻ đẹp tuyệt vời của Du thuyền Hạ Long: Hành trình đến thiên đường thiên nhiên
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+          {[1, 2, 3].map((_, i) => (
+            <div
+              key={i}
+              className="border rounded-xl p-4 hover:shadow-md transition duration-300"
+            >
+              <img
+                src="/halong.jpg"
+                alt="Vịnh Hạ Long"
+                className="w-full h-52 object-cover rounded-lg mb-4"
+              />
+              <h3 className="font-bold text-lg mb-2">Vịnh Hạ Long</h3>
+              <button className="bg-gray-100 px-4 py-2 rounded-full text-sm hover:bg-teal-500 hover:text-white transition">
+                Xem ngay
+              </button>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Điểm đến và tin tức */}
-      <section className="container mx-auto px-6 pb-12">
-        <h2 className="text-2xl font-bold mb-4">Các điểm đến nổi bật</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
+      {/* Tin tức nổi bật */}
+      <section className="my-16">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-6">
+          <h2 className="text-2xl font-bold">
+            Hạ Long: Khám phá Sự đặc sắc và Cập nhật tin tức mới nhất
+          </h2>
+          <p className="text-gray-600 md:max-w-xl mt-2 md:mt-0">
+            Hạ Long: Bí mật và Cuộc sống trong Vịnh – Khám phá và Cập nhật những tin tức hấp dẫn từ điểm đến tuyệt vời này.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((_, i) => (
             <div
               key={i}
-              className="rounded-lg shadow-md overflow-hidden bg-white"
+              className="border rounded-xl overflow-hidden hover:shadow-md transition"
             >
               <img
-                src="/images/ha-long.jpg"
-                alt="Vịnh Hạ Long"
-                className="w-full h-40 object-cover"
+                src="/butterfly.jpg"
+                alt="Mùa bướm"
+                className="w-full h-52 object-cover"
               />
-              <div className="text-center py-4">
-                <h3 className="font-semibold">Vịnh Hạ Long</h3>
-                <button className="mt-2 bg-gray-200 py-1 px-3 rounded-full">
-                  Xem ngay
-                </button>
+              <div className="p-4">
+                <h3 className="font-bold text-sm leading-snug mb-2">
+                  Mùa bướm thơ mộng tại vườn quốc gia Cúc Phương
+                </h3>
+                <p className="text-gray-500 text-sm line-clamp-2 mb-2">
+                  Mỗi năm, từ cuối tháng 4 đến cuối tháng 5, Vườn quốc gia Cúc Phương lại khoác lên mình tấm áo rực rỡ...
+                </p>
+                <p className="text-xs text-gray-400">21/05/2025</p>
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="text-center mt-6">
+          <button className="bg-white border border-gray-300 px-6 py-2 rounded-full hover:bg-teal-500 hover:text-white transition">
+            Xem tất cả →
+          </button>
         </div>
       </section>
       </main>

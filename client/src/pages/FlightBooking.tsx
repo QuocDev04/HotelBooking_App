@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FaPlaneDeparture, FaCalendarAlt, FaUser } from 'react-icons/fa';
+import ReviewSection from '../compoments/reviewSection';
 const FlightBooking = () => {
   const [schedules, setSchedules] = useState([]);
   const [transports, setTransports] = useState([]);
@@ -97,20 +98,7 @@ useEffect(() => {
         </div>
       </form>
     </div>
-    <section className="container mx-auto py-10 px-6">
-        <h2 className="text-3xl font-bold mb-4">Đánh giá từ người dùng</h2>
-        <div className="border-l-4 border-teal-400 pl-6 py-4 bg-white rounded-md shadow">
-          <h3 className="font-semibold text-lg text-teal-600">
-            Du thuyền Heritage Bình Chuẩn
-          </h3>
-          <p className="text-gray-600 mt-2">
-            Chị rất cảm ơn team đã tư vấn cho chị chọn du thuyền Heritage Bình
-            Chuẩn. Bố mẹ chị rất ưng ý em ạ! Tàu đẹp, mang đậm phong cách Á Đông.
-            Đồ ăn hợp khẩu vị. Nhân viên nhiệt tình và chu đáo.
-          </p>
-          <p className="font-bold mt-4">– Chị Thu Hà</p>
-        </div>
-      </section>
+   <ReviewSection />
     </div>
   );
 };
