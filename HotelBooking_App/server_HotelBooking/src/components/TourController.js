@@ -70,15 +70,14 @@ export const UpdateTour = async (req, res) => {
         const { price, discountPercent = 0, discountExpiryDate } = req.body;
         const now = new Date();
 
-        // Kiểm tra ngày hết hạn giảm giá
-        const isDiscountValid = !discountExpiryDate || new Date(discountExpiryDate) > now;
+        const isDiscountValid =
+            discountPercent > 0 &&
+            (!discountExpiryDate || new Date(discountExpiryDate) > now);
 
-        // Tính giá cuối cùng
         const finalPrice = isDiscountValid
             ? Math.round(price * (1 - discountPercent / 100))
-            : price;
+            : null; 
 
-        // Cập nhật tour, ép thêm finalPrice vào body
         const tour = await TourModel.findByIdAndUpdate(
             req.params.id,
             { ...req.body, finalPrice },
@@ -96,7 +95,8 @@ export const UpdateTour = async (req, res) => {
             message: error.message
         });
     }
-}
+};
+
 
 
 export const GetTourById = async (req, res) => {
