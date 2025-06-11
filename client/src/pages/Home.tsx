@@ -26,16 +26,16 @@ const Home = () => {
               <p className="text-gray-600 mb-6">
                 Hơn 100 tour du thuyền hạng sang giá tốt đang chờ bạn
               </p>
-              <div className="flex flex-wrap justify-center gap-2">
+              <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-3 sm:gap-2 w-full">
                 <input
                   type="text"
                   placeholder="🔍Nhập tên du thuyền"
-                  className="p-3 rounded-full border text-sm w-[240px]"
+                  className="p-3 rounded-full border text-sm w-full sm:w-[240px]"
                 />
-                <select className="p-3 rounded-full border text-sm w-[160px]">
+                <select className="p-3 rounded-full border text-sm w-full sm:w-[160px]">
                   <option>Tất cả địa điểm</option>
                 </select>
-                <select className="p-3 rounded-full border text-sm w-[160px]">
+                <select className="p-3 rounded-full border text-sm w-full sm:w-[160px]">
                   <option>Tất cả mức giá</option>
                 </select>
                 <button className="p-3 px-6 bg-teal-500 text-white rounded-full text-sm font-semibold">
@@ -51,10 +51,12 @@ const Home = () => {
 
 
 
-        <section className="container mx-auto p-4 mt-[120px] md:mt-[150px] lg:mt-[180px]">
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 mt-32 sm:mt-36 lg:mt-44">
+
 
           <h2 className="text-2xl font-bold mb-4">Du thuyền mới và phổ biến nhất</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+
             {tours.length === 0 ? (
               <p>Không có dữ liệu du thuyền.</p>
             ) : (
