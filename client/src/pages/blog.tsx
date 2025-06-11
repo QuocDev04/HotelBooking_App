@@ -1,97 +1,77 @@
 import React from "react";
 
 export default function Blog() {
-    const articles = [
-  {
-    title: "Khám Phá Biển Cồn Nổi – Viên Ngọc Hoang Sơ Giữa Long Ninh Bình",
-    image: "https://minio.fares.vn/mixivivu-dev/tour/blog/images/vhjivvnujyukle6j.webp",
-    date: "04/06/2025",
-    desc: "Nơi thiên nhiên hoang sơ, trải nghiệm hấp dẫn chờ đón bạn khám phá..."
-  },
-  {
-    title: "Top 5 Trải Nghiệm Hấp Dẫn Khi Đi Biển Đà Nẵng",
-    image: "https://minio.fares.vn/mixivivu-dev/tour/blog/images/vhjivvnujyukle6j.webp",
-    date: "04/06/2025",
-    desc: "Đà Nẵng – thành phố đáng sống nhất Việt Nam không chỉ nổi tiếng với biển xanh..."
-  },
-  {
-    title: "Mùa bướm thơ mộng tại Vườn quốc gia Cúc Phương",
-    image: "https://minio.fares.vn/mixivivu-dev/tour/blog/images/vhjivvnujyukle6j.webp",
-    date: "03/06/2025",
-    desc: "Hàng nghìn cánh bướm trắng muốt bay rợp trời tạo nên khung cảnh thần tiên..."
-  },
-  {
-    title: "Lịch trình chiêm bái và lễ Phật tại chùa Quán Sứ",
-    image: "https://minio.fares.vn/mixivivu-dev/tour/blog/images/vhjivvnujyukle6j.webp",
-    date: "12/05/2025",
-    desc: "Từ ngày 15 – 18, nhiều hoạt động ý nghĩa tại chùa Quán Sứ chào đón du khách..."
-  },
-  {
-    title: "Top 5 quán bún mọc ở Hà Nội nhất định phải thử",
-    image: "https://minio.fares.vn/mixivivu-dev/tour/blog/images/vhjivvnujyukle6j.webp",
-    date: "02/05/2025",
-    desc: "Hà Nội không chỉ nổi tiếng với phở mà còn rất nhiều món ngon khác..."
-  },
-  {
-    title: "Bánh Xíu Páo Nam Định – Món Bánh Nhỏ Mang Hương Vị Lớn",
-    image: "https://minio.fares.vn/mixivivu-dev/tour/blog/images/vhjivvnujyukle6j.webp",
-    date: "01/05/2025",
-    desc: "Làm từ bột mì, thịt xá xíu, trứng, loại bánh này mang hương vị đậm đà khó quên..."
-  }
-];
-  return (
-    <div className="p-6 mx-auto max-w-7xl">
-      <h1 className="mb-2 text-3xl font-bold">
-        Hạ Long: Khám phá Sự đặc sắc và Cập nhật tin tức mới nhất
-      </h1>
-      <p className="mb-6 text-gray-600">
-        Hạ Long: Bí mật và Cuộc sống trong Vịnh – Khám phá và Cập nhật những tin tức hấp dẫn từ điểm đến tuyệt vời này.
-      </p>
-
-      <div className="flex flex-wrap gap-4 mb-6 ">
-        <button className="px-4 py-1 text-sm border rounded-full">Tất cả</button>
-        <button className="px-4 py-1 text-sm border rounded-full">Du lịch</button>
-        <button className="px-4 py-1 text-sm border rounded-full">Khám phá</button>
-        <button className="px-4 py-1 text-sm border rounded-full">Du thuyền</button>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-        {articles.map((article, index) => (
-          <div
-            key={index}
-            className="overflow-hidden transition border shadow-sm rounded-xl hover:shadow-md"
-          >
-            <img
-              src={article.image}
-              alt={article.title}
-              className="object-cover w-full h-40"
-            />
-            <div className="p-4">
-              <h2 className="mb-2 text-lg font-semibold line-clamp-2">
-                {article.title}
-              </h2>
-              <p className="mb-2 text-sm text-gray-600">{article.date}</p>
-              <p className="text-sm text-gray-700 line-clamp-3">
-                {article.desc}
-              </p>
+    return (
+    <div className="min-h-screen p-4 bg-gray-50 md:p-8">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+        {/* Sidebar */}
+        <aside className="md:col-span-1">
+          <div className="mb-6 bg-white border border-blue-500 shadow-md rounded-xl">
+            <div className="px-4 py-2 text-lg font-semibold text-white bg-blue-500 rounded-t-xl">
+              Danh mục tour
+            </div>
+            <div className="px-4 py-3 space-y-2">
+              <button className="block w-full text-left text-black-700 hover:underline">Tour trong nước</button>
+              <button className="block w-full text-left text-black-700 hover:underline">Tour nước ngoài</button>
             </div>
           </div>
-        ))}
-      </div>
 
-      <div className="flex items-center justify-between mt-8">
-        <span className="text-sm text-gray-600">Đang xem: 1 - 6 / 135</span>
-        <div className="flex gap-1">
-          {["Trước", 1, 2, 3, 4, 5, "Tiếp"].map((item, i) => (
-            <button
-              key={i}
-              className="px-3 py-1 text-sm border rounded hover:bg-gray-100"
-            >
-              {item}
-            </button>
-          ))}
-        </div>
+          <div className="bg-white border border-gray-200 shadow-md rounded-xl">
+            <div className="px-4 py-2 font-semibold text-gray-800 bg-gray-100 rounded-t-xl">
+              Cẩm nang du lịch
+            </div>
+            <ul className="divide-y divide-gray-100">
+              {[1, 2, 3, 4, 5].map((item, idx) => (
+                <li key={idx} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50">
+                  <img
+                    src="https://via.placeholder.com/60"
+                    alt=""
+                    className="object-cover w-16 h-12 rounded"
+                  />
+                  <p className="text-sm font-medium text-gray-700 line-clamp-2">
+                    Du lịch Đà Lạt – Cẩm nang từ A đến Z (update thông tin 2024)
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </aside>
+
+        {/* Main content */}
+        <main className="space-y-6 md:col-span-3">
+          <div className="grid gap-6 md:grid-cols-2">
+            {[1, 2, 3, 4].map((item, idx) => (
+              <div
+                key={idx}
+                className="overflow-hidden transition bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md"
+              >
+                <img
+                  src="https://via.placeholder.com/600x300"
+                  alt="Blog Thumbnail"
+                  className="object-cover w-full h-48"
+                />
+                <div className="p-4">
+                  <p className="mb-1 text-sm text-gray-400">Thứ Hai, 25/12/2023 - Nguyễn Anh Dũng</p>
+                  <h3 className="text-lg font-semibold text-gray-800 cursor-pointer hover:text-blue-600">
+                    Tiêu đề bài viết blog hấp dẫn
+                  </h3>
+                  <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+                    Mô tả ngắn gọn nội dung bài viết để người dùng hiểu nhanh nội dung chính.
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          <div className="flex justify-center gap-2 mt-6">
+            <button className="w-8 h-8 font-semibold text-white bg-blue-600 rounded-full shadow">1</button>
+            <button className="w-8 h-8 text-gray-600 bg-white border rounded-full hover:bg-gray-100">2</button>
+          </div>
+        </main>
       </div>
     </div>
   );
-}
+};
+
+
