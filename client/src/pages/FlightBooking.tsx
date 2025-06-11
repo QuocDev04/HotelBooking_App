@@ -68,31 +68,39 @@ useEffect(() => {
 </div>
 
         {/* Ngày đi */}
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-          <div className="flex items-center bg-gray-50 border rounded-xl px-4 py-3 text-sm">
+        <div className="flex items-center bg-gray-50 border rounded-xl px-4 py-3 text-sm">
+         
             <FaCalendarAlt className="text-gray-400 mr-2" />
             <input type="date" className="w-full bg-transparent outline-none" defaultValue="2025-05-30" />
-          </div>
+         
         </div>
 
         {/* Hành khách */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {['Người lớn', 'Trẻ em', 'Em bé'].map((label, i) => (
-            <div key={i} className="flex items-center bg-gray-50 border rounded-xl px-4 py-3 text-sm">
-              <FaUser className="text-gray-400 mr-2" />
-              <input
-                type="number"
-                defaultValue={label === 'Người lớn' ? 1 : 0}
-                className="w-full bg-transparent outline-none"
-                placeholder={label}
-              />
-            </div>
-          ))}
-        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+  {[
+    { label: 'Người lớn', defaultValue: 1 },
+    { label: 'Trẻ em', defaultValue: 0 },
+    { label: 'Em bé', defaultValue: 0 },
+  ].map((item, i) => (
+    <div key={i} className="flex flex-col bg-gray-50 border rounded-xl px-4 py-3 text-sm">
+      <label className="flex items-center text-gray-500 font-medium mb-1">
+        <FaUser className="text-gray-400 mr-2" />
+        {item.label}
+      </label>
+      <input
+        type="number"
+        min={0}
+        defaultValue={item.defaultValue}
+        className="w-full bg-transparent outline-none border rounded-md px-2 py-1"
+      />
+    </div>
+  ))}
+</div>
+
 
         {/* Nút tìm kiếm */}
-        <div className="flex justify-end">
-          <button className="mt-4 bg-teal-400 hover:bg-teal-500 text-white font-semibold px-6 py-3 rounded-full">
+        <div className="flex justify-center sm:justify-end">
+          <button className="mt-4 bg-teal-400 hover:bg-teal-500 text-white font-semibold px-6 py-3 rounded-full w-full sm:w-auto">
             Tìm vé máy bay
           </button>
         </div>
