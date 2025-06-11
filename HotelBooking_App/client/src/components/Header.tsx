@@ -12,7 +12,7 @@ const Header = () => {
         { name: 'Tìm du thuyền', path: '/cruise' },
         { name: 'Tìm khách sạn', path: '/' },
         { name: 'Tìm địa điểm du lịch', path: '/' },
-        { name: 'Doanh nghiệp', path: '/' },
+        { name: 'Giới Thiệu', path: '/introduce' },
         { name: 'Blog', path: '/' },
     ];
     const [userId, setUserId] = useState<string | null>(null);
