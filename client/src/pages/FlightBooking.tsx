@@ -56,16 +56,16 @@ useEffect(() => {
 </div>
 
         {/* Điểm đi & Điểm đến */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-center bg-gray-50 border rounded-xl px-4 py-3 text-sm">
-            <FaPlaneDeparture className="text-gray-400 mr-2" />
-            <input type="text" placeholder="vui lòng nhập điểm đi" className="w-full bg-transparent outline-none" />
-          </div>
-          <div className="flex items-center bg-gray-50 border rounded-xl px-4 py-3 text-sm">
-            <FaPlaneDeparture className="text-gray-400 mr-2 rotate-180" />
-            <input type="text" placeholder="vui lòng nhập điểm đến" className="w-full bg-transparent outline-none" />
-          </div>
-        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+  {[['vui lòng nhập điểm đi', <FaPlaneDeparture className="text-gray-400 mr-2" />],
+    ['vui lòng nhập điểm đến', <FaPlaneDeparture className="text-gray-400 mr-2 rotate-180" />]]
+    .map(([placeholder, icon], i) => (
+      <div key={i} className="flex items-center bg-gray-50 border rounded-xl px-4 py-3 text-sm">
+        {icon}
+        <input type="text" placeholder={placeholder} className="w-full bg-transparent outline-none" />
+      </div>
+  ))}
+</div>
 
         {/* Ngày đi */}
         <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
