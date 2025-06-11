@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import PaymentPage from './pages/payment.tsx'
 import Blog from './pages/blog.tsx'
 import { HotelPolicy } from './pages/hotelPolicy.tsx'
+import JapanTourPage from './pages/detailTour.tsx'
 
 
 const App = () => {
@@ -15,6 +16,8 @@ const App = () => {
           <Route path="/payment" element={<PaymentPage />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/hotelPolicy" element={<HotelPolicy />} />
+          <Route path="/detailtour" element={<JapanTourPage />} />
+
         </Routes>
       </Layout>
     </Router>
