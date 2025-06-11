@@ -74,7 +74,7 @@ const HotelPage = () => {
       </section>
       <div className="text-center mt-6">
           <button className="bg-white border border-gray-300 px-6 py-2 rounded-full hover:bg-teal-500 hover:text-white transition">
-            Xem tất cả →
+            Xem tất cả khách sạn
           </button>
         </div>
 <ReviewSection/>
