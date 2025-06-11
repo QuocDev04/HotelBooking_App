@@ -3,8 +3,8 @@ import React from 'react';
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white p-8">
-      <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="flex justify-center bg-gray-900 text-white">
+      <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
         <div>
           <img src="/logo.png" alt="Logo" className="w-16 h-16 mb-2" />
           <p>Công ty TNHH Du lịch và Dịch Vụ Elite Travel</p>

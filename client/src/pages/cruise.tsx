@@ -58,10 +58,10 @@ const CruisePage = () => {
 
         <main className="lg:col-span-4">
           <p className="font-semibold text-lg mb-4">Tìm thấy {tours.length} kết quả</p>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {tours.map((tour) => (
               <div key={tour.tour_id} className="flex bg-white border rounded-xl shadow-sm overflow-hidden">
-                <img src={tour.imageTour} alt={tour.tour_name} className="w-48 h-32 object-cover" />
+                <img src={tour.imageTour} alt={tour.tour_name} className="w-40 h-32 object-cover" />
                 <div className="p-4 flex flex-col justify-between w-full">
                   <div>
                     <h3 className="font-semibold text-lg text-gray-800">{tour.tour_name}</h3>
