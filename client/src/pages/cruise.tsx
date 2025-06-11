@@ -13,42 +13,36 @@ const CruisePage = () => {
   return (
     <div className="font-sans text-gray-800">
       {/* FORM TÌM KIẾM */}
-      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
-        <div className="bg-white p-6 md:p-8 rounded-xl shadow-md border border-gray-200">
-          <h2 className="text-lg md:text-2xl font-bold text-center">
-            Bạn lựa chọn du thuyền Hạ Long nào?
-          </h2>
-          <p className="text-gray-500 text-sm md:text-base text-center mt-1">
-            Hơn 100 tour du thuyền hạng sang giá tốt đang chờ bạn
-          </p>
-
-          <div className="mt-6 flex flex-col md:flex-row md:flex-wrap lg:flex-nowrap items-center gap-4">
-            <div className="flex items-center border rounded-full px-4 py-2 w-full md:w-[40%] bg-white">
-              <span className="text-gray-400 mr-2">🔍</span>
-              <input
-                type="text"
-                placeholder="Nhập tên du thuyền"
-                className="outline-none w-full text-sm"
-              />
-            </div>
-            <div className="flex items-center border rounded-full px-4 py-2 w-full md:w-[25%] bg-white">
-              <span className="text-gray-400 mr-2">📍</span>
-              <select className="outline-none w-full text-sm bg-white">
-                <option>Tất cả địa điểm</option>
-              </select>
-            </div>
-            <div className="flex items-center border rounded-full px-4 py-2 w-full md:w-[25%] bg-white">
-              <span className="text-gray-400 mr-2">💰</span>
-              <select className="outline-none w-full text-sm bg-white">
-                <option>Tất cả mức giá</option>
-              </select>
-            </div>
-            <button className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-full text-sm w-full md:w-auto">
-              Tìm kiếm
-            </button>
+      <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 max-w-5xl mx-auto mt-10">
+        <h2 className="text-xl md:text-2xl font-bold text-center">
+          Bạn lựa chọn du thuyền nào?
+        </h2>
+        <p className="text-gray-500 text-sm text-center mt-1">
+          Hơn 100 tour du thuyền hạng sang giá tốt đang chờ bạn
+        </p>
+        <div className="mt-6 flex flex-col sm:flex-row sm:flex-wrap lg:flex-nowrap items-center gap-4">
+          <div className="flex items-center border rounded-full px-4 py-2 w-full md:w-1/3 bg-white">
+            <span className="text-gray-400 mr-2">🔍</span>
+            <input type="text" placeholder="Nhập tên du thuyền" className="outline-none w-full text-sm" />
           </div>
+          <div className="flex items-center border rounded-full px-4 py-2 w-full md:w-1/4 bg-white">
+            <span className="text-gray-400 mr-2">📍</span>
+            <select className="outline-none w-full text-sm bg-white">
+              <option>Tất cả địa điểm</option>
+            </select>
+          </div>
+          <div className="flex items-center border rounded-full px-4 py-2 w-full md:w-1/4 bg-white">
+            <span className="text-gray-400 mr-2">💰</span>
+            <select className="outline-none w-full text-sm bg-white">
+              <option>Tất cả mức giá</option>
+            </select>
+          </div>
+          <button className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-full text-sm">
+            Tìm kiếm
+          </button>
         </div>
       </div>
+
 
       {/* BỐ CỤC DỮ LIỆU */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 pb-20 grid grid-cols-1 lg:grid-cols-5 gap-6">

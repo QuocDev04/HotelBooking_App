@@ -82,7 +82,7 @@ const Home = () => {
                           : `${tour.price.toLocaleString()}đ`}
                         /khách
                       </span>
-                      <button className="bg-teal-500 text-white px-4 py-1 rounded-full">
+                      <button className="bg-teal-500 text-white px-4 py-1 rounded-full hover:font-semibold hover:bg-teal-600 transition">
                         Đặt ngay
                       </button>
                     </div>
