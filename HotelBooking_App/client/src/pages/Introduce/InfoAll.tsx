@@ -15,8 +15,8 @@ const InfoAll = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <div className="max-w-6xl mx-auto p-4 mt-32">
-      <h1 className="text-3xl font-bold mb-6 text-center">Thông tin chung</h1>
+    <div className="max-w-6xl mx-auto p-4">
+      <h1 className="text-3xl font-bold  my-20 text-center">Thông tin chung</h1>
       <div className="space-y-4">
         {sections.map((sec, idx) => (
           <div key={idx} className="border rounded-lg bg-white shadow">

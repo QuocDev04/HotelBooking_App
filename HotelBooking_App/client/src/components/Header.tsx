@@ -61,15 +61,15 @@ const Header = () => {
     return (
         <>
             <nav className={`fixed top-0 left-0 w-full flex items-center justify-between px-4 md:px-16 lg:px-24 xl:px-32 transition-all duration-500 z-50 ${isScrolled ? "shadow-md text-gray-700 backdrop-blur-lg py-1 md:py-1.5" : "py-0 md:py-0.5"}`}>
-                <a href="/" className="flex items-center gap-2">
+                <Link to="/" className="flex items-center gap-2">
                     <img src={logo} alt="logo" className="h-20" />
-                </a>
+                </Link>
 
                 <div className="hidden md:flex text-white items-center gap-4 lg:gap-8">
                     {navLinks.map((link, i) => (
-                        <a key={i} href={link.path} className="group flex flex-col gap-0.5">
+                        <Link key={i} to={link.path} className="group flex flex-col gap-0.5">
                             {link.name}
-                        </a>
+                        </Link>
                     ))}
                 </div>
 
