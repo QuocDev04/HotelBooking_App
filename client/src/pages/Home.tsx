@@ -1,5 +1,6 @@
 import React from 'react'
 import { useEffect, useState } from 'react';
+import Footer from '../compoments/footer';
 
 const Home = () => {
     const [tours, setTours] = useState([]);
@@ -11,7 +12,9 @@ const Home = () => {
       .catch((error) => console.error('Error fetching tours:', error));
   }, []);
   return (
-    <div className="font-sans text-gray-800">
+     <div className="flex flex-col min-h-screen font-sans text-gray-800">
+      <main className="flex-grow">
+   
         <div
         className="relative bg-cover bg-center h-[300px]"
         style={{ backgroundImage: "url('/banner.png')" }}
@@ -122,9 +125,10 @@ const Home = () => {
           ))}
         </div>
       </section>
-
-    </div>
-  )
-}
+      </main>
+</div>
+    
+  );
+};
 
 export default Home

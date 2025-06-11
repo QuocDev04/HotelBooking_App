@@ -94,6 +94,39 @@
       "tour_type": "cruise",
       "created_at": "2025-06-09T08:51:43.477596",
       "updated_at": "2025-06-09T08:51:43.477599"
+    },
+     {
+      "tour_id": 5,
+      "tour_name": "Ha Long Bay Cruise",
+      "destination": "Ha Long",
+      "departure_location": "Hanoi",
+      "duration": 3,
+      "price": 300.0,
+      "promotion_price": 250.0,
+      "available_slots": 20,
+      "maxPeople": 30,
+      "imageTour": "halong.jpg",
+      "status": "available",
+      "description": "A beautiful cruise around Ha Long Bay.",
+      "tour_type": "cruise",
+      "created_at": "2025-06-09T08:51:43.477596",
+      "updated_at": "2025-06-09T08:51:43.477599"
+    }, {
+      "tour_id": 6,
+      "tour_name": "Ha Long Bay Cruise",
+      "destination": "Ha Long",
+      "departure_location": "Hanoi",
+      "duration": 3,
+      "price": 300.0,
+      "promotion_price": 250.0,
+      "available_slots": 20,
+      "maxPeople": 30,
+      "imageTour": "halong.jpg",
+      "status": "available",
+      "description": "A beautiful cruise around Ha Long Bay.",
+      "tour_type": "cruise",
+      "created_at": "2025-06-09T08:51:43.477596",
+      "updated_at": "2025-06-09T08:51:43.477599"
     }
   ],
   "tour_schedule": [
@@ -108,7 +141,89 @@
   ],
   "rooms": [
     {
-      "room_id": 1,
+      "room_id": 2,
+      "address": "Cruise Deck 3",
+      "room_name": "Ocean View",
+      "price_per_night": 120.0,
+      "description": "Room with sea view",
+      "imageRoom": "room1.jpg",
+      "capacity": 2,
+      "type_name": "deluxe",
+      "amenities": "WiFi, TV, Air Conditioning"
+    },
+    {
+      "room_id": 3,
+      "address": "Cruise Deck 3",
+      "room_name": "Ocean View",
+      "price_per_night": 120.0,
+      "description": "Room with sea view",
+      "imageRoom": "room1.jpg",
+      "capacity": 2,
+      "type_name": "deluxe",
+      "amenities": "WiFi, TV, Air Conditioning"
+    },
+    {
+      "room_id": 4,
+      "address": "Cruise Deck 3",
+      "room_name": "Ocean View",
+      "price_per_night": 120.0,
+      "description": "Room with sea view",
+      "imageRoom": "room1.jpg",
+      "capacity": 2,
+      "type_name": "deluxe",
+      "amenities": "WiFi, TV, Air Conditioning"
+    },{
+      "room_id": 5,
+      "address": "Cruise Deck 3",
+      "room_name": "Ocean View",
+      "price_per_night": 120.0,
+      "description": "Room with sea view",
+      "imageRoom": "room1.jpg",
+      "capacity": 2,
+      "type_name": "deluxe",
+      "amenities": "WiFi, TV, Air Conditioning"
+    },{
+      "room_id": 6,
+      "address": "Cruise Deck 3",
+      "room_name": "Ocean View",
+      "price_per_night": 120.0,
+      "description": "Room with sea view",
+      "imageRoom": "room1.jpg",
+      "capacity": 2,
+      "type_name": "deluxe",
+      "amenities": "WiFi, TV, Air Conditioning"
+    },{
+      "room_id": 7,
+      "address": "Cruise Deck 3",
+      "room_name": "Ocean View",
+      "price_per_night": 120.0,
+      "description": "Room with sea view",
+      "imageRoom": "room1.jpg",
+      "capacity": 2,
+      "type_name": "deluxe",
+      "amenities": "WiFi, TV, Air Conditioning"
+    },{
+      "room_id": 8,
+      "address": "Cruise Deck 3",
+      "room_name": "Ocean View",
+      "price_per_night": 120.0,
+      "description": "Room with sea view",
+      "imageRoom": "room1.jpg",
+      "capacity": 2,
+      "type_name": "deluxe",
+      "amenities": "WiFi, TV, Air Conditioning"
+    },{
+      "room_id": 9,
+      "address": "Cruise Deck 3",
+      "room_name": "Ocean View",
+      "price_per_night": 120.0,
+      "description": "Room with sea view",
+      "imageRoom": "room1.jpg",
+      "capacity": 2,
+      "type_name": "deluxe",
+      "amenities": "WiFi, TV, Air Conditioning"
+    },{
+      "room_id": 10,
       "address": "Cruise Deck 3",
       "room_name": "Ocean View",
       "price_per_night": 120.0,
