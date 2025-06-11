@@ -1,5 +1,5 @@
 import  { useEffect, useState } from 'react';
-import ReviewSection from '../compoments/reviewSection';
+import ReviewSection from '../../components/reviewSection';
 
 const HotelPage = () => {
   const [rooms, setRooms] = useState([]);
@@ -26,7 +26,7 @@ const HotelPage = () => {
 
   return (
     <main className="font-sans text-gray-800">
-      <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 max-w-5xl mx-auto mt-10">
+      <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 max-w-5xl mx-auto mt-40">
         <h2 className="text-xl md:text-2xl font-bold text-center">
           Bạn lựa chọn khách sạn nào?
         </h2>
