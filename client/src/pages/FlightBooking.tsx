@@ -38,22 +38,22 @@ useEffect(() => {
 
       <form className="space-y-4">
         {/* Chọn loại vé */}
-        <div className="flex justify-between items-center text-sm font-medium text-gray-600 mb-4">
-          <div className="flex gap-6">
-            <label className="inline-flex items-center gap-2">
-              <input type="radio" name="type" defaultChecked className="accent-teal-500" />
-              Một chiều
-            </label>
-            <label className="inline-flex items-center gap-2">
-              <input type="radio" name="type" className="accent-teal-500" />
-              Khứ hồi
-            </label>
-          </div>
-          <label className="inline-flex items-center gap-2">
-            <input type="checkbox" className="accent-teal-500" />
-            Vé rẻ nhất tháng
-          </label>
-        </div>
+        <div className="flex flex-col sm:flex-row justify-between text-sm font-medium text-gray-600 gap-2 sm:gap-0 mb-4">
+  <div className="flex gap-6 justify-center sm:justify-start">
+    <label className="inline-flex items-center gap-2">
+      <input type="radio" name="type" defaultChecked className="accent-teal-500" />
+      Một chiều
+    </label>
+    <label className="inline-flex items-center gap-2">
+      <input type="radio" name="type" className="accent-teal-500" />
+      Khứ hồi
+    </label>
+  </div>
+  <label className="inline-flex items-center gap-2 self-center sm:self-auto">
+    <input type="checkbox" className="accent-teal-500" />
+    Vé rẻ nhất tháng
+  </label>
+</div>
 
         {/* Điểm đi & Điểm đến */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
