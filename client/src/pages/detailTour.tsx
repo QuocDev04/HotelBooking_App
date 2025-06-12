@@ -1,111 +1,196 @@
-import { useEffect, useState } from "react";
+import React, { useState } from 'react';
 
-export default function JapanTourPage() {
-  const [faqs, setFaqs] = useState([]);
-  const [newQuestion, setNewQuestion] = useState("");
-  const [author, setAuthor] = useState("");
+const TourPage = () => {
+    const [adults, setAdults] = useState(1);
+  const [children, setChildren] = useState(0);
+  const [infants, setInfants] = useState(0);
 
-  useEffect(() => {
-    fetch("/api/faq")
-      .then((res) => res.json())
-      .then((data) => setFaqs(data));
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!newQuestion.trim()) return;
-
-    const res = await fetch("/api/faq", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        question: newQuestion,
-        author: author || "Ẩn danh",
-      }),
-    });
-
-    if (res.ok) {
-      const newFaq = await res.json();
-      setFaqs((prev) => [...prev, newFaq]);
-      setNewQuestion("");
-      setAuthor("");
-    }
-  };
-
+  const pricePerPerson = 15000000;
+  const total = (adults + children + infants) * pricePerPerson;
   return (
-    <div className="max-w-6xl p-4 mx-auto space-y-12">
+    <>
+        <div className="max-w-screen-xl p-4 mx-auto font-sans">
+      {/* Title */}
+      <h1 className="mb-2 text-2xl font-semibold">
+        HCM - Seoul - Đảo Nami - Trượt Tuyết Elysian 5N4Đ
+      </h1>
+
+      {/* Icons */}
+      <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-700">
+        <div className="flex items-center gap-1">
+          <span className="text-blue-600">★ ★ ★ ★ ☆</span>
+        </div>
+        <div className="flex items-center gap-1">Khởi hành từ <strong>HCM</strong></div>
+        <div className="flex items-center gap-1">Điểm đến <strong>Hàn Quốc</strong></div>
+        <div className="flex items-center gap-1">Thời gian <strong>5N4Đ</strong></div>
+        <div className="flex items-center gap-1">Số chỗ <strong>Còn chỗ</strong></div>
+        <div className="flex items-center gap-1">Di chuyển bằng <strong>Máy bay</strong></div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        {/* Image */}
+        <div className="md:col-span-2">
+          <img
+            src="https://cdn2.ivivu.com/2022/12/tour-han-quoc-tuyet-ivivu.jpg"
+            alt="Tour"
+            className="object-cover w-full h-auto rounded-lg"
+          />
+
+          <div className="flex gap-2 mt-2 overflow-auto">
+            {[1, 2, 3, 4, 5].map((_, i) => (
+              <img
+                key={i}
+                src={`https://placehold.co/100x70?text=Ảnh+${i + 1}`}
+                alt="Thumb"
+                className="border rounded-lg"
+              />
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
+            <span>Chia sẻ:</span>
+            <div className="flex gap-2">
+              <button className="hover:text-blue-600">Fb</button>
+              <button className="hover:text-sky-500">P</button>
+              <button className="hover:text-blue-400">Tw</button>
+            </div>
+          </div>
+        </div>
+
+        {/* Booking box */}
+        <div className="p-4 space-y-4 rounded-lg bg-blue-50">
+          <div className="text-2xl font-bold text-blue-700">15.000.000đ</div>
+          <div className="text-sm">Mã tour: <strong>ND006</strong></div>
+
+          <div className="flex flex-wrap gap-2">
+            <span className="px-2 py-1 text-xs font-medium bg-blue-200 rounded">Giảm 50%</span>
+            <span className="px-2 py-1 text-xs font-medium bg-blue-200 rounded">Giảm 15%</span>
+            <span className="px-2 py-1 text-xs font-medium bg-blue-200 rounded">Giảm 10k</span>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Chọn Ngày đi</label>
+            <input type="date" className="w-full p-2 mt-1 border rounded" />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span>Người lớn</span>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setAdults(Math.max(1, adults - 1))} className="px-2">-</button>
+                <span>{adults}</span>
+                <button onClick={() => setAdults(adults + 1)} className="px-2">+</button>
+                <span className="text-sm text-gray-500">{(adults * pricePerPerson).toLocaleString()}đ</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span>Trẻ em</span>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setChildren(Math.max(0, children - 1))} className="px-2">-</button>
+                <span>{children}</span>
+                <button onClick={() => setChildren(children + 1)} className="px-2">+</button>
+                <span className="text-sm text-gray-500">{(children * pricePerPerson).toLocaleString()}đ</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span>Em bé</span>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setInfants(Math.max(0, infants - 1))} className="px-2">-</button>
+                <span>{infants}</span>
+                <button onClick={() => setInfants(infants + 1)} className="px-2">+</button>
+                <span className="text-sm text-gray-500">{(infants * pricePerPerson).toLocaleString()}đ</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-2 text-lg font-bold text-blue-600 border-t">
+            Tổng tiền: {total.toLocaleString()}đ
+          </div>
+
+          <div className="flex gap-2">
+            <button className="flex-1 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">Đặt ngay</button>
+            <button className="flex-1 py-2 border rounded hover:bg-gray-100">Liên hệ tư vấn</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div className="max-w-screen-xl p-6 mx-auto space-y-10">
       {/* Giới thiệu */}
-      <section>
-        <h1 className="mb-2 text-3xl font-bold">Tour Nhật Bản: Hà Nội - Osaka - Kyoto - Tokyo</h1>
-        <p className="text-gray-700">Nhật Bản được mệnh danh là một trong những thiên đường du lịch châu Á...</p>
-        <ul className="mt-3 ml-6 text-gray-800 list-disc">
-          <li>Ghé thăm công viên thỏ mộng Nara</li>
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold">Giới thiệu</h2>
+        <p>
+          Nhật Bản được mệnh danh là thiên đường du lịch với phong cảnh và văn hóa đặc sắc. Lịch trình: Hà Nội - Osaka - Kyoto - Tokyo 6N5Đ.
+        </p>
+        <ul className="pl-5 text-sm text-gray-700 list-disc">
+          <li>Ghé thăm công viên Nara</li>
           <li>Trải nghiệm tàu cao tốc Shinkansen</li>
-          <li>Thư giãn trong suối nước nóng onsen</li>
-          <li>Thưởng thức thịt bò Kobe</li>
-          <li><strong className="text-green-600">Đặc biệt: Hoàn tiền 100% nếu không đỗ visa</strong></li>
+          <li>Thư giãn tại suối nước nóng onsen</li>
+          <li>Thưởng thức thịt bò vùng đất Kobe</li>
+          <li>Hoàn tiền 100% nếu không đỗ Visa</li>
         </ul>
       </section>
 
       {/* Lịch trình */}
       <section>
-        <h2 className="mb-3 text-2xl font-bold">Lịch trình tour</h2>
-        <ul className="space-y-2">
-          {[
-            "Hà Nội - Osaka",
-            "Osaka - Kobe",
-            "Cố đô Kyoto",
-            "Fuji - Lễ hội hoa anh đào Kawaguchi",
-            "Tokyo",
-            "Tokyo - Ngắm hoa anh đào công viên UENO - Hà Nội",
-          ].map((day, idx) => (
-            <li key={idx} className="p-3 border rounded shadow-sm">
-              <span className="font-semibold">Ngày {idx + 1}:</span> {day}
-            </li>
-          ))}
-        </ul>
+        <h2 className="mb-4 text-2xl font-bold">Lịch trình tour</h2>
+        <ol className="pl-5 space-y-2 text-gray-800 list-decimal">
+          <li>Hà Nội - Osaka</li>
+          <li>Osaka - Kobe</li>
+          <li>Cố đô Kyoto</li>
+          <li>Fuji - Lễ hội hoa anh đào Kawaguchi</li>
+          <li>Tokyo</li>
+          <li>Tokyo - Công viên UENO - Hà Nội</li>
+        </ol>
       </section>
 
       {/* Bảng giá */}
       <section>
-        <h2 className="mb-3 text-2xl font-bold">Bảng giá (Khởi hành từ Hà Nội)</h2>
-        <table className="w-full text-left border">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-2">Ngày khởi hành</th>
-              <th className="p-2">Hãng tour</th>
-              <th className="p-2">Giá tour</th>
-              <th className="p-2">Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {["17/06/2025", "24/06/2025", "01/07/2025", "08/07/2025", "15/07/2025", "22/07/2025", "29/07/2025"].map((date, idx) => (
-              <tr key={idx} className="border-t">
-                <td className="p-2">{date}</td>
-                <td className="p-2">Vietjet Air</td>
-                <td className="p-2 font-semibold text-red-600">
-                  {idx < 5 ? "29.900.000đ" : "28.900.000đ"}
-                </td>
-                <td className="p-2">
-                  <button className="px-3 py-1 text-white bg-orange-500 rounded">Giữ chỗ ngay</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <h2 className="mb-4 text-2xl font-bold">Bảng giá (Khởi hành từ Hà Nội)</h2>
+        <div className="grid gap-4">
+          {[
+            { date: "17/06/2025", price: "29.900.000đ", points: "299.000 điểm" },
+            { date: "24/06/2025", price: "29.900.000đ", points: "299.000 điểm" },
+            { date: "22/07/2025", price: "28.900.000đ", points: "289.000 điểm", discount: true },
+          ].map((item, i) => (
+            <div key={i} className="flex items-center justify-between p-4 border rounded-lg shadow-sm">
+              <div>
+                <div className="text-sm font-semibold">{item.date}</div>
+                <div className="font-bold text-orange-600">{item.price}</div>
+                <div className="text-xs text-gray-500">+ {item.points}</div>
+              </div>
+              <button className="px-4 py-2 text-white bg-orange-500 rounded hover:bg-orange-600">
+                Giữ chỗ ngay
+              </button>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* Đánh giá */}
       <section>
-        <h2 className="mb-3 text-2xl font-bold">Đánh giá</h2>
-        <div className="p-4 mb-4 font-semibold text-green-800 bg-green-100 rounded">
-          9.0 Tuyệt vời (30 đánh giá)
-        </div>
-        <div className="space-y-4">
-          {["Nguyệt", "Hồng", "My Dung", "Bình An"].map((name, idx) => (
-            <div key={idx} className="pt-3 border-t">
-              <div className="font-medium text-green-700">Tuyệt vời - {name}</div>
-              <p className="mt-1 text-sm text-gray-700">Chuyến đi đáng nhớ, lịch trình hợp lý, hướng dẫn viên thân thiện...</p>
+        <h2 className="mb-4 text-2xl font-bold">Đánh giá</h2>
+        <div className="text-xl font-bold text-green-600">9 Tuyệt vời</div>
+        <div className="grid gap-4 mt-4">
+          {[
+            {
+              name: "Nguyệt",
+              date: "01/06/2025",
+              rating: 9.4,
+              comment: "Chuyến đi đáng nhớ, lịch trình trọn vẹn, thích bò Kobe và Shinkansen."
+            },
+            {
+              name: "Hồng",
+              date: "18/05/2025",
+              rating: 9.4,
+              comment: "Điểm đến hợp lý, nhân viên dễ thương, rất hài lòng."
+            }
+          ].map((review, i) => (
+            <div key={i} className="p-4 border rounded-lg shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-semibold">{review.name} - {review.date}</div>
+                <div className="px-2 text-sm text-white bg-green-500 rounded">{review.rating}</div>
+              </div>
+              <p className="mt-2 text-sm text-gray-700">{review.comment}</p>
             </div>
           ))}
         </div>
@@ -113,46 +198,28 @@ export default function JapanTourPage() {
 
       {/* Hỏi đáp */}
       <section>
-        <h2 className="mb-4 text-2xl font-bold">Hỏi đáp ({faqs.length})</h2>
-        <form onSubmit={handleSubmit} className="mb-6 space-y-3">
-          <input
-            type="text"
-            placeholder="Tên của bạn (tùy chọn)"
-            className="w-full p-2 border border-gray-300 rounded"
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-          />
-          <textarea
-            className="w-full p-2 border rounded"
-            rows={3}
-            placeholder="Mời bạn để lại câu hỏi..."
-            value={newQuestion}
-            onChange={(e) => setNewQuestion(e.target.value)}
-          />
-          <button
-            type="submit"
-            className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
-          >
-            Gửi câu hỏi
-          </button>
-        </form>
-
+        <h2 className="mb-4 text-2xl font-bold">Hỏi đáp</h2>
         <div className="space-y-4">
-          {faqs.map((faq, index) => (
-            <div key={index} className="pt-4 border-t">
-              <div className="mb-1 font-semibold text-orange-600">
-                {faq.author || "Khách"} hỏi:
-              </div>
-              <div className="mb-2 text-gray-800">{faq.question}</div>
-              {faq.answer && (
-                <div className="p-3 text-sm text-gray-700 bg-gray-100 rounded">
-                  <strong>BestPrice Travel:</strong> {faq.answer}
-                </div>
-              )}
+          {[
+            {
+              question: "Tour đi Nhật Bản ngày 10.06.2025 có thêm được 2 chỗ nữa không?",
+              answer: "Dạ hiện vẫn còn nhận được 2 khách nữa ạ."
+            },
+            {
+              question: "Tour có ghé Kobe để ăn thịt bò không?",
+              answer: "Tour có ghé thành phố Kobe, tùy chương trình sẽ có trải nghiệm bò Kobe."
+            }
+          ].map((item, i) => (
+            <div key={i} className="p-4 border rounded-lg shadow-sm">
+              <p className="font-medium">Q: {item.question}</p>
+              <p className="mt-2 text-sm text-gray-700">A: {item.answer}</p>
             </div>
           ))}
         </div>
       </section>
     </div>
+    </>
   );
-}
+};
+
+export default TourPage;
