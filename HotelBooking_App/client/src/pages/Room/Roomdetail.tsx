@@ -175,38 +175,38 @@ const Roomdetail = () => {
           </div>
         </div>
       </div>
-      <div className="max-w-6xl mx-auto mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="max-w-6xl mx-auto mt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Đánh giá */}
-        <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center">
-          <div className="flex items-center gap-2">
-            <span className="text-blue-600 text-3xl font-bold">9,0</span>
-            <span className="text-gray-600 font-semibold">/10</span>
+        <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center">
+          <div className="flex items-end gap-2 mb-2">
+            <span className="text-red-600 text-5xl font-extrabold leading-none">9,0</span>
+            <span className="text-gray-600 font-semibold text-xl pb-1">/10</span>
           </div>
-          <div className="text-sm text-gray-500 mt-1">Xuất sắc</div>
-          <div className="text-xs text-gray-400 mb-2">48 đánh giá</div>
-          <div className="w-full border-t pt-2 mt-2">
-            <div className="text-sm font-semibold mb-1">
+          <div className="text-lg text-gray-700 font-semibold mt-1 mb-2">Xuất sắc</div>
+          <div className="text-base text-gray-500 mb-3">48 đánh giá</div>
+          <hr className="w-full border-gray-200 mb-3" />
+          <div className="w-full">
+            <div className="text-lg font-semibold mb-1">
               Khách nói gì về kỳ nghỉ của họ
             </div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-gray-700">Thuy L. T.</span>
-              <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-semibold">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="font-bold text-gray-700 text-base">Thuy L. T.</span>
+              <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-sm font-semibold">
                 9.4/10
               </span>
             </div>
-            <div className="text-gray-600 text-sm mt-1">
-              Tôi đã có 1 trải nghiệm tuyệt vời ở đây...chất lượng 5 sao...tôi
-              sẽ quay lại đây nếu có cơ hội
+            <div className="text-gray-600 text-base mt-1">
+              Tôi đã có 1 trải nghiệm tuyệt vời ở đây...chất lượng 5 sao...tôi sẽ quay lại đây nếu có cơ hội
             </div>
           </div>
         </div>
         {/* Vị trí */}
-        <div className="bg-white rounded-xl shadow p-4">
-          <div className="flex justify-between items-center mb-1">
-            <span className="font-semibold">Trong khu vực</span>
-            <button className="text-blue-600 text-sm hover:underline flex items-center gap-1">
+        <div className="bg-white rounded-xl shadow p-6">
+          <div className="flex justify-between items-center mb-2">
+            <span className="font-bold text-lg">Trong khu vực</span>
+            <button className="text-blue-600 text-base hover:underline flex items-center gap-1">
               <svg
-                className="w-4 h-4 inline-block"
+                className="w-5 h-5 inline-block"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -218,9 +218,9 @@ const Roomdetail = () => {
               Xem bản đồ
             </button>
           </div>
-          <div className="flex items-center text-md text-gray-700 mb-1">
+          <div className="flex items-center text-base text-gray-700 mb-2">
             <svg
-              className="w-4 h-4 mr-1 text-gray-400"
+              className="w-5 h-5 mr-1 text-gray-400"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
@@ -231,9 +231,9 @@ const Roomdetail = () => {
             </svg>
             38 Võ Nguyên Giáp, Mân Thái, Sơn Trà, Đà Nẵng, Việt Nam, 550000
           </div>
-          <div className="flex items-center text-md text-blue-700 mb-2">
+          <div className="flex items-center text-base text-blue-700 mb-3">
             <svg
-              className="w-4 h-4 mr-1 text-blue-400"
+              className="w-5 h-5 mr-1 text-blue-400"
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -241,115 +241,87 @@ const Roomdetail = () => {
             </svg>
             Gần khu vui chơi giải trí
           </div>
-          <ul className="text-md text-gray-700 space-y-1">
-            <li className="flex items-center">
-              <svg
-                className="w-4 h-4 mr-1 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path d="M21 10.5a8.38 8.38 0 01-.9 3.8c-1.5 3-6.1 7.7-6.1 7.7s-4.6-4.7-6.1-7.7A8.38 8.38 0 013 10.5 8.5 8.5 0 1112 19a8.5 8.5 0 019-8.5z" />
-                <circle cx="12" cy="10.5" r="3" />
-              </svg>
-              Four Points by Sheraton Danang -{" "}
-              <span className="ml-1 text-gray-500">968 m</span>
+          <ul className="text-base text-gray-700 space-y-1">
+            <li className="flex items-center justify-between">
+              <div className="flex items-center min-w-0">
+                <svg className="w-5 h-5 mr-1 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M21 10.5a8.38 8.38 0 01-.9 3.8c-1.5 3-6.1 7.7-6.1 7.7s-4.6-4.7-6.1-7.7A8.38 8.38 0 013 10.5 8.5 8.5 0 1112 19a8.5 8.5 0 019-8.5z" />
+                  <circle cx="12" cy="10.5" r="3" />
+                </svg>
+                <span className="truncate">Four Points by Sheraton Danang</span>
+              </div>
+              <span className="ml-2 text-gray-500 font-medium min-w-[70px] text-right">968 m</span>
             </li>
-            <li className="flex items-center">
-              <svg
-                className="w-4 h-4 mr-1 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path d="M21 10.5a8.38 8.38 0 01-.9 3.8c-1.5 3-6.1 7.7-6.1 7.7s-4.6-4.7-6.1-7.7A8.38 8.38 0 013 10.5 8.5 8.5 0 1112 19a8.5 8.5 0 019-8.5z" />
-                <circle cx="12" cy="10.5" r="3" />
-              </svg>
-              Đối diện Sở 35 Cty TNHH Huy Đăng Ngô Q... -{" "}
-              <span className="ml-1 text-gray-500">1.65 km</span>
+            <li className="flex items-center justify-between">
+              <div className="flex items-center min-w-0">
+                <svg className="w-5 h-5 mr-1 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M21 10.5a8.38 8.38 0 01-.9 3.8c-1.5 3-6.1 7.7-6.1 7.7s-4.6-4.7-6.1-7.7A8.38 8.38 0 013 10.5 8.5 8.5 0 1112 19a8.5 8.5 0 019-8.5z" />
+                  <circle cx="12" cy="10.5" r="3" />
+                </svg>
+                <span className="truncate">Đối diện Sở 35 Cty TNHH Huy Đăng Ngô Q...</span>
+              </div>
+              <span className="ml-2 text-gray-500 font-medium min-w-[70px] text-right">1.65 km</span>
             </li>
-            <li className="flex items-center">
-              <svg
-                className="w-4 h-4 mr-1 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path d="M21 10.5a8.38 8.38 0 01-.9 3.8c-1.5 3-6.1 7.7-6.1 7.7s-4.6-4.7-6.1-7.7A8.38 8.38 0 013 10.5 8.5 8.5 0 1112 19a8.5 8.5 0 019-8.5z" />
-                <circle cx="12" cy="10.5" r="3" />
-              </svg>
-              Biển Phạm Văn Đồng -{" "}
-              <span className="ml-1 text-gray-500">2.10 km</span>
+            <li className="flex items-center justify-between">
+              <div className="flex items-center min-w-0">
+                <svg className="w-5 h-5 mr-1 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M21 10.5a8.38 8.38 0 01-.9 3.8c-1.5 3-6.1 7.7-6.1 7.7s-4.6-4.7-6.1-7.7A8.38 8.38 0 013 10.5 8.5 8.5 0 1112 19a8.5 8.5 0 019-8.5z" />
+                  <circle cx="12" cy="10.5" r="3" />
+                </svg>
+                <span className="truncate">Biển Phạm Văn Đồng</span>
+              </div>
+              <span className="ml-2 text-gray-500 font-medium min-w-[70px] text-right">2.10 km</span>
             </li>
-            <li className="flex items-center">
-              <svg
-                className="w-4 h-4 mr-1 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path d="M21 10.5a8.38 8.38 0 01-.9 3.8c-1.5 3-6.1 7.7-6.1 7.7s-4.6-4.7-6.1-7.7A8.38 8.38 0 013 10.5 8.5 8.5 0 1112 19a8.5 8.5 0 019-8.5z" />
-                <circle cx="12" cy="10.5" r="3" />
-              </svg>
-              Bảo tàng 3D Art In Paradise Đà Nẵng -{" "}
-              <span className="ml-1 text-gray-500">1.24 km</span>
+            <li className="flex items-center justify-between">
+              <div className="flex items-center min-w-0">
+                <svg className="w-5 h-5 mr-1 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M21 10.5a8.38 8.38 0 01-.9 3.8c-1.5 3-6.1 7.7-6.1 7.7s-4.6-4.7-6.1-7.7A8.38 8.38 0 013 10.5 8.5 8.5 0 1112 19a8.5 8.5 0 019-8.5z" />
+                  <circle cx="12" cy="10.5" r="3" />
+                </svg>
+                <span className="truncate">Bảo tàng 3D Art In Paradise Đà Nẵng</span>
+              </div>
+              <span className="ml-2 text-gray-500 font-medium min-w-[70px] text-right">1.24 km</span>
             </li>
-            <li className="flex items-center">
-              <svg
-                className="w-4 h-4 mr-1 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path d="M21 10.5a8.38 8.38 0 01-.9 3.8c-1.5 3-6.1 7.7-6.1 7.7s-4.6-4.7-6.1-7.7A8.38 8.38 0 013 10.5 8.5 8.5 0 1112 19a8.5 8.5 0 019-8.5z" />
-                <circle cx="12" cy="10.5" r="3" />
-              </svg>
-              Đối diện Sở 35 Cty TNHH Huy Đăng Ngô Q... -{" "}
-              <span className="ml-1 text-gray-500">1.65 km</span>
+            <li className="flex items-center justify-between">
+              <div className="flex items-center min-w-0">
+                <svg className="w-5 h-5 mr-1 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M21 10.5a8.38 8.38 0 01-.9 3.8c-1.5 3-6.1 7.7-6.1 7.7s-4.6-4.7-6.1-7.7A8.38 8.38 0 013 10.5 8.5 8.5 0 1112 19a8.5 8.5 0 019-8.5z" />
+                  <circle cx="12" cy="10.5" r="3" />
+                </svg>
+                <span className="truncate">Đối diện Sở 35 Cty TNHH Huy Đăng Ngô Q...</span>
+              </div>
+              <span className="ml-2 text-gray-500 font-medium min-w-[70px] text-right">1.65 km</span>
             </li>
-            <li className="flex items-center">
-              <svg
-                className="w-4 h-4 mr-1 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path d="M21 10.5a8.38 8.38 0 01-.9 3.8c-1.5 3-6.1 7.7-6.1 7.7s-4.6-4.7-6.1-7.7A8.38 8.38 0 013 10.5 8.5 8.5 0 1112 19a8.5 8.5 0 019-8.5z" />
-                <circle cx="12" cy="10.5" r="3" />
-              </svg>
-              Bệnh viện 199 - Bộ Công An -{" "}
-              <span className="ml-1 text-gray-500">2.54 km</span>
+            <li className="flex items-center justify-between">
+              <div className="flex items-center min-w-0">
+                <svg className="w-5 h-5 mr-1 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M21 10.5a8.38 8.38 0 01-.9 3.8c-1.5 3-6.1 7.7-6.1 7.7s-4.6-4.7-6.1-7.7A8.38 8.38 0 013 10.5 8.5 8.5 0 1112 19a8.5 8.5 0 019-8.5z" />
+                  <circle cx="12" cy="10.5" r="3" />
+                </svg>
+                <span className="truncate">Bệnh viện 199 - Bộ Công An</span>
+              </div>
+              <span className="ml-2 text-gray-500 font-medium min-w-[70px] text-right">2.54 km</span>
             </li>
-            <li className="flex items-center">
-              <svg
-                className="w-4 h-4 mr-1 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path d="M21 10.5a8.38 8.38 0 01-.9 3.8c-1.5 3-6.1 7.7-6.1 7.7s-4.6-4.7-6.1-7.7A8.38 8.38 0 013 10.5 8.5 8.5 0 1112 19a8.5 8.5 0 019-8.5z" />
-                <circle cx="12" cy="10.5" r="3" />
-              </svg>
-              Trường Cao đẳng Nghề Đà Nẵng -{" "}
-              <span className="ml-1 text-gray-500">3.00 km</span>
+            <li className="flex items-center justify-between">
+              <div className="flex items-center min-w-0">
+                <svg className="w-5 h-5 mr-1 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M21 10.5a8.38 8.38 0 01-.9 3.8c-1.5 3-6.1 7.7-6.1 7.7s-4.6-4.7-6.1-7.7A8.38 8.38 0 013 10.5 8.5 8.5 0 1112 19a8.5 8.5 0 019-8.5z" />
+                  <circle cx="12" cy="10.5" r="3" />
+                </svg>
+                <span className="truncate">Trường Cao đẳng Nghề Đà Nẵng</span>
+              </div>
+              <span className="ml-2 text-gray-500 font-medium min-w-[70px] text-right">3.00 km</span>
             </li>
           </ul>
         </div>
         {/* Tiện ích */}
-        <div className="bg-white rounded-xl shadow p-4">
-          <div className="flex justify-between items-center mb-2">
-            <span className="font-semibold">Tiện ích chính</span>
-            <button className="text-blue-600 text-xs hover:underline flex items-center gap-1">
+        <div className="bg-white rounded-xl shadow p-6">
+          <div className="flex justify-between items-center mb-3">
+            <span className="font-bold text-lg">Tiện ích chính</span>
+            <button className="text-blue-600 text-base hover:underline flex items-center gap-1">
               Xem thêm
               <svg
-                className="w-4 h-4 ml-1 text-blue-600"
+                className="w-5 h-5 ml-1 text-blue-600"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -363,16 +335,10 @@ const Roomdetail = () => {
               </svg>
             </button>
           </div>
-          <div className="grid grid-cols-2 gap-y-2 gap-x-6 text-sm text-gray-700">
+          <div className="grid grid-cols-2 gap-y-3 gap-x-8 text-base text-gray-700">
             <div className="flex items-center gap-2">
               {/* Máy lạnh */}
-              <svg
-                className="w-5 h-5 text-blue-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <rect x="3" y="7" width="18" height="6" rx="2" />
                 <path d="M3 13h18M8 17v2M12 17v2M16 17v2" />
               </svg>
@@ -380,13 +346,7 @@ const Roomdetail = () => {
             </div>
             <div className="flex items-center gap-2">
               {/* Chỗ đậu xe */}
-              <svg
-                className="w-5 h-5 text-blue-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <rect x="3" y="7" width="18" height="10" rx="2" />
                 <circle cx="7.5" cy="17.5" r="1.5" />
                 <circle cx="16.5" cy="17.5" r="1.5" />
@@ -395,13 +355,7 @@ const Roomdetail = () => {
             </div>
             <div className="flex items-center gap-2">
               {/* Hồ bơi */}
-              <svg
-                className="w-5 h-5 text-blue-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path d="M2 20c2-2 6-2 8 0s6 2 8 0" />
                 <path d="M12 4v8" />
                 <circle cx="12" cy="4" r="2" />
@@ -410,13 +364,7 @@ const Roomdetail = () => {
             </div>
             <div className="flex items-center gap-2">
               {/* WiFi */}
-              <svg
-                className="w-5 h-5 text-blue-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path d="M2 8.82A17.89 17.89 0 0112 6c3.31 0 6.42.8 9.18 2.22" />
                 <path d="M5.07 13.11A12.94 12.94 0 0112 11c2.21 0 4.3.53 6.07 1.47" />
                 <path d="M8.53 17.11A7.94 7.94 0 0112 16c1.13 0 2.21.21 3.18.61" />
@@ -426,26 +374,14 @@ const Roomdetail = () => {
             </div>
             <div className="flex items-center gap-2">
               {/* Nhà hàng */}
-              <svg
-                className="w-5 h-5 text-blue-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path d="M4 6h16M4 10h16M10 14v6m4-6v6" />
               </svg>
               Nhà hàng
             </div>
             <div className="flex items-center gap-2">
               {/* Thang máy */}
-              <svg
-                className="w-5 h-5 text-blue-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <rect x="7" y="4" width="10" height="16" rx="2" />
                 <path d="M12 8v4m0 4h.01" />
               </svg>
@@ -453,13 +389,7 @@ const Roomdetail = () => {
             </div>
             <div className="flex items-center gap-2">
               {/* Lễ tân 24h */}
-              <svg
-                className="w-5 h-5 text-blue-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10" />
                 <path d="M12 6v6l4 2" />
               </svg>
