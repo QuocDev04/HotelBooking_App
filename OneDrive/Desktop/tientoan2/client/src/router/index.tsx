@@ -6,6 +6,7 @@ import CruisePage from "../pages/Cruise/Cruise"
 import FlightBooking from "../pages/Cruise/FlightBooking"
 import HotelPage from "../pages/Cruise/Hotels"
 import TransportDetail from "../pages/Cruise/TransportDetail"
+import TourList from "../pages/ToursList"
 const Router = () => {
     return (
          <Routes>
@@ -16,6 +17,7 @@ const Router = () => {
                 <Route path="/flightBooking" element={<FlightBooking />} />
                 <Route path="/hotel" element={<HotelPage />} />
                 <Route path="/transport/:id" element={<TransportDetail />} />
+                <Route path="/tours" element={<TourList />} />
             </Route>
         </Routes>
     )
