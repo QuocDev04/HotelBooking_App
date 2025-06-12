@@ -10,6 +10,8 @@ import PaymentPage from "../pages/Tour/payment"
 import Blog from "../pages/Tour/blog"
 import { HotelPolicy } from "../pages/Tour/hotelPolicy"
 import JapanTourPage from "../pages/Tour/detailTour"
+import BookingRoom from "../pages/Booking/BookingRoom"
+import BookingAll from "../pages/Booking/BookingAll"
 
 
 const Router = () => {
@@ -26,6 +28,9 @@ const Router = () => {
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/hotelPolicy" element={<HotelPolicy />} />
                 <Route path="/detailtour" element={<JapanTourPage />} />
+                <Route path="/bookingroom" element={<BookingRoom />} />
+                <Route path="/bookingall" element={<BookingAll />} />
+
             </Route>
         </Routes>
     )
