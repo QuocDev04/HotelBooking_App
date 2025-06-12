@@ -2,9 +2,9 @@ import React from "react";
 
 const BookingRoom = () => {
   return (
-    <div>
+    <div className="max-w-screen-xl p-4 mx-auto font-sans">
       {/* Progress Bar */}
-      <div className="flex items-center mt-25 mb-10 w-full">
+      <div className="flex items-center mt-25 mb-10 w-full ">
         {/* Step 1 */}
         <div className="flex items-center flex-1">
           <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-base border-2 border-blue-600">
@@ -49,7 +49,7 @@ const BookingRoom = () => {
       </div>
 
       {/* Main content */}
-      <div className="flex gap-6 p-6 bg-gray-100">
+      <div className="flex gap-6 p-6">
         {/* Left: Hotel Info */}
         <div className="w-3/12 bg-white rounded-xl p-3 shadow-md flex flex-col gap-2">
           <img
@@ -264,77 +264,61 @@ const BookingRoom = () => {
             </div>
           </div>
           <form>
-            <div className="font-semibold text-base mb-3">
-              Nhập thông tin chi tiết của bạn
-            </div>
-            {/* Họ */}
-            <div className="mb-4">
-              <label className="text-sm font-medium flex items-center gap-1">
-                Họ (tiếng Anh)
-                <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="ví dụ: Nguyễn"
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200"
-              />
-            </div>
-            {/* Tên */}
-            <div className="mb-4">
-              <label className="text-sm font-medium flex items-center gap-1">
-                Tên (tiếng Anh)
-                <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="ví dụ: Tiến"
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200"
-              />
-            </div>
-            {/* Email */}
-            <div className="mb-4">
-              <label className="text-sm font-medium flex items-center gap-1">
-                Địa chỉ email
-                <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                placeholder="Nhập email"
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200"
-              />
-              <div className="text-xs text-gray-500 mt-1">
-                Email xác nhận đặt phòng sẽ được gửi đến địa chỉ này
-              </div>
-            </div>
-            {/* Quốc gia */}
-            <div className="mb-4">
-              <label className="text-sm font-medium flex items-center gap-1">
-                Vùng/quốc gia
-                <span className="text-red-500">*</span>
-              </label>
-              <select className="w-full mt-1 px-3 py-2 border border-gray-300 rounded focus:outline-none">
-                <option>Việt Nam</option>
-                <option>Khác</option>
-              </select>
-            </div>
-            {/* Số điện thoại */}
-            <div className="mb-4">
-              <label className="text-sm font-medium flex items-center gap-1">
-                Số điện thoại
-                <span className="text-red-500">*</span>
-              </label>
-              <div className="flex gap-2 mt-1">
-                <select className="w-24 px-3 py-2 border border-gray-300 rounded focus:outline-none">
-                  <option>VN+84</option>
-                </select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Họ */}
+              <div className="mb-4">
+                <label className="text-sm font-medium flex items-center gap-1">
+                  Họ (tiếng Anh)
+                  <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
-                  placeholder="Số điện thoại"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none"
+                  placeholder="ví dụ: Nguyễn"
+                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200"
                 />
               </div>
-              <div className="text-xs text-gray-500 mt-1">
-                Cần thiết để chỗ nghỉ xác nhận đặt phòng của bạn
+              {/* Địa chỉ email */}
+              <div className="mb-4">
+                <label className="text-sm font-medium flex items-center gap-1">
+                  Địa chỉ email
+                  <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  placeholder="Nhập email"
+                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200"
+                />
+                <div className="text-xs text-gray-500 mt-1">
+                  Email xác nhận đặt phòng sẽ được gửi đến địa chỉ này
+                </div>
+              </div>
+              {/* Quốc gia */}
+              <div className="mb-4">
+                <label className="text-sm font-medium flex items-center gap-1">
+                  Vùng/quốc gia
+                  <span className="text-red-500">*</span>
+                </label>
+                <select className="w-full mt-1 px-3 py-2 border border-gray-300 rounded focus:outline-none">
+                  <option>Việt Nam</option>
+                  <option>Khác</option>
+                </select>
+              </div>
+              {/* Số điện thoại */}
+              <div className="mb-4">
+                <label className="text-sm font-medium flex items-center gap-1">
+                  Số điện thoại
+                  <span className="text-red-500">*</span>
+                </label>
+                <div className="flex gap-2 mt-1">
+                  <input
+                    type="text"
+                    placeholder="Số điện thoại"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none"
+                  />
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  Cần thiết để chỗ nghỉ xác nhận đặt phòng của bạn
+                </div>
               </div>
             </div>
             <div className="border border-green-600 rounded p-3 mb-4 bg-white">
