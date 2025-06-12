@@ -266,7 +266,7 @@ const BookingRoom = () => {
           <form>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Họ */}
-              <div className="mb-4">
+              <div className="">
                 <label className="text-sm font-medium flex items-center gap-1">
                   Họ (tiếng Anh)
                   <span className="text-red-500">*</span>
@@ -278,7 +278,7 @@ const BookingRoom = () => {
                 />
               </div>
               {/* Địa chỉ email */}
-              <div className="mb-4">
+              <div className="">
                 <label className="text-sm font-medium flex items-center gap-1">
                   Địa chỉ email
                   <span className="text-red-500">*</span>
