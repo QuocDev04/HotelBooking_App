@@ -5,6 +5,7 @@ import InfoAll from "../pages/Introduce/InfoAll"
 import CruisePage from "../pages/Cruise/Cruise"
 import FlightBooking from "../pages/Cruise/FlightBooking"
 import HotelPage from "../pages/Cruise/Hotels"
+import TransportDetail from "../pages/Cruise/TransportDetail"
 const Router = () => {
     return (
          <Routes>
@@ -14,6 +15,7 @@ const Router = () => {
                 <Route path="/cruise" element={<CruisePage />} />
                 <Route path="/flightBooking" element={<FlightBooking />} />
                 <Route path="/hotel" element={<HotelPage />} />
+                <Route path="/transport/:id" element={<TransportDetail />} />
             </Route>
         </Routes>
     )
