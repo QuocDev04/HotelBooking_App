@@ -12,11 +12,12 @@ const BookingOnySchema = new mongoose.Schema({
         ref: "User",
         required: true,
     },
-    roomQuantity: { type: Number, required: true },
     total_price: { type: Number, required: true },
     check_in_date: { type: Date, required: true },
     check_out_date: { type: Date, required: true },
     status: { type: String, required: true },
+    adults: { type: Number, required: true },         
+    children: { type: Number, required: true }, 
     payment_method: {
         type: String,
         required: true,

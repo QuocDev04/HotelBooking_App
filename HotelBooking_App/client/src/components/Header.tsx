@@ -9,11 +9,11 @@ import { Link } from 'react-router-dom';
 
 const Header = () => {
     const navLinks = [
-        { name: 'Tìm du thuyền', path: '/cruise' },
-        { name: 'Tìm khách sạn', path: '/' },
+        { name: 'Tìm phương tiện', path: '/' },
+        { name: 'Tìm phòng', path: '/' },
         { name: 'Tìm địa điểm du lịch', path: '/' },
         { name: 'Giới Thiệu', path: '/introduce' },
-        { name: 'Blog', path: '/' },
+        { name: 'Blog', path: '/blog' },
     ];
     const [userId, setUserId] = useState<string | null>(null);
     const [isScrolled, setIsScrolled] = useState(false);
@@ -73,7 +73,7 @@ const Header = () => {
                     ))}
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="hidden md:flex items-center gap-4 ">
                     {token ? (
                         <Popover content={user} trigger="click" className="cursor-pointer">
                             <div className="text-[#8B4513] hover:text-[#6B3E26] transition-all duration-300 hover:scale-110">
@@ -109,18 +109,21 @@ const Header = () => {
                             {link.name}
                         </a>
                     ))}
-                    {user ? (
-                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 cursor-pointer">
-                            👤
-                        </div>
-                    ) : (
-                        <button
-                            onClick={() => setShowLogin(true)}
-                            className="bg-black text-white px-8 py-2 rounded-full ml-4 transition-all duration-500"
-                        >
-                            Login
-                        </button>
-                    )}
+
+                    <button className=" px-8 py-2.5 rounded-full transition-all duration-500">
+                        {token ? (
+                            <Popover content={user} trigger="click" className="cursor-pointer">
+                                <div className="text-[#8B4513] hover:text-[#6B3E26] transition-all duration-300 hover:scale-110">
+                                    <FaUserCircle className="text-2xl" />
+                                </div>
+                            </Popover>
+                        ) : (
+                            <button onClick={() => setShowLogin(true)} className="bg-black text-white px-8 py-2.5 rounded-full ml-4 transition-all duration-500">
+                                Login
+                            </button>
+                        )}
+                    </button>
+                    
                 </div>
 
             </nav>
