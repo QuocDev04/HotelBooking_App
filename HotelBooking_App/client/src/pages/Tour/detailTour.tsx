@@ -1,41 +1,31 @@
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import { useState } from 'react';
-import DatePicker from 'react-datepicker';
+import { useQuery } from '@tanstack/react-query';
 import "react-datepicker/dist/react-datepicker.css";
+import { useParams } from 'react-router-dom';
+import instanceClient from '../../../configs/instance';
+import LeftTourDetail from './Left/LeftTourDetail';
+import Content from './Content/Content';
+import RightTourDetail from './Right/RightTourDetail';
+import Schedule from './Content/Schedule';
+import PriceList from './Content/PriceList';
+import Evaluate from './Content/Evaluate';
+import QA from './Content/QA';
+import { useEffect } from 'react';
 const TourPage = () => {
-  const itinerary = [
-    { day: "Ngày 1", title: "Hà Nội - Osaka" },
-    { day: "Ngày 2", title: "Osaka - Kobe" },
-    { day: "Ngày 3", title: "Cố đô Kyoto" },
-    { day: "Ngày 4", title: "Fuji - Lễ hội hoa anh đào Kawaguchi Festival" },
-    { day: "Ngày 5", title: "Tokyo" },
-    { day: "Ngày 6", title: "Tokyo - Ngắm hoa anh đào công viên UENO - Hà Nội" },
-  ];
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+  const { id } = useParams();
+  const { data: tour } = useQuery({
+    queryKey: ['tour', id],
+    queryFn: () => instanceClient.get(`/tour/${id}`)
+  })
 
-  const [adults, setAdults] = useState(1);
-  const [children, setChildren] = useState(0);
-  const [infants, setInfants] = useState(0);
-  const thumbnails = [
-    "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/gallery/slide1.png",
-    "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/gallery/slide2.png",
-    "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/gallery/slide3.png",
-    "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/gallery/slide4.png",
-  ];
-
-  const [mainImage, setMainImage] = useState(thumbnails[0]);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const handleThumbnailClick = (src: string) => {
-    setMainImage(src);
-  };
-  const pricePerPerson = 15000000;
-  const total = (adults + children + infants) * pricePerPerson;
   return (
     <>
       <div className="max-w-screen-xl p-4 mx-auto font-sans mt-32">
         {/* Title */}
         <h1 className="mb-2 text-2xl font-semibold">
-          HCM - Seoul - Đảo Nami - Trượt Tuyết Elysian 5N4Đ
+          {tour?.data?.tour.nameTour}
         </h1>
 
         {/* Icons */}
@@ -55,7 +45,7 @@ const TourPage = () => {
             </div>
             <div className="ml-2">
               <div className="text-sm text-gray-500">Khởi hành từ</div>
-              <div className="text-sm font-semibold text-blue-500">HCM</div>
+              <div className="text-sm font-semibold text-blue-500">{tour?.data?.tour.departure_location}</div>
             </div>
           </div>
           <div className="flex items-center">
@@ -66,8 +56,8 @@ const TourPage = () => {
               </svg>
             </div>
             <div className="ml-2">
-              <div className="text-sm text-gray-500">Khởi hành từ</div>
-              <div className="text-sm font-semibold text-blue-500">HCM</div>
+              <div className="text-sm text-gray-500">Điểm đến</div>
+              <div className="text-sm font-semibold text-blue-500">{tour?.data?.tour?.destination}</div>
             </div>
           </div>
           <div className="flex items-center">
@@ -81,8 +71,8 @@ const TourPage = () => {
               </svg>
             </div>
             <div className="ml-2">
-              <div className="text-sm text-gray-500">Khởi hành từ</div>
-              <div className="text-sm font-semibold text-blue-500">HCM</div>
+              <div className="text-sm text-gray-500">Thời gian</div>
+              <div className="text-sm font-semibold text-blue-500">{tour?.data?.tour?.duration}</div>
             </div>
           </div>
           <div className="flex items-center">
@@ -93,11 +83,11 @@ const TourPage = () => {
               </svg>
             </div>
             <div className="ml-2">
-              <div className="text-sm text-gray-500">Khởi hành từ</div>
-              <div className="text-sm font-semibold text-blue-500">HCM</div>
+              <div className="text-sm text-gray-500">Số chỗ còn nhận</div>
+              <div className="text-sm font-semibold text-blue-500">{tour?.data?.tour?.maxPeople}</div>
             </div>
           </div>
-          <div className="flex items-center text-blue-500">
+          {/* <div className="flex items-center text-blue-500">
             <div className=" rounded-2xl p-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -118,357 +108,32 @@ const TourPage = () => {
               <div className="text-sm text-gray-500">Khởi hành từ</div>
               <div className="text-sm font-semibold text-blue-500">HCM</div>
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div className="grid grid-cols-1 gap-2 lg:grid-cols-3 lg:gap-8">
           {/* Image */}
-          <div className="rounded lg:col-span-2">
-            <div className="flex flex-col items-center space-y-4">
-              <div className="w-full max-w-4xl">
-                <img
-                  src={mainImage}
-                  className="w-full rounded-lg"
-                  alt="Main"
-                />
-              </div>
-
-              <div className="grid grid-cols-4 max-w-4xl gap-4">
-                {thumbnails.map((src, index) => (
-                  <img
-                    key={index}
-                    src={src}
-                    className="thumb rounded-lg md:h-24 h-14 object-cover cursor-pointer hover:opacity-80"
-                    alt={`Thumb ${index + 1}`}
-                    onClick={() => handleThumbnailClick(src)}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
+          <LeftTourDetail/>
 
           {/* Booking box */}
-          <div className="max-w-[460px] w-full bg-blue-100/90 p-5 max-md:mt-16 border rounded-4xl border-gray-300/70">
-            <h2 className="lg:text-4xl md:text-xl font-medium text-blue-500 my-2">15.000.000đ</h2>
-            <div className="text-sm">Mã tour: <strong>ND006</strong></div>
-            <hr className="border-gray-300 my-5" />
-            <div className="text-2xl font-bold "></div>
-
-            <div className="flex items-center">
-              <div className=" rounded-2xl p-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 21 22" fill="none">
-                  <path d="M19 13.5V5C19 3.89543 18.1046 3 17 3H3C1.89543 3 0.999998 3.89543 0.999998 5V17C0.999998 18.1046 1.89543 19 3 19H10.5" stroke="#3B82F6" stroke-width="2"></path>
-                  <path d="M15 1V5" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"></path>
-                  <path d="M5 1V5" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"></path>
-                  <path d="M20 16C20 13.2386 17.7614 11 15 11C12.2386 11 10 13.2386 10 16C10 18.7614 12.2386 21 15 21C17.7614 21 20 18.7614 20 16Z" stroke="#3B82F6" stroke-width="2"></path>
-                  <path d="M15 13.5676V16.0001L16.6216 17.6217" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
-              </div>
-              <div className="w-full">
-                <DatePicker
-                  selected={selectedDate}
-                  onChange={(date) => setSelectedDate(date)}
-                  dateFormat="dd/MM/yyyy"
-                  placeholderText="Chọn ngày đi"
-                  className=" w-[300px] px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-            </div>
-            <div className="space-y-2 my-6">
-              <div className="flex items-center justify-between gap-4">
-                {/* Label */}
-                <span className="w-24">Người lớn</span>
-
-                {/* Nút tăng/giảm */}
-                <div className="flex items-center rounded-xl border border-gray-200 dark:border-blue-600">
-                  <button onClick={() => setAdults(Math.max(0, adults - 1))} className="px-2">-</button>
-                  <input
-                    type="number"
-                    id="Quantity"
-                    value={adults}
-                    readOnly
-                    className="h-9 w-16 border-transparent text-center sm:text-sm appearance-none"
-                  />
-
-                  <button onClick={() => setAdults(adults + 1)} className="px-2">+</button>
-                </div>
-
-                {/* Giá tiền */}
-                <span className="text-sm text-gray-500 min-w-[80px] text-right">
-                  {(adults * pricePerPerson).toLocaleString()}đ
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between gap-4">
-                {/* Label */}
-                <span className="w-24">Người lớn</span>
-
-                {/* Nút tăng/giảm */}
-                <div className="flex items-center rounded-xl border border-gray-200 dark:border-blue-600">
-                  <button onClick={() => setAdults(Math.max(0, adults - 1))} className="px-2">-</button>
-                  <input
-                    type="number"
-                    id="Quantity"
-                    value={adults}
-                    readOnly
-                    className="h-9 w-16 border-transparent text-center sm:text-sm appearance-none"
-                  />
-
-                  <button onClick={() => setAdults(adults + 1)} className="px-2">+</button>
-                </div>
-
-                {/* Giá tiền */}
-                <span className="text-sm text-gray-500 min-w-[80px] text-right">
-                  {(adults * pricePerPerson).toLocaleString()}đ
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between gap-4">
-                {/* Label */}
-                <span className="w-24">Người lớn</span>
-
-                {/* Nút tăng/giảm */}
-                <div className="flex items-center rounded-xl border border-gray-200 dark:border-blue-600">
-                  <button onClick={() => setAdults(Math.max(0, adults - 1))} className="px-2">-</button>
-                  <input
-                    type="number"
-                    id="Quantity"
-                    value={adults}
-                    readOnly
-                    className="h-9 w-16 border-transparent text-center sm:text-sm appearance-none"
-                  />
-
-                  <button onClick={() => setAdults(adults + 1)} className="px-2">+</button>
-                </div>
-
-                {/* Giá tiền */}
-                <span className="text-sm text-gray-500 min-w-[80px] text-right">
-                  {(adults * pricePerPerson).toLocaleString()}đ
-                </span>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t flex justify-between items-center text-lg font-bold text-blue-600">
-              <span>Tổng tiền:</span>
-              <span>{total.toLocaleString()}đ</span>
-            </div>
-
-
-            <div className="flex gap-2 my-6">
-              <button className="flex-1 py-2 text-white bg-blue-400 rounded hover:bg-blue-500">Đặt ngay</button>
-              <button className="flex-1 py-2 border rounded hover:bg-gray-100">Liên hệ tư vấn</button>
-            </div>
-          </div>
+          <RightTourDetail/>
         </div>
       </div>
       <div className="max-w-screen-xl p-6 mx-auto space-y-10">
         {/* Giới thiệu */}
-        <section className="space-y-4">
-          <h2 className="text-2xl font-bold">Giới thiệu</h2>
-          <p>
-            Nhật Bản được mệnh danh là thiên đường du lịch với phong cảnh và văn hóa đặc sắc. Lịch trình: Hà Nội - Osaka - Kyoto - Tokyo 6N5Đ.
-          </p>
-          <ul className="pl-5 text-sm text-gray-700 list-disc">
-            <li>Ghé thăm công viên Nara</li>
-            <li>Trải nghiệm tàu cao tốc Shinkansen</li>
-            <li>Thư giãn tại suối nước nóng onsen</li>
-            <li>Thưởng thức thịt bò vùng đất Kobe</li>
-            <li>Hoàn tiền 100% nếu không đỗ Visa</li>
-          </ul>
-        </section>
+        <Content/>
 
         {/* Lịch trình */}
-        <section>
-          <h2 className="mb-4 text-2xl font-bold">Lịch trình tour</h2>
-          <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
-            {itinerary.map((item, index) => (
-              <div
-                key={index}
-                className="px-4 py-3 border-b cursor-pointer last:border-b-0"
-                onClick={() => setOpenIndex(openIndex === index ? null : index)}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">
-                    {item.day}: {item.title}
-                  </span>
-                  {openIndex === index ? (
-                    <ChevronUp className="w-5 h-5 text-gray-500" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5 text-gray-500" />
-                  )}
-                </div>
-                {openIndex === index && (
-                  <div className="mt-2 text-sm text-gray-600">
-                    {/* Nội dung chi tiết có thể thay thế tại đây nếu cần */}
-                    Nội dung chi tiết sẽ được cập nhật...
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 text-center">
-            <button className="flex items-center justify-center gap-2 px-4 py-2 text-blue-600 border border-blue-500 rounded hover:bg-blue-50">
-              Tải lịch trình tour
-              <ChevronDown className="w-4 h-4" />
-            </button>
-          </div>
-        </section>
+        <Schedule/>
 
         {/* Bảng giá */}
-        <section>
-          <h2 className="mb-4 text-2xl font-bold">Bảng giá (Khởi hành từ Hà Nội)</h2>
-          {/* Nút lọc tháng */}
-          <div className="flex mb-4 space-x-4">
-            <button className="px-4 py-2 font-semibold text-white bg-orange-500 rounded">Tất cả</button>
-            <button className="px-4 py-2 text-gray-700 bg-gray-100 rounded">Tháng 6</button>
-            <button className="px-4 py-2 text-gray-700 bg-gray-100 rounded">Tháng 7</button>
-          </div>
+        <PriceList/>
 
-          {/* Bảng dữ liệu */}
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-center bg-white rounded shadow-sm">
-              <thead>
-                <tr className="text-sm font-semibold text-gray-700 bg-gray-100">
-                  <th className="px-4 py-2">Ngày khởi hành</th>
-                  <th className="px-4 py-2">Hãng tour</th>
-                  <th className="px-4 py-2">Giá tour</th>
-                  <th className="px-4 py-2">Giữ chỗ</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  {
-                    date: "17/06/2025",
-                    brand: "Vietjet Air",
-                    price: "29.900.000đ",
-                    points: "299.000 điểm",
-                  },
-                  {
-                    date: "24/06/2025",
-                    brand: "Vietjet Air",
-                    price: "29.900.000đ",
-                    points: "299.000 điểm",
-                  },
-                  {
-                    date: "01/07/2025",
-                    brand: "Vietjet Air",
-                    price: "29.900.000đ",
-                    points: "299.000 điểm",
-                  },
-                  {
-                    date: "08/07/2025",
-                    brand: "Vietjet Air",
-                    price: "29.900.000đ",
-                    points: "299.000 điểm",
-                  },
-                  {
-                    date: "15/07/2025",
-                    brand: "Vietjet Air",
-                    price: "29.900.000đ",
-                    points: "299.000 điểm",
-                  },
-                  {
-                    date: "22/07/2025",
-                    brand: "Vietjet Air",
-                    priceOld: "29.900.000đ",
-                    price: "28.900.000đ",
-                    points: "289.000 điểm",
-                    note: "ĐẶT SỚM: Giảm 1 Triệu",
-                  },
-                  {
-                    date: "29/07/2025",
-                    brand: "Vietjet Air",
-                    priceOld: "29.900.000đ",
-                    price: "28.900.000đ",
-                    points: "289.000 điểm",
-                    note: "ĐẶT SỚM: Giảm 1 Triệu",
-                  },
-                ].map((item, i) => (
-                  <tr key={i} className="text-sm text-gray-700 border-b">
-                    <td className="px-4 py-3">
-                      <div className="font-medium">{item.date}</div>
-                      <div className="text-xs text-green-600">Còn chỗ</div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div>{item.brand}</div>
-                      {item.note && (
-                        <div className="mt-1 text-xs text-orange-500">🔖 {item.note}</div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {item.priceOld ? (
-                        <div>
-                          <span className="text-gray-400 line-through">{item.priceOld}</span>{" "}
-                          <span className="font-bold text-orange-600">{item.price}</span>
-                        </div>
-                      ) : (
-                        <div className="font-bold text-orange-600">{item.price}</div>
-                      )}
-                      <div className="text-xs text-gray-500">💰 {item.points}</div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <button className="px-4 py-2 text-white bg-orange-500 rounded hover:bg-orange-600">
-                        Giữ chỗ ngay
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
         {/* Đánh giá */}
-        <section>
-          <h2 className="mb-4 text-2xl font-bold">Đánh giá</h2>
-          <div className="text-xl font-bold text-green-600">9 Tuyệt vời</div>
-          <div className="grid gap-4 mt-4">
-            {[
-              {
-                name: "Nguyệt",
-                date: "01/06/2025",
-                rating: 9.4,
-                comment: "Chuyến đi đáng nhớ, lịch trình trọn vẹn, thích bò Kobe và Shinkansen."
-              },
-              {
-                name: "Hồng",
-                date: "18/05/2025",
-                rating: 9.4,
-                comment: "Điểm đến hợp lý, nhân viên dễ thương, rất hài lòng."
-              }
-            ].map((review, i) => (
-              <div key={i} className="p-4 border rounded-lg shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm font-semibold">{review.name} - {review.date}</div>
-                  <div className="px-2 text-sm text-white bg-green-500 rounded">{review.rating}</div>
-                </div>
-                <p className="mt-2 text-sm text-gray-700">{review.comment}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        <Evaluate/>
 
         {/* Hỏi đáp */}
-        <section>
-          <h2 className="mb-4 text-2xl font-bold">Hỏi đáp</h2>
-          <div className="space-y-4">
-            {[
-              {
-                question: "Tour đi Nhật Bản ngày 10.06.2025 có thêm được 2 chỗ nữa không?",
-                answer: "Dạ hiện vẫn còn nhận được 2 khách nữa ạ."
-              },
-              {
-                question: "Tour có ghé Kobe để ăn thịt bò không?",
-                answer: "Tour có ghé thành phố Kobe, tùy chương trình sẽ có trải nghiệm bò Kobe."
-              }
-            ].map((item, i) => (
-              <div key={i} className="p-4 border rounded-lg shadow-sm">
-                <p className="font-medium">Q: {item.question}</p>
-                <p className="mt-2 text-sm text-gray-700">A: {item.answer}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        <QA/>
       </div>
     </>
   );

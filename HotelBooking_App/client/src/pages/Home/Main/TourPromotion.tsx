@@ -4,7 +4,7 @@ import { CalendarIcon, TicketIcon } from '@heroicons/react/24/outline';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import instanceClient from '../../../../configs/instance';
-
+import { Link } from 'react-router-dom';
 interface Tour {
     _id: number;
     nameTour: string;
@@ -15,7 +15,7 @@ interface Tour {
     imageTour: string;
     duration?: string;
     available_slots?: number;
-    finalPrice?:number;
+    finalPrice?: number;
 }
 
 // Animation variants cho từng card
@@ -25,7 +25,7 @@ const cardVariants = {
         opacity: 1,
         y: 0,
         transition: {
-            delay: index * 0.1, 
+            delay: index * 0.1,
             duration: 0.6,
             ease: 'easeOut',
         },
@@ -33,7 +33,7 @@ const cardVariants = {
 };
 
 const TourPromotion = () => {
-    const {data} = useQuery({
+    const { data } = useQuery({
         queryKey: ['featured'],
         queryFn: () => instanceClient.get('/featured')
     })
@@ -51,7 +51,7 @@ const TourPromotion = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {tours.slice(0, 6).map((tour:any, index:number) => (
+                    {tours.slice(0, 6).map((tour: any, index: number) => (
                         <motion.div
                             key={`${tour._id}-${index}`}
                             className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden flex flex-col"
@@ -62,11 +62,14 @@ const TourPromotion = () => {
                             variants={cardVariants}
                         >
                             <div className="relative">
-                                <img
-                                    src={tour.imageTour}
-                                    alt={tour.nameTour}
-                                    className="w-full object-cover"
-                                />
+                                <Link to={`detailtour/${tour._id}`}>
+                                    <img
+                                        src={tour.imageTour[0]}
+                                        alt={tour.nameTour}
+                                        className="w-full object-cover"
+                                    />
+                                </Link>
+
                             </div>
 
                             <div className="p-5 flex flex-col flex-grow">

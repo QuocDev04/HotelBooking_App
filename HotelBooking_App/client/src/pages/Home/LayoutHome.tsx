@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import AboutUs from "./Main/About"
 import Banner from "./Main/Banner"
 import FeaturedDestination from "./Main/FeaturedDestination"
@@ -8,6 +9,9 @@ import TourOut from "./Main/TourOut"
 import TourPromotion from "./Main/TourPromotion"
 
 const LayoutHome = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
   return (
     <div>
       <Banner/>

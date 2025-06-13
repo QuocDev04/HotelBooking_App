@@ -65,7 +65,7 @@ export const HotelPolicy = () => {
   };
 
   return (
-    <section className="px-4 py-12 mx-auto max-w-7xl">
+    <section className="px-4 py-12 mx-auto max-w-7xl mt-20">
       <div className="mb-10 text-center">
         <h2 className="text-3xl font-bold text-gray-800">
           Câu hỏi thường gặp?
