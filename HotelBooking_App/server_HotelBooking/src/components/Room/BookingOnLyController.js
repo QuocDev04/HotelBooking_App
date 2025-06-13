@@ -1,6 +1,7 @@
-import BookingOnlyRoom from "../models/BookingRoom";
-import RoomModel from "../models/RoomModel";
-import { StatusCodes } from "http-status-codes";
+import mongoose from "mongoose";
+import RoomInventoryBooking from "../../models/Room/RoomInventoryBooking";
+import BookingOnlyRoom from "../../models/Room/BookingRoom";
+import RoomModel from "../../models/Room/RoomModel";
 
 // Tính số đêm giữa check-in và check-out
 const calculateNights = (checkIn, checkOut) => {
@@ -13,51 +14,89 @@ export const createBookingOnlyRoom = async (req, res) => {
         const {
             user,
             room,
-            roomQuantity,
             check_in_date,
             check_out_date,
             status,
             payment_method,
             payment_status,
+            adults,
+            children,
         } = req.body;
 
-        // Lấy thông tin phòng để tính giá
+        // 1. Kiểm tra phòng tồn tại
         const roomData = await RoomModel.findById(room);
         if (!roomData) {
-            return res.status(StatusCodes.NOT_FOUND).json({
+            return res.status(404).json({ success: false, message: "Room not found" });
+        }
+
+        // 2. Kiểm tra số người
+        const totalGuests = adults + children;
+        if (totalGuests > roomData.capacityRoom) {
+            return res.status(400).json({
                 success: false,
-                message: "Room not found",
+                message: `Số khách (${totalGuests}) vượt quá sức chứa (${roomData.capacityRoom}) của phòng`,
             });
         }
 
-        const nights = calculateNights(check_in_date, check_out_date);
-        const total_price = roomData.priceRoom * roomQuantity * nights;
+        // 3. Kiểm tra trùng ngày
+        const existingBooking = await BookingOnlyRoom.findOne({
+            room: room,
+            status: { $nin: ["cancelled", "checked_out"] },
+            $or: [
+                {
+                    check_in_date: { $lt: new Date(check_out_date) },
+                    check_out_date: { $gt: new Date(check_in_date) }
+                }
+            ],
+        });
 
-        // Tạo booking
+        if (existingBooking) {
+            return res.status(400).json({
+                success: false,
+                message: "Phòng đã được đặt trong khoảng ngày đã chọn",
+            });
+        }
+
+        // 4. Tính giá tiền
+        const nights = calculateNights(check_in_date, check_out_date);
+        const total_price = roomData.priceRoom * nights;
+
+        // 5. Tạo booking
         const newBooking = await BookingOnlyRoom.create({
             user,
             room,
-            roomQuantity,
             check_in_date,
             check_out_date,
             status,
             payment_method,
             payment_status,
+            adults,
+            children,
             total_price,
         });
 
-        return res.status(StatusCodes.CREATED).json({
+        // 6. Gộp RoomInventoryBooking thành 1 bản ghi
+        await RoomInventoryBooking.create({
+            Room: room,
+            check_in_date: new Date(check_in_date),
+            check_out_date: new Date(check_out_date),
+            booked_quantity: 1,
+        });
+
+        return res.status(201).json({
             success: true,
             message: "Booking created successfully",
             booking: newBooking,
         });
+
     } catch (error) {
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        return res.status(500).json({
             success: false,
             message: error.message,
         });
     }
 };
+
 
 
 export const getBookingWithDetails = async (req, res) => {
@@ -77,4 +116,4 @@ export const getBookingWithDetails = async (req, res) => {
             message: error.message,
         });
     }
-  };
+};

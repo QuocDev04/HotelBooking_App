@@ -10,6 +10,7 @@ import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { useQuery } from '@tanstack/react-query';
 import instanceClient from '../../../../configs/instance';
 import { TicketIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const cardVariants = {
     hidden: { opacity: 0, y: 30 },
@@ -91,17 +92,23 @@ const TourIn = () => {
                                     variants={cardVariants}
                                 >
                                     <div className="relative">
-                                        <img
-                                            src={tour.imageTour}
-                                            alt={tour.nameTour}
-                                            className="w-full object-cover aspect-[16/10]"
-                                        />
+                                        <Link to={`/detailtour/${tour._id}`}>
+                                            <img
+                                                src={tour.imageTour}
+                                                alt={tour.nameTour}
+                                                className="w-full object-cover aspect-[16/10]"
+                                            />
+                                        </Link>
+
                                     </div>
 
                                     <div className="p-5 flex flex-col flex-grow">
-                                        <h3 className="text-lg font-bold text-gray-800 mb-2 leading-snug line-clamp-2 min-h-[48px]">
-                                            {tour.nameTour}
-                                        </h3>
+                                        <Link to={`/detailtour/${tour._id}`}>
+                                            <h3 className="text-lg font-bold text-gray-800 mb-2 leading-snug line-clamp-2 min-h-[48px]">
+                                                {tour.nameTour}
+                                            </h3>
+                                        </Link>
+
 
                                         <div className="flex items-center justify-between mb-2 text-sm text-gray-500">
                                             <div className="flex items-center gap-1">

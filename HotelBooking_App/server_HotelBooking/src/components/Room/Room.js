@@ -1,5 +1,5 @@
-import RoomModel from "../models/RoomModel";
 import { StatusCodes } from 'http-status-codes';
+import RoomModel from '../../models/Room/RoomModel';
 
 
 

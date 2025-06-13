@@ -1,6 +1,6 @@
 
 import  express  from 'express';
-import { createBookingOnlyRoom, getBookingWithDetails } from '../components/BookingOnLyController';
+import { createBookingOnlyRoom, getBookingWithDetails } from '../components/Room/BookingOnLyController';
 
 const RouterBookingOnly = express.Router();
 RouterBookingOnly.post('/booking-room', createBookingOnlyRoom);

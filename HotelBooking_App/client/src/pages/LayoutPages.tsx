@@ -5,9 +5,11 @@ import Footer from "../components/Footer"
 const LayoutPages = () => {
   return (
     <div>
-      <Header/>
-      <Outlet/>
-      <Footer/>
+      <Header />
+      <div>
+        <Outlet />
+      </div>
+      <Footer />
     </div>
   )
 }

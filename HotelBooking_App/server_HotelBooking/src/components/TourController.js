@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import TourModel from "../models/TourModel";
+import TourScheduleModel from "../models/TourScheduleModel";
 
 
 export const getAllTours = async (req, res) => {
@@ -101,19 +102,28 @@ export const UpdateTour = async (req, res) => {
 
 export const GetTourById = async (req, res) => {
     try {
-        const tour = await TourModel.findById(req.params.id, req.body);
-        return res.status(StatusCodes.OK).json({
+        const tour = await TourModel.findById(req.params.id);
+        if (!tour) {
+            return res.status(404).json({ success: false, message: "Không tìm thấy tour" });
+        }
+
+        const schedule = await TourScheduleModel.findOne({ Tour: tour._id });
+
+        return res.status(200).json({
             success: true,
             message: "Tour byID successfully",
-            tour: tour
-        })
+            tour: {
+                ...tour.toObject(),
+                schedules: schedule ? schedule.schedules : [],
+            }
+        });
     } catch (error) {
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        return res.status(500).json({
             success: false,
             message: error.message
-        })
+        });
     }
-}
+};
 
 
 //get tour featured
