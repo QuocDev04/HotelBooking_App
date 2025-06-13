@@ -37,7 +37,7 @@ const schedule = [
 const TransportDetail = () => {
   return (
     
-      <main className="max-w-7xl mx-auto px-4 md:px-8 py-6 mt-20">
+      <main className="max-w-screen-2xl mx-auto px-4 md:px-8 py-6 mt-20">
         <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6">
           <img
             src={transport.image_transport}

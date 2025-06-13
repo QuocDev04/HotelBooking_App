@@ -78,7 +78,7 @@ const DestinationList = () => {
   );
 
   return (
-    <main className="flex flex-col md:flex-row gap-6 px-4 md:px-8 py-6 max-w-screen-xl mx-auto mt-20">
+    <main className="flex flex-col md:flex-row gap-6 px-4 md:px-8 py-6 max-w-screen-2xl mx-auto mt-20">
       <Sidebar />
       <section className="flex-1">
         <div className="bg-white rounded-xl shadow p-6 mb-8">
