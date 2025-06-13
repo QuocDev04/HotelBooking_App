@@ -2,22 +2,15 @@ import { Route, Routes } from "react-router-dom"
 import LayoutPages from "../pages/LayoutPages"
 import Home from "../pages/Home/LayoutHome"
 import InfoAll from "../pages/Introduce/InfoAll"
-import CruisePage from "../pages/Cruise/Cruise"
-import FlightBooking from "../pages/Cruise/FlightBooking"
-import HotelPage from "../pages/Cruise/Hotels"
-import TransportDetail from "../pages/Cruise/TransportDetail"
-import TourList from "../pages/ToursList"
+import HotelList from "../pages/Tours/HotelsList"
+
 const Router = () => {
     return (
          <Routes>
             <Route path="/" element={<LayoutPages/>}>
                 <Route path="/" element={<Home />} />
                 <Route path="/introduce" element={<InfoAll />} />
-                <Route path="/cruise" element={<CruisePage />} />
-                <Route path="/flightBooking" element={<FlightBooking />} />
-                <Route path="/hotel" element={<HotelPage />} />
-                <Route path="/transport/:id" element={<TransportDetail />} />
-                <Route path="/tours" element={<TourList />} />
+                <Route path="/hotels" element={<HotelList />} />
             </Route>
         </Routes>
     )
