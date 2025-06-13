@@ -6,7 +6,7 @@ const rooms = [
     room_name: "Phòng Deluxe Hướng Biển",
     address: "Vinpearl, Nha Trang",
     price_per_night: 1500000,
-    image_room: "https://source.unsplash.com/400x250/?hotel,sea",
+    image_room: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSn7d2rRrHwbdb-W-UJPX_wIXCVXfKZmCyDPA&s",
     capacity: 4,
     max_adults: 2,
     max_children: 2,
@@ -17,7 +17,7 @@ const rooms = [
     room_name: "Phòng Suite Sang Trọng",
     address: "Jeju, Hàn Quốc",
     price_per_night: 3000000,
-    image_room: "https://source.unsplash.com/400x250/?hotel,suite",
+    image_room: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTA0-GY84wue4TgTJKA-TMil4__Up94d4lZQ&s",
     capacity: 5,
     max_adults: 3,
     max_children: 2,
@@ -28,7 +28,7 @@ const rooms = [
     room_name: "Phòng Standard View Vườn",
     address: "Đà Lạt",
     price_per_night: 900000,
-    image_room: "https://source.unsplash.com/400x250/?hotel,garden",
+    image_room: "https://longthuanhotelresort.com/wp-content/uploads/2020/10/570-X-340-THUMBNAILS-PHONG-DELUXE-GARDEN-VIEW.jpg",
     capacity: 3,
     max_adults: 2,
     max_children: 1,
@@ -39,7 +39,7 @@ const rooms = [
     room_name: "Phòng Family Hướng Núi",
     address: "Sa Pa",
     price_per_night: 2200000,
-    image_room: "https://source.unsplash.com/400x250/?hotel,mountain",
+    image_room: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYzGhzdv7uYrqcKZp6ijKQOsAnLh2sPgkSQA&s",
     capacity: 6,
     max_adults: 4,
     max_children: 2,
@@ -50,7 +50,7 @@ const rooms = [
     room_name: "Phòng Executive Hồ Bơi Riêng",
     address: "Phú Quốc",
     price_per_night: 4500000,
-    image_room: "https://source.unsplash.com/400x250/?hotel,pool",
+    image_room: "https://blog.premierresidencesphuquoc.com/wp-content/uploads/2024/10/unnamed-2-2-1024x683.webp",
     capacity: 5,
     max_adults: 3,
     max_children: 2,
@@ -61,7 +61,7 @@ const rooms = [
     room_name: "Phòng Twin Cơ Bản",
     address: "TP.HCM",
     price_per_night: 850000,
-    image_room: "https://source.unsplash.com/400x250/?hotel,twin",
+    image_room: "https://dyf.vn/wp-content/uploads/2021/10/phong-twin-la-gi.jpg",
     capacity: 2,
     max_adults: 2,
     max_children: 0,
@@ -72,7 +72,7 @@ const rooms = [
     room_name: "Phòng King View Biển",
     address: "Đà Nẵng",
     price_per_night: 2800000,
-    image_room: "https://source.unsplash.com/400x250/?hotel,king",
+    image_room: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtMh6CYy0R_0oqi2AZjXkOI-y-SSxbJAz_3g&s",
     capacity: 4,
     max_adults: 2,
     max_children: 2,
@@ -83,7 +83,7 @@ const rooms = [
     room_name: "Phòng Single Giá Rẻ",
     address: "Huế",
     price_per_night: 500000,
-    image_room: "https://source.unsplash.com/400x250/?hotel,single",
+    image_room: "https://www.lionhotel.vn/files/branch/room/i_78_952_IMG_5315.jpg",
     capacity: 1,
     max_adults: 1,
     max_children: 0,
@@ -94,7 +94,7 @@ const rooms = [
     room_name: "Phòng President Sang Trọng",
     address: "Hà Nội",
     price_per_night: 7500000,
-    image_room: "https://source.unsplash.com/400x250/?hotel,luxury",
+    image_room: "https://ezcloud.vn/wp-content/uploads/2023/10/president-suite-la-gi.webp",
     capacity: 6,
     max_adults: 4,
     max_children: 2,
@@ -109,9 +109,7 @@ const RoomList = () => {
       <Sidebar />
       <section className="flex-1">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">
-            Kết quả tìm thấy: {rooms.length} phòng khách sạn
-          </h2>
+          <h2 className="text-2xl font-bold text-blue-600">Danh sách phòng</h2>
           <select className="border text-sm rounded px-3 py-1">
             <option>Mặc định</option>
             <option>Giá tăng dần</option>
