@@ -3,6 +3,7 @@ import LayoutPages from "../pages/LayoutPages"
 import Home from "../pages/Home/LayoutHome"
 import InfoAll from "../pages/Introduce/InfoAll"
 import HotelList from "../pages/Tours/HotelsList"
+import Transport from "../pages/Tours/Transport"
 
 const Router = () => {
     return (
@@ -11,6 +12,7 @@ const Router = () => {
                 <Route path="/" element={<Home />} />
                 <Route path="/introduce" element={<InfoAll />} />
                 <Route path="/hotels" element={<HotelList />} />
+                <Route path="/transport" element={<Transport />} />
             </Route>
         </Routes>
     )
