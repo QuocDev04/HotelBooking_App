@@ -1,12 +1,8 @@
-<<<<<<< HEAD
 import { ChevronDown, ChevronUp } from 'lucide-react';
-=======
->>>>>>> origin/main
 import { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 const TourPage = () => {
-<<<<<<< HEAD
   const itinerary = [
     { day: "Ngày 1", title: "Hà Nội - Osaka" },
     { day: "Ngày 2", title: "Osaka - Kobe" },
@@ -27,18 +23,6 @@ const TourPage = () => {
     "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/gallery/slide4.png",
   ];
 
-=======
-  const [adults, setAdults] = useState(1);
-  const [children, setChildren] = useState(0);
-  const [infants, setInfants] = useState(0);
-  const thumbnails = [
-    "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/gallery/slide1.png",
-    "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/gallery/slide2.png",
-    "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/gallery/slide3.png",
-    "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/gallery/slide4.png",
-  ];
-
->>>>>>> origin/main
   const [mainImage, setMainImage] = useState(thumbnails[0]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const handleThumbnailClick = (src: string) => {
@@ -59,10 +43,6 @@ const TourPage = () => {
           <div className="flex items-center gap-1">
             <span className="text-blue-600">★ ★ ★ ★ ☆</span>
           </div>
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/main
         </div>
         <div className="flex flex-wrap gap-4 mb-4">
 
@@ -195,14 +175,6 @@ const TourPage = () => {
               </div>
 
             </div>
-<<<<<<< HEAD
-=======
-
-
-
-
-
->>>>>>> origin/main
             <div className="space-y-2 my-6">
               <div className="flex items-center justify-between gap-4">
                 {/* Label */}
@@ -309,7 +281,6 @@ const TourPage = () => {
         {/* Lịch trình */}
         <section>
           <h2 className="mb-4 text-2xl font-bold">Lịch trình tour</h2>
-<<<<<<< HEAD
           <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
             {itinerary.map((item, index) => (
               <div
@@ -342,23 +313,11 @@ const TourPage = () => {
               <ChevronDown className="w-4 h-4" />
             </button>
           </div>
-=======
-          <ol className="pl-5 space-y-2 text-gray-800 list-decimal">
-            <li>Hà Nội - Osaka</li>
-            <li>Osaka - Kobe</li>
-            <li>Cố đô Kyoto</li>
-            <li>Fuji - Lễ hội hoa anh đào Kawaguchi</li>
-            <li>Tokyo</li>
-            <li>Tokyo - Công viên UENO - Hà Nội</li>
-          </ol>
->>>>>>> origin/main
         </section>
 
         {/* Bảng giá */}
         <section>
           <h2 className="mb-4 text-2xl font-bold">Bảng giá (Khởi hành từ Hà Nội)</h2>
-<<<<<<< HEAD
-
           {/* Nút lọc tháng */}
           <div className="flex mb-4 space-x-4">
             <button className="px-4 py-2 font-semibold text-white bg-orange-500 rounded">Tất cả</button>
@@ -459,28 +418,6 @@ const TourPage = () => {
             </table>
           </div>
         </section>
-=======
-          <div className="grid gap-4">
-            {[
-              { date: "17/06/2025", price: "29.900.000đ", points: "299.000 điểm" },
-              { date: "24/06/2025", price: "29.900.000đ", points: "299.000 điểm" },
-              { date: "22/07/2025", price: "28.900.000đ", points: "289.000 điểm", discount: true },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center justify-between p-4 border rounded-lg shadow-sm">
-                <div>
-                  <div className="text-sm font-semibold">{item.date}</div>
-                  <div className="font-bold text-orange-600">{item.price}</div>
-                  <div className="text-xs text-gray-500">+ {item.points}</div>
-                </div>
-                <button className="px-4 py-2 text-white bg-orange-500 rounded hover:bg-orange-600">
-                  Giữ chỗ ngay
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-
->>>>>>> origin/main
         {/* Đánh giá */}
         <section>
           <h2 className="mb-4 text-2xl font-bold">Đánh giá</h2>
@@ -506,11 +443,6 @@ const TourPage = () => {
                   <div className="px-2 text-sm text-white bg-green-500 rounded">{review.rating}</div>
                 </div>
                 <p className="mt-2 text-sm text-gray-700">{review.comment}</p>
-<<<<<<< HEAD
-
-
-=======
->>>>>>> origin/main
               </div>
             ))}
           </div>
