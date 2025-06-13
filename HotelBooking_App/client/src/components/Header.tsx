@@ -9,17 +9,11 @@ import { Link } from 'react-router-dom';
 
 const Header = () => {
     const navLinks = [
-<<<<<<< HEAD
         { name: 'Tìm du thuyền', path: '/transport' },
         { name: 'Tìm khách sạn', path: '/rooms' },
         { name: 'Tìm địa điểm du lịch', path: '/destinations' },
-=======
-        { name: 'Tìm du thuyền', path: '/cruise' },
-        { name: 'Tìm khách sạn', path: '/' },
-        { name: 'Tìm địa điểm du lịch', path: '/' },
->>>>>>> origin/main
         { name: 'Giới Thiệu', path: '/introduce' },
-        { name: 'Blog', path: '/' },
+        { name: 'Blog', path: '/blog' },
     ];
     const [userId, setUserId] = useState<string | null>(null);
     const [isScrolled, setIsScrolled] = useState(false);

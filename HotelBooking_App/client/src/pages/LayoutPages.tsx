@@ -5,15 +5,11 @@ import Footer from "../components/Footer"
 const LayoutPages = () => {
   return (
     <div>
-      <Header/>
-<<<<<<< HEAD
+      <Header />
       <div className="pt-20">
-  <Outlet />
-</div>
-=======
-      <Outlet/>
->>>>>>> origin/main
-      <Footer/>
+        <Outlet />
+      </div>
+      <Footer />
     </div>
   )
 }
