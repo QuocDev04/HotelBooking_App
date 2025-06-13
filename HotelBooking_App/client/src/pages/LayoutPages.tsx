@@ -6,9 +6,13 @@ const LayoutPages = () => {
   return (
     <div>
       <Header/>
+<<<<<<< HEAD
       <div className="pt-20">
   <Outlet />
 </div>
+=======
+      <Outlet/>
+>>>>>>> origin/main
       <Footer/>
     </div>
   )
