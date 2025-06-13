@@ -13,7 +13,7 @@ const Header = () => {
         { name: 'Tìm khách sạn', path: '/' },
         { name: 'Tìm địa điểm du lịch', path: '/' },
         { name: 'Giới Thiệu', path: '/introduce' },
-        { name: 'Blog', path: '/' },
+        { name: 'Blog', path: '/blog' },
     ];
     const [userId, setUserId] = useState<string | null>(null);
     const [isScrolled, setIsScrolled] = useState(false);

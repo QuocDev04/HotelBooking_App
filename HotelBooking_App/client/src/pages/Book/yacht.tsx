@@ -46,35 +46,35 @@ const YachtDetailPage = () => {
       { name: 'Sân khấu biểu diễn', icon: '🎭' }
     ],
     rooms: [
-      { 
-        id: 101, 
-        type: 'Phòng Ocean Suite', 
-        price: 4370000 , 
-        size: '25m²', 
-        description: 'Phòng tiêu chuẩn với view biển, giường đôi hoặc 2 giường đơn', 
+      {
+        id: 101,
+        type: 'Phòng Ocean Suite',
+        price: 4370000,
+        size: '25m²',
+        description: 'Phòng tiêu chuẩn với view biển, giường đôi hoặc 2 giường đơn',
         amenities: ['TV màn hình phẳng', 'Minibar', 'Điều hòa', 'Wifi'],
         image: 'https://minio.fares.vn/mixivivu-dev/tour/du-thuyen-heritage-binh-chuan-cat-ba/Ph%C3%B2ng%20Delta%20Suite/b1zy0kd45oky2b4k.webp',
-        available: 10 
+        available: 10
       },
-      { 
-        id: 102, 
-        type: 'Phòng Ocean Suite', 
-        price: 4620000 , 
-        size: '35m²', 
-        description: 'Phòng rộng với ban công riêng nhìn ra biển', 
+      {
+        id: 102,
+        type: 'Phòng Ocean Suite',
+        price: 4620000,
+        size: '35m²',
+        description: 'Phòng rộng với ban công riêng nhìn ra biển',
         amenities: ['TV màn hình phẳng', 'Minibar', 'Khu vực tiếp khách', 'Bồn tắm'],
         image: 'https://minio.fares.vn/mixivivu-dev/tour/du-thuyen-heritage-binh-chuan-cat-ba/Ph%C3%B2ng%20Ocean%20Suite/ceb6gpnbn7ujv921.webp',
-        available: 5 
+        available: 5
       },
-      { 
-        id: 103, 
-        type: 'Phòng Captain Suite', 
-        price: 4870000, 
-        size: '50m²', 
-        description: 'Suite cao cấp với phòng khách riêng và nhiều tiện nghi', 
+      {
+        id: 103,
+        type: 'Phòng Captain Suite',
+        price: 4870000,
+        size: '50m²',
+        description: 'Suite cao cấp với phòng khách riêng và nhiều tiện nghi',
         amenities: ['TV 2 màn hình', 'Minibar cao cấp', 'Bồn tắm Jacuzzi', 'Dịch vụ butler'],
         image: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800&auto=format&fit=crop',
-        available: 2 
+        available: 2
       }
     ],
     gallery: [
@@ -104,16 +104,16 @@ const YachtDetailPage = () => {
   };
 
   return (
-    <div className="max-w-7xl mt-15 px-4 py-8">
+    <div className="max-w-screen-2xl mx-auto mt-15 px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-    <div className="flex justify-between items-center mb-2">
-      <h1 className="text-3xl font-bold">{yacht.name}</h1>
-      <h2 className="text-3xl font-bold">{yacht.price} đ/ khách</h2>
-    </div>
-    <p className="text-xl text-gray-600">{yacht.description}</p>
-  </div>
-      
+        <div className="flex justify-between items-center mb-2">
+          <h1 className="text-3xl font-bold">{yacht.name}</h1>
+          <h2 className="text-3xl font-bold">{yacht.price} đ/ khách</h2>
+        </div>
+        <p className="text-xl text-gray-600">{yacht.description}</p>
+      </div>
+
 
       {/* Main content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -121,9 +121,9 @@ const YachtDetailPage = () => {
         <div className="lg:col-span-2">
           {/* Yacht image */}
           <div className="rounded-lg shadow-md overflow-hidden mb-8">
-            <img 
-              src={yacht.image} 
-              alt={yacht.name} 
+            <img
+              src={yacht.image}
+              alt={yacht.name}
               className="w-full h-96 object-cover"
             />
           </div>
@@ -210,16 +210,15 @@ const YachtDetailPage = () => {
               {activeTab === 'rooms' && (
                 <div className="space-y-6">
                   {yacht.rooms.map(room => (
-                    <div 
+                    <div
                       key={room.id}
-                      className={`border rounded-lg overflow-hidden transition-all ${
-                        selectedRoom?.id === room.id ? 'ring-2 ring-blue-500' : ''
-                      }`}
+                      className={`border rounded-lg overflow-hidden transition-all ${selectedRoom?.id === room.id ? 'ring-2 ring-blue-500' : ''
+                        }`}
                     >
                       <div className="flex flex-col md:flex-row">
-                        <img 
-                          src={room.image} 
-                          alt={room.type} 
+                        <img
+                          src={room.image}
+                          alt={room.type}
                           className="mx-auto block rounded-lg w-auto max-w-full h-52 object-cover border border-gray-200 shadow-sm"
                         />
                         <div className="p-4 flex-1">
@@ -246,11 +245,10 @@ const YachtDetailPage = () => {
                           </div>
                           <button
                             onClick={() => setSelectedRoom(room)}
-                            className={`mt-4 w-full py-2 rounded-lg ${
-                              selectedRoom?.id === room.id 
-                                ? 'bg-blue-600 text-white' 
-                                : 'bg-gray-100 hover:bg-gray-200'
-                            }`}
+                            className={`mt-4 w-full py-2 rounded-lg ${selectedRoom?.id === room.id
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-100 hover:bg-gray-200'
+                              }`}
                           >
                             {selectedRoom?.id === room.id ? 'Đã chọn' : 'Chọn phòng'}
                           </button>
@@ -265,9 +263,9 @@ const YachtDetailPage = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {yacht.gallery.map((image, index) => (
                     <div key={index} className="rounded-lg overflow-hidden shadow-md">
-                      <img 
-                        src={image} 
-                        alt={`Gallery ${index + 1}`} 
+                      <img
+                        src={image}
+                        alt={`Gallery ${index + 1}`}
                         className="w-full h-48 object-cover cursor-pointer hover:opacity-90"
                       />
                     </div>
@@ -282,11 +280,11 @@ const YachtDetailPage = () => {
         <div>
           <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
             <h2 className="text-xl font-bold mb-4">Đặt du thuyền</h2>
-            
+
             <div className="mb-4">
               <label className="block text-gray-700 mb-2">Ngày khởi hành</label>
-              <input 
-                type="date" 
+              <input
+                type="date"
                 className="w-full border rounded px-3 py-2"
                 min={new Date().toISOString().split('T')[0]}
               />
@@ -331,11 +329,10 @@ const YachtDetailPage = () => {
                 <button
                   onClick={handleBook}
                   disabled={!selectedRoom}
-                  className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
-                    selectedRoom 
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
+                  className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${selectedRoom
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
                 >
                   Đặt ngay
                 </button>
