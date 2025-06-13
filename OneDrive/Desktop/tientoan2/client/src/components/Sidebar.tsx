@@ -4,7 +4,7 @@ const Sidebar: React.FC = () => {
   return (
     <aside className="w-full md:w-64 bg-white p-4 border rounded-xl shadow text-sm space-y-6">
       {/* Tiêu đề */}
-      <h2 className="text-base font-semibold text-gray-800 border-b pb-2">Danh mục tour</h2>
+      <h2 className="text-base font-semibold text-gray-800 border-b pb-2">Danh mục Hotels</h2>
 
       {/* Tour nội địa & quốc tế */}
       <div className="space-y-2">

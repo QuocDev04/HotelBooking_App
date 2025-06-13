@@ -2,8 +2,9 @@ import { Route, Routes } from "react-router-dom"
 import LayoutPages from "../pages/LayoutPages"
 import Home from "../pages/Home/LayoutHome"
 import InfoAll from "../pages/Introduce/InfoAll"
-import HotelList from "../pages/Tours/HotelsList"
+import RoomList from "../pages/Tours/Rooms"
 import Transport from "../pages/Tours/Transport"
+import DestinationList from "../pages/Tours/DestinationList"
 
 const Router = () => {
     return (
@@ -11,8 +12,9 @@ const Router = () => {
             <Route path="/" element={<LayoutPages/>}>
                 <Route path="/" element={<Home />} />
                 <Route path="/introduce" element={<InfoAll />} />
-                <Route path="/hotels" element={<HotelList />} />
+               <Route path="/rooms" element={<RoomList />} />
                 <Route path="/transport" element={<Transport />} />
+                <Route path="/destinations" element={<DestinationList />} />
             </Route>
         </Routes>
     )

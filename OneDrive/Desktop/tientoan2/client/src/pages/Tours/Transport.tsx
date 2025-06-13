@@ -21,47 +21,97 @@ const Transport = () => {
   };
 
   const transportData = {
-    transport: [
-      {
-        from: "Hà Nội",
-        to: "Bangkok",
-        image: "https://source.unsplash.com/400x250/?bangkok",
-        date: "19 tháng 6 - 21 tháng 6",
-      },
-      {
-        from: "Hà Nội",
-        to: "Kuta",
-        image: "https://source.unsplash.com/400x250/?bali",
-        date: "13 tháng 6 - 27 tháng 6",
-      },
-      {
-        from: "Hà Nội",
-        to: "Tokyo",
-        image: "https://source.unsplash.com/400x250/?tokyo",
-        date: "19 tháng 6 - 16 tháng 7",
-      },
-      {
-        from: "Hà Nội",
-        to: "Chiang Mai",
-        image: "https://source.unsplash.com/400x250/?chiangmai",
-        date: "16 tháng 6 - 22 tháng 6",
-      },
-    ],
-    domestic: [
-      {
-        from: "TP.HCM",
-        to: "Đà Nẵng",
-        image: "https://source.unsplash.com/400x250/?danang",
-        date: "20 tháng 6 - 24 tháng 6",
-      },
-      {
-        from: "Hà Nội",
-        to: "Phú Quốc",
-        image: "https://source.unsplash.com/400x250/?phuquoc",
-        date: "25 tháng 6 - 30 tháng 6",
-      },
-    ],
-  };
+  transport: [
+    {
+      from: "Hà Nội",
+      to: "Bangkok",
+      image: "https://cdn.saigontimestravel.com/storage/images/retail/wp-content/uploads/2024/08/bangkok-thai-lan-1.jpg",
+      date: "19 tháng 6 - 21 tháng 6",
+    },
+    {
+      from: "Hà Nội",
+      to: "Kuta",
+      image: "https://media.istockphoto.com/id/904453184/vi/anh/n%C3%BAi-ph%C3%BA-s%C4%A9-v%C3%A0-%C4%91%C6%B0%E1%BB%9Dng-ch%C3%A2n-tr%E1%BB%9Di-tokyo.jpg?s=612x612&w=0&k=20&c=Rcww2jkfT2EiP73fVwkYO1OBVvou7NPng_ZwjTWad0A=",
+      date: "13 tháng 6 - 27 tháng 6",
+    },
+    {
+      from: "Hà Nội",
+      to: "Tokyo",
+      image: "https://media.istockphoto.com/id/484915982/vi/anh/akihabara-tokyo.jpg?s=612x612&w=0&k=20&c=NUqzICFIaaQAxpnryr_q-bYHUb18woGf8RKd3yJiG0M=",
+      date: "19 tháng 6 - 16 tháng 7",
+    },
+    {
+      from: "Hà Nội",
+      to: "Chiang Mai",
+      image: "https://media.istockphoto.com/id/622780072/vi/anh/nh%E1%BB%AFng-%C4%91i%E1%BB%83m-h%E1%BA%A5p-d%E1%BA%ABn-nh%E1%BA%A5t-c%E1%BB%A7a-landscape-in-chiang-mai-n%C3%BAi-inthanon.jpg?s=612x612&w=0&k=20&c=TnoN2DTBhq0wYir8C5t-X-H1c0sQQ9fgU2g5-EtI-1U=",
+      date: "16 tháng 6 - 22 tháng 6",
+    },
+    {
+      from: "TP.HCM",
+      to: "Seoul",
+      image: "https://images.pexels.com/photos/237211/pexels-photo-237211.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
+      date: "10 tháng 7 - 18 tháng 7",
+    },
+    {
+      from: "Đà Nẵng",
+      to: "Singapore",
+      image: "https://duhocinec.com/wp-content/uploads/2024/09/dat-nuoc-singapore-01.jpg",
+      date: "5 tháng 7 - 9 tháng 7",
+    },
+    {
+      from: "Hà Nội",
+      to: "Paris",
+      image: "https://media.istockphoto.com/id/1185953092/vi/anh/%C4%91i%E1%BB%83m-thu-h%C3%BAt-ch%C3%ADnh-c%E1%BB%A7a-paris-v%C3%A0-to%C3%A0n-ch%C3%A2u-%C3%A2u-l%C3%A0-th%C3%A1p-eiffel-trong-nh%E1%BB%AFng-tia-n%E1%BA%AFng-m%E1%BA%B7t-tr%E1%BB%9Di-l%E1%BA%B7n.jpg?s=612x612&w=0&k=20&c=QX7TNdmG1wcxmsCDKlfDK7ic45yuFl7QW0l95mKfZWE=",
+      date: "2 tháng 8 - 12 tháng 8",
+    },
+    {
+      from: "TP.HCM",
+      to: "Sydney",
+      image: "https://objectstorage.omzcloud.vn/pys-object-storage/web/uploads/posts/avatar/1648181662.jpg",
+      date: "15 tháng 8 - 25 tháng 8",
+    },
+    {
+      from: "Hà Nội",
+      to: "Dubai",
+      image: "https://objectstorage.omzcloud.vn/pys-object-storage/web/uploads/posts/avatar/1657162996.jpg",
+      date: "1 tháng 9 - 7 tháng 9",
+    },
+    {
+      from: "Đà Nẵng",
+      to: "Kuala Lumpur",
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJTmQScNXRWdcHCVZ_e5gNTEW2x4hRVC48Jw&s",
+      date: "22 tháng 6 - 28 tháng 6",
+    },
+    {
+      from: "TP.HCM",
+      to: "New York",
+      image: "https://images.pexels.com/photos/597909/pexels-photo-597909.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
+      date: "12 tháng 9 - 22 tháng 9",
+    },
+    {
+      from: "Hà Nội",
+      to: "Luang Prabang",
+      image: "https://dulichviet.com.vn/images/bandidau/du-lich-co-do-Luang-Prabang-lao.jpg",
+      date: "6 tháng 7 - 11 tháng 7",
+    },
+  ],
+
+  domestic: [
+    {
+      from: "TP.HCM",
+      to: "Đà Nẵng",
+      image: "https://source.unsplash.com/400x250/?danang",
+      date: "20 tháng 6 - 24 tháng 6",
+    },
+    {
+      from: "Hà Nội",
+      to: "Phú Quốc",
+      image: "https://source.unsplash.com/400x250/?phu-quoc",
+      date: "25 tháng 6 - 30 tháng 6",
+    },
+  ],
+};
+
 
   return (
     <div className="bg-[#f9f9f9] min-h-screen pt-4 pb-20 px-4 md:px-8 lg:px-32">
