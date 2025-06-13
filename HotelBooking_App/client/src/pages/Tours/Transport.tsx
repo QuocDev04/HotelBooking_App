@@ -114,7 +114,7 @@ const Transport = () => {
 
 
   return (
-    <div className=" max-w-screen-xl mx-auto pt-4 pb-20 px-4 md:px-8 lg:px-32">
+    <div className=" max-w-screen-xl mx-auto pt-4 pb-20 px-4 md:px-8 lg:px-32 mt-20">
       <div className="bg-white rounded-3xl shadow-xl p-6 md:p-10">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-extrabold text-[#006CAA]">Tìm kiếm phương tiện</h1>

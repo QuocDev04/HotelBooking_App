@@ -105,7 +105,7 @@ const rooms = [
 
 const RoomList = () => {
   return (
-    <div className="max-w-screen-xl p-4 mx-auto font-sans">
+    <div className="max-w-screen-xl p-4 mx-auto font-sans mt-20">
     <main className="flex flex-col md:flex-row gap-6 px-4 md:px-8 py-6">
       <Sidebar />
       <section className="flex-1">

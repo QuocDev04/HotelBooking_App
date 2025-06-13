@@ -6,7 +6,7 @@ const LayoutPages = () => {
   return (
     <div>
       <Header />
-      <div className="pt-20">
+      <div>
         <Outlet />
       </div>
       <Footer />
