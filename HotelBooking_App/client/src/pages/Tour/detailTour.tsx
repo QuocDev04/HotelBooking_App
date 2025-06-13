@@ -1,7 +1,22 @@
+<<<<<<< HEAD
+import { ChevronDown, ChevronUp } from 'lucide-react';
+=======
+>>>>>>> origin/main
 import { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 const TourPage = () => {
+<<<<<<< HEAD
+  const itinerary = [
+    { day: "Ngày 1", title: "Hà Nội - Osaka" },
+    { day: "Ngày 2", title: "Osaka - Kobe" },
+    { day: "Ngày 3", title: "Cố đô Kyoto" },
+    { day: "Ngày 4", title: "Fuji - Lễ hội hoa anh đào Kawaguchi Festival" },
+    { day: "Ngày 5", title: "Tokyo" },
+    { day: "Ngày 6", title: "Tokyo - Ngắm hoa anh đào công viên UENO - Hà Nội" },
+  ];
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
   const [infants, setInfants] = useState(0);
@@ -12,6 +27,18 @@ const TourPage = () => {
     "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/gallery/slide4.png",
   ];
 
+=======
+  const [adults, setAdults] = useState(1);
+  const [children, setChildren] = useState(0);
+  const [infants, setInfants] = useState(0);
+  const thumbnails = [
+    "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/gallery/slide1.png",
+    "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/gallery/slide2.png",
+    "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/gallery/slide3.png",
+    "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/gallery/slide4.png",
+  ];
+
+>>>>>>> origin/main
   const [mainImage, setMainImage] = useState(thumbnails[0]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const handleThumbnailClick = (src: string) => {
@@ -32,7 +59,10 @@ const TourPage = () => {
           <div className="flex items-center gap-1">
             <span className="text-blue-600">★ ★ ★ ★ ☆</span>
           </div>
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/main
         </div>
         <div className="flex flex-wrap gap-4 mb-4">
 
@@ -165,11 +195,14 @@ const TourPage = () => {
               </div>
 
             </div>
+<<<<<<< HEAD
+=======
 
 
 
 
 
+>>>>>>> origin/main
             <div className="space-y-2 my-6">
               <div className="flex items-center justify-between gap-4">
                 {/* Label */}
@@ -276,6 +309,40 @@ const TourPage = () => {
         {/* Lịch trình */}
         <section>
           <h2 className="mb-4 text-2xl font-bold">Lịch trình tour</h2>
+<<<<<<< HEAD
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+            {itinerary.map((item, index) => (
+              <div
+                key={index}
+                className="px-4 py-3 border-b cursor-pointer last:border-b-0"
+                onClick={() => setOpenIndex(openIndex === index ? null : index)}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">
+                    {item.day}: {item.title}
+                  </span>
+                  {openIndex === index ? (
+                    <ChevronUp className="w-5 h-5 text-gray-500" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-gray-500" />
+                  )}
+                </div>
+                {openIndex === index && (
+                  <div className="mt-2 text-sm text-gray-600">
+                    {/* Nội dung chi tiết có thể thay thế tại đây nếu cần */}
+                    Nội dung chi tiết sẽ được cập nhật...
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 text-center">
+            <button className="flex items-center justify-center gap-2 px-4 py-2 text-blue-600 border border-blue-500 rounded hover:bg-blue-50">
+              Tải lịch trình tour
+              <ChevronDown className="w-4 h-4" />
+            </button>
+          </div>
+=======
           <ol className="pl-5 space-y-2 text-gray-800 list-decimal">
             <li>Hà Nội - Osaka</li>
             <li>Osaka - Kobe</li>
@@ -284,11 +351,115 @@ const TourPage = () => {
             <li>Tokyo</li>
             <li>Tokyo - Công viên UENO - Hà Nội</li>
           </ol>
+>>>>>>> origin/main
         </section>
 
         {/* Bảng giá */}
         <section>
           <h2 className="mb-4 text-2xl font-bold">Bảng giá (Khởi hành từ Hà Nội)</h2>
+<<<<<<< HEAD
+
+          {/* Nút lọc tháng */}
+          <div className="flex mb-4 space-x-4">
+            <button className="px-4 py-2 font-semibold text-white bg-orange-500 rounded">Tất cả</button>
+            <button className="px-4 py-2 text-gray-700 bg-gray-100 rounded">Tháng 6</button>
+            <button className="px-4 py-2 text-gray-700 bg-gray-100 rounded">Tháng 7</button>
+          </div>
+
+          {/* Bảng dữ liệu */}
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-center bg-white rounded shadow-sm">
+              <thead>
+                <tr className="text-sm font-semibold text-gray-700 bg-gray-100">
+                  <th className="px-4 py-2">Ngày khởi hành</th>
+                  <th className="px-4 py-2">Hãng tour</th>
+                  <th className="px-4 py-2">Giá tour</th>
+                  <th className="px-4 py-2">Giữ chỗ</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {
+                    date: "17/06/2025",
+                    brand: "Vietjet Air",
+                    price: "29.900.000đ",
+                    points: "299.000 điểm",
+                  },
+                  {
+                    date: "24/06/2025",
+                    brand: "Vietjet Air",
+                    price: "29.900.000đ",
+                    points: "299.000 điểm",
+                  },
+                  {
+                    date: "01/07/2025",
+                    brand: "Vietjet Air",
+                    price: "29.900.000đ",
+                    points: "299.000 điểm",
+                  },
+                  {
+                    date: "08/07/2025",
+                    brand: "Vietjet Air",
+                    price: "29.900.000đ",
+                    points: "299.000 điểm",
+                  },
+                  {
+                    date: "15/07/2025",
+                    brand: "Vietjet Air",
+                    price: "29.900.000đ",
+                    points: "299.000 điểm",
+                  },
+                  {
+                    date: "22/07/2025",
+                    brand: "Vietjet Air",
+                    priceOld: "29.900.000đ",
+                    price: "28.900.000đ",
+                    points: "289.000 điểm",
+                    note: "ĐẶT SỚM: Giảm 1 Triệu",
+                  },
+                  {
+                    date: "29/07/2025",
+                    brand: "Vietjet Air",
+                    priceOld: "29.900.000đ",
+                    price: "28.900.000đ",
+                    points: "289.000 điểm",
+                    note: "ĐẶT SỚM: Giảm 1 Triệu",
+                  },
+                ].map((item, i) => (
+                  <tr key={i} className="text-sm text-gray-700 border-b">
+                    <td className="px-4 py-3">
+                      <div className="font-medium">{item.date}</div>
+                      <div className="text-xs text-green-600">Còn chỗ</div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div>{item.brand}</div>
+                      {item.note && (
+                        <div className="mt-1 text-xs text-orange-500">🔖 {item.note}</div>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      {item.priceOld ? (
+                        <div>
+                          <span className="text-gray-400 line-through">{item.priceOld}</span>{" "}
+                          <span className="font-bold text-orange-600">{item.price}</span>
+                        </div>
+                      ) : (
+                        <div className="font-bold text-orange-600">{item.price}</div>
+                      )}
+                      <div className="text-xs text-gray-500">💰 {item.points}</div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <button className="px-4 py-2 text-white bg-orange-500 rounded hover:bg-orange-600">
+                        Giữ chỗ ngay
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+=======
           <div className="grid gap-4">
             {[
               { date: "17/06/2025", price: "29.900.000đ", points: "299.000 điểm" },
@@ -309,6 +480,7 @@ const TourPage = () => {
           </div>
         </section>
 
+>>>>>>> origin/main
         {/* Đánh giá */}
         <section>
           <h2 className="mb-4 text-2xl font-bold">Đánh giá</h2>
@@ -334,6 +506,11 @@ const TourPage = () => {
                   <div className="px-2 text-sm text-white bg-green-500 rounded">{review.rating}</div>
                 </div>
                 <p className="mt-2 text-sm text-gray-700">{review.comment}</p>
+<<<<<<< HEAD
+
+
+=======
+>>>>>>> origin/main
               </div>
             ))}
           </div>
