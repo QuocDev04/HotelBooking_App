@@ -87,28 +87,6 @@ const TourPage = () => {
               <div className="text-sm font-semibold text-blue-500">{tour?.data?.tour?.maxPeople}</div>
             </div>
           </div>
-          {/* <div className="flex items-center text-blue-500">
-            <div className=" rounded-2xl p-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                version="1.0"
-                width="24"
-                height="24"
-                viewBox="0 0 50 50"
-                preserveAspectRatio="xMidYMid meet"
-                fill="currentColor"
-                stroke="none"
-              >
-                <g transform="translate(0 50) scale(0.1 -0.1)" fill="currentColor" stroke="none">
-                  <path d="M374 439 l-62 -62 -123 42 -123 41 -23 -22 c-13 -12 -23 -25 -23 -29 0 -4 21 -20 48 -35 26 -15 71 -43 101 -62 l53 -34 -53 -54 c-50 -51 -57 -54 -89 -49 -29 5 -40 2 -58 -18 l-22 -23 50 -18 c45 -16 51 -22 68 -67 l18 -49 23 24 c19 20 22 32 17 59 -6 31 -2 37 48 86 l55 52 34 -53 c18 -29 46 -74 61 -100 15 -27 31 -48 35 -48 4 0 17 10 29 23 l21 23 -39 124 -40 124 60 61 c63 63 71 83 44 109 -26 27 -47 18 -110 -45z" />
-                </g>
-              </svg>
-            </div>
-            <div className="ml-2">
-              <div className="text-sm text-gray-500">Khởi hành từ</div>
-              <div className="text-sm font-semibold text-blue-500">HCM</div>
-            </div>
-          </div> */}
         </div>
 
         <div className="grid grid-cols-1 gap-2 lg:grid-cols-3 lg:gap-8">

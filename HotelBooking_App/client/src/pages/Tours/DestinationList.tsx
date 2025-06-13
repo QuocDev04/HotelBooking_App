@@ -1,4 +1,4 @@
-import Sidebar from "../../components/Sidebar";
+import Sidebar from "../Room/RoomList/Sidebar";
 import { useState } from "react";
 
 const destinations = [
@@ -127,4 +127,4 @@ const DestinationList = () => {
 };
 
 export default DestinationList;
-{/*hihihi*/}
+{/*hihihi*/ }
