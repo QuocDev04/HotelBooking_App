@@ -5,6 +5,7 @@ import InfoAll from "../pages/Introduce/InfoAll"
 import RoomList from "../pages/Tours/Rooms"
 import Transport from "../pages/Tours/Transport"
 import DestinationList from "../pages/Tours/DestinationList"
+import TransportDetail from "../pages/Tours/TransportDeatil"
 
 const Router = () => {
     return (
@@ -15,6 +16,7 @@ const Router = () => {
                <Route path="/rooms" element={<RoomList />} />
                 <Route path="/transport" element={<Transport />} />
                 <Route path="/destinations" element={<DestinationList />} />
+                <Route path="/transports" element={<TransportDetail />} />
             </Route>
         </Routes>
     )
