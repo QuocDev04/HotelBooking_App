@@ -96,6 +96,7 @@ const Login = ({ onClose = () => { }, openRegister = () => { } }) => {
                         onFinish={onFinish}
                     >
                         <Form.Item
+                            validateTrigger="onBlur"
                             name="email"
                             rules={[
                                 { required: true, message: "Vui lòng nhập email" },
@@ -133,6 +134,7 @@ const Login = ({ onClose = () => { }, openRegister = () => { } }) => {
                         </Form.Item>
 
                         <Form.Item
+                            validateTrigger="onBlur"
                             name="password"
                             rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
                         >

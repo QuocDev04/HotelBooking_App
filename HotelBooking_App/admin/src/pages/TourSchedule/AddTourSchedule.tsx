@@ -268,7 +268,6 @@ const AddTourSchedule = () => {
                                                 </Form.Item>
                                             </div>
                                         ))}
-
                                         <Form.Item>
                                             <Button
                                                 type="dashed"

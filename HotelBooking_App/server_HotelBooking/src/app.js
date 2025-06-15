@@ -12,6 +12,7 @@ import TourSchedule from "./router/TourScheduleRouter";
 import AdminRouter from "./router/AdminRouter";
 import UserRouter from "./router/UserRouter";
 import RouterBookingOnly from "./router/BookingOnLyRouter";
+import Vnpay from "./router/vnpay/vnpayRouter.js";
 
 const app = express();
 app.use(express.json());
@@ -29,5 +30,6 @@ app.use('/api/', TransportSchedulemodel)
 app.use('/api/', TourSchedule)
 app.use('/api/', AdminRouter)
 app.use('/api/', RouterBookingOnly)
+app.use('/api/', Vnpay)
 
 export const viteNodeApp = app;

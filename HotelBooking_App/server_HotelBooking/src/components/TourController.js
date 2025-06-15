@@ -48,7 +48,6 @@ export const AddTour = async (req, res) => {
     }
 }
 
-
 export const DeleteTour = async (req, res) => {
     try {
         const tour = await TourModel.findByIdAndDelete(req.params.id);
@@ -77,7 +76,7 @@ export const UpdateTour = async (req, res) => {
 
         const finalPrice = isDiscountValid
             ? Math.round(price * (1 - discountPercent / 100))
-            : null; 
+            : null;
 
         const tour = await TourModel.findByIdAndUpdate(
             req.params.id,
@@ -97,8 +96,6 @@ export const UpdateTour = async (req, res) => {
         });
     }
 };
-
-
 
 export const GetTourById = async (req, res) => {
     try {

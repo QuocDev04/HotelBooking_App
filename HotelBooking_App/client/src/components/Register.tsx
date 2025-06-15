@@ -80,6 +80,7 @@ const Register = ({ onClose = () => { }, openLogin = () => { } }) => {
                     </div>
                     <Form onFinish={onFinish}>
                         <Form.Item
+                            validateTrigger="onBlur"
                             name="email"
                             rules={[
                                 { required: true, message: "Vui lòng nhập email" },
@@ -118,6 +119,7 @@ const Register = ({ onClose = () => { }, openLogin = () => { } }) => {
 
 
                         <Form.Item
+                            validateTrigger="onBlur"
                             name="username"
                             rules={[
                                 { required: true, message: "Vui lòng nhập tên đăng nhập" },
@@ -139,6 +141,7 @@ const Register = ({ onClose = () => { }, openLogin = () => { } }) => {
 
 
                         <Form.Item
+                            validateTrigger="onBlur"
                             name="phone_number"
                             rules={[
                                 { required: true, message: "Vui lòng nhập số điện thoại" },
@@ -171,6 +174,7 @@ const Register = ({ onClose = () => { }, openLogin = () => { } }) => {
 
 
                         <Form.Item
+                            validateTrigger="onBlur"
                             name="password"
                             rules={[{ required: true, message: "Vui lòng nhập lại mật khẩu" }]}
                         >

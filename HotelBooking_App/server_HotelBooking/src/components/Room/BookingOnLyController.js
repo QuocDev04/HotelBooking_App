@@ -12,99 +12,112 @@ const calculateNights = (checkIn, checkOut) => {
 export const createBookingOnlyRoom = async (req, res) => {
     try {
         const {
-            user,
-            room,
+            userName,
+            emailName,
+            phoneName,
             check_in_date,
             check_out_date,
-            status,
             payment_method,
             payment_status,
             adults,
             children,
+            itemRoom, // nhận danh sách phòng từ client
         } = req.body;
 
-        // 1. Kiểm tra phòng tồn tại
-        const roomData = await RoomModel.findById(room);
-        if (!roomData) {
-            return res.status(404).json({ success: false, message: "Room not found" });
-        }
-
-        // 2. Kiểm tra số người
-        const totalGuests = adults + children;
-        if (totalGuests > roomData.capacityRoom) {
+        if (!itemRoom || !Array.isArray(itemRoom) || itemRoom.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: `Số khách (${totalGuests}) vượt quá sức chứa (${roomData.capacityRoom}) của phòng`,
+                message: "Danh sách phòng không được để trống",
             });
         }
 
-        // 3. Kiểm tra trùng ngày
-        const existingBooking = await BookingOnlyRoom.findOne({
-            room: room,
-            status: { $nin: ["cancelled", "checked_out"] },
-            $or: [
-                {
-                    check_in_date: { $lt: new Date(check_out_date) },
-                    check_out_date: { $gt: new Date(check_in_date) }
-                }
-            ],
-        });
-
-        if (existingBooking) {
-            return res.status(400).json({
-                success: false,
-                message: "Phòng đã được đặt trong khoảng ngày đã chọn",
-            });
-        }
-
-        // 4. Tính giá tiền
         const nights = calculateNights(check_in_date, check_out_date);
-        const total_price = roomData.priceRoom * nights;
+        let total_price = 0;
 
-        // 5. Tạo booking
+        // Kiểm tra từng phòng
+        for (const item of itemRoom) {
+            const roomData = await RoomModel.findById(item.roomId);
+            if (!roomData) {
+                return res.status(404).json({
+                    success: false,
+                    message: `Phòng với ID ${item.roomId} không tồn tại`,
+                });
+            }
+
+            const totalGuests = adults + children;
+            if (totalGuests > roomData.capacityRoom) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Phòng ${roomData.name || item.roomId} chỉ chứa tối đa ${roomData.capacityRoom} khách, bạn đang đặt ${totalGuests}`,
+                });
+            }
+
+            // Kiểm tra phòng đã được đặt chưa
+            const existingBooking = await BookingOnlyRoom.findOne({
+                "itemRoom.roomId": item.roomId,
+                status: { $nin: ["cancelled", "checked_out"] },
+                $or: [
+                    {
+                        check_in_date: { $lt: new Date(check_out_date) },
+                        check_out_date: { $gt: new Date(check_in_date) },
+                    },
+                ],
+            });
+
+            if (existingBooking) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Phòng ${roomData.name || item.roomId} đã được đặt trong khoảng thời gian này`,
+                });
+            }
+
+            total_price += roomData.priceRoom * nights;
+        }
+
+        // Tạo đơn đặt phòng
         const newBooking = await BookingOnlyRoom.create({
-            user,
-            room,
+            userName,
+            emailName,
+            phoneName,
             check_in_date,
             check_out_date,
-            status,
             payment_method,
-            payment_status,
+            payment_status: "pending",
             adults,
             children,
             total_price,
+            itemRoom,
         });
 
-        // 6. Gộp RoomInventoryBooking thành 1 bản ghi
-        await RoomInventoryBooking.create({
-            Room: room,
-            check_in_date: new Date(check_in_date),
-            check_out_date: new Date(check_out_date),
-            booked_quantity: 1,
-        });
+        // Tạo bản ghi RoomInventoryBooking cho mỗi phòng
+        for (const item of itemRoom) {
+            await RoomInventoryBooking.create({
+                Room: item.roomId,
+                check_in_date: new Date(check_in_date),
+                check_out_date: new Date(check_out_date),
+                booked_quantity: 1,
+            });
+        }
 
         return res.status(201).json({
             success: true,
-            message: "Booking created successfully",
+            message: "Đặt phòng thành công",
             booking: newBooking,
         });
-
     } catch (error) {
         return res.status(500).json({
             success: false,
             message: error.message,
         });
     }
-};
+  };
 
 
 
 export const getBookingWithDetails = async (req, res) => {
     try {
-        // Giả sử lấy tất cả booking, bạn có thể sửa filter theo user hoặc bookingId
         const bookings = await BookingOnlyRoom.find()
-            .populate("user", "username email phone_number")   // lấy trường name, email, phone từ user
-            .populate("room", "nameRoom priceRoom ")
+            .populate("itemRoom.roomId", "nameRoom priceRoom amenitiesRoom addressRoom")
         return res.status(200).json({
             success: true,
             message: "Bookings retrieved with user and room info",

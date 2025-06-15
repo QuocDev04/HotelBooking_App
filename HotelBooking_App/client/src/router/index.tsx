@@ -14,6 +14,7 @@ import { HotelPolicy } from "../pages/Blog/hotelPolicy"
 import JapanTourPage from "../pages/Tour/detailTour"
 import BookingRoom from "../pages/Booking/BookingRoom"
 import BookingAll from "../pages/Booking/BookingAll"
+import PaymentResult from "../pages/Booking/Payment"
 const Router = () => {
     return (
         <Routes>
@@ -30,8 +31,9 @@ const Router = () => {
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/hotelPolicy" element={<HotelPolicy />} />
                 <Route path="/detailtour/:id" element={<JapanTourPage />} />
-                <Route path="/bookingroom" element={<BookingRoom />} />
+                <Route path="/bookingroom/:id" element={<BookingRoom />} />
                 <Route path="/bookingall" element={<BookingAll />} />
+                <Route path="/payment-result" element={<PaymentResult />} />
             </Route>
         </Routes>
     )
