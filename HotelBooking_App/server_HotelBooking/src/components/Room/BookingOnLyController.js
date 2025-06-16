@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import RoomInventoryBooking from "../../models/Room/RoomInventoryBooking";
 import BookingOnlyRoom from "../../models/Room/BookingRoom";
 import RoomModel from "../../models/Room/RoomModel";
+import { StatusCodes } from 'http-status-codes';
 
 // Tính số đêm giữa check-in và check-out
 const calculateNights = (checkIn, checkOut) => {
@@ -12,6 +13,7 @@ const calculateNights = (checkIn, checkOut) => {
 export const createBookingOnlyRoom = async (req, res) => {
     try {
         const {
+            userId,
             userName,
             emailName,
             phoneName,
@@ -73,16 +75,17 @@ export const createBookingOnlyRoom = async (req, res) => {
 
             total_price += roomData.priceRoom * nights;
         }
-
+        const bookingStatus = payment_status === "completed" ? "completed" : "pending";
         // Tạo đơn đặt phòng
         const newBooking = await BookingOnlyRoom.create({
+            userId,
             userName,
             emailName,
             phoneName,
             check_in_date,
             check_out_date,
             payment_method,
-            payment_status: "pending",
+            payment_status: bookingStatus,
             adults,
             children,
             total_price,
@@ -110,8 +113,7 @@ export const createBookingOnlyRoom = async (req, res) => {
             message: error.message,
         });
     }
-  };
-
+};
 
 
 export const getBookingWithDetails = async (req, res) => {
@@ -130,3 +132,17 @@ export const getBookingWithDetails = async (req, res) => {
         });
     }
 };
+
+
+export const getOrderById = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const order = await BookingOnlyRoom.find({ userId }).populate("itemRoom.roomId", "nameRoom priceRoom amenitiesRoom addressRoom")
+        if (!order) {
+            return res.status(StatusCodes.NOT_FOUND).json({ error: "Order not found" })
+        }
+        return res.status(StatusCodes.OK).json(order)
+    } catch (error) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message })
+    }
+}

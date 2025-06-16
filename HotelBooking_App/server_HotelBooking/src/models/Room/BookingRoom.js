@@ -10,6 +10,11 @@ const RoomItemSchema = new mongoose.Schema({
 }, { _id: false })
 const BookingOnySchema = new mongoose.Schema({
     itemRoom: [RoomItemSchema],
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
     userName: { type: String, required: true },
     emailName: { type: String, required: true },
     phoneName: { type: String, required: true },
@@ -25,8 +30,14 @@ const BookingOnySchema = new mongoose.Schema({
     },
     payment_status: {
         type: String,
-        enum: ['pending', 'completed', 'processing'],
+        enum: ['pending', 'confirmed', 'completed', 'cancelled'],
+        default: 'pending',
     },
+    status: {
+        type: String,
+        enum: ['pending', 'confirmed', 'cancelled', 'checked_out', 'no_show'],
+        default: 'pending',
+      }
 }, {
     timestamps: true
 })

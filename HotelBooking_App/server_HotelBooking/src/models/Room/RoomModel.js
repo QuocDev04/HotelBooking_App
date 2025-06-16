@@ -8,6 +8,7 @@ const RoomModel = new mongoose.Schema({
     typeRoom: { type: String, required: true },
     descriptionRoom: { type: String },
     amenitiesRoom: [{ type: String, required: true }],
+    statusRoom: { type: Boolean, default: false },
     addressRoom: { type: String, required: true },
     capacityRoom: {
         type: Number,

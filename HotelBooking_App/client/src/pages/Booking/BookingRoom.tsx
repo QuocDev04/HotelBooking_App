@@ -37,7 +37,7 @@ const BookingRoom = () => {
   const { mutate } = useMutation({
     mutationFn: async (data) => {
       try {
-        return await instanceClient.post('/booking-room', data)
+        return await instanceClient.post('/booking-room',data)
       } catch (error) {
         const err = error as AxiosError<{ messages: string[] }>;
         const errorMessages = err?.response?.data?.messages;
@@ -48,9 +48,6 @@ const BookingRoom = () => {
     onSuccess: async (data) => {
       const paymentMethod = data?.data?.booking?.payment_method;
       console.log("databongking",data?.data?.booking?._id);
-      // Cập nhật bookingId nếu cần
-      message.success("Đặt phòng thành công!");
-
       // Nếu phương thức là chuyển khoản, gọi đến VNPay
       if (paymentMethod === "bank_transfer") {
         try {
@@ -69,18 +66,22 @@ const BookingRoom = () => {
     }
   })
   const onFinish = (values: any) => {
+    if (!bookingData?.roomId) {
+      message.error("Vui lòng chọn phòng trước khi đặt.");
+      return;
+    }
 
-    // Kết hợp dữ liệu bookingData từ localStorage và thông tin từ form
     const payload = {
-      itemRoom: bookingData?.roomId ? [{ roomId: bookingData.roomId }] : [],
+      userId: localStorage.getItem("userId"),
+      itemRoom: [{ roomId: bookingData?.roomId }],
       check_in_date: bookingData?.check_in_date,
       check_out_date: bookingData?.check_out_date,
       adults: bookingData?.adults,
       children: bookingData?.children,
-      ...values,  // thông tin người dùng từ form: username, email, phone_number
+      ...values,  // username, email, phone_number
     };
 
-    // Gọi mutate với payload
+    console.log("Payload gửi đi:", payload);
     mutate(payload);
   };
   return (
