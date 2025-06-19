@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, notification, Popconfirm, Table, type TableColumnsType } from 'antd';
+import { Button, notification, Popconfirm, Space, Table, Tag, type TableColumnsType } from 'antd';
 import { AiFillEdit, AiTwotoneDelete } from 'react-icons/ai';
 import { Link } from 'react-router-dom';
 import instance from '../../configs/axios';
@@ -114,6 +114,29 @@ const ListTour = () => {
           "quocte": "Quốc Tế",
         };
         return tourTypeMap[tour.tourType] || "Không xác định";
+      }
+    },
+    {
+      title: 'Phương Tiện',
+      dataIndex: 'itemTransport',
+      key: 'itemTransport',
+      render: (_: any, record: any) => {
+        const transports = record.itemTransport;
+
+        if (!Array.isArray(transports)) return null;
+
+        return (
+          <Space direction="vertical">
+            {transports.map((t: any, index: number) => {
+              const transport = t.TransportId;
+              return transport ? (
+                <Tag color="blue" key={index}>
+                  {transport.transportName} - {transport.transportType}
+                </Tag>
+              ) : null;
+            })}
+          </Space>
+        );
       }
     },
     {

@@ -151,11 +151,12 @@ const TourIn = () => {
                                             <span>
                                                 Còn lại: <strong>{tour.remainingSlots} chỗ</strong>
                                             </span>
-                                            <span className="text-blue-600 hover:underline text-sm cursor-pointer">
+                                            <Link to={`detailtour/${tour._id}`}>
+                                             <span className="text-blue-600 hover:underline text-sm cursor-pointer">
                                                 Chi tiết
                                             </span>
+                                            </Link>
                                         </div>
-
                                         <button className="mt-auto w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition">
                                             Đặt ngay
                                         </button>

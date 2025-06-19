@@ -1,8 +1,15 @@
 import mongoose from "mongoose";
 
-
+const TransportItemSchema = new mongoose.Schema({
+    TransportId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Transport",
+        required: true
+    }
+}, { _id: false })
 const TourModel = new mongoose.Schema({
     nameTour: { type: String, required: true },
+    itemTransport: [TransportItemSchema],
     destination: { type: String, required: true },
     departure_location: { type: String, required: true },
     duration: { type: String, required: true },

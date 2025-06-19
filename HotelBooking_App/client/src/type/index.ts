@@ -1,11 +1,24 @@
 export interface Tour {
-    tour_id: number;
-    tour_name: string;
-    imageTour: string;
-    destination: string;
-    promotion_price?: number;
-    price: number;
+    _id: number;                 
+    nameTour: string;                
+    destination: string;             
+    departure_location: string;       
+    duration: number;                
+    price: number;                   
+    finalPrice: number;             
+    discountPercent: number;        
+    discount_expiry_date: string;    
+    remainingSlots: number;         
+    max_people: number;              
+    imageTour: string;              
+    status: string;                  
+    description: string;             
+    tour_type: string;              
+    featured: boolean;               
+    total_sold: number;              
+
 }
+  
 
 export interface Room {
     room_id: number;

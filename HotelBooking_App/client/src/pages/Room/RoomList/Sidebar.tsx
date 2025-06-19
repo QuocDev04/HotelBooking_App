@@ -2,7 +2,7 @@
 
 const Sidebar: React.FC = () => {
   return (
-    <aside className="w-full md:w-64 bg-white p-4 border rounded-xl shadow text-sm space-y-6 mt-12">
+    <aside className=" md:w-64 bg-white p-4 border rounded-xl shadow text-sm space-y-6 mt-12">
       {/* Tiêu đề */}
       <h2 className="text-base font-semibold text-gray-800 border-b pb-2">Danh mục Hotels</h2>
 

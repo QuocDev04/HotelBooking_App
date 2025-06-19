@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery } from '@tanstack/react-query';
 import "react-datepicker/dist/react-datepicker.css";
 import { useParams } from 'react-router-dom';
@@ -9,8 +10,10 @@ import Schedule from './Content/Schedule';
 import PriceList from './Content/PriceList';
 import Evaluate from './Content/Evaluate';
 import QA from './Content/QA';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 const TourPage = () => {
+  const [activeTab, setActiveTab] = useState('overview');
+  const [selectedRoom, setSelectedRoom] = useState(null)
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [])
@@ -19,7 +22,11 @@ const TourPage = () => {
     queryKey: ['tour', id],
     queryFn: () => instanceClient.get(`/tour/${id}`)
   })
-
+  const { data: room } = useQuery({
+    queryKey: ['room'],
+    queryFn: () => instanceClient.get('/room')
+  })
+  const rooms = room?.data?.rooms
   return (
     <>
       <div className="max-w-screen-xl p-4 mx-auto font-sans mt-32">
@@ -91,27 +98,93 @@ const TourPage = () => {
 
         <div className="grid grid-cols-1 gap-2 lg:grid-cols-3 lg:gap-8">
           {/* Image */}
-          <LeftTourDetail/>
+          <LeftTourDetail />
 
           {/* Booking box */}
-          <RightTourDetail/>
+          <RightTourDetail selectedRoom={selectedRoom} />
+
         </div>
       </div>
       <div className="max-w-screen-xl p-6 mx-auto space-y-10">
-        {/* Giới thiệu */}
-        <Content/>
+        <div className="flex border-b ">
+          <button
+            className={`px-4 py-2 font-medium ${activeTab === 'overview' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+            onClick={() => setActiveTab('overview')}
+          >
+            Tổng quan
+          </button>
+          <button
+            className={`px-4 py-2 font-medium ${activeTab === 'rooms' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+            onClick={() => setActiveTab('rooms')}
+          >
+            Phòng nghỉ
+          </button>
+        </div>
+        {activeTab === 'overview' && (
+          <div className='space-y-6 max-w-3xl'>
+            < Content />
 
-        {/* Lịch trình */}
-        <Schedule/>
+            {/* Lịch trình */}
+            < Schedule />
 
-        {/* Bảng giá */}
-        <PriceList/>
+            {/* Bảng giá */}
+            < PriceList />
 
-        {/* Đánh giá */}
-        <Evaluate/>
+            {/* Đánh giá */}
+            < Evaluate />
 
-        {/* Hỏi đáp */}
-        <QA/>
+            {/* Hỏi đáp */}
+            < QA />
+          </div>
+        )}
+        {activeTab === 'rooms' && (
+          <div className="space-y-6 max-w-3xl">
+            {rooms?.map((room:any) => {
+              const isSelected = selectedRoom?._id === room._id;
+              return (
+                <div
+                  key={room._id}
+                  className={`border rounded-lg overflow-hidden transition-all ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
+                >
+                  <div className="flex flex-col md:flex-row">
+                    <img
+                      src={room.imageRoom[0]}
+                      alt={room.type}
+                      className="mx-auto block rounded-lg w-auto max-w-full h-52 object-cover border border-gray-200 shadow-sm"
+                    />
+                    <div className="p-4 flex-1">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-bold text-xl">{room.nameRoom}</h3>
+                          <p className="text-gray-600 my-3">{room.typeRoom}</p>
+                          <p className="my-2" dangerouslySetInnerHTML={{ __html: room.descriptionRoom?.split(' ').slice(0, 10).join(' ') || '' }} />
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {room.amenitiesRoom?.map((item:any, i:any) => (
+                              <span key={i} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">{item}</span>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-blue-600">{new Intl.NumberFormat('vi-VN').format(room.priceRoom)}₫</p>
+                          <p className="text-sm text-gray-500">/khách</p>
+                          <p className="text-sm my-2">Còn {room.status} phòng</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setSelectedRoom(room)}
+                        className={`mt-4 w-full py-2 rounded-lg ${isSelected ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+                      >
+                        {isSelected ? 'Đã chọn' : 'Chọn phòng'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+        )}
+
       </div>
     </>
   );

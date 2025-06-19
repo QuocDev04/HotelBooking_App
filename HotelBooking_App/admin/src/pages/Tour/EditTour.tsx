@@ -32,7 +32,11 @@ const EditTour = () => {
             {text} <span className="text-red-500">*</span>
         </>
     );
-
+    const { data:transport } = useQuery({
+        queryKey: ['transport'],
+        queryFn: () => instance.get('/transport')
+    })
+    const transports = transport?.data?.transport;
     const { mutate } = useMutation({
         mutationFn: async (data: any) => {
             try {
@@ -58,15 +62,13 @@ const EditTour = () => {
         },
     })
     useEffect(() => {
-        if (data?.data?.tour) {
+        if (data?.data?.tour && transports?.length > 0) {
             const tour = data.data.tour;
 
-            // Chuyển discountExpiryDate thành moment object nếu có
             if (tour.discountExpiryDate) {
                 tour.discountExpiryDate = moment(tour.discountExpiryDate);
             }
 
-            // Cập nhật hình ảnh
             if (tour.imageTour) {
                 setFileList(
                     tour.imageTour.map((url: string, index: number) => ({
@@ -79,14 +81,21 @@ const EditTour = () => {
                 );
             }
 
-            // Gán mô tả vào ReactQuill
             if (tour.descriptionTour) {
                 setValue(tour.descriptionTour);
             }
 
-            form.setFieldsValue(tour);
+            // ✅ chuyển thành mảng ID nếu không dùng labelInValue
+            const transportIds = tour.itemTransport?.map(
+                (item: any) => item.TransportId?._id || item._id
+            );
+
+            form.setFieldsValue({
+                ...tour,
+                itemTransport: transportIds, // hoặc dạng [{ value, label }] nếu dùng labelInValue
+            });
         }
-    }, [data?.data, form]);
+    }, [data?.data?.tour, transports]);
     const toolbarOptions = [
         ["bold", "italic", "underline", "strike"], // toggled buttons
         ["blockquote", "code-block"],
@@ -138,6 +147,7 @@ const EditTour = () => {
         const newValues = {
             ...values,
             imageTour: imageUrls,
+            itemTransport: values.itemTransport.map((id: any) => ({ TransportId: id })),
         };
 
         console.log("Data being sent:", newValues);
@@ -170,7 +180,7 @@ const EditTour = () => {
                                     form.setFieldsValue({ discountExpiryDate: null });
                                 }
                             }
-                          }}
+                        }}
                         form={form}>
                         <Row gutter={[32, 32]}>
                             {/* Cột trái */}
@@ -370,7 +380,25 @@ const EditTour = () => {
                                         ]}
                                     />
                                 </Form.Item>
-
+                                <Form.Item
+                                    required={false}
+                                    label={requiredLabel("Chọn Phương Tiện")}
+                                    name="itemTransport"
+                                    rules={[{ required: true, message: "Vui lòng chọn Phương Tiện" }]}
+                                >
+                                    <Select
+                                        mode="multiple"
+                                        size="large"
+                                        placeholder="Chọn phương tiện"
+                                        allowClear
+                                    >
+                                        {transports?.map((transport:any) => (
+                                            <Select.Option key={transport._id} value={transport._id}>
+                                                {transport.transportName} - {transport.transportType}
+                                            </Select.Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
                                 <Form.Item
                                     required={false}
                                     label={requiredLabel("Ảnh Tour")}

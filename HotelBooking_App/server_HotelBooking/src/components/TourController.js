@@ -5,7 +5,7 @@ import TourScheduleModel from "../models/TourScheduleModel";
 
 export const getAllTours = async (req, res) => {
     try {
-        const tour = await TourModel.find()
+        const tour = await TourModel.find().populate("itemTransport.TransportId", "transportName transportNumber transportType")
         return res.status(StatusCodes.OK).json({
             success: true,
             message: "Get all tours successfully",
@@ -99,7 +99,7 @@ export const UpdateTour = async (req, res) => {
 
 export const GetTourById = async (req, res) => {
     try {
-        const tour = await TourModel.findById(req.params.id);
+        const tour = await TourModel.findById(req.params.id).populate("itemTransport.TransportId", "transportName transportNumber transportType")
         if (!tour) {
             return res.status(404).json({ success: false, message: "Không tìm thấy tour" });
         }
@@ -122,7 +122,6 @@ export const GetTourById = async (req, res) => {
     }
 };
 
-
 //get tour featured
 export const TourFeatured = async (req, res) => {
     try {
@@ -139,7 +138,6 @@ export const TourFeatured = async (req, res) => {
         })
     }
 }
-
 
 //get tour top_selling
 export const TourTopSelling = async (req, res) => {

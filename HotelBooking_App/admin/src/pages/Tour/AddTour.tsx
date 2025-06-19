@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PlusOutlined } from "@ant-design/icons";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button, Checkbox, Col, DatePicker, Form, Image, Input, InputNumber, message, Row, Select, Upload, type FormProps, type GetProp, type UploadFile, type UploadProps } from "antd";
 import { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import instance from "../../configs/axios";
+import { Option } from "antd/lib/mentions";
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
 const AddTour = () => {
@@ -22,7 +23,12 @@ const AddTour = () => {
       {text} <span className="text-red-500">*</span>
     </>
   );
-
+  const {data} = useQuery({
+    queryKey:['transport'],
+    queryFn: () => instance.get('/transport')
+  })
+  const transports = data?.data?.transport;
+  
   const { mutate } = useMutation({
     mutationFn: async (data: any) => {
       try {
@@ -97,6 +103,7 @@ const AddTour = () => {
     const newValues = {
       ...values,
       imageTour: imageUrls,
+      itemTransport: values.itemTransport.map((id:any) => ({ TransportId: id })),
     };
 
     console.log("Data being sent:", newValues);
@@ -323,7 +330,25 @@ const AddTour = () => {
                     ]}
                   />
                 </Form.Item>
-
+                <Form.Item
+                  required={false}
+                  label={requiredLabel("Chọn Phương Tiện")}
+                  name="itemTransport"
+                  rules={[{ required: true, message: "Vui lòng chọn Phương Tiện" }]}
+                >
+                  <Select
+                    size="large"
+                    placeholder="Chọn phương tiện"
+                    mode="multiple"               // cho phép chọn nhiều
+                    allowClear
+                  >
+                    {transports?.map((transport:any) => (
+                      <Option key={transport?._id} value={transport._id}>
+                        {transport.transportName} - {transport.transportType}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
                 <Form.Item
                   required={false}
                   label={requiredLabel("Ảnh Tour")}
