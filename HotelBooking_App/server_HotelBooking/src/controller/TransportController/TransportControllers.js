@@ -1,10 +1,10 @@
 import { StatusCodes } from "http-status-codes";
-import TransportModel from "../models/TransportModel"
+import TransportScheduleModel from "../../models/Transport/TransportScheduleModel";
 
 
 export const GetTransportAll = async (req, res) => {
     try {
-        const transport = await TransportModel.find();
+        const transport = await TransportScheduleModel.find();
         return res.status(StatusCodes.OK).json({
 
             success: true,

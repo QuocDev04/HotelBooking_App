@@ -1,6 +1,6 @@
 
 import jwt from 'jsonwebtoken';
-import UserModel from '../models/UserModel';
+import UserModel from '../../models/People/UserModel';
 import { StatusCodes } from 'http-status-codes';
 import bcryptjs from "bcryptjs";
 

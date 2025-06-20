@@ -23,7 +23,7 @@ export const createBookingOnlyRoom = async (req, res) => {
             payment_status,
             adults,
             children,
-            itemRoom, // nhận danh sách phòng từ client
+            itemRoom,
         } = req.body;
 
         if (!itemRoom || !Array.isArray(itemRoom) || itemRoom.length === 0) {

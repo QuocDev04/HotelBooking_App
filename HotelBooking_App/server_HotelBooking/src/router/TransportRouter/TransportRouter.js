@@ -1,6 +1,6 @@
 
 import express from 'express';
-import { AddTransport, DeleteTransport, GetTransportAll, GetTransportById, UpdateTransport } from '../components/TransportControllers';
+import { AddTransport, DeleteTransport, GetTransportAll, GetTransportById, UpdateTransport } from '../../controller/TransportController/TransportControllers';
 
 const TransportRouter = express.Router();
 TransportRouter.get('/transport', GetTransportAll)

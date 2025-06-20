@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import Admin from "../models/AdminModel";
+import Admin from "../../models/People/AdminModel";
 
 export const registerAdmin = async (req, res) => {
     try {

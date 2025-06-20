@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import "react-datepicker/dist/react-datepicker.css";
 import { useParams } from 'react-router-dom';
 import instanceClient from '../../../configs/instance';
@@ -27,6 +27,7 @@ const TourPage = () => {
     queryFn: () => instanceClient.get('/room')
   })
   const rooms = room?.data?.rooms
+  
   return (
     <>
       <div className="max-w-screen-xl p-4 mx-auto font-sans mt-32">
@@ -139,7 +140,7 @@ const TourPage = () => {
         )}
         {activeTab === 'rooms' && (
           <div className="space-y-6 max-w-3xl">
-            {rooms?.map((room:any) => {
+            {rooms?.map((room: any) => {
               const isSelected = selectedRoom?._id === room._id;
               return (
                 <div
@@ -159,7 +160,7 @@ const TourPage = () => {
                           <p className="text-gray-600 my-3">{room.typeRoom}</p>
                           <p className="my-2" dangerouslySetInnerHTML={{ __html: room.descriptionRoom?.split(' ').slice(0, 10).join(' ') || '' }} />
                           <div className="flex flex-wrap gap-2 mt-2">
-                            {room.amenitiesRoom?.map((item:any, i:any) => (
+                            {room.amenitiesRoom?.map((item: any, i: any) => (
                               <span key={i} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">{item}</span>
                             ))}
                           </div>
