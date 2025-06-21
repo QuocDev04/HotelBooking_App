@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import "react-datepicker/dist/react-datepicker.css";
 import { useParams } from 'react-router-dom';
 import instanceClient from '../../../configs/instance';
@@ -13,7 +13,7 @@ import QA from './Content/QA';
 import { useEffect, useState } from 'react';
 const TourPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [selectedRoom, setSelectedRoom] = useState(null)
+  const [selectedRoom, setSelectedRoom] = useState<any[]>([])
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [])
@@ -27,7 +27,15 @@ const TourPage = () => {
     queryFn: () => instanceClient.get('/room')
   })
   const rooms = room?.data?.rooms
-  
+  const toggleSelectRoom = (roomItem: any) => {
+    if (selectedRoom.some(r => r._id === roomItem._id)) {
+      // Nếu đã chọn rồi thì bỏ chọn
+      setSelectedRoom(prev => prev.filter(r => r._id !== roomItem._id));
+    } else {
+      // Nếu chưa chọn thì thêm vào
+      setSelectedRoom(prev => [...prev, roomItem]);
+    }
+  };
   return (
     <>
       <div className="max-w-screen-xl p-4 mx-auto font-sans mt-32">
@@ -92,101 +100,111 @@ const TourPage = () => {
             </div>
             <div className="ml-2">
               <div className="text-sm text-gray-500">Số chỗ còn nhận</div>
-              <div className="text-sm font-semibold text-blue-500">{tour?.data?.tour?.maxPeople}</div>
+              <div className="text-sm font-semibold text-blue-500">{tour?.data?.tour?.available_slots}</div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-2 lg:grid-cols-3 lg:gap-8">
-          {/* Image */}
-          <LeftTourDetail />
-
-          {/* Booking box */}
-          <RightTourDetail selectedRoom={selectedRoom} />
-
-        </div>
-      </div>
-      <div className="max-w-screen-xl p-6 mx-auto space-y-10">
-        <div className="flex border-b ">
-          <button
-            className={`px-4 py-2 font-medium ${activeTab === 'overview' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
-            onClick={() => setActiveTab('overview')}
-          >
-            Tổng quan
-          </button>
-          <button
-            className={`px-4 py-2 font-medium ${activeTab === 'rooms' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
-            onClick={() => setActiveTab('rooms')}
-          >
-            Phòng nghỉ
-          </button>
-        </div>
-        {activeTab === 'overview' && (
-          <div className='space-y-6 max-w-3xl'>
-            < Content />
-
-            {/* Lịch trình */}
-            < Schedule />
-
-            {/* Bảng giá */}
-            < PriceList />
-
-            {/* Đánh giá */}
-            < Evaluate />
-
-            {/* Hỏi đáp */}
-            < QA />
-          </div>
-        )}
-        {activeTab === 'rooms' && (
-          <div className="space-y-6 max-w-3xl">
-            {rooms?.map((room: any) => {
-              const isSelected = selectedRoom?._id === room._id;
-              return (
-                <div
-                  key={room._id}
-                  className={`border rounded-lg overflow-hidden transition-all ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+          <div className="w-full lg:w-2/3">
+            <LeftTourDetail />
+            <div className="mt-8">
+              <div className="flex border-b">
+                <button
+                  className={`px-4 py-2 font-medium ${activeTab === 'overview' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+                  onClick={() => setActiveTab('overview')}
                 >
-                  <div className="flex flex-col md:flex-row">
-                    <img
-                      src={room.imageRoom[0]}
-                      alt={room.type}
-                      className="mx-auto block rounded-lg w-auto max-w-full h-52 object-cover border border-gray-200 shadow-sm"
-                    />
-                    <div className="p-4 flex-1">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-bold text-xl">{room.nameRoom}</h3>
-                          <p className="text-gray-600 my-3">{room.typeRoom}</p>
-                          <p className="my-2" dangerouslySetInnerHTML={{ __html: room.descriptionRoom?.split(' ').slice(0, 10).join(' ') || '' }} />
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {room.amenitiesRoom?.map((item: any, i: any) => (
-                              <span key={i} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">{item}</span>
-                            ))}
+                  Tổng quan
+                </button>
+                <button
+                  className={`px-4 py-2 font-medium ${activeTab === 'rooms' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+                  onClick={() => setActiveTab('rooms')}
+                >
+                  Phòng nghỉ
+                </button>
+              </div>
+              {activeTab === 'overview' && (
+                <div className="mt-6">
+                  <Content />
+                  <Schedule />
+                  <PriceList />
+                  <Evaluate />
+                  <QA />
+                </div>
+              )}
+              {activeTab === 'rooms' && (
+                <div className="space-y-6 max-w-3xl mt-6">
+                  {rooms?.map((room: any) => {
+                    const isSelected = selectedRoom.some((r: any) => r._id === room._id);
+                    const isBooked = room.statusRoom === true;
+                    return (
+                      <div
+                        key={room._id}
+                        className={`border rounded-lg overflow-hidden transition-all p-4 bg-blue-100 ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
+                        onClick={() => !isBooked && toggleSelectRoom(roomItem)}
+                        title={isBooked ? 'Phòng đã được đặt' : ''}
+                        style={{ borderColor: '#2563eb' }}
+                      >
+                        <div className="flex flex-col md:flex-row gap-4">
+                          <img
+                            src={room.imageRoom[0]}
+                            alt={room.type}
+                            className="rounded-lg w-full md:w-64 h-40 object-cover border border-gray-300 shadow-sm"
+                          />
+                          <div className="flex flex-col flex-1 justify-between">
+                            <div>
+                              <div className="flex justify-between items-center">
+                                <h3 className="font-bold text-lg md:text-xl text-black">{ room.nameRoom.split(' ').slice(0, 5).join(' ') + '...' || '' }</h3>
+                                <div className="md:mt-0 text-right">
+                                  <div className="flex items-center space-x-1 md:space-x-2">
+                                    <p className="text-blue-700 font-bold text-lg md:text-xl">
+                                      {new Intl.NumberFormat('vi-VN').format(room.priceRoom)}₫
+                                    </p>
+                                    <p className="text-sm text-gray-700">/khách</p>
+                                  </div>
+                                </div>
+                              </div>
+                              <p className="text-blue-400 mt-1">{room.typeRoom} - sức chứa tối đa {room.capacityRoom} người</p>
+                              <p className="my-2" dangerouslySetInnerHTML={{ __html: room.descriptionRoom?.split(' ').slice(0, 7).join(' ') + '...' || '' }} />
+                              <div className="flex flex-wrap gap-2 mt-3 max-h-16 overflow-hidden">
+                                {room.amenitiesRoom?.map((item: any, i: any) => (
+                                  <span
+                                    key={i}
+                                    className="bg-blue-200 text-blue-700 px-2 py-1 rounded text-xs whitespace-nowrap"
+                                  >
+                                    {item}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => {
+                                if (isSelected) {
+                                  setSelectedRoom(selectedRoom.filter((r) => r._id !== room._id));
+                                } else {
+                                  setSelectedRoom([...selectedRoom, room]);
+                                }
+                              }}
+                              className={`mt-4 w-full py-2 rounded-lg ${isSelected ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'} ${isBooked ? 'cursor-not-allowed bg-gray-300 text-gray-600' : ''}`}
+                              disabled={isBooked}
+                            >
+                              {isBooked ? 'Đã được đặt' : isSelected ? 'Bỏ chọn' : 'Chọn phòng'}
+                            </button>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-blue-600">{new Intl.NumberFormat('vi-VN').format(room.priceRoom)}₫</p>
-                          <p className="text-sm text-gray-500">/khách</p>
-                          <p className="text-sm my-2">Còn {room.status} phòng</p>
-                        </div>
                       </div>
-                      <button
-                        onClick={() => setSelectedRoom(room)}
-                        className={`mt-4 w-full py-2 rounded-lg ${isSelected ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
-                      >
-                        {isSelected ? 'Đã chọn' : 'Chọn phòng'}
-                      </button>
-                    </div>
-                  </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
+              )}
+            </div>
           </div>
 
-        )}
-
-      </div>
+          <div className="w-full lg:w-1/3 h-full">
+            <RightTourDetail selectedRoom={selectedRoom} />
+          </div>
+        </div>
+      </div >
     </>
   );
 };

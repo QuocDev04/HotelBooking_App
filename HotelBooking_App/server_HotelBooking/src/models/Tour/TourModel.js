@@ -27,9 +27,5 @@ const TourModel = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    totalSold: {
-        type: Number,
-        default: 0
-    },
 }, { timestamps: true })
 export default mongoose.model("Tour", TourModel)

@@ -2,7 +2,7 @@
 const Evaluate = () => {
   return (
         <section>
-            <h2 className="mb-4 text-2xl font-bold">Đánh giá</h2>
+            <h2 className="mb-4 text-2xl font-bold my-7">Đánh giá</h2>
             <div className="text-xl font-bold text-green-600">9 Tuyệt vời</div>
             <div className="grid gap-4 mt-4">
                 {[

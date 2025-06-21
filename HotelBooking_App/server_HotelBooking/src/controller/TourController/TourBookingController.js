@@ -48,25 +48,62 @@ export const createBookingTour = async (req, res) => {
 
         const startTime = new Date(bookingDate);
         const endTime = addDays(startTime, days);
+        
+        const now = new Date();
+        if (endTime < now) {
+            if (itemRoom && itemRoom.length > 0) {
+                const roomIds = itemRoom.map(item => item.roomId);
+                const rooms = await Promise.all(roomIds.map(id => RoomModel.findById(id)));
 
-        // Khai báo biến roomPricePerNight ngoài if để dùng được sau này
+                await Promise.all(rooms.map(room => {
+                    if (room) {
+                        room.statusRoom = false;  // trả phòng
+                        return room.save();
+                    }
+                }));
+            }
+            return res.status(400).json({ message: "Tour đã kết thúc, không thể đặt phòng." });
+        }
         let roomPricePerNight = 0;
         let totalRoomPrice = 0;
+        let totalRoomCapacity = 0;
 
         if (itemRoom && itemRoom.length > 0) {
-            const roomId = itemRoom[0].roomId;
-            const room = await RoomModel.findById(roomId);
-            if (!room) {
-                return res.status(404).json({ message: "Phòng không tồn tại." });
+            const roomIds = itemRoom.map(item => item.roomId);
+            const rooms = await Promise.all(roomIds.map(id => RoomModel.findById(id)));
+
+            for (let i = 0; i < rooms.length; i++) {
+                const room = rooms[i];
+                if (!room) {
+                    return res.status(404).json({ message: `Phòng với ID ${roomIds[i]} không tồn tại.` });
+                }
+
+                if (room.statusRoom) {
+                    return res.status(400).json({ message: `Phòng ${room.nameRoom} đã được đặt.` });
+                }
+
+                totalRoomCapacity += room.capacityRoom;
+
+                roomPricePerNight = room.priceRoom;
+                if (days === 1 && nights === 0) {
+                    totalRoomPrice += roomPricePerNight;
+                } else {
+                    totalRoomPrice += roomPricePerNight * (nights > 0 ? nights : (days - 1));
+                }
             }
 
-            roomPricePerNight = room.priceRoom;
-
-            if (days === 1 && nights === 0) {
-                totalRoomPrice = roomPricePerNight;
-            } else {
-                totalRoomPrice = roomPricePerNight * (nights > 0 ? nights : (days - 1));
-            }
+            const totalPeople = Number(adultsTour) + Number(childrenTour);
+            if (totalPeople > totalRoomCapacity) {
+                return res.status(400).json({
+                    message: `Tổng số người (${totalPeople}) không được vượt quá sức chứa phòng (${totalRoomCapacity}).`,
+                });
+              }
+              
+            // Cập nhật trạng thái tất cả phòng là đã đặt
+            await Promise.all(rooms.map(room => {
+                room.statusRoom = true;
+                return room.save();
+            }));
         }
 
         // Tính tổng tiền tour (giá tour nhân với tổng số người)

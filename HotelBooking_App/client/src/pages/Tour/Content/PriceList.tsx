@@ -2,7 +2,7 @@
 const PriceList = () => {
   return (
       <section>
-          <h2 className="mb-4 text-2xl font-bold">Bảng giá (Khởi hành từ Hà Nội)</h2>
+          <h2 className="mb-4 text-2xl font-bold my-7">Bảng giá (Khởi hành từ Hà Nội)</h2>
           {/* Nút lọc tháng */}
           <div className="flex mb-4 space-x-4">
               <button className="px-4 py-2 font-semibold text-white bg-orange-500 rounded">Tất cả</button>

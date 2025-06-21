@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import TourModel from "../../models/Tour/TourModel";
 import Transport from "../../models/Transport/TransportModel";
 import TourScheduleModel from "../../models/Tour/TourScheduleModel";
+import TourBooking from "../../models/Tour/TourBooking";
 
 
 export const getAllTours = async (req, res) => {
@@ -107,12 +108,22 @@ export const GetTourById = async (req, res) => {
 
         const schedule = await TourScheduleModel.findOne({ Tour: tour._id });
 
+        //// Tính tổng số người đã đặt từ bảng BookingTour
+        const bookings = await TourBooking.find({ tourId: tour._id });
+        let totalBooked = 0;
+        bookings.forEach(booking => {
+            totalBooked += booking.adultsTour + booking.childrenTour;
+        });
+        //Tính số slot còn lại
+        const available_slots = tour.maxPeople - totalBooked;
+
         return res.status(200).json({
             success: true,
             message: "Tour byID successfully",
             tour: {
                 ...tour.toObject(),
                 schedules: schedule ? schedule.schedules : [],
+                available_slots: available_slots < 0 ? 0 : available_slots
             }
         });
     } catch (error) {

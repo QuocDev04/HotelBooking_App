@@ -10,7 +10,7 @@ const Schedule = () => {
     if (error) return <p>Đã xảy ra lỗi khi tải lịch trình.</p>;
     return (
         <section>
-            <h2 className="mb-4 text-2xl font-bold">🗓️ Lịch trình tour</h2>
+            <h2 className="mb-4 text-2xl font-bold my-7"> Lịch trình tour</h2>
             <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
                 {schedule?.map((item:any, index:any) => (
                     <div

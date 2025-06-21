@@ -2,7 +2,7 @@
 const QA = () => {
   return (
     <section>
-      <h2 className="mb-4 text-2xl font-bold">Hỏi đáp</h2>
+      <h2 className="mb-4 text-2xl font-bold my-7">Hỏi đáp</h2>
       <div className="space-y-4">
         {[
           {
