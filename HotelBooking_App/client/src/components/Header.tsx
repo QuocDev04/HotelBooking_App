@@ -15,15 +15,15 @@ const Header = () => {
         { name: 'Giới Thiệu', path: '/introduce' },
         { name: 'Blog', path: '/blog' },
     ];
+
     const [userId, setUserId] = useState<string | null>(null);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [showLogin, setShowLogin] = useState(false);
     const [showRegister, setShowRegister] = useState(false);
+
     useEffect(() => {
-        setUserId(localStorage.getItem("user"));
-    }, []);
-    useEffect(() => {
+        setUserId(localStorage.getItem("userId"));
 
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 10);
@@ -31,18 +31,21 @@ const Header = () => {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
+
     const handleLogout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        setUserId(null); // Cập nhật lại state
+        localStorage.removeItem("userId");
+        setUserId(null);
         window.location.href = "/";
     };
+
     const token = localStorage.getItem("token");
+
     const user = (
-        <div className="flex flex-col gap-1 p-2 min-w-[150px] ">
-            <h3 className="text-[#8B4513] text-sm font-medium pb-1  mb-1">
-                Tài khoản
-            </h3>
+        <div className="flex flex-col gap-1 p-2 min-w-[150px]">
+            <h3 className="text-[#8B4513] text-sm font-medium pb-1 mb-1">Tài khoản</h3>
+
             <Link to={"/profile"}>
                 <div className="hover:bg-[#E6D5B8]/50 px-3 py-1.5 rounded-md transition-all text-[#8B4513] text-sm">
                     Thông Tin
@@ -55,7 +58,6 @@ const Header = () => {
                 Đăng Xuất
             </div>
         </div>
-    
     );
 
     return (
@@ -73,10 +75,10 @@ const Header = () => {
                     ))}
                 </div>
 
-                <div className="hidden md:flex items-center gap-4 ">
+                <div className="hidden md:flex items-center gap-4">
                     {token ? (
                         <Popover content={user} trigger="click" className="cursor-pointer">
-                            <div className="text-[#8B4513] hover:text-[#6B3E26] transition-all duration-300 hover:scale-110">
+                            <div className="text-[#8B4513] hover:text-[#6B3E26] transition-all duration-300 hover:scale-110 text-center">
                                 <FaUserCircle className="text-2xl" />
                             </div>
                         </Popover>
@@ -110,11 +112,14 @@ const Header = () => {
                         </a>
                     ))}
 
-                    <button className=" px-8 py-2.5 rounded-full transition-all duration-500">
+                    <div className="px-8 py-2.5 rounded-full transition-all duration-500">
                         {token ? (
                             <Popover content={user} trigger="click" className="cursor-pointer">
-                                <div className="text-[#8B4513] hover:text-[#6B3E26] transition-all duration-300 hover:scale-110">
+                                <div className="text-[#8B4513] hover:text-[#6B3E26] transition-all duration-300 hover:scale-110 text-center">
                                     <FaUserCircle className="text-2xl" />
+                                    {userId && (
+                                        <div className="text-xs text-gray-500">ID: {userId}</div>
+                                    )}
                                 </div>
                             </Popover>
                         ) : (
@@ -122,10 +127,8 @@ const Header = () => {
                                 Login
                             </button>
                         )}
-                    </button>
-                    
+                    </div>
                 </div>
-
             </nav>
 
             {/* Hiển thị login modal nếu showLogin true */}
@@ -133,8 +136,8 @@ const Header = () => {
                 <Login
                     onClose={() => setShowLogin(false)}
                     openRegister={() => {
-                        setShowLogin(false);       // đóng form đăng nhập
-                        setShowRegister(true);     // mở form đăng ký
+                        setShowLogin(false);
+                        setShowRegister(true);
                     }}
                 />
             )}

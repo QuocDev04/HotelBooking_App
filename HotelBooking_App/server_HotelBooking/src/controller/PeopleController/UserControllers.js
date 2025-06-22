@@ -34,7 +34,8 @@ export const LoginUser = async (req, res) => {
             accessToken,
             refreshToken,
             email: user.email,
-            username: user.username
+            username: user.username,
+            userId: user.id,
         })
     } catch (error) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
