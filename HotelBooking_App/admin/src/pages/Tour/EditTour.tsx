@@ -85,14 +85,13 @@ const EditTour = () => {
                 setValue(tour.descriptionTour);
             }
 
-            // ✅ chuyển thành mảng ID nếu không dùng labelInValue
-            const transportIds = tour.itemTransport?.map(
+            const transportId = tour.itemTransport?.map(
                 (item: any) => item.TransportId?._id || item._id
             );
 
             form.setFieldsValue({
                 ...tour,
-                itemTransport: transportIds, // hoặc dạng [{ value, label }] nếu dùng labelInValue
+                itemTransport: transportId, 
             });
         }
     }, [data?.data?.tour, transports]);
