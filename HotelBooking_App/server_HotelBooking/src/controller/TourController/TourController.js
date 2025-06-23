@@ -1,6 +1,5 @@
 import { StatusCodes } from "http-status-codes";
 import TourModel from "../../models/Tour/TourModel";
-import Transport from "../../models/Transport/TransportModel";
 import TourScheduleModel from "../../models/Tour/TourScheduleModel";
 import TourBooking from "../../models/Tour/TourBooking";
 
