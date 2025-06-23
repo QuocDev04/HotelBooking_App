@@ -36,11 +36,7 @@ const Header = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         localStorage.removeItem("userId");
-<<<<<<< HEAD
-        setUserId(null);
-=======
         setUserId(null); // Cập nhật lại state
->>>>>>> nghuyquoc
         window.location.href = "/";
     };
 
