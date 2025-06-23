@@ -21,9 +21,7 @@ const Header = () => {
     const [showLogin, setShowLogin] = useState(false);
     const [showRegister, setShowRegister] = useState(false);
     useEffect(() => {
-        setUserId(localStorage.getItem("user"));
-    }, []);
-    useEffect(() => {
+        setUserId(localStorage.getItem("userId"));
 
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 10);
@@ -34,6 +32,7 @@ const Header = () => {
     const handleLogout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
+        localStorage.removeItem("userId");
         setUserId(null); // Cập nhật lại state
         window.location.href = "/";
     };

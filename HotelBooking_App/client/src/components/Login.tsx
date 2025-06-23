@@ -36,10 +36,11 @@ const Login = ({ onClose = () => { }, openRegister = () => { } }) => {
                     });
                 }
 
-                const { accessToken, username } = response.data;
+                const { accessToken, username, userId } = response.data;
                 if (accessToken) {
                     localStorage.setItem("token", accessToken);
                     localStorage.setItem("user", username);
+                    localStorage.setItem("userId", userId);
                     onClose();
 
                 }
