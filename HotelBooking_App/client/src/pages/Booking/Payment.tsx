@@ -18,7 +18,7 @@ function PaymentResult() {
 
         setTimeout(() => {
             navigate("/");  // Chuyển về trang chủ sau 2 giây
-        }, 2000);
+        }, 20000);
     }, [location, navigate]);
 
     return <div>Đang xử lý kết quả thanh toán...</div>;

@@ -22,7 +22,6 @@ const checkOutTourSchema = new mongoose.Schema({
         enum: ['pending', 'confirmed', 'completed', 'cancelled'],
         default: 'pending',
     },
-    // transaction_id: { type: String, required: true },
     amount: { type: Number },
 }, { timestamps: true })
 

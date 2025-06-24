@@ -8,12 +8,17 @@ const RoomModel = new mongoose.Schema({
     typeRoom: { type: String, required: true },
     descriptionRoom: { type: String },
     amenitiesRoom: [{ type: String, required: true }],
-    statusRoom: { type: Boolean, default: false },
+    statusRoom: {
+        type: String,
+        enum: ['waiting', 'available', 'full', 'cancelled'],
+        default: 'available'
+    },
     addressRoom: { type: String, required: true },
     capacityRoom: {
         type: Number,
         required: true,
         min: 1
-    }
+    },
+    waitingSince: { type: Date, default: null },
 }, { timestamps: true });
 export default mongoose.model("Room", RoomModel);
