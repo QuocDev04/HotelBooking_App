@@ -1,10 +1,8 @@
 import RoomModel from "../../models/Room/RoomModel";
 import TourModel from "../../models/Tour/TourModel";
 import TourBookingSchema from "../../models/Tour/TourBooking";
-import { StatusCodes } from 'http-status-codes';
 import cron from 'node-cron';
 
-// Giải phóng phòng khi tour đã kết thúc
 async function releaseRooms(itemRoom) {
     const roomIds = itemRoom.map(item => item.roomId);
     const rooms = await Promise.all(roomIds.map(id => RoomModel.findById(id)));
@@ -17,7 +15,6 @@ async function releaseRooms(itemRoom) {
     }));
 }
 
-// Giải phóng phòng waiting quá 10 phút
 export async function releaseExpiredWaitingRooms() {
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
 
@@ -28,45 +25,77 @@ export async function releaseExpiredWaitingRooms() {
     });
 
     for (const room of roomsToRelease) {
-        // Tìm booking chứa phòng này
         const booking = await TourBookingSchema.findOne({
             'itemRoom.roomId': room._id,
-            adultsTour: { $gt: 0 },   // chỉ lấy booking có người đặt
-            endTime: { $gte: new Date() }
+            endTime: { $gte: new Date() },
+            isConfirmed: false,
         });
 
         if (booking) {
-            // Lấy phòng trong booking
-            const roomItem = booking.itemRoom.find(item => item.roomId.toString() === room._id.toString());
-            if (roomItem) {
-                // Tổng người trong booking hiện tại (ở level booking)
-                const totalPeople = booking.adultsTour + booking.childrenTour;
+            const totalPeople = booking.adultsTour + booking.childrenTour;
+            console.log("Trả lại slot tour cho booking:", booking._id, "Tổng người:", totalPeople);
 
-                // Cộng lại slot cho tour
-                await TourModel.findByIdAndUpdate(booking.tourId, {
-                    $inc: { available_slots: totalPeople }
-                });
-
-                // Reset số người về 0
-                booking.adultsTour = 0;
-                booking.childrenTour = 0;
-
-                // Xóa itemRoom (hoặc giữ, tùy ý)
-                booking.itemRoom = [];
-
-                // Lưu booking
-                await booking.save();
-            }
+            await TourModel.findByIdAndUpdate(booking.tourId, {
+                $inc: { available_slots: totalPeople },
+              });
+            booking.slot_reserved = false;
+            await booking.save();
+        } else {
+            console.log("Không tìm thấy booking phù hợp cho phòng:", room._id);
         }
 
-        // Trả phòng về trạng thái ban đầu
         room.statusRoom = 'available';
         room.waitingSince = null;
         await room.save();
     }
 
     if (roomsToRelease.length > 0) {
-        console.log(`[CRON] Đã trả lại ${roomsToRelease.length} phòng waiting sau 10 phút`);
+        console.log(`[CRON] Trả lại ${roomsToRelease.length} phòng & slot tour sau 10 phút`);
+    }
+}
+
+
+export async function releaseRoomsAndSlotsForCancelledPayment(bookingId) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        const booking = await TourBookingSchema.findById(bookingId).session(session);
+        if (!booking) throw new Error("Không tìm thấy booking.");
+
+        if (!booking.slot_reserved) {
+            await session.abortTransaction();
+            return;
+        }
+
+        const totalPeople = Number(booking.adultsTour || 0) + Number(booking.childrenTour || 0);
+        const tourId = booking.tourId._id ? booking.tourId._id : booking.tourId;
+
+        await TourModel.findByIdAndUpdate(
+            tourId,
+            { $inc: { available_slots: totalPeople } },
+            { session }
+        );
+
+        const roomIds = booking.itemRoom?.map(item => item.roomId) || [];
+        await RoomModel.updateMany(
+            { _id: { $in: roomIds } },
+            { $set: { statusRoom: "available", waitingSince: null } },
+            { session }
+        );
+
+        booking.payment_status = "cancelled";
+        booking.slot_reserved = false;
+        await booking.save({ session });
+
+        await session.commitTransaction();
+        console.log(`[HUỶ] Booking ${booking._id} – đã trả ${totalPeople} slot và mở ${roomIds.length} phòng.`);
+    } catch (error) {
+        await session.abortTransaction();
+        console.error("Lỗi khi huỷ booking:", error);
+        throw error;
+    } finally {
+        session.endSession();
     }
 }
 

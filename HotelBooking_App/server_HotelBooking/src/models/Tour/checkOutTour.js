@@ -22,6 +22,7 @@ const checkOutTourSchema = new mongoose.Schema({
         enum: ['pending', 'confirmed', 'completed', 'cancelled'],
         default: 'pending',
     },
+    isConfirmed: { type: Boolean, default: false },
     amount: { type: Number },
 }, { timestamps: true })
 
