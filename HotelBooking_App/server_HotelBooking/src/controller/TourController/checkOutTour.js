@@ -10,7 +10,7 @@ export const checkOutBookingTour = async (req, res) => {
         if (!booking) {
             return res.status(404).json({ message: "Không tìm thấy booking" });
         }
-
+        
         // Tạo thông tin thanh toán
         const newPayment = new CheckOutTour({
             BookingTourId,

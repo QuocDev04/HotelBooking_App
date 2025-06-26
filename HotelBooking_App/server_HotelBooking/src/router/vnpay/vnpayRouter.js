@@ -3,7 +3,7 @@ import { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } from 'vnpay';
 import BookingOnySchema from '../../models/Room/BookingRoom';
 import checkOutTourSchema from '../../models/Tour/checkOutTour';
 import RoomModel from '../../models/Room/RoomModel'; // chắc chắn import đúng path nhé
-
+import { sendMail } from "../../controller/mail/sendMail";
 const Vnpay = express.Router();
 
 Vnpay.post('/vnpay/:bookingId', async (req, res) => {
@@ -101,10 +101,88 @@ Vnpay.get('/check-payment-vnpay', async (req, res) => {
                         payment_date: new Date(),
                     },
                     { new: true }
-                ).populate('BookingTourId');
+                ).populate({
+                    path: 'BookingTourId',
+                    select: 'tourId totalPriceBooking itemRoom bookingDate endTime adultsTour childrenTour',
+                    populate: [
+                        {
+                            path: 'tourId',
+                            select: 'nameTour itemTransport',
+                            populate: {
+                                path: 'itemTransport.TransportId',
+                                model: 'Transport',
+                                select: 'transportType transportName transportNumber',
+                            },
+                        },
+                        {
+                            path: 'itemRoom.roomId',
+                            model: 'Room',
+                            select: 'nameRoom capacityRoom typeRoom',
+                        },
+                    ],
+                });
 
-                // Cập nhật trạng thái phòng nếu có
                 const booking = updated?.BookingTourId;
+                const email = updated?.emailUser;
+                const fullName = updated?.fullName;
+
+                const tourName = booking?.tourId?.nameTour || 'N/A';
+                const transports = (booking?.tourId?.itemTransport || [])
+                    .map(it => {
+                        const t = it?.TransportId;
+                        return t
+                            ? `${t.transportType} - ${t.transportName} (${t.transportNumber})`
+                            : null;
+                    })
+                    .filter(Boolean);
+                const transportHTML =
+                    transports.length > 0
+                        ? transports.map(str => `<li>${str}</li>`).join('')
+                        : '<li>Không xác định</li>';
+
+                const rooms = (booking?.itemRoom || [])
+                    .map(it => {
+                        return it
+                            ? `Tên Phòng: ${it.roomId?.nameRoom} - Sức Chứa: ${it.roomId?.capacityRoom} - Loại Phòng: ${it.roomId?.typeRoom} `
+                            : null;
+                    })
+                    .filter(Boolean);
+                const roomHTML =
+                    rooms.length > 0
+                        ? rooms.map(str => `<li>${str}</li>`).join('')
+                        : '<li>Không có phòng</li>';
+
+                const totalPrice = booking?.totalPriceBooking ?? 0;
+                const totalPriceVN = totalPrice.toLocaleString('vi-VN');
+
+                if (email) {
+                    try {
+                        await sendMail({
+                            email,
+                            subject: 'Xác nhận thanh toán tour thành công',
+                            html: `
+                        <p>Xin chào <strong>${fullName}</strong>,</p>
+                        <p>Bạn đã <b>thanh toán thành công</b> cho tour <b>${tourName}</b>.</p>
+                        <ul>
+                          <li><strong>Mã đặt chỗ:</strong> ${bookingId}</li>
+                          <li><strong>Thời Gian Đi:</strong> ${booking?.bookingDate}</li>
+                          <li><strong>Thời Gian Kết Thúc:</strong> ${booking?.endTime}</li>
+                          <li><strong>Người Lớn:</strong> ${booking?.adultsTour} người</li>
+                          <li><strong>Trẻ Con:</strong> ${booking?.childrenTour} người</li>
+                          <li><strong>Tổng giá:</strong> ${totalPriceVN} VNĐ</li>
+                        </ul>
+                        <p><strong>Phương tiện di chuyển:</strong></p>
+                        <ul>${transportHTML}</ul>
+                        <p><strong>Phòng bạn đã chọn:</strong></p>
+                        <ul>${roomHTML}</ul>
+                        <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi!</p>
+                      `,
+                        });
+                        console.log(' Đã gửi email xác nhận tới', email);
+                    } catch (mailErr) {
+                        console.error('  Gửi email thất bại:', mailErr);
+                    }
+                }
                 if (booking?.itemRoom?.length > 0) {
                     const roomIds = booking.itemRoom.map(item => item.roomId);
                     await Promise.all(roomIds.map(async id => {
@@ -157,7 +235,6 @@ Vnpay.get('/check-payment-vnpay', async (req, res) => {
 
             return res.redirect('http://localhost:5173/payment-result?success=false&message=Giao dịch thất bại');
         }
-
     } catch (error) {
         console.error('Lỗi xử lý callback:', error);
         return res.redirect('http://localhost:5173/payment-result?success=false&message=Lỗi hệ thống');
