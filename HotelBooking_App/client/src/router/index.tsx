@@ -12,6 +12,7 @@ import { HotelPolicy } from "../pages/Tour/hotelPolicy"
 import JapanTourPage from "../pages/Tour/detailTour"
 import BookingRoom from "../pages/Booking/BookingRoom"
 import BookingAll from "../pages/Booking/BookingAll"
+import InfoUser from "../pages/InfoUser/InfoUser"
 
 
 const Router = () => {
@@ -30,6 +31,7 @@ const Router = () => {
                 <Route path="/detailtour" element={<JapanTourPage />} />
                 <Route path="/bookingroom" element={<BookingRoom />} />
                 <Route path="/bookingall" element={<BookingAll />} />
+                <Route path="/infouser" element={<InfoUser />} />
 
             </Route>
         </Routes>
