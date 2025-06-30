@@ -136,25 +136,37 @@ const TourPage = () => {
                 <div className="space-y-6 max-w-3xl mt-6">
                   {rooms?.map((room: any) => {
                     const isSelected = selectedRoom.some((r: any) => r._id === room._id);
-                    const isBooked = room.statusRoom === true;
+                    const isAvailable = room.statusRoom === 'available';
+                    const isWaiting = room.statusRoom === 'waiting';
+                    const isFull = room.statusRoom === 'full';
+                    const isCancelled = room.statusRoom === 'cancelled';
+
+                    let roomStatusText = '';
+                    if (isWaiting) roomStatusText = 'Chờ xác nhận';
+                    else if (isFull) roomStatusText = 'Đã đầy';
+                    else if (isCancelled) roomStatusText = 'Đã hủy';
+                    else if (!isAvailable) roomStatusText = 'Không khả dụng';
+
                     return (
                       <div
                         key={room._id}
                         className={`border rounded-lg overflow-hidden transition-all p-4 bg-blue-100 ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
-                        onClick={() => !isBooked && toggleSelectRoom(roomItem)}
-                        title={isBooked ? 'Phòng đã được đặt' : ''}
+                        onClick={() => isAvailable && toggleSelectRoom(room)}
+                        title={!isAvailable ? `Phòng ${roomStatusText}` : ''}
                         style={{ borderColor: '#2563eb' }}
                       >
                         <div className="flex flex-col md:flex-row gap-4">
                           <img
                             src={room.imageRoom[0]}
-                            alt={room.type}
+                            alt={room.typeRoom}
                             className="rounded-lg w-full md:w-64 h-40 object-cover border border-gray-300 shadow-sm"
                           />
                           <div className="flex flex-col flex-1 justify-between">
                             <div>
                               <div className="flex justify-between items-center">
-                                <h3 className="font-bold text-lg md:text-xl text-black">{ room.nameRoom.split(' ').slice(0, 5).join(' ') + '...' || '' }</h3>
+                                <h3 className="font-bold text-lg md:text-xl text-black">
+                                  {room.nameRoom?.split(' ').slice(0, 5).join(' ') + '...' || ''}
+                                </h3>
                                 <div className="md:mt-0 text-right">
                                   <div className="flex items-center space-x-1 md:space-x-2">
                                     <p className="text-blue-700 font-bold text-lg md:text-xl">
@@ -164,10 +176,17 @@ const TourPage = () => {
                                   </div>
                                 </div>
                               </div>
-                              <p className="text-blue-400 mt-1">{room.typeRoom} - sức chứa tối đa {room.capacityRoom} người</p>
-                              <p className="my-2" dangerouslySetInnerHTML={{ __html: room.descriptionRoom?.split(' ').slice(0, 7).join(' ') + '...' || '' }} />
+                              <p className="text-blue-400 mt-1">
+                                {room.typeRoom} - sức chứa tối đa {room.capacityRoom} người
+                              </p>
+                              <p
+                                className="my-2"
+                                dangerouslySetInnerHTML={{
+                                  __html: room.descriptionRoom?.split(' ').slice(0, 7).join(' ') + '...' || '',
+                                }}
+                              />
                               <div className="flex flex-wrap gap-2 mt-3 max-h-16 overflow-hidden">
-                                {room.amenitiesRoom?.map((item: any, i: any) => (
+                                {room.amenitiesRoom?.map((item: any, i: number) => (
                                   <span
                                     key={i}
                                     className="bg-blue-200 text-blue-700 px-2 py-1 rounded text-xs whitespace-nowrap"
@@ -177,18 +196,30 @@ const TourPage = () => {
                                 ))}
                               </div>
                             </div>
+
                             <button
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (!isAvailable) return;
                                 if (isSelected) {
                                   setSelectedRoom(selectedRoom.filter((r) => r._id !== room._id));
                                 } else {
                                   setSelectedRoom([...selectedRoom, room]);
                                 }
                               }}
-                              className={`mt-4 w-full py-2 rounded-lg ${isSelected ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'} ${isBooked ? 'cursor-not-allowed bg-gray-300 text-gray-600' : ''}`}
-                              disabled={isBooked}
+                              className={`mt-4 w-full py-2 rounded-lg ${isAvailable
+                                  ? isSelected
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-100 hover:bg-gray-200'
+                                  : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                                }`}
+                              disabled={!isAvailable}
                             >
-                              {isBooked ? 'Đã được đặt' : isSelected ? 'Bỏ chọn' : 'Chọn phòng'}
+                              {!isAvailable
+                                ? roomStatusText
+                                : isSelected
+                                  ? 'Bỏ chọn'
+                                  : 'Chọn phòng'}
                             </button>
                           </div>
                         </div>

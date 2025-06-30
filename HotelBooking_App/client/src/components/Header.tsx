@@ -9,11 +9,11 @@ import { Link } from 'react-router-dom';
 
 const Header = () => {
     const navLinks = [
-        { name: 'Tìm phương tiện', path: '/transport' },
-        { name: 'Tìm phòng', path: '/rooms' },
-        { name: 'Tìm địa điểm du lịch', path: '/destinations' },
+        { name: 'Phòng', path: '/rooms' },
+        { name: 'Các địa điểm du lịch', path: '/destinations' },
         { name: 'Giới Thiệu', path: '/introduce' },
         { name: 'Blog', path: '/blog' },
+        { name: 'Các câu hỏi thường gặp', path: '/hotelPolicy' },
     ];
 
     const [userId, setUserId] = useState<string | null>(null);
@@ -43,10 +43,12 @@ const Header = () => {
     const token = localStorage.getItem("token");
 
     const user = (
-        <div className="flex flex-col gap-1 p-2 min-w-[150px]">
-            <h3 className="text-[#8B4513] text-sm font-medium pb-1 mb-1">Tài khoản</h3>
 
-            <Link to={"/profile"}>
+        <div className="flex flex-col gap-1 p-2 min-w-[150px] ">
+            <h3 className="text-[#8B4513] text-sm font-medium pb-1  mb-1">
+                Tài khoản
+            </h3>
+            <Link to={"/infouser"}>
                 <div className="hover:bg-[#E6D5B8]/50 px-3 py-1.5 rounded-md transition-all text-[#8B4513] text-sm">
                     Thông Tin
                 </div>

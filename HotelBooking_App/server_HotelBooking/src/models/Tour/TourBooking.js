@@ -26,6 +26,7 @@ const TourBookingSchema = new mongoose.Schema({
     endTime: { type: Date },
     adultsTour: { type: Number, required: true },
     childrenTour: { type: Number, required: true },
+    slot_reserved: { type: Boolean, default: false },
 }, { timestamps: true });
 
 export default mongoose.model('BookingTour', TourBookingSchema);
