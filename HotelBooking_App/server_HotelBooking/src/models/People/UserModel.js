@@ -7,7 +7,11 @@ const UserModel = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     phone_number: { type: String, required: true },
     address: { type: String },
-    profile_picture: { type: String },
+    avatar: {
+        type: String,
+        default:
+            "https://png.pngtree.com/element_our/20200610/ourmid/pngtree-character-default-avatar-image_2237203.jpg",
+      },
     type:{type:String, enum:['login', 'loginGoogle']}
 }, { timestamps: true })
 
