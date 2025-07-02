@@ -4,7 +4,7 @@ import { Spin, Typography } from "antd";
 import instance from "../configs/axios";
 
 const { Text } = Typography;
-
+   
 const SyncUserToBackend: React.FC = () => {
     const { isSignedIn, user } = useUser();
     const { getToken } = useAuth();
