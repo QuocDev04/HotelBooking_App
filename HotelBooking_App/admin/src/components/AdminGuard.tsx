@@ -10,6 +10,7 @@ const SyncUserToBackend: React.FC = () => {
     const { getToken } = useAuth();
     const [loading, setLoading] = useState(false);
 
+    
     useEffect(() => {
         if (!isSignedIn || !user) return;
 
