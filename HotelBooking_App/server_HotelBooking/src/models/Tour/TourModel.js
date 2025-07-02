@@ -10,7 +10,7 @@ const TransportItemSchema = new mongoose.Schema({
 const TourModel = new mongoose.Schema({
     nameTour: { type: String, required: true },
     itemTransport: [TransportItemSchema],
-    destination: { type: String, required: true },
+    destination: { type: mongoose.Schema.Types.ObjectId, ref: "Location", required: true },
     departure_location: { type: String, required: true },
     duration: { type: String, required: true },
     price: { type: Number, required: true },             // Giá gốc

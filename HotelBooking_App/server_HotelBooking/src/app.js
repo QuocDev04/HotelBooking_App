@@ -15,6 +15,7 @@ import TourRouter from './router/TourRouter/TourRouter';
 import RouterRoom from './router/RoomRouer/RoomRouter';
 import UserRouter from './router/PeopleRouter/UserRouter';
 import RouterChecOutBookingTour from "./router/TourRouter/checkOutTour";
+import routerLocation from "./router/Location/locationRouter";
 
 const app = express();
 app.use(express.json());
@@ -35,5 +36,6 @@ app.use('/api/', RouterBookingOnly)
 app.use('/api/', Vnpay)
 app.use('/api/', RouterBookingTour)
 app.use('/api/', RouterChecOutBookingTour)
+app.use('/api/', routerLocation)
 
 export const viteNodeApp = app;

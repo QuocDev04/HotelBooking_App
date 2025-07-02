@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 
 const RoomModel = new mongoose.Schema({
@@ -20,5 +20,10 @@ const RoomModel = new mongoose.Schema({
         min: 1
     },
     waitingSince: { type: Date, default: null },
+    locationId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Location',
+        required: true
+    }
 }, { timestamps: true });
 export default mongoose.model("Room", RoomModel);
