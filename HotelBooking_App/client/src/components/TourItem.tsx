@@ -42,7 +42,7 @@ const TourItem = ({ tour }: TourItemProps) => {
                         <div className="flex items-center text-sm justify-between mb-2 leading-snug truncate">
                             <div className="flex items-center gap-1 mr-4  text-gray-500">
                                 <CalendarIcon className="w-4 h-4" />
-                                <span> {tour.departure_location} - {tour.destination?.locationName} - {tour.destination?.country}</span>
+                                <span>  {tour.destination?.locationName} - {tour.destination?.country}</span>
                             </div>
                             <div className="flex items-center gap-1 text-gray-500">
                                 <CalendarIcon className="w-4 h-4" />
@@ -50,19 +50,16 @@ const TourItem = ({ tour }: TourItemProps) => {
                             </div>
                         </div>
 
-                        {/* Giá cũ chỉ gạch khi có giá mới */}
-                        {tour.price && tour.finalPrice && (
-                            <div>
-                                <span className="line-through text-gray-400 text-sm">
+                        <div className="flex justify-between items-end min-h-[56px]">
+                            <div className="flex flex-col">
+                                <span className={`text-sm text-gray-400 line-through ${tour.price > tour.finalPrice ? '' : 'invisible'}`}>
                                     {tour.price.toLocaleString('vi-VN')}đ
                                 </span>
+                                <span className="text-lg font-bold text-blue-600">
+                                    Giá: {(tour.finalPrice ?? tour.price)?.toLocaleString('vi-VN') || "N/A"}đ
+                                </span>
                             </div>
-                        )}
 
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-lg font-bold text-blue-600">
-                                <p>Giá: {(tour.finalPrice ?? tour.price)?.toLocaleString('vi-VN') || "N/A"}đ</p>
-                            </span>
                             {tour.discountPercent && (
                                 <span className="flex items-center gap-1 bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded border border-red-400">
                                     <TicketIcon className="w-4 h-4" />
@@ -84,10 +81,11 @@ const TourItem = ({ tour }: TourItemProps) => {
                             </Link>
 
                         </div>
-
-                        <button className="mt-auto w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition">
-                            Đặt ngay
-                        </button>
+                        <Link to={`/detailtour/${tour._id}`}>
+                            <button className="mt-auto w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition">
+                                Đặt ngay
+                            </button>
+                        </Link>
                     </div>
                 </motion.div>
             </div>
