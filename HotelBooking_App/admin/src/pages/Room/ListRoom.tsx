@@ -33,6 +33,8 @@ const ListRoom = () => {
     queryKey: ['room'],
     queryFn: async () => instance.get('/room')
   })
+  console.log("data",data?.data.rooms);
+  
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
     mutationFn: async (id: string) => {
@@ -120,8 +122,11 @@ const ListRoom = () => {
     },
     {
       title: 'Địa Chỉ',
-      dataIndex: 'addressRoom',
-      key: 'addressRoom',
+      dataIndex: 'locationId',
+      key: 'locationId',
+      render: (_ : any, room:any) => {
+        return room?.locationId?.locationName + ' - ' + room?.locationId?.country 
+      }
     },
     {
       title: 'Dich Vụ Phòng',

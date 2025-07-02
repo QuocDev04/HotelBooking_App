@@ -42,7 +42,7 @@ const TourItem = ({ tour }: TourItemProps) => {
                         <div className="flex items-center text-sm justify-between mb-2 leading-snug truncate">
                             <div className="flex items-center gap-1 mr-4  text-gray-500">
                                 <CalendarIcon className="w-4 h-4" />
-                                <span> {tour.departure_location} - {tour.destination}</span>
+                                <span> {tour.departure_location} - {tour.destination?.locationName} - {tour.destination?.country}</span>
                             </div>
                             <div className="flex items-center gap-1 text-gray-500">
                                 <CalendarIcon className="w-4 h-4" />

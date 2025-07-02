@@ -37,7 +37,7 @@ export async function releaseExpiredWaitingRooms() {
 
             await TourModel.findByIdAndUpdate(booking.tourId, {
                 $inc: { available_slots: totalPeople },
-              });
+            });
             booking.slot_reserved = false;
             await booking.save();
         } else {
@@ -213,7 +213,7 @@ export const createBookingTour = async (req, res) => {
 export const getByIdBookingTour = async (req, res) => {
     try {
         const byId = await TourBookingSchema.findById(req.params.id)
-            .populate("itemRoom.roomId", "nameRoom addressRoom")
+            .populate("itemRoom.roomId", "nameRoom locationId")
             .populate("tourId");
 
         return res.status(200).json({

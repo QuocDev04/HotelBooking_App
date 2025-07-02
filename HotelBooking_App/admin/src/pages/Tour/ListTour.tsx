@@ -64,6 +64,9 @@ const ListTour = () => {
       title: 'Điểm Đến',
       dataIndex: 'destination',
       key: 'destination',
+      render:(_:any, tour:any) => {
+        return tour?.destination?.locationName + " - " + tour?.destination?.country
+      }
     },
     {
       title: 'Nơi Xuất Phát',

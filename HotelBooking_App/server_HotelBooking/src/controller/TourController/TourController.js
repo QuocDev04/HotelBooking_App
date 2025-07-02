@@ -6,7 +6,9 @@ import TourBooking from "../../models/Tour/TourBooking";
 
 export const getAllTours = async (req, res) => {
     try {
-        const tour = await TourModel.find().populate("itemTransport.TransportId", "transportName transportNumber transportType")
+        const tour = await TourModel.find()
+        .populate("itemTransport.TransportId", "transportName transportNumber transportType")
+            .populate("destination", "locationName country")
         return res.status(StatusCodes.OK).json({
             success: true,
             message: "Get all tours successfully",
@@ -100,7 +102,7 @@ export const UpdateTour = async (req, res) => {
 
 export const GetTourById = async (req, res) => {
     try {
-        const tour = await TourModel.findById(req.params.id).populate("itemTransport.TransportId", "transportName transportNumber transportType")
+        const tour = await TourModel.findById(req.params.id).populate("itemTransport.TransportId", "transportName transportNumber transportType").populate("destination", "locationName country")
         if (!tour) {
             return res.status(404).json({ success: false, message: "Không tìm thấy tour" });
         }

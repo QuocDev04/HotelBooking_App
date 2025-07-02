@@ -13,7 +13,6 @@ const RoomModel = new mongoose.Schema({
         enum: ['waiting', 'available', 'full', 'cancelled'],
         default: 'available'
     },
-    addressRoom: { type: String, required: true },
     capacityRoom: {
         type: Number,
         required: true,

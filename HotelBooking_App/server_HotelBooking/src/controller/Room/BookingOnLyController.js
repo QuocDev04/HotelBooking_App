@@ -119,7 +119,7 @@ export const createBookingOnlyRoom = async (req, res) => {
 export const getBookingWithDetails = async (req, res) => {
     try {
         const bookings = await BookingOnlyRoom.find()
-            .populate("itemRoom.roomId", "nameRoom priceRoom amenitiesRoom addressRoom")
+            .populate("itemRoom.roomId", "nameRoom priceRoom amenitiesRoom locationId")
         return res.status(200).json({
             success: true,
             message: "Bookings retrieved with user and room info",
@@ -137,7 +137,7 @@ export const getBookingWithDetails = async (req, res) => {
 export const getOrderById = async (req, res) => {
     try {
         const { userId } = req.params;
-        const order = await BookingOnlyRoom.find({ userId }).populate("itemRoom.roomId", "nameRoom priceRoom amenitiesRoom addressRoom")
+        const order = await BookingOnlyRoom.find({ userId }).populate("itemRoom.roomId", "nameRoom priceRoom amenitiesRoom locationId")
         if (!order) {
             return res.status(StatusCodes.NOT_FOUND).json({ error: "Order not found" })
         }

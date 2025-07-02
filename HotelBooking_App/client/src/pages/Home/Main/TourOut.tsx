@@ -113,7 +113,7 @@ const TourOut = () => {
                                         <div className="flex items-center justify-between mb-2 text-sm text-gray-500">
                                             <div className="flex items-center gap-1">
                                                 <CalendarIcon className="w-4 h-4" />
-                                                <span className='line-clamp-1'>{tour.departure_location} - {tour.destination}</span>
+                                                <span className='line-clamp-1'>{tour.departure_location} - {tour.destination?.locationName} - {tour.destination?.country}</span>
                                             </div>
                                             <div className="flex items-center gap-1">
                                                 <CalendarIcon className="w-4 h-4" />

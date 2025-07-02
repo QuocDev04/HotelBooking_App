@@ -7,7 +7,7 @@ interface Bill {
     _id: string;
     roomId: string;
     nameRoom: string;
-    addressRoom: string;
+    locationId: string;
     amenitiesRoom: string[];
     capacityRoom: number;
     priceRoom: number;
@@ -150,7 +150,7 @@ const InfoUser = () => {
                                 </div>
                             </div>
                         </div>
-                    
+
                     </div>
                 </div>
 
@@ -224,8 +224,8 @@ const InfoUser = () => {
                             <button
                                 onClick={() => setSelectedStatus("all")}
                                 className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${selectedStatus === "all"
-                                        ? "bg-blue-600 text-white shadow-lg"
-                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                    ? "bg-blue-600 text-white shadow-lg"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                     }`}
                             >
                                 Tất cả
@@ -233,8 +233,8 @@ const InfoUser = () => {
                             <button
                                 onClick={() => setSelectedStatus("completed")}
                                 className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${selectedStatus === "completed"
-                                        ? "bg-green-600 text-white shadow-lg"
-                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                    ? "bg-green-600 text-white shadow-lg"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                     }`}
                             >
                                 Đã thanh toán
@@ -242,8 +242,8 @@ const InfoUser = () => {
                             <button
                                 onClick={() => setSelectedStatus("pending")}
                                 className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${selectedStatus === "pending"
-                                        ? "bg-yellow-600 text-white shadow-lg"
-                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                    ? "bg-yellow-600 text-white shadow-lg"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                     }`}
                             >
                                 Chờ thanh toán
@@ -276,8 +276,8 @@ const InfoUser = () => {
                                                 {/* Room Image */}
                                                 <div className="flex-shrink-0">
                                                     <div className={`w-20 h-20 rounded-xl flex items-center justify-center shadow-lg overflow-hidden ${bill?.BookingTourId?.tourId?.nameTour
-                                                            ? 'bg-gradient-to-br from-purple-400 to-pink-500'
-                                                            : 'bg-gradient-to-br from-blue-400 to-purple-500'
+                                                        ? 'bg-gradient-to-br from-purple-400 to-pink-500'
+                                                        : 'bg-gradient-to-br from-blue-400 to-purple-500'
                                                         }`}>
                                                         {bill?.BookingTourId?.tourId?.nameTour ? (
                                                             // Tour image
@@ -329,7 +329,7 @@ const InfoUser = () => {
                                                             <span>
                                                                 {bill?.BookingTourId?.tourId?.nameTour
                                                                     ? 'Tour du lịch'
-                                                                    : bill?.addressRoom || 'N/A'
+                                                                    : bill?.locationId || 'N/A'
                                                                 }
                                                             </span>
                                                         </div>
@@ -436,8 +436,8 @@ const InfoUser = () => {
                                         <div className="flex items-center space-x-4">
                                             <div className="flex items-center space-x-2 text-sm">
                                                 <div className={`w-2 h-2 rounded-full ${bill.payment_status === 'completed' ? 'bg-green-500' :
-                                                        bill.payment_status === 'pending' ? 'bg-yellow-500' :
-                                                            'bg-gray-400'
+                                                    bill.payment_status === 'pending' ? 'bg-yellow-500' :
+                                                        'bg-gray-400'
                                                     }`}></div>
                                                 <span className="text-gray-600">
                                                     {getStatusText(bill.payment_status || '')}
@@ -606,7 +606,7 @@ const InfoUser = () => {
                                                                     <span className="font-bold text-lg text-gray-900 truncate">{room.nameRoom}</span>
                                                                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 ml-2">{room.typeRoom}</span>
                                                                 </div>
-                                                                <div className="text-gray-600 text-sm truncate">{room.addressRoom}</div>
+                                                                <div className="text-gray-600 text-sm truncate">{room.locationId}</div>
                                                                 <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                                                                     <span>Sức chứa: {room.capacityRoom}</span>
                                                                     <span>•</span>
@@ -661,7 +661,7 @@ const InfoUser = () => {
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                                     </svg>
-                                                    <span>{selectedBill.addressRoom}</span>
+                                                    <span>{selectedBill.locationId}</span>
                                                 </div>
                                                 <div className="flex items-center space-x-2">
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

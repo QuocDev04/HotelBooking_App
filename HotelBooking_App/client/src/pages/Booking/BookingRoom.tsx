@@ -37,22 +37,22 @@ const BookingRoom = () => {
   const { mutate } = useMutation({
     mutationFn: async (data) => {
       try {
-        return await instanceClient.post('/booking-room',data)
+        return await instanceClient.post('/booking-room', data)
       } catch (error) {
         const err = error as AxiosError<{ messages: string[] }>;
         const errorMessages = err?.response?.data?.messages;
         throw new Error(errorMessages?.[0] || 'Đã có lỗi xảy ra');
       }
     },
-    
+
     onSuccess: async (data) => {
       const paymentMethod = data?.data?.booking?.payment_method;
-      console.log("databongking",data?.data?.booking?._id);
+      console.log("databongking", data?.data?.booking?._id);
       // Nếu phương thức là chuyển khoản, gọi đến VNPay
       if (paymentMethod === "bank_transfer") {
         try {
           const res = await instanceClient.post(`/vnpay/${data?.data?.booking?._id}`);
-          console.log("VNPay response:", res?.data); 
+          console.log("VNPay response:", res?.data);
 
           if (res.data?.success && res.data?.paymentUrl) {
             window.location.href = res.data.paymentUrl;
@@ -154,7 +154,7 @@ const BookingRoom = () => {
           </div>
           <div className="font-bold text-base mb-1">{room?.nameRoom}</div>
           <div className="text-xs text-gray-700 mb-1">
-            {room?.addressRoom
+            {room?.locationId
             }
           </div>
           <div className="text-green-700 text-xs font-medium mb-1">
