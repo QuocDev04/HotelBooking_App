@@ -192,7 +192,7 @@ const TourPage = () => {
                               <p
                                 className="my-2"
                                 dangerouslySetInnerHTML={{
-                                  __html: room.descriptionRoom?.split(' ').slice(0, 7).join(' ') + '...' || '',
+                                  __html: room.descriptionRoom?.split(' ').slice(0, 10).join(' ') + '...' || '',
                                 }}
                               />
                               <div className="flex flex-wrap gap-2 mt-3 max-h-16 overflow-hidden">

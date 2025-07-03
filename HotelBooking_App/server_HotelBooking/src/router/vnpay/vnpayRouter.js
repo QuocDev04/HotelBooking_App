@@ -2,7 +2,7 @@ import express from 'express';
 import { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } from 'vnpay';
 import BookingOnySchema from '../../models/Room/BookingRoom';
 import checkOutTourSchema from '../../models/Tour/checkOutTour';
-import RoomModel from '../../models/Room/RoomModel'; // chắc chắn import đúng path nhé
+import RoomModel from '../../models/Room/RoomModel'; 
 import { sendMail } from "../../controller/mail/sendMail";
 const Vnpay = express.Router();
 
@@ -123,6 +123,8 @@ Vnpay.get('/check-payment-vnpay', async (req, res) => {
                 });
 
                 const booking = updated?.BookingTourId;
+
+
                 const email = updated?.emailUser;
                 const fullName = updated?.fullName;
 

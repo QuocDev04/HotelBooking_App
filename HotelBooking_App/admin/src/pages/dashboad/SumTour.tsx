@@ -27,16 +27,16 @@ const SumTour = () => {
 
     // Lọc theo từng mốc thời gian
     const todayCount = bookings.filter((item: any) =>
-        dayjs(item.BookingTourId?.bookingDate).isSame(today, "day")
+        dayjs(item.BookingTourId?.createdAt).isSame(today, "day")
     ).length;
 
     const weekCount = bookings.filter((item: any) => {
-        const date = dayjs(item.BookingTourId?.bookingDate);
+        const date = dayjs(item.BookingTourId?.createdAt);
         return date.isBetween(startOfWeek, endOfWeek, null, "[]");
     }).length;
 
     const monthCount = bookings.filter((item: any) => {
-        const date = dayjs(item.BookingTourId?.bookingDate);
+        const date = dayjs(item.BookingTourId?.createdAt);
         return date.isBetween(startOfMonth, endOfMonth, null, "[]");
     }).length;
 
