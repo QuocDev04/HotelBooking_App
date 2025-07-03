@@ -104,7 +104,7 @@ const TourOut = () => {
 
                                     <div className="p-5 flex flex-col flex-grow">
                                         <Link to={`/detailtour/${tour._id}`}>
-                                            <h3 className="text-lg font-bold text-gray-800 mb-2 leading-snug line-clamp-2 min-h-[48px]">
+                                            <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2 min-h-[48px] leading-snug truncate">
                                                 {tour.nameTour}
                                             </h3>
                                         </Link>
@@ -113,7 +113,7 @@ const TourOut = () => {
                                         <div className="flex items-center justify-between mb-2 text-sm text-gray-500">
                                             <div className="flex items-center gap-1">
                                                 <CalendarIcon className="w-4 h-4" />
-                                                <span className='line-clamp-1'>{tour.departure_location} - {tour.destination?.locationName} - {tour.destination?.country}</span>
+                                                <span className='line-clamp-1'>{tour.destination?.locationName} - {tour.destination?.country}</span>
                                             </div>
                                             <div className="flex items-center gap-1">
                                                 <CalendarIcon className="w-4 h-4" />

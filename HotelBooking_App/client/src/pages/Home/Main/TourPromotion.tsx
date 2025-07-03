@@ -38,6 +38,8 @@ const TourPromotion = () => {
         queryFn: () => instanceClient.get('/featured')
     })
     const tours = data?.data?.tourFeatured || []
+    console.log('tours',tours);
+    
     return (
         <section className="py-16">
             <div className="container mx-auto px-4">
@@ -75,7 +77,7 @@ const TourPromotion = () => {
                             <div className="p-5 flex flex-col flex-grow">
                                 {/* Tên tour */}
                                 <Link to={`detailtour/${tour._id}`}>
-                                    <h3 className="text-lg font-bold text-gray-800 mb-2 leading-snug">
+                                    <h3 className="text-lg font-bold text-gray-800 mb-2 leading-snug truncate">
                                         {tour.nameTour}
                                     </h3>
                                 </Link>
@@ -83,7 +85,7 @@ const TourPromotion = () => {
                                 <div className="flex items-center justify-between mb-2">
                                     <div className="flex items-center gap-1 text-gray-500">
                                         <CalendarIcon className="w-4 h-4" />
-                                        <span> {tour.departure_location} - {tour.destination?.locationName} - {tour.destination?.country}</span>
+                                        <span>{tour.destination?.locationName} - {tour.destination?.country}</span>
                                     </div>
                                     <div className="flex items-center gap-1 text-gray-500">
                                         <CalendarIcon className="w-4 h-4" />
@@ -91,19 +93,16 @@ const TourPromotion = () => {
                                     </div>
                                 </div>
 
-                                {/* Giá cũ chỉ gạch khi có giá mới */}
-                                {tour.price && tour.finalPrice && (
-                                    <div>
-                                        <span className="line-through text-gray-400 text-sm">
+                                <div className="flex justify-between items-end min-h-[56px]">
+                                    <div className="flex flex-col">
+                                        <span className={`text-sm text-gray-400 line-through ${tour.price > tour.finalPrice ? '' : 'invisible'}`}>
                                             {tour.price.toLocaleString('vi-VN')}đ
                                         </span>
+                                        <span className="text-lg font-bold text-blue-600">
+                                            Giá: {(tour.finalPrice ?? tour.price)?.toLocaleString('vi-VN') || "N/A"}đ
+                                        </span>
                                     </div>
-                                )}
 
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-lg font-bold text-blue-600">
-                                        <p>Giá: {(tour.finalPrice ?? tour.price)?.toLocaleString('vi-VN') || "N/A"}đ</p>
-                                    </span>
                                     {tour.discountPercent && (
                                         <span className="flex items-center gap-1 bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded border border-red-400">
                                             <TicketIcon className="w-4 h-4" />

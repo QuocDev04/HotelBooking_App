@@ -138,7 +138,7 @@ export const GetTourById = async (req, res) => {
 //get tour featured
 export const TourFeatured = async (req, res) => {
     try {
-        const tourFeatured = await TourModel.find({ featured: true });
+        const tourFeatured = await TourModel.find({ featured: true }).populate("destination", "locationName country");
         return res.status(StatusCodes.OK).json({
             success: true,
             message: "get tourFeatured successfully",
@@ -155,7 +155,7 @@ export const TourFeatured = async (req, res) => {
 //get tour top_selling
 export const TourTopSelling = async (req, res) => {
     try {
-        const topSellingTours = await TourModel.find()
+        const topSellingTours = await TourModel.find().populate("destination", "locationName country")
             .sort({ totalSold: -1 })
             .limit(7); // Lấy 7 tour có lượt đặt nhiều nhất
         return res.status(StatusCodes.OK).json({

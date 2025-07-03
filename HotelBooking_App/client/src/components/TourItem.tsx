@@ -33,9 +33,11 @@ const TourItem = ({ tour }: TourItemProps) => {
 
                     <div className="p-5 flex flex-col flex-grow">
                         {/* Tên tour */}
-                        <Link to={`/detailtour/${tour._id}`}><h3 className="text-lg font-bold text-gray-800 mb-2 leading-snug truncate">
+                        <Link to={`/detailtour/${tour._id}`}>
+                        <h3 className="text-lg font-bold text-gray-800 mb-2 leading-snug truncate">
                             {tour.nameTour}
-                        </h3></Link>
+                        </h3>
+                        </Link>
 
 
                         {/* Ngày khởi hành, Địa điểm, Đánh giá */}
