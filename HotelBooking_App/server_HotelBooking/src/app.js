@@ -16,6 +16,7 @@ import RouterRoom from './router/RoomRouer/RoomRouter';
 import UserRouter from './router/PeopleRouter/UserRouter';
 import RouterChecOutBookingTour from "./router/TourRouter/checkOutTour";
 import routerLocation from "./router/Location/locationRouter";
+import CmtRouter from "./router/Cmt/CmtRouter.js";
 
 const app = express();
 app.use(express.json());
@@ -37,5 +38,6 @@ app.use('/api/', Vnpay)
 app.use('/api/', RouterBookingTour)
 app.use('/api/', RouterChecOutBookingTour)
 app.use('/api/', routerLocation)
+app.use('/api/', CmtRouter)
 
 export const viteNodeApp = app;

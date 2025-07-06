@@ -7,9 +7,7 @@ import LeftTourDetail from './Left/LeftTourDetail';
 import Content from './Content/Content';
 import RightTourDetail from './Right/RightTourDetail';
 import Schedule from './Content/Schedule';
-import PriceList from './Content/PriceList';
 import Evaluate from './Content/Evaluate';
-import QA from './Content/QA';
 import { useEffect, useState } from 'react';
 const TourPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -137,9 +135,7 @@ const TourPage = () => {
                 <div className="mt-6">
                   <Content />
                   <Schedule />
-                  <PriceList />
                   <Evaluate />
-                  <QA />
                 </div>
               )}
               {activeTab === 'rooms' && (
