@@ -7,13 +7,16 @@
     "scripts": {
         "dev": "nodemon ./src/app.js",
         "build": "vite build",
-        "start": "node dist/app.js"
+        "start": "node dist/app.js",
+        "postinstall": "patch-package"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "devDependencies": {
         "morgan": "^1.10.0",
+        "patch-package": "^8.0.0",
+        "postinstall-postinstall": "^2.1.0",
         "vite-plugin-node": "^3.1.0",
         "vite-plugin-node-polyfills": "^0.22.0"
     },
