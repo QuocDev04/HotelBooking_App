@@ -23,7 +23,7 @@ app.use(morgan("tiny"));
 //monggo
 
 connectDB();
-
+app.get('/', (req, res) => res.send("API is working"))
 app.use('/api', UserRouter)
 app.use('/api/', RouterRoom)
 app.use('/api/', TourRouter)
