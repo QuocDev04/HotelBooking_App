@@ -78,7 +78,7 @@ const International = () => {
                     }}
                     onSwiper={(swiper) => {
                         setTimeout(() => {
-                            if (typeof swiper.params.navigation !== 'boolean') {
+                            if (swiper.params.navigation && typeof swiper.params.navigation !== 'boolean') {
                                 swiper.params.navigation.prevEl = prevRef.current;
                                 swiper.params.navigation.nextEl = nextRef.current;
                                 swiper.navigation.destroy();
@@ -86,7 +86,7 @@ const International = () => {
                                 swiper.navigation.update();
                             }
                         });
-                    }}
+                      }}
                     breakpoints={{
                         640: { slidesPerView: 2 },
                         1024: { slidesPerView: 3 },

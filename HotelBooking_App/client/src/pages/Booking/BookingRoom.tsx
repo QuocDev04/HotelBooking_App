@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom"
@@ -31,12 +32,19 @@ const BookingRoom = () => {
       setBookingData(JSON.parse(data));
     }
   }, []);
-  const checkInDate = new Date(bookingData?.check_in_date);
-  const checkOutDate = new Date(bookingData?.check_out_date);
+  const checkInDate = bookingData?.check_in_date ? new Date(bookingData.check_in_date) : null;
+  const checkOutDate = bookingData?.check_out_date ? new Date(bookingData.check_out_date) : null;
+  
 
-  const timeDiff = checkOutDate.getTime() - checkInDate.getTime();
-  const numberOfNights = timeDiff / (1000 * 60 * 60 * 24);
 
+  let numberOfNights = 0;
+
+  if (checkInDate && checkOutDate) {
+    const timeDiff = checkOutDate.getTime() - checkInDate.getTime();
+    numberOfNights = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+  } else {
+    console.warn('Ngày nhận/trả phòng không hợp lệ');
+  }
   const formattedCheckIn = dayjs(bookingData?.check_in_date ?? "")
     .add(7, 'hour')
     .format("DD/MM/YYYY [lúc] HH:mm");
