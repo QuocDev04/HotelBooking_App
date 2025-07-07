@@ -7,9 +7,8 @@
     "scripts": {
         "dev": "nodemon ./src/app.js",
         "build": "vite build",
-        "start": "node dist/app.js",
-        "postinstall": "patch-package"
-    },
+        "start": "node dist/app.js"
+        },
     "keywords": [],
     "author": "",
     "license": "ISC",
