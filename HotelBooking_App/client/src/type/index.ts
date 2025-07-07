@@ -1,7 +1,13 @@
+export interface Destination {
+    _id: string;
+    locationName: string;
+    country: string;
+}
+
 export interface Tour {
     _id: number;
     nameTour: string;
-    destination: string;
+    destination: Destination;
     departure_location: string;
     duration: number;
     price: number;
@@ -16,7 +22,7 @@ export interface Tour {
     tour_type: string;
     featured: boolean;
     total_sold: number;
-}
+  }
 
 export interface Room {
     room_id: number;

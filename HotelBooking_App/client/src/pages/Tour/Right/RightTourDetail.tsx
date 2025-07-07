@@ -101,7 +101,7 @@ const RightTourDetail = ({ selectedRoom }: RightTourDetailProps) => {
         if (totalCapacity < adultsTour + childrenTour) {
             message.error('Vui lòng chọn thêm phòng để phù hợp với số người đi');
             return;
-      }
+        }
         const data: BookingTourData = {
             userId,
             tourId: id || '',
@@ -110,7 +110,7 @@ const RightTourDetail = ({ selectedRoom }: RightTourDetailProps) => {
             childrenTour,
             itemRoom: selectedRoom.map(room => ({
                 roomId: room._id,
-              })),
+            })),
         };
 
         mutate(data);
@@ -235,10 +235,10 @@ const RightTourDetail = ({ selectedRoom }: RightTourDetailProps) => {
                     {(
                         price * adultsTour +
                         price * childrenTour +
-                        selectedRoom.reduce(
+                        (selectedRoom?.reduce(
                             (total, room) => total + Number(room.priceRoom) * nights,
                             0
-                        )
+                        ) ?? 0)
                     ).toLocaleString('vi-VN')} đ
                 </span>
             </div>
