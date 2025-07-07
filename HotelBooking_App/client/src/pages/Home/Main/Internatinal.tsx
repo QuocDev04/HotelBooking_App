@@ -78,7 +78,7 @@ const International = () => {
                     }}
                     onSwiper={(swiper) => {
                         setTimeout(() => {
-                            if (typeof swiper.params.navigation !== "boolean") {
+                            if (typeof swiper.params.navigation !== 'boolean') {
                                 swiper.params.navigation.prevEl = prevRef.current;
                                 swiper.params.navigation.nextEl = nextRef.current;
                                 swiper.navigation.destroy();

@@ -48,7 +48,7 @@ const TourItem = ({ tour }: TourItemProps) => {
                         <div className="flex items-center text-sm justify-between mb-2 leading-snug truncate">
                             <div className="flex items-center gap-1 mr-4  text-gray-500">
                                 <CalendarIcon className="w-4 h-4" />
-                                <span>  {tour.destination?.locationName} - {tour.destination?.country}</span>
+                                <span>  {tour.destination?.locationName ? `${tour.destination.locationName} - ${tour.destination.country}` : 'N/A'}</span>
                             </div>
                             <div className="flex items-center gap-1 text-gray-500">
                                 <CalendarIcon className="w-4 h-4" />

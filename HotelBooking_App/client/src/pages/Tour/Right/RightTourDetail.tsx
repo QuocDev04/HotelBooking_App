@@ -58,7 +58,7 @@ const RightTourDetail = ({ selectedRoom }: RightTourDetailProps) => {
 
     const nights = getNights(tours?.duration || '');
 
-    const { mutate, isLoading } = useMutation({
+    const { mutate, isPending } = useMutation({
         mutationFn: async (data: BookingTourData) => {
             try {
                 const response = await instanceClient.post(`/bookingTour`, data);
@@ -248,10 +248,10 @@ const RightTourDetail = ({ selectedRoom }: RightTourDetailProps) => {
             <div className="flex gap-2 my-6">
                 <button
                     onClick={handleBooking}
-                    disabled={isLoading}
+                    disabled={isPending}
                     className="flex-1 py-2 text-white bg-blue-400 rounded hover:bg-blue-500 disabled:opacity-50"
                 >
-                    {isLoading ? 'Đang đặt...' : 'Đặt ngay'}
+                    {isPending ? 'Đang đặt...' : 'Đặt ngay'}
                 </button>
                 <button className="flex-1 py-2 border rounded hover:bg-gray-100">
                     Liên hệ tư vấn
