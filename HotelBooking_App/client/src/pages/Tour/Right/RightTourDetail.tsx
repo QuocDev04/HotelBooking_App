@@ -57,7 +57,6 @@ const RightTourDetail = ({ selectedRoom }: RightTourDetailProps) => {
     };
 
     const nights = getNights(tours?.duration || '');
-    const roomPrice = Number(selectedRoom?.priceRoom || 0);
 
     const { mutate, isLoading } = useMutation({
         mutationFn: async (data: BookingTourData) => {

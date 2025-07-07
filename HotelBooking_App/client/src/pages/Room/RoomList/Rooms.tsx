@@ -13,6 +13,8 @@ interface Room {
   amenitiesRoom: string;
   priceRoom: number;
   imageRoom: string[];
+  locationName: string;
+  country: string;
 }
 
 const RoomList = () => {
@@ -60,7 +62,7 @@ const RoomList = () => {
                   />
                 </Link>
                 <div className="p-4">
-                  <p className="text-sm text-gray-500 mb-1">📍 {room.locationId?.locationName} - {room.locationId?.country}</p>
+                  <p className="text-sm text-gray-500 mb-1">�� {room.locationName} - {room.country}</p>
                   <Link to={`/roomdetail/${room._id}`}>
                     <h3 className="text-blue-600 font-semibold text-lg mb-1">
                       {room.nameRoom}

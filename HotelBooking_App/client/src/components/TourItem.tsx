@@ -8,6 +8,10 @@ type TourItemProps = {
     tour: Tour
 }
 
+interface TourItem {
+  locationName: string;
+  country: string;
+}
 
 const TourItem = ({ tour }: TourItemProps) => {
     return (
