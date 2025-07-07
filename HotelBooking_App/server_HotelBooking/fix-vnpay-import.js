@@ -1,11 +1,17 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const filePath = path.resolve(__dirname, 'node_modules/vnpay/index.js'); // hoặc file nào đó
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-let content = fs.readFileSync(filePath, 'utf-8');
-content = content.replace(/dayjs\/plugin\/timezone(['"])/g, 'dayjs/plugin/timezone.js$1');
+const filePath = path.resolve(__dirname, 'node_modules/vnpay/index.js');
 
-fs.writeFileSync(filePath, content);
+async function fix() {
+    let content = await fs.readFile(filePath, 'utf-8');
+    content = content.replace(/dayjs\/plugin\/timezone(['"])/g, 'dayjs/plugin/timezone.js$1');
+    await fs.writeFile(filePath, content);
+    console.log('Fixed vnpay import paths');
+}
 
-console.log('Fixed vnpay import paths');
+fix();
