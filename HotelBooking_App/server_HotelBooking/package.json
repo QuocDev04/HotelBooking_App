@@ -9,7 +9,7 @@
         "build": "vite build",
         "start": "node dist/app.js",
         "postinstall": "node fix-vnpay-import.js"
-        },
+    },
     "keywords": [],
     "author": "",
     "license": "ISC",
