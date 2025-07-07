@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import TransportModel from "../../models/Transport/TransportModel";
+import TransportModel from "../../models/Transport/TransportModel.js";
 
 
 export const GetTransportAll = async (req, res) => {

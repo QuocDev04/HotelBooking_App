@@ -1,6 +1,6 @@
 
 import  express  from 'express';
-import { DeleteUser, GetAllUser, GetByIdUser, LoginUser, PutUser, RegisterUser } from '../../controller/PeopleController/UserControllers';
+import { DeleteUser, GetAllUser, GetByIdUser, LoginUser, PutUser, RegisterUser } from '../../controller/PeopleController/UserControllers.js';
 
 const UserRouter = express.Router();
 UserRouter.post('/register', RegisterUser)

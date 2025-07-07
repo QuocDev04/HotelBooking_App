@@ -1,9 +1,9 @@
 import express from 'express';
 import { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } from 'vnpay';
-import BookingOnySchema from '../../models/Room/BookingRoom';
-import checkOutTourSchema from '../../models/Tour/checkOutTour';
-import RoomModel from '../../models/Room/RoomModel'; 
-import { sendMail } from "../../controller/mail/sendMail";
+import BookingOnySchema from '../../models/Room/BookingRoom.js';
+import checkOutTourSchema from '../../models/Tour/checkOutTour.js';
+import RoomModel from '../../models/Room/RoomModel.js'; 
+import { sendMail } from "../../controller/mail/sendMail.js";
 const Vnpay = express.Router();
 
 Vnpay.post('/vnpay/:bookingId', async (req, res) => {

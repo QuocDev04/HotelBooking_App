@@ -1,6 +1,6 @@
 
 import  express  from 'express';
-import { AddRoom, DeleteRoom, GetRoomById, RoomAll, UpdateRoom } from '../../controller/Room/Room';
+import { AddRoom, DeleteRoom, GetRoomById, RoomAll, UpdateRoom } from '../../controller/Room/Room.js';
 
 const RouterRoom = express.Router();
 RouterRoom.get('/room', RoomAll);

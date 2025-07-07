@@ -1,5 +1,5 @@
 import express from 'express';
-import { DeleteCmtByUserTour, GetCmtByTourId, PostCmt, PostReply, PutCmtByUserTour } from '../../controller/Cmt/CmtController';
+import { DeleteCmtByUserTour, GetCmtByTourId, PostCmt, PostReply, PutCmtByUserTour } from '../../controller/Cmt/CmtController.js';
 
 
 const CmtRouter = express.Router();

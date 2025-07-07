@@ -1,6 +1,6 @@
-import RoomModel from "../../models/Room/RoomModel";
-import TourModel from "../../models/Tour/TourModel";
-import TourBookingSchema from "../../models/Tour/TourBooking";
+import RoomModel from "../../models/Room/RoomModel.js";
+import TourModel from "../../models/Tour/TourModel.js";
+import TourBookingSchema from "../../models/Tour/TourBooking.js";
 import cron from 'node-cron';
 
 async function releaseRooms(itemRoom) {

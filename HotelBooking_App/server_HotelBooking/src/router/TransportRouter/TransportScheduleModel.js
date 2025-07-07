@@ -1,6 +1,6 @@
 
 import  express from 'express';
-import { DelTransport, GetByIdTransport, GetTransport, PostTransport, PutTransport } from '../../controller/TransportController/TransportScheduleModel';
+import { DelTransport, GetByIdTransport, GetTransport, PostTransport, PutTransport } from '../../controller/TransportController/TransportScheduleModel.js';
 const TransportSchedulemodel = express.Router();
 TransportSchedulemodel.post('/transportSchedule', PostTransport)
 TransportSchedulemodel.get('/transportSchedule', GetTransport)

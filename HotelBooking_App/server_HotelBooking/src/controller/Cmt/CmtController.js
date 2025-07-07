@@ -1,4 +1,4 @@
-import CmtModel from "../../models/Cmt/CmtModel"
+import CmtModel from "../../models/Cmt/CmtModel.js"
 
 
 export const PostCmt = async (req, res) => {

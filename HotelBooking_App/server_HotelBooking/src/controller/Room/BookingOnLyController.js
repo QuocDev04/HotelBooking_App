@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import RoomInventoryBooking from "../../models/Room/RoomInventoryBooking";
-import BookingOnlyRoom from "../../models/Room/BookingRoom";
-import RoomModel from "../../models/Room/RoomModel";
+import RoomInventoryBooking from "../../models/Room/RoomInventoryBooking.js";
+import BookingOnlyRoom from "../../models/Room/BookingRoom.js";
+import RoomModel from "../../models/Room/RoomModel.js";
 import { StatusCodes } from 'http-status-codes';
 
 // Tính số đêm giữa check-in và check-out

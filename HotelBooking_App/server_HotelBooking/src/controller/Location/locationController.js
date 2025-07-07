@@ -1,5 +1,5 @@
 
-import LocationSchema from "../../models/Location/locationModel"
+import LocationSchema from "../../models/Location/locationModel.js"
 
 export const PostLocation = async (req, res) => {
     try {

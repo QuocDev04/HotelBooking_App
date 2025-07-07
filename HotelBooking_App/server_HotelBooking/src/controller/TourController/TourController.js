@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
-import TourModel from "../../models/Tour/TourModel";
-import TourScheduleModel from "../../models/Tour/TourScheduleModel";
-import TourBooking from "../../models/Tour/TourBooking";
+import TourModel from "../../models/Tour/TourModel.js";
+import TourScheduleModel from "../../models/Tour/TourScheduleModel.js";
+import TourBooking from "../../models/Tour/TourBooking.js";
 
 
 export const getAllTours = async (req, res) => {
