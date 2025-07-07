@@ -1,4 +1,5 @@
-import React from "react";
+// Xóa hoặc comment dòng import React nếu không dùng
+// import React from "react";
 
 export default function PaymentPage() {
   return (

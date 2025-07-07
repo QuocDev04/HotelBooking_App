@@ -5,18 +5,6 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import instanceClient from '../../../../configs/instance';
 import { Link } from 'react-router-dom';
-interface Tour {
-    _id: number;
-    nameTour: string;
-    departure_location: string;
-    destination: string;
-    price: number;
-    promotion_price?: number;
-    imageTour: string;
-    duration?: string;
-    available_slots?: number;
-    finalPrice?: number;
-}
 
 // Animation variants cho từng card
 const cardVariants = {

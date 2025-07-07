@@ -58,7 +58,6 @@ const RightTourDetail = ({ selectedRoom }: RightTourDetailProps) => {
 
     const nights = getNights(tours?.duration || '');
     const roomPrice = Number(selectedRoom?.priceRoom || 0);
-    const totalRoomPrice = roomPrice * nights;
 
     const { mutate, isLoading } = useMutation({
         mutationFn: async (data: BookingTourData) => {
@@ -210,7 +209,7 @@ const RightTourDetail = ({ selectedRoom }: RightTourDetailProps) => {
             </div>
 
             {/* Thông tin phòng */}
-            {selectedRoom?.length > 0 ? (
+            {selectedRoom && selectedRoom.length > 0 ? (
                 selectedRoom?.map((room, index) => (
                     <div key={room._id || index} className="mb-4 border-b pb-4">
                         <div className="mb-1">

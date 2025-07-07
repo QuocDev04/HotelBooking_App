@@ -7,7 +7,7 @@ function PaymentResult() {
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
-        const responseCode = params.get("vnp_ResponseCode");
+        // const responseCode = params.get("vnp_ResponseCode");
 
             navigate("/");  // Chuyển về trang chủ sau 2 giây
     }, [location, navigate]);
