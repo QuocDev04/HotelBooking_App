@@ -78,12 +78,13 @@ const International = () => {
                     }}
                     onSwiper={(swiper) => {
                         setTimeout(() => {
-                            if (!swiper?.params?.navigation) return;
-                            swiper.params.navigation.prevEl = prevRef.current;
-                            swiper.params.navigation.nextEl = nextRef.current;
-                            swiper.navigation.destroy();
-                            swiper.navigation.init();
-                            swiper.navigation.update();
+                            if (typeof swiper?.params?.navigation !== 'boolean') {
+                                swiper.params.navigation.prevEl = prevRef.current;
+                                swiper.params.navigation.nextEl = nextRef.current;
+                                swiper.navigation.destroy();
+                                swiper.navigation.init();
+                                swiper.navigation.update();
+                            }
                         });
                     }}
                     breakpoints={{

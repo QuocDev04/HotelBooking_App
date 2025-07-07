@@ -16,7 +16,7 @@ const DestinationList = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const filtered = tours?.filter(
-    (d) =>
+    (d: DestinationType) =>
       d.nameTour.toLowerCase().includes(searchTerm.toLowerCase()) ||
       d.departure_location.toLowerCase().includes(searchTerm.toLowerCase())
   );

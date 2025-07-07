@@ -6,6 +6,16 @@ import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import type { AxiosError } from "axios";
 import { Form, Input, message } from "antd";
+
+// Định nghĩa kiểu dữ liệu cho BookingData
+interface BookingData {
+  roomId: string;
+  check_in_date: string;
+  check_out_date: string;
+  adults: number;
+  children: number;
+}
+
 const BookingRoom = () => {
   const { id } = useParams();
   const { data } = useQuery({
@@ -13,7 +23,7 @@ const BookingRoom = () => {
     queryFn: () => instanceClient.get(`/room/${id}`)
   })
   const room = data?.data?.rooms
-  const [bookingData, setBookingData] = useState(null);
+  const [bookingData, setBookingData] = useState<BookingData | null>(null);
 
   useEffect(() => {
     const data = localStorage.getItem("bookingData");

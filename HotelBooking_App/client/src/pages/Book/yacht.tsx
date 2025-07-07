@@ -1,5 +1,17 @@
 import { useState } from 'react';
 
+// Định nghĩa kiểu dữ liệu cho Room
+interface Room {
+  id: number;
+  type: string;
+  price: number;
+  size: string;
+  description: string;
+  amenities: string[];
+  image: string;
+  available: number;
+}
+
 const YachtDetailPage = () => {
   // Dữ liệu fix cứng
   const yacht = {
@@ -84,7 +96,7 @@ const YachtDetailPage = () => {
     ]
   };
 
-  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [duration, setDuration] = useState(1);
   const [activeTab, setActiveTab] = useState('overview');
   const [bookingSuccess, setBookingSuccess] = useState(false);
@@ -95,7 +107,7 @@ const YachtDetailPage = () => {
     // Xử lý đặt phòng
     console.log('Booking details:', {
       yacht: yacht.name,
-      room: selectedRoom.type,
+      room: selectedRoom?.type,
       duration,
       totalPrice
     });
@@ -244,7 +256,7 @@ const YachtDetailPage = () => {
                             </div>
                           </div>
                           <button
-                            onClick={() => setSelectedRoom(room)}
+                            onClick={() => setSelectedRoom({ id: room.id, type: room.type, price: room.price, size: room.size, description: room.description, amenities: room.amenities, image: room.image, available: room.available })}
                             className={`mt-4 w-full py-2 rounded-lg ${selectedRoom?.id === room.id
                               ? 'bg-blue-600 text-white'
                               : 'bg-gray-100 hover:bg-gray-200'
