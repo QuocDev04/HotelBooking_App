@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom"
 import instanceClient from "../../../configs/instance";
 import { useEffect, useState } from "react";
-import dayjs from "dayjs";
+import * as dayjs from 'dayjs';
 import type { AxiosError } from "axios";
 import { Form, Input, message } from "antd";
 
@@ -37,10 +37,10 @@ const BookingRoom = () => {
   const timeDiff = checkOutDate.getTime() - checkInDate.getTime();
   const numberOfNights = timeDiff / (1000 * 60 * 60 * 24);
 
-  const formattedCheckIn = dayjs(bookingData?.check_in_date)
+  const formattedCheckIn = dayjs(bookingData?.check_in_date ?? "")
     .add(7, 'hour')
     .format("DD/MM/YYYY [lúc] HH:mm");
-  const formattedCheckOut = dayjs(bookingData?.check_out_date)
+  const formattedCheckOut = dayjs(bookingData?.check_out_date ?? "")
     .add(7, 'hour')
     .format("DD/MM/YYYY [lúc] HH:mm");
   const [form] = Form.useForm();

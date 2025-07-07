@@ -4,7 +4,12 @@ import { useState } from "react";
 import instanceClient from "../../../configs/instance";
 import TourList from "../../components/TourList";
 
-
+// Định nghĩa hoặc import DestinationType phù hợp với dữ liệu
+interface DestinationType {
+  nameTour: string;
+  departure_location: string;
+  // ... các trường khác nếu có ...
+}
 
 const DestinationList = () => {
   const {data} = useQuery({
