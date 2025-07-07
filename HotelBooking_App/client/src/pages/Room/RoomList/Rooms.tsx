@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 interface Room {
   _id: string;
   nameRoom: string;
-  addressRoom: string;
+  locationId: string;
   typeRoom: string;
   capacityRoom: number;
   amenitiesRoom: string;
@@ -60,7 +60,7 @@ const RoomList = () => {
                   />
                 </Link>
                 <div className="p-4">
-                  <p className="text-sm text-gray-500 mb-1">📍 {room.addressRoom}</p>
+                  <p className="text-sm text-gray-500 mb-1">📍 {room.locationId?.locationName} - {room.locationId?.country}</p>
                   <Link to={`/roomdetail/${room._id}`}>
                     <h3 className="text-blue-600 font-semibold text-lg mb-1">
                       {room.nameRoom}

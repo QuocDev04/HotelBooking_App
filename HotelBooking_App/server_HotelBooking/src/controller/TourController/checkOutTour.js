@@ -1,5 +1,5 @@
-import BookingTour from "../../models/Tour/TourBooking"
-import CheckOutTour from "../../models/Tour/checkOutTour"
+import BookingTour from "../../models/Tour/TourBooking.js"
+import CheckOutTour from "../../models/Tour/checkOutTour.js"
 
 export const checkOutBookingTour = async (req, res) => {
     try {

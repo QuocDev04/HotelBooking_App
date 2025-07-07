@@ -1,5 +1,5 @@
 import express from 'express';
-import { AddTour, DeleteTour, getAllTours, GetTourById, TourFeatured, TourTopSelling, UpdateTour } from './../../controller/TourController/TourController';
+import { AddTour, DeleteTour, getAllTours, GetTourById, TourFeatured, TourTopSelling, UpdateTour } from './../../controller/TourController/TourController.js';
 
 const TourRouter = express.Router();
 TourRouter.get('/tour', getAllTours)

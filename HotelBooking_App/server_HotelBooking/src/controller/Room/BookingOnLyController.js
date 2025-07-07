@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import RoomInventoryBooking from "../../models/Room/RoomInventoryBooking";
-import BookingOnlyRoom from "../../models/Room/BookingRoom";
-import RoomModel from "../../models/Room/RoomModel";
+import RoomInventoryBooking from "../../models/Room/RoomInventoryBooking.js";
+import BookingOnlyRoom from "../../models/Room/BookingRoom.js";
+import RoomModel from "../../models/Room/RoomModel.js";
 import { StatusCodes } from 'http-status-codes';
 
 // Tính số đêm giữa check-in và check-out
@@ -119,7 +119,7 @@ export const createBookingOnlyRoom = async (req, res) => {
 export const getBookingWithDetails = async (req, res) => {
     try {
         const bookings = await BookingOnlyRoom.find()
-            .populate("itemRoom.roomId", "nameRoom priceRoom amenitiesRoom addressRoom")
+            .populate("itemRoom.roomId", "nameRoom priceRoom amenitiesRoom locationId")
         return res.status(200).json({
             success: true,
             message: "Bookings retrieved with user and room info",
@@ -137,7 +137,7 @@ export const getBookingWithDetails = async (req, res) => {
 export const getOrderById = async (req, res) => {
     try {
         const { userId } = req.params;
-        const order = await BookingOnlyRoom.find({ userId }).populate("itemRoom.roomId", "nameRoom priceRoom amenitiesRoom addressRoom")
+        const order = await BookingOnlyRoom.find({ userId }).populate("itemRoom.roomId", "nameRoom priceRoom amenitiesRoom locationId")
         if (!order) {
             return res.status(StatusCodes.NOT_FOUND).json({ error: "Order not found" })
         }

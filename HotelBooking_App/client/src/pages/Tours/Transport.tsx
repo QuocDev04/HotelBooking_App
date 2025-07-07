@@ -1,5 +1,16 @@
 import { useState } from "react";
 
+interface TransportType {
+  from: string;
+  to: string;
+  image: string;
+  date: string;
+}
+
+interface TransportData {
+  [key: string]: TransportType[];
+}
+
 const Transport = () => {
   const [tripType, setTripType] = useState("roundtrip");
   const [directOnly, setDirectOnly] = useState(false);
@@ -20,7 +31,7 @@ const Transport = () => {
     alert("Đang tìm chuyến...");
   };
 
-  const transportData = {
+  const transportData: TransportData = {
   transport: [
     {
       from: "Hà Nội",
@@ -224,7 +235,7 @@ const Transport = () => {
         <p className="text-gray-500">Tìm ưu đãi cho chuyến bay trong nước và quốc tế</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
-          {transportData[tab]?.map((item, index) => (
+          {transportData[tab]?.map((item: TransportType, index: number) => (
             <div key={index} className="rounded-lg overflow-hidden shadow hover:shadow-md transition">
               <img src={item.image} alt={item.to} className="w-full h-48 object-cover" />
               <div className="p-4">

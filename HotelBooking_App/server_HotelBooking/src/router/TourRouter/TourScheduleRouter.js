@@ -1,5 +1,5 @@
 import express from 'express'
-import { DeleteTourSchedule, GetByIdTourSchedule, GetTourScheduleAll, PostTourSchedule, PutTourSchedule } from './../../controller/TourController/TourScheduleController';
+import { DeleteTourSchedule, GetByIdTourSchedule, GetTourScheduleAll, PostTourSchedule, PutTourSchedule } from './../../controller/TourController/TourScheduleController.js';
 
 
 const TourSchedule = express.Router();

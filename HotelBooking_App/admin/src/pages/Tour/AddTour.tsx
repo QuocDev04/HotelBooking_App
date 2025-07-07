@@ -28,8 +28,13 @@ const AddTour = () => {
     queryFn: () => instance.get('/transport')
   })
   const transports = data?.data?.transport;
-  
-  const { mutate } = useMutation({
+  const { data: location } = useQuery({
+    queryKey: ['location'],
+    queryFn: async () => {
+      return await instance.get("/location")
+    }
+  })
+  const { mutate, isPending } = useMutation({
     mutationFn: async (data: any) => {
       try {
         return await instance.post("/tour", data)
@@ -157,11 +162,20 @@ const AddTour = () => {
                       label={requiredLabel("Điểm Đến")}
                       name="destination"
                       rules={[
-                        { required: true, message: "Nhập điểm đến" },
-                        { min: 2, max: 100, message: "Phải từ 2–100 ký tự" },
+                        { required: true, message: "Chọn điểm đến" },
                       ]}
                     >
-                      <Input placeholder="VD: Đà Nẵng" size="large" />
+                      <Select placeholder="Chọn Địa Chỉ" disabled={isPending} style={{ width: "100%" }}
+                        size="large" options={location?.data?.location?.map((location: any) => ({
+                          label: location.locationName + ' - ' + location.country,
+                          value: location._id
+                        }))}
+                        onChange={(value) => {
+                          // Cập nhật giá trị của trường category
+                          form.setFieldsValue({
+                            location: value,
+                          });
+                        }} />
                     </Form.Item>
                   </Col>
 

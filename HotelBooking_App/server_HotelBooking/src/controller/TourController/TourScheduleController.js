@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import TourScheduleModel from "../../models/Tour/TourScheduleModel";
+import TourScheduleModel from "../../models/Tour/TourScheduleModel.js";
 
 
 

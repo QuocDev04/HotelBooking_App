@@ -12,7 +12,7 @@ const UserModel = new mongoose.Schema({
         default:
             "https://png.pngtree.com/element_our/20200610/ourmid/pngtree-character-default-avatar-image_2237203.jpg",
       },
-    type:{type:String, enum:['login', 'loginGoogle']}
+    role: { type: String, enum: ['user', 'member']}
 }, { timestamps: true })
 
 export default mongoose.model("User", UserModel)

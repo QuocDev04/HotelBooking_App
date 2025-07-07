@@ -25,7 +25,12 @@ const EditRoom = () => {
     queryFn: async () => instance.get(`/room/${id}`)
   })
   console.log(data?.data?.rooms);
-
+  const { data: location } = useQuery({
+    queryKey: ['location'],
+    queryFn: async () => {
+      return await instance.get("/location")
+    }
+  })
   const { mutate, isPending, isError } = useMutation({
     mutationFn: async (data: any) => {
       try {
@@ -58,17 +63,17 @@ const EditRoom = () => {
           name: `imageRoom${index}`,
           status: "done",
           url,
-          thumbUrl: url, // 👈 sửa DÒNG NÀY
+          thumbUrl: url,
         }))
       );
     }
 
-    // 👇 NẾU description có, gán vào ReactQuill
+
     if (data?.data?.rooms.descriptionRoom) {
       setValue(data.data.rooms.descriptionRoom);
     }
 
-    // 👇 Cập nhật form values cho các trường khác
+
     if (data?.data?.rooms) {
       form.setFieldsValue(data.data.rooms);
     }
@@ -178,7 +183,7 @@ const EditRoom = () => {
           layout="vertical"
           onFinish={onFinish}
           validateTrigger="onBlur"
-          initialValues={{...data?.data?.rooms}}
+          initialValues={{ ...data?.data?.rooms }}
         >
           <Row gutter={[24, 24]}>
             {/* Bên trái - 60% */}
@@ -263,21 +268,19 @@ const EditRoom = () => {
                   <Form.Item
                     required={false}
                     label={requiredLabel("Địa Chỉ")}
-                    name="addressRoom"
+                    name="locationId"
                     rules={[
                       { required: true, message: 'Vui lòng nhập Địa Chỉ' },
-                      {
-                        min: 5,
-                        message: 'Địa chỉ phải có ít nhất 5 ký tự',
-                      },
-                      {
-                        max: 200,
-                        message: 'Địa chỉ không được vượt quá 200 ký tự',
-                      },
                     ]}
                   >
-                    <Input type="text" placeholder="VD: Số 123, Ngõ abc, ..." disabled={isPending} style={{ width: "100%" }}
-                      size="large" />
+                    <Select placeholder="Chọn Địa Chỉ" disabled={isPending} style={{ width: "100%" }}
+                      size="large" options={location?.data?.location?.map((location: any) => ({
+                        label: location.locationName + ' - ' + location.country,
+                        value: location._id
+                      }))}
+                      onChange={(value) => {
+                        form.setFieldsValue({ location: value });
+                      }} />
                   </Form.Item>
                 </Col>
 
@@ -305,7 +308,7 @@ const EditRoom = () => {
                 name="typeRoom"
                 rules={[{ required: true, message: 'Vui lòng nhập loại phòng' }]}
               >
-                <Select disabled={isPending} labelRender={labelRender} defaultValue="1" style={{ width: '100%' }} options={options} 
+                <Select disabled={isPending} labelRender={labelRender} defaultValue="1" style={{ width: '100%' }} options={options}
                   size="large" />
               </Form.Item>
 

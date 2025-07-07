@@ -2,7 +2,7 @@
 import express from "express";
 import { StatusCodes } from "http-status-codes";
 import { verifyClerkToken } from "../../Middleware/Middleware.js";
-import Admin from './../../models/People/AdminModel';
+import Admin from './../../models/People/AdminModel.js';
 
 const AdminRouter = express.Router();
 

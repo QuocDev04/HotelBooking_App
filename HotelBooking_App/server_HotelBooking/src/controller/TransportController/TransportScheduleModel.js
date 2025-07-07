@@ -1,4 +1,4 @@
-import TransportScheduleModel from "../../models/Transport/TransportScheduleModel";
+import TransportScheduleModel from "../../models/Transport/TransportScheduleModel.js";
 import { StatusCodes } from 'http-status-codes';
 
 export const PostTransport = async (req,res) =>{

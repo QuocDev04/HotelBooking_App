@@ -1,5 +1,5 @@
 import express from 'express';
-import { checkOutBookingTour, getCheckOutUserTour, getCheckOutUserTourByUserId } from '../../controller/TourController/checkOutTour';
+import { checkOutBookingTour, getCheckOutUserTour, getCheckOutUserTourByUserId } from '../../controller/TourController/checkOutTour.js';
 const RouterChecOutBookingTour = express.Router();
 RouterChecOutBookingTour.post('/checkOutBookingTour/:id', checkOutBookingTour)
 RouterChecOutBookingTour.get('/checkOutBookingTour', getCheckOutUserTour)

@@ -7,9 +7,7 @@ import LeftTourDetail from './Left/LeftTourDetail';
 import Content from './Content/Content';
 import RightTourDetail from './Right/RightTourDetail';
 import Schedule from './Content/Schedule';
-import PriceList from './Content/PriceList';
 import Evaluate from './Content/Evaluate';
-import QA from './Content/QA';
 import { useEffect, useState } from 'react';
 const TourPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -22,10 +20,12 @@ const TourPage = () => {
     queryKey: ['tour', id],
     queryFn: () => instanceClient.get(`/tour/${id}`)
   })
+  
   const { data: room } = useQuery({
     queryKey: ['room'],
     queryFn: () => instanceClient.get('/room')
   })
+  
   const rooms = room?.data?.rooms
   const toggleSelectRoom = (roomItem: any) => {
     if (selectedRoom.some(r => r._id === roomItem._id)) {
@@ -36,6 +36,14 @@ const TourPage = () => {
       setSelectedRoom(prev => [...prev, roomItem]);
     }
   };
+  const destinationLocation = tour?.data?.tour?.destination;
+  
+  const matchedRooms = rooms?.filter((roomItem: any) => {
+    return (
+      roomItem?.locationId?.locationName === destinationLocation?.locationName &&
+      roomItem?.locationId?.country === destinationLocation?.country
+    );
+  });  
   return (
     <>
       <div className="max-w-screen-xl p-4 mx-auto font-sans mt-32">
@@ -73,7 +81,7 @@ const TourPage = () => {
             </div>
             <div className="ml-2">
               <div className="text-sm text-gray-500">Điểm đến</div>
-              <div className="text-sm font-semibold text-blue-500">{tour?.data?.tour?.destination}</div>
+              <div className="text-sm font-semibold text-blue-500">{tour?.data?.tour?.destination?.locationName} - {tour?.data?.tour?.destination?.country}</div>
             </div>
           </div>
           <div className="flex items-center">
@@ -127,14 +135,12 @@ const TourPage = () => {
                 <div className="mt-6">
                   <Content />
                   <Schedule />
-                  <PriceList />
                   <Evaluate />
-                  <QA />
                 </div>
               )}
               {activeTab === 'rooms' && (
                 <div className="space-y-6 max-w-3xl mt-6">
-                  {rooms?.map((room: any) => {
+                  {matchedRooms?.map((room: any) => {
                     const isSelected = selectedRoom.some((r: any) => r._id === room._id);
                     const isAvailable = room.statusRoom === 'available';
                     const isWaiting = room.statusRoom === 'waiting';
@@ -182,7 +188,7 @@ const TourPage = () => {
                               <p
                                 className="my-2"
                                 dangerouslySetInnerHTML={{
-                                  __html: room.descriptionRoom?.split(' ').slice(0, 7).join(' ') + '...' || '',
+                                  __html: room.descriptionRoom?.split(' ').slice(0, 10).join(' ') + '...' || '',
                                 }}
                               />
                               <div className="flex flex-wrap gap-2 mt-3 max-h-16 overflow-hidden">

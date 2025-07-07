@@ -1,12 +1,14 @@
 import { StatusCodes } from "http-status-codes";
-import TourModel from "../../models/Tour/TourModel";
-import TourScheduleModel from "../../models/Tour/TourScheduleModel";
-import TourBooking from "../../models/Tour/TourBooking";
+import TourModel from "../../models/Tour/TourModel.js";
+import TourScheduleModel from "../../models/Tour/TourScheduleModel.js";
+import TourBooking from "../../models/Tour/TourBooking.js";
 
 
 export const getAllTours = async (req, res) => {
     try {
-        const tour = await TourModel.find().populate("itemTransport.TransportId", "transportName transportNumber transportType")
+        const tour = await TourModel.find()
+        .populate("itemTransport.TransportId", "transportName transportNumber transportType")
+            .populate("destination", "locationName country")
         return res.status(StatusCodes.OK).json({
             success: true,
             message: "Get all tours successfully",
@@ -100,7 +102,7 @@ export const UpdateTour = async (req, res) => {
 
 export const GetTourById = async (req, res) => {
     try {
-        const tour = await TourModel.findById(req.params.id).populate("itemTransport.TransportId", "transportName transportNumber transportType")
+        const tour = await TourModel.findById(req.params.id).populate("itemTransport.TransportId", "transportName transportNumber transportType").populate("destination", "locationName country")
         if (!tour) {
             return res.status(404).json({ success: false, message: "Không tìm thấy tour" });
         }
@@ -136,7 +138,7 @@ export const GetTourById = async (req, res) => {
 //get tour featured
 export const TourFeatured = async (req, res) => {
     try {
-        const tourFeatured = await TourModel.find({ featured: true });
+        const tourFeatured = await TourModel.find({ featured: true }).populate("destination", "locationName country");
         return res.status(StatusCodes.OK).json({
             success: true,
             message: "get tourFeatured successfully",
@@ -153,7 +155,7 @@ export const TourFeatured = async (req, res) => {
 //get tour top_selling
 export const TourTopSelling = async (req, res) => {
     try {
-        const topSellingTours = await TourModel.find()
+        const topSellingTours = await TourModel.find().populate("destination", "locationName country")
             .sort({ totalSold: -1 })
             .limit(7); // Lấy 7 tour có lượt đặt nhiều nhất
         return res.status(StatusCodes.OK).json({

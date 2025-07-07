@@ -196,8 +196,12 @@ const BookingRoom = () => {
                   rules={[
                     { required: true, message: "Vui lòng nhập tên" },
                     {
-                      pattern: /^[a-zA-Z0-9._]{4,20}$/,
-                      message: "Tên phải từ 4–20 ký tự, không chứa khoảng trắng và chỉ gồm chữ, số, dấu _ hoặc ."
+                      pattern: /^[a-zA-ZÀ-ỹ\s]+$/,
+                      message: "Tên chỉ chứa chữ cái và khoảng trắng"
+                    },
+                    {
+                      max: 50,
+                      message: "Tên không được vượt quá 50 ký tự"
                     }
                   ]}
                 >

@@ -1,11 +1,11 @@
 import { StatusCodes } from 'http-status-codes';
-import RoomModel from '../../models/Room/RoomModel';
+import RoomModel from '../../models/Room/RoomModel.js';
 
 
 
 export const RoomAll = async (req, res) => {
     try {
-        const room = await RoomModel.find()
+        const room = await RoomModel.find().populate('locationId', 'locationName country')
         return res.status(StatusCodes.OK).json({
             success: true,
             message: "Get all rooms successfully",
@@ -69,7 +69,7 @@ export const UpdateRoom = async (req, res) => {
 
 export const GetRoomById = async (req, res) => {
     try {
-        const room = await RoomModel.findById(req.params.id);
+        const room = await RoomModel.findById(req.params.id).populate('locationId', 'locationName country');
         if (!room) {
             return res.status(StatusCodes.NOT_FOUND).json({
                 success: false,
