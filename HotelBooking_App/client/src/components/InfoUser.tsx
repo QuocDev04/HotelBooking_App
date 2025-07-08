@@ -248,6 +248,15 @@ const InfoUser = () => {
                             >
                                 Chờ thanh toán
                             </button>
+                            <button
+                                onClick={() => setSelectedStatus("cancelled")}
+                                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${selectedStatus === "cancelled"
+                                    ? "bg-red-600 text-white shadow-lg"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                    }`}
+                            >
+                                Đã hủy
+                            </button>
                         </div>
                     </div>
                 </div>

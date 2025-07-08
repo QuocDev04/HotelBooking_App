@@ -117,7 +117,7 @@ const RightTourDetail = ({ selectedRoom }: RightTourDetailProps) => {
     };
 
     return (
-        <div className="max-w-[460px] w-full bg-blue-100/90 p-5 max-md:mt-16 border rounded-4xl border-gray-300/70">
+        <div className="max-w-[460px] w-full bg-blue-100/90 p-3 md:p-5 max-md:mt-4 border rounded-2xl md:rounded-4xl border-gray-300/70">
             <h2 className="lg:text-4xl md:text-xl font-medium text-blue-500 my-2">
                 {price.toLocaleString()}đ
             </h2>
@@ -127,8 +127,8 @@ const RightTourDetail = ({ selectedRoom }: RightTourDetailProps) => {
             <hr className="border-gray-300 my-5" />
 
             {/* Ngày đi */}
-            <div className="flex items-center mb-4">
-                <div className="rounded-2xl p-2">
+            <div className="flex flex-col sm:flex-row items-center mb-4 gap-2">
+                <div className="rounded-2xl p-2 flex-shrink-0">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="30"
@@ -164,44 +164,44 @@ const RightTourDetail = ({ selectedRoom }: RightTourDetailProps) => {
                     dateFormat="dd/MM/yyyy"
                     minDate={new Date()}
                     placeholderText="Chọn ngày đi"
-                    className="w-[300px] px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full sm:w-[300px] px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
             </div>
 
             {/* Số lượng người lớn/trẻ em */}
-            <div className="space-y-2 my-6">
+            <div className="space-y-2 my-4 md:my-6">
                 {/* Người lớn */}
-                <div className="flex items-center justify-between gap-4">
-                    <span className="w-24">Người lớn</span>
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+                    <span className="w-full sm:w-24">Người lớn</span>
                     <div className="flex items-center rounded-xl border border-gray-200 dark:border-blue-600">
                         <button onClick={() => setAdultsTour(Math.max(adultsTour - 1, 1))} className="px-2">-</button>
                         <input
                             type="number"
                             value={adultsTour}
                             readOnly
-                            className="h-9 w-16 text-center border-transparent sm:text-sm"
+                            className="h-9 w-12 text-center border-transparent sm:text-sm"
                         />
                         <button onClick={() => setAdultsTour(adultsTour + 1)} className="px-2">+</button>
                     </div>
-                    <span className="text-sm text-gray-500 min-w-[80px] text-right">
+                    <span className="text-xs md:text-sm text-gray-500 min-w-[60px] text-right">
                         {(price * adultsTour).toLocaleString()}đ
                     </span>
                 </div>
 
                 {/* Trẻ con */}
-                <div className="flex items-center justify-between gap-4">
-                    <span className="w-24">Trẻ con</span>
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+                    <span className="w-full sm:w-24">Trẻ con</span>
                     <div className="flex items-center rounded-xl border border-gray-200 dark:border-blue-600">
                         <button onClick={() => setChildrenTour(Math.max(childrenTour - 1, 0))} className="px-2">-</button>
                         <input
                             type="number"
                             value={childrenTour}
                             readOnly
-                            className="h-9 w-16 text-center border-transparent sm:text-sm"
+                            className="h-9 w-12 text-center border-transparent sm:text-sm"
                         />
                         <button onClick={() => setChildrenTour(childrenTour + 1)} className="px-2">+</button>
                     </div>
-                    <span className="text-sm text-gray-500 min-w-[80px] text-right">
+                    <span className="text-xs md:text-sm text-gray-500 min-w-[60px] text-right">
                         {(price * childrenTour).toLocaleString()}đ
                     </span>
                 </div>
@@ -229,7 +229,7 @@ const RightTourDetail = ({ selectedRoom }: RightTourDetailProps) => {
                 <div className="text-gray-500 italic">Chưa chọn phòng</div>
             )}
             {/* Tổng tiền */}
-            <div className="pt-4 border-t flex justify-between items-center text-lg font-bold text-blue-600">
+            <div className="pt-4 border-t flex flex-col sm:flex-row justify-between items-center text-base md:text-lg font-bold text-blue-600 gap-2">
                 <span>Tổng tiền:</span>
                 <span>
                     {(

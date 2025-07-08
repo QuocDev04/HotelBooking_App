@@ -26,7 +26,6 @@ const TourPromotion = () => {
         queryFn: () => instanceClient.get('/featured')
     })
     const tours = data?.data?.tourFeatured || []
-    console.log('tours',tours);
     
     return (
         <section className="py-16">

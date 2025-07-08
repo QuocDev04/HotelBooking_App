@@ -13,7 +13,10 @@ const BookingRoom = () => {
     queryKey: ['bookingTour', id],
     queryFn: () => instanceClient.get(`/bookingTour/${id}`)
   })
-  const bookingTour = data?.data?.byId
+  
+  const bookingTour = data?.data?.booking
+  console.log(bookingTour);
+  
   const formatDateVN = (dateString:any) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -21,8 +24,6 @@ const BookingRoom = () => {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
       timeZone: 'Asia/Ho_Chi_Minh',
     }).format(date);
   };
@@ -80,9 +81,9 @@ const BookingRoom = () => {
     mutate(newValues);
   };
   return (
-    <div className="max-w-screen-xl p-4 mx-auto font-sans">
+    <div className="max-w-screen-xl p-2 md:p-4 mx-auto font-sans">
       {/* Progress Bar */}
-      <div className="flex items-center mt-25 mb-10 w-full ">
+      <div className="hidden md:flex flex-col md:flex-row items-center mt-4 mb-6 w-full gap-2 md:gap-0">
         {/* Step 1 */}
         <div className="flex items-center flex-1">
           <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-base border-2 border-blue-600">
@@ -126,27 +127,26 @@ const BookingRoom = () => {
         </div>
       </div>
 
-      {/* Bảng tổng hợp thông tin khách sạn & vé máy bay */}
-      <div className="overflow-x-auto mb-6">
-        <table className="min-w-full bg-white rounded-xl shadow-md">
-          <thead>
-            <tr className="bg-blue-50 text-blue-700 text-left">
-              <th className="py-3 px-4 rounded-tl-xl">Dịch vụ</th>
-              <th className="py-3 px-4">Thông tin</th>
-              <th className="py-3 px-4 rounded-tr-xl">Tóm tắt giá</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* Khách sạn */}
-            <tr className="border-b">
-              <td className="py-3 px-4 align-top">
+      {/* Dịch vụ - chuyển table thành card ở mobile */}
+      <div className="mb-4 mt-20">
+        <div className="bg-white rounded-xl shadow-md flex flex-col md:table w-full">
+          <div className="hidden md:table-header-group bg-blue-50 text-blue-700">
+            <div className="table-row ">
+              <div className="table-cell py-3 px-4 rounded-tl-xl">Dịch vụ</div>
+              <div className="table-cell py-3 px-4">Thông tin</div>
+              <div className="table-cell py-3 px-4 rounded-tr-xl">Tóm tắt giá</div>
+            </div>
+          </div>
+          <div className="flex flex-col md:table-row-group">
+            <div className="flex flex-col md:table-row border-b">
+              <div className="md:table-cell py-3 px-4 align-top flex justify-center">
                 <img
                   src={bookingTour?.tourId?.imageTour[0]}
                   alt="La Vela Saigon Hotel"
-                  className="w-56 rounded mb-2"
+                  className="w-full max-w-[180px] rounded mb-2 mx-auto"
                 />
-              </td>
-              <td className="py-3 px-4 align-top">
+              </div>
+              <div className="md:table-cell py-3 px-4 align-top">
                 <div className="font-bold mb-1">{bookingTour?.tourId?.nameTour}</div>
                 <div>
                   {bookingTour?.itemRoom?.map((item: any, index: any) => (
@@ -163,26 +163,27 @@ const BookingRoom = () => {
                   Ngày về: <b>{formatDateVN(bookingTour?.endTime)}</b> <br />
                   {bookingTour?.tourId?.duration} - {bookingTour?.adultsTour} người lớn - {bookingTour?.childrenTour} trẻ em
                 </div>
-              </td>
-              <td className="py-10 px-4 align-top">
+              </div>
+              <div className="md:table-cell py-6 px-4 align-top">
                 <div className="font-semibold text-blue-700 mb-1">Tổng cộng</div>
                 <div className="text-rose-600 font-bold text-2xl mb-1">
                   {bookingTour?.totalPriceBooking.toLocaleString()} đ
                 </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+
       {/* Booking Form */}
-      <div className="bg-white rounded-lg p-6 shadow-md">
+      <div className="bg-white rounded-lg p-2 md:p-6 shadow-md">
         <div className="flex items-center mb-6">
           <div className="font-semibold text-3xl mr-4">
             Nhập thông tin chi tiết của bạn
           </div>
         </div>
         <Form form={form} onFinish={onFinish}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 mb-6">
             {/* Phần thông tin chính chiếm 2/3 */}
             <div className="md:col-span-2 grid grid-cols-1">
               {/* Họ */}

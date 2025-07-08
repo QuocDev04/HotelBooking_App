@@ -33,7 +33,6 @@ const TourIn = () => {
 
 
     const tours = data?.data?.tours?.filter((tour: any) => tour.tourType === 'noidia') || [];
-    console.log(tours);
     const prevRef = useRef<HTMLButtonElement>(null);
     const nextRef = useRef<HTMLButtonElement>(null);
 
@@ -104,7 +103,7 @@ const TourIn = () => {
 
                                     <div className="p-5 flex flex-col flex-grow">
                                         <Link to={`/detailtour/${tour._id}`}>
-                                            <h3 className="text-lg font-bold text-gray-800 mb-2 leading-snug truncate line-clamp-2 min-h-[48px]">
+                                            <h3 className="text-lg font-bold text-gray-800 leading-snug truncate line-clamp-2 min-h-[36px]">
                                                 {tour.nameTour}
                                             </h3>
                                         </Link>
@@ -121,30 +120,22 @@ const TourIn = () => {
                                             </div>
                                         </div>
 
-                                        <div className="min-h-[48px] flex flex-col justify-between mb-2">
-                                            {/* Dòng giá cũ – hiển thị hoặc tạo khoảng trống ảo */}
-                                            {tour.price && tour.finalPrice ? (
-                                                <span className="line-through text-gray-400 text-sm">
+                                        <div className="flex justify-between items-end min-h-[40px]">
+                                            <div className="flex flex-col">
+                                                <span className={`text-sm text-gray-400 line-through ${tour.price > tour.finalPrice ? '' : 'invisible'}`}>
                                                     {tour.price.toLocaleString('vi-VN')}đ
                                                 </span>
-                                            ) : (
-                                                // Khi không có giá cũ, render 1 span ẩn chiều cao tương đương để giữ layout
-                                                <span className="invisible text-sm">0₫</span>
-                                            )}
-
-                                            {/* Giá hiện tại và phần trăm giảm */}
-                                            <div className="flex items-center justify-between">
                                                 <span className="text-lg font-bold text-blue-600">
                                                     Giá: {(tour.finalPrice ?? tour.price)?.toLocaleString('vi-VN') || "N/A"}đ
                                                 </span>
-
-                                                {tour.discountPercent && (
-                                                    <span className="flex items-center gap-1 bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded border border-red-400">
-                                                        <TicketIcon className="w-4 h-4" />
-                                                        -{tour.discountPercent}%
-                                                    </span>
-                                                )}
                                             </div>
+
+                                            {tour.discountPercent && (
+                                                <span className="flex items-center gap-1 bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded border border-red-400">
+                                                    <TicketIcon className="w-4 h-4" />
+                                                    -{tour.discountPercent}%
+                                                </span>
+                                            )}
                                         </div>
 
                                         <div className="flex justify-between text-sm mb-4 text-gray-600">

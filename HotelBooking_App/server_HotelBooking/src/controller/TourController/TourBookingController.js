@@ -141,7 +141,7 @@ const createBookingTour = async (req, res) => {
 
         const { days, nights } = parseDuration(tour.duration);
         const startTime = new Date(bookingDate);
-        const endTime = addDays(startTime, days);
+        const endTime = addDays(startTime, nights + 1);
         const now = new Date();
 
         if (endTime < now) {
@@ -211,7 +211,7 @@ const getByIdBookingTour = async (req, res) => {
     try {
         const booking = await TourBookingSchema.findById(req.params.id)
             .populate('userId', 'username email')
-            .populate('tourId', 'nameTour price duration')
+            .populate('tourId', 'nameTour price duration imageTour')
             .populate('itemRoom.roomId', 'nameRoom priceRoom');
 
         if (!booking) {
