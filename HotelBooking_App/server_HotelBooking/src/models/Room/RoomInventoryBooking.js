@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 
 
@@ -11,4 +11,4 @@ const RoomInventoryBooking = new mongoose.Schema({
     booking_date: { type: Date },
     booked_quantity: { type: Number },
 }, { timestamps: true });
-export default mongoose.model("RoomInventoryBooking", RoomInventoryBooking);
+module.exports = mongoose.model("RoomInventoryBooking", RoomInventoryBooking);

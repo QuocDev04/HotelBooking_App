@@ -1,8 +1,7 @@
-
-import express from "express";
-import { StatusCodes } from "http-status-codes";
-import { verifyClerkToken } from "../../Middleware/Middleware.js";
-import Admin from './../../models/People/AdminModel.js';
+const express = require("express");
+const { StatusCodes } = require("http-status-codes");
+const { verifyClerkToken } = require("../../Middleware/Middleware.js");
+const Admin = require('./../../models/People/AdminModel.js');
 
 const AdminRouter = express.Router();
 
@@ -61,4 +60,4 @@ AdminRouter.post("/syncUser", verifyClerkToken, async (req, res) => {
     }
   });
   
-export default AdminRouter;
+module.exports = AdminRouter;

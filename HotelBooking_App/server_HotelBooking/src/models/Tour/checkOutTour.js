@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 
 
@@ -26,4 +26,4 @@ const checkOutTourSchema = new mongoose.Schema({
     amount: { type: Number },
 }, { timestamps: true })
 
-export default mongoose.model("checkOutTour", checkOutTourSchema)
+module.exports = mongoose.model("checkOutTour", checkOutTourSchema)

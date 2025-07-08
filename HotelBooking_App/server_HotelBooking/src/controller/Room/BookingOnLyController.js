@@ -1,8 +1,8 @@
-import mongoose from "mongoose";
-import RoomInventoryBooking from "../../models/Room/RoomInventoryBooking.js";
-import BookingOnlyRoom from "../../models/Room/BookingRoom.js";
-import RoomModel from "../../models/Room/RoomModel.js";
-import { StatusCodes } from 'http-status-codes';
+const mongoose = require("mongoose");
+const RoomInventoryBooking = require("../../models/Room/RoomInventoryBooking.js");
+const BookingOnlyRoom = require("../../models/Room/BookingRoom.js");
+const RoomModel = require("../../models/Room/RoomModel.js");
+const { StatusCodes } = require('http-status-codes');
 
 // Tính số đêm giữa check-in và check-out
 const calculateNights = (checkIn, checkOut) => {
@@ -10,7 +10,7 @@ const calculateNights = (checkIn, checkOut) => {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
-export const createBookingOnlyRoom = async (req, res) => {
+const createBookingOnlyRoom = async (req, res) => {
     try {
         const {
             userId,
@@ -116,7 +116,7 @@ export const createBookingOnlyRoom = async (req, res) => {
 };
 
 
-export const getBookingWithDetails = async (req, res) => {
+const getBookingWithDetails = async (req, res) => {
     try {
         const bookings = await BookingOnlyRoom.find()
             .populate("itemRoom.roomId", "nameRoom priceRoom amenitiesRoom locationId")
@@ -134,7 +134,7 @@ export const getBookingWithDetails = async (req, res) => {
 };
 
 
-export const getOrderById = async (req, res) => {
+const getOrderById = async (req, res) => {
     try {
         const { userId } = req.params;
         const order = await BookingOnlyRoom.find({ userId }).populate("itemRoom.roomId", "nameRoom priceRoom amenitiesRoom locationId")
@@ -146,3 +146,5 @@ export const getOrderById = async (req, res) => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message })
     }
 }
+
+module.exports = { createBookingOnlyRoom, getBookingWithDetails, getOrderById };

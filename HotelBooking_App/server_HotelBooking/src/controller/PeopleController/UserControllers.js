@@ -1,9 +1,7 @@
-
-import jwt from 'jsonwebtoken';
-import UserModel from '../../models/People/UserModel.js';
-import { StatusCodes } from 'http-status-codes';
-import bcryptjs from "bcryptjs";
-
+const jwt = require('jsonwebtoken');
+const UserModel = require('../../models/People/UserModel.js');
+const { StatusCodes } = require('http-status-codes');
+const bcryptjs = require("bcryptjs");
 
 const generateRefefreshToken = (userId) => {
     return jwt.sign({ userId }, "123456", { expiresIn: '1y' })
@@ -11,10 +9,10 @@ const generateRefefreshToken = (userId) => {
 const generateAccessToken = (userId) => {
     return jwt.sign({ userId }, "123456", { expiresIn: '1m' })
 }
-export const LoginUser = async (req, res) => {
+const LoginUser = async (req, res) => {
     const {email, password} = req.body;
     try {
-        //ktra emal đẫ tồn tại chưa
+        //ktra emal đã tồn tại chưa
         const user = await UserModel.findOne({email});
         if(!user){
             return res.status(StatusCodes.NOT_FOUND).json({
@@ -45,7 +43,7 @@ export const LoginUser = async (req, res) => {
     }
 }
 
-export const RegisterUser = async (req, res) => {
+const RegisterUser = async (req, res) => {
     const { email, password, username, phone_number } = req.body;
     try {
         //ktra xem đã có email hay chưa
@@ -78,7 +76,7 @@ export const RegisterUser = async (req, res) => {
     }
 }
 
-export const GetAllUser = async (req, res) => {
+const GetAllUser = async (req, res) => {
     try {
         const user = await UserModel.find();
         return res.status(StatusCodes.OK).json({
@@ -94,7 +92,7 @@ export const GetAllUser = async (req, res) => {
     }
 }
 
-export const GetByIdUser = async (req, res) => {
+const GetByIdUser = async (req, res) => {
     try {
         const user = await UserModel.findById(req.params.id);
         return res.status(StatusCodes.OK).json({
@@ -110,7 +108,7 @@ export const GetByIdUser = async (req, res) => {
     }
 }
 
-export const PutUser = async (req, res) => {
+const PutUser = async (req, res) => {
     try {
         const user = await UserModel.findById(req.params.id, req.body);
         return res.status(StatusCodes.OK).json({
@@ -126,7 +124,7 @@ export const PutUser = async (req, res) => {
     }
 }
 
-export const DeleteUser = async (req, res) => {
+const DeleteUser = async (req, res) => {
     try {
         const user = await UserModel.findById(req.params.id, req.body);
         return res.status(StatusCodes.OK).json({
@@ -141,3 +139,5 @@ export const DeleteUser = async (req, res) => {
         })
     }
 }
+
+module.exports = { LoginUser, RegisterUser, GetAllUser, GetByIdUser, PutUser, DeleteUser };

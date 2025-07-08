@@ -1,10 +1,10 @@
-import { StatusCodes } from "http-status-codes";
-import TourModel from "../../models/Tour/TourModel.js";
-import TourScheduleModel from "../../models/Tour/TourScheduleModel.js";
-import TourBooking from "../../models/Tour/TourBooking.js";
+const { StatusCodes } = require("http-status-codes");
+const TourModel = require("../../models/Tour/TourModel.js");
+const TourScheduleModel = require("../../models/Tour/TourScheduleModel.js");
+const TourBooking = require("../../models/Tour/TourBooking.js");
 
 
-export const getAllTours = async (req, res) => {
+const getAllTours = async (req, res) => {
     try {
         const tour = await TourModel.find()
         .populate("itemTransport.TransportId", "transportName transportNumber transportType")
@@ -22,7 +22,7 @@ export const getAllTours = async (req, res) => {
     }
 }
 
-export const AddTour = async (req, res) => {
+const AddTour = async (req, res) => {
     try {
         const { price, discountPercent = 0, discountExpiryDate } = req.body;
         const now = new Date();
@@ -51,7 +51,7 @@ export const AddTour = async (req, res) => {
     }
 }
 
-export const DeleteTour = async (req, res) => {
+const DeleteTour = async (req, res) => {
     try {
         const tour = await TourModel.findByIdAndDelete(req.params.id);
         return res.status(StatusCodes.OK).json({
@@ -68,7 +68,7 @@ export const DeleteTour = async (req, res) => {
     }
 }
 
-export const UpdateTour = async (req, res) => {
+const UpdateTour = async (req, res) => {
     try {
         const { price, discountPercent = 0, discountExpiryDate } = req.body;
         const now = new Date();
@@ -100,7 +100,7 @@ export const UpdateTour = async (req, res) => {
     }
 };
 
-export const GetTourById = async (req, res) => {
+const GetTourById = async (req, res) => {
     try {
         const tour = await TourModel.findById(req.params.id).populate("itemTransport.TransportId", "transportName transportNumber transportType").populate("destination", "locationName country")
         if (!tour) {
@@ -136,7 +136,7 @@ export const GetTourById = async (req, res) => {
 };
 
 //get tour featured
-export const TourFeatured = async (req, res) => {
+const TourFeatured = async (req, res) => {
     try {
         const tourFeatured = await TourModel.find({ featured: true }).populate("destination", "locationName country");
         return res.status(StatusCodes.OK).json({
@@ -153,7 +153,7 @@ export const TourFeatured = async (req, res) => {
 }
 
 //get tour top_selling
-export const TourTopSelling = async (req, res) => {
+const TourTopSelling = async (req, res) => {
     try {
         const topSellingTours = await TourModel.find().populate("destination", "locationName country")
             .sort({ totalSold: -1 })
@@ -170,3 +170,5 @@ export const TourTopSelling = async (req, res) => {
         })
     }
 }
+
+module.exports = { getAllTours, AddTour, DeleteTour, UpdateTour, GetTourById, TourFeatured, TourTopSelling };

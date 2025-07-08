@@ -1,9 +1,7 @@
-import { StatusCodes } from 'http-status-codes';
-import RoomModel from '../../models/Room/RoomModel.js';
+const { StatusCodes } = require('http-status-codes');
+const RoomModel = require('../../models/Room/RoomModel.js');
 
-
-
-export const RoomAll = async (req, res) => {
+const RoomAll = async (req, res) => {
     try {
         const room = await RoomModel.find().populate('locationId', 'locationName country')
         return res.status(StatusCodes.OK).json({
@@ -19,7 +17,7 @@ export const RoomAll = async (req, res) => {
     }
 }
 
-export const AddRoom = async (req, res) => {
+const AddRoom = async (req, res) => {
     try {
         const room = await RoomModel.create(req.body);
         return res.status(StatusCodes.OK).json({
@@ -35,7 +33,7 @@ export const AddRoom = async (req, res) => {
     }
 }
 
-export const DeleteRoom = async (req, res) => {
+const DeleteRoom = async (req, res) => {
     try {
         const room = await RoomModel.findByIdAndDelete(req.params.id);
         return res.status(StatusCodes.OK).json({
@@ -51,7 +49,7 @@ export const DeleteRoom = async (req, res) => {
     }
 }
 
-export const UpdateRoom = async (req, res) => {
+const UpdateRoom = async (req, res) => {
     try {
         const room = await RoomModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
         return res.status(StatusCodes.OK).json({
@@ -67,7 +65,7 @@ export const UpdateRoom = async (req, res) => {
     }
 }
 
-export const GetRoomById = async (req, res) => {
+const GetRoomById = async (req, res) => {
     try {
         const room = await RoomModel.findById(req.params.id).populate('locationId', 'locationName country');
         if (!room) {
@@ -88,3 +86,5 @@ export const GetRoomById = async (req, res) => {
         });
     }
 }
+
+module.exports = { RoomAll, AddRoom, DeleteRoom, UpdateRoom, GetRoomById };

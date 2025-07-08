@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const ScheduleSchema = new mongoose.Schema({
     dayNumber: { type: String, required: true }, 
@@ -17,4 +17,4 @@ const TourScheduleSchema = new mongoose.Schema({
     schedules: [ScheduleSchema]
 }, { timestamps: true });
 
-export default mongoose.model("TourSchedule", TourScheduleSchema);
+module.exports = mongoose.model("TourSchedule", TourScheduleSchema);

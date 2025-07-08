@@ -1,7 +1,7 @@
-import BookingTour from "../../models/Tour/TourBooking.js"
-import CheckOutTour from "../../models/Tour/checkOutTour.js"
+const BookingTour = require("../../models/Tour/TourBooking.js")
+const CheckOutTour = require("../../models/Tour/checkOutTour.js")
 
-export const checkOutBookingTour = async (req, res) => {
+const checkOutBookingTour = async (req, res) => {
     try {
         const { BookingTourId, fullName, emailUser, phoneUser, payment_method, amount } = req.body;
 
@@ -35,7 +35,7 @@ export const checkOutBookingTour = async (req, res) => {
     }
 };
 
-export const getCheckOutUserTour = async (req, res) => {
+const getCheckOutUserTour = async (req, res) => {
     try {
         const getCheckOutUserTour = await CheckOutTour.find()
             .populate({
@@ -69,7 +69,7 @@ export const getCheckOutUserTour = async (req, res) => {
     }
 };
   
-export const getCheckOutUserTourByUserId = async (req, res) => {
+const getCheckOutUserTourByUserId = async (req, res) => {
     try {
         const userId = req.params.userId;
 
@@ -108,4 +108,6 @@ export const getCheckOutUserTourByUserId = async (req, res) => {
         });
     }
 };
+
+module.exports = { checkOutBookingTour, getCheckOutUserTour, getCheckOutUserTourByUserId };
   

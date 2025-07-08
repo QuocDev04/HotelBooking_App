@@ -1,6 +1,6 @@
-import { verifyToken } from "@clerk/clerk-sdk-node";
+const { verifyToken } = require("@clerk/clerk-sdk-node");
 
-export const verifyClerkToken = async (req, res, next) => {
+const verifyClerkToken = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader) return res.status(401).json({ message: "No token provided" });
@@ -20,3 +20,5 @@ export const verifyClerkToken = async (req, res, next) => {
         return res.status(401).json({ message: "Unauthorized: Failed to verify token." });
     }
 };
+
+module.exports = { verifyClerkToken };

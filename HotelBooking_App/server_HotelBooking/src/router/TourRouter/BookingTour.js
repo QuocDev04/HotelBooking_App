@@ -1,7 +1,7 @@
-import express from 'express';
-import { createBookingTour, getByIdBookingTour } from './../../controller/TourController/TourBookingController.js';
+const express = require('express');
+const { createBookingTour, getByIdBookingTour } = require('./../../controller/TourController/TourBookingController.js');
 const RouterBookingTour = express.Router();
 RouterBookingTour.post('/bookingTour', createBookingTour)
 RouterBookingTour.get('/bookingTour/:id', getByIdBookingTour)
 
-export default RouterBookingTour
+module.exports = RouterBookingTour

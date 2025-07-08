@@ -1,5 +1,4 @@
-
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const RoomItemSchema = new mongoose.Schema({
     roomId: {
@@ -41,4 +40,4 @@ const BookingOnySchema = new mongoose.Schema({
 }, {
     timestamps: true
 })
-export default mongoose.model("BookingOnlyRoom", BookingOnySchema)
+module.exports = mongoose.model("BookingOnlyRoom", BookingOnySchema)

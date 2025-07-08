@@ -1,6 +1,5 @@
-
-import express from 'express';
-import { AddTransport, DeleteTransport, GetTransportAll, GetTransportById, UpdateTransport } from '../../controller/TransportController/TransportControllers.js';
+const express = require('express');
+const { AddTransport, DeleteTransport, GetTransportAll, GetTransportById, UpdateTransport } = require('../../controller/TransportController/TransportControllers.js');
 
 const TransportRouter = express.Router();
 TransportRouter.get('/transport', GetTransportAll)
@@ -9,4 +8,4 @@ TransportRouter.put('/transport/:id', UpdateTransport)
 TransportRouter.get('/transport/:id', GetTransportById)
 TransportRouter.delete('/transport/:id', DeleteTransport)
 
-export default TransportRouter
+module.exports = TransportRouter

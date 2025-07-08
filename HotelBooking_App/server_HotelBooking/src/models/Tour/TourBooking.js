@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const RoomItemBookingSchema = new mongoose.Schema({
     roomId: {
@@ -29,4 +29,4 @@ const TourBookingSchema = new mongoose.Schema({
     slot_reserved: { type: Boolean, default: false },
 }, { timestamps: true });
 
-export default mongoose.model('BookingTour', TourBookingSchema);
+module.exports = mongoose.model('BookingTour', TourBookingSchema);

@@ -1,7 +1,6 @@
-import CmtModel from "../../models/Cmt/CmtModel.js"
+const CmtModel = require("../../models/Cmt/CmtModel.js");
 
-
-export const PostCmt = async (req, res) => {
+const PostCmt = async (req, res) => {
     try {
         const { userId, tourId } = req.params;
         const { rating, reviewText, replies } = req.body;
@@ -28,7 +27,7 @@ export const PostCmt = async (req, res) => {
     }
 };
 
-export const GetCmtByTourId = async (req, res) => {
+const GetCmtByTourId = async (req, res) => {
     try {
         const { tourId } = req.params;
 
@@ -50,7 +49,7 @@ export const GetCmtByTourId = async (req, res) => {
     }
 };
 
-export const PostReply = async (req, res) => {
+const PostReply = async (req, res) => {
     try {
         const { commentId } = req.params;
         const { replierId, replierType, replyText } = req.body;
@@ -87,7 +86,7 @@ export const PostReply = async (req, res) => {
     }
 };
 
-export const PutCmtByUserTour = async (req, res) => {
+const PutCmtByUserTour = async (req, res) => {
     try {
         const { userId, tourId } = req.params;
         const updateData = req.body;
@@ -116,7 +115,7 @@ export const PutCmtByUserTour = async (req, res) => {
     }
 };
 
-export const DeleteCmtByUserTour = async (req, res) => {
+const DeleteCmtByUserTour = async (req, res) => {
     try {
         const { userId, tourId } = req.params;
 
@@ -139,3 +138,5 @@ export const DeleteCmtByUserTour = async (req, res) => {
         });
     }
 };
+
+module.exports = { PostCmt, GetCmtByTourId, PostReply, PutCmtByUserTour, DeleteCmtByUserTour };

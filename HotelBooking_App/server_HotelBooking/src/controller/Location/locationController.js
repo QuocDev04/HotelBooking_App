@@ -1,7 +1,6 @@
+const LocationSchema = require("../../models/Location/locationModel.js");
 
-import LocationSchema from "../../models/Location/locationModel.js"
-
-export const PostLocation = async (req, res) => {
+const PostLocation = async (req, res) => {
     try {
         const postLocation = await LocationSchema.create(req.body);
         res.status(200).json({
@@ -18,7 +17,7 @@ export const PostLocation = async (req, res) => {
     }
 }
 
-export const getLocationAll = async (req, res) => {
+const getLocationAll = async (req, res) => {
     try {
         const locations = await LocationSchema.find();
         res.status(200).json({
@@ -35,7 +34,7 @@ export const getLocationAll = async (req, res) => {
     }
 }
 
-export const getLocationById = async (req, res) => {
+const getLocationById = async (req, res) => {
     try {
         const location = await LocationSchema.findById(req.params.id, req.body);
         res.status(200).json({
@@ -52,7 +51,7 @@ export const getLocationById = async (req, res) => {
     }
 }
 
-export const updateLocation = async (req, res) => {
+const updateLocation = async (req, res) => {
     try {
         const location = await LocationSchema.findByIdAndUpdate(req.params.id, req.body)
         res.status(200).json({
@@ -69,7 +68,7 @@ export const updateLocation = async (req, res) => {
     }
 }
 
-export const deleteLocation = async (req, res) => {
+const deleteLocation = async (req, res) => {
     try {
         const location = await LocationSchema.findByIdAndDelete(req.params.id, req.body);
         res.status(200).json({
@@ -85,3 +84,5 @@ export const deleteLocation = async (req, res) => {
         })
     }
 }
+
+module.exports = { PostLocation, getLocationAll, getLocationById, updateLocation, deleteLocation };

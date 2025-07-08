@@ -1,8 +1,8 @@
-import { StatusCodes } from "http-status-codes";
-import TransportModel from "../../models/Transport/TransportModel.js";
+const { StatusCodes } = require("http-status-codes");
+const TransportModel = require("../../models/Transport/TransportModel.js");
 
 
-export const GetTransportAll = async (req, res) => {
+const GetTransportAll = async (req, res) => {
     try {
         const transport = await TransportModel.find();
         return res.status(StatusCodes.OK).json({
@@ -19,7 +19,7 @@ export const GetTransportAll = async (req, res) => {
     }
 }
 
-export const AddTransport = async (req, res) => {
+const AddTransport = async (req, res) => {
     try {
         const transport = await TransportModel.create(req.body);
         return res.status(StatusCodes.OK).json({
@@ -35,7 +35,7 @@ export const AddTransport = async (req, res) => {
     }
 }
 
-export const UpdateTransport = async (req, res) => {
+const UpdateTransport = async (req, res) => {
     try {
         const transport = await TransportModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
         return res.status(StatusCodes.OK).json({
@@ -52,7 +52,7 @@ export const UpdateTransport = async (req, res) => {
     }
 }
 
-export const GetTransportById = async (req, res) => {
+const GetTransportById = async (req, res) => {
     try {
         const transport = await TransportModel.findById(req.params.id, req.body);
         return res.status(StatusCodes.OK).json({
@@ -69,7 +69,7 @@ export const GetTransportById = async (req, res) => {
     }
 }
 
-export const DeleteTransport = async (req, res) => {
+const DeleteTransport = async (req, res) => {
     try {
         const transport = await TransportModel.findByIdAndDelete(req.params.id);
         return res.status(StatusCodes.OK).json({
@@ -85,3 +85,5 @@ export const DeleteTransport = async (req, res) => {
         })
     }
 }
+
+module.exports = { GetTransportAll, AddTransport, UpdateTransport, GetTransportById, DeleteTransport };

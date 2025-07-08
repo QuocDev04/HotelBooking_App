@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const TransportItemSchema = new mongoose.Schema({
     TransportId: {
@@ -28,4 +28,4 @@ const TourModel = new mongoose.Schema({
         default: false,
     },
 }, { timestamps: true })
-export default mongoose.model("Tour", TourModel)
+module.exports = mongoose.model("Tour", TourModel)

@@ -1,5 +1,5 @@
-import express from 'express'
-import { DeleteTourSchedule, GetByIdTourSchedule, GetTourScheduleAll, PostTourSchedule, PutTourSchedule } from './../../controller/TourController/TourScheduleController.js';
+const express = require('express')
+const { DeleteTourSchedule, GetByIdTourSchedule, GetTourScheduleAll, PostTourSchedule, PutTourSchedule } = require('./../../controller/TourController/TourScheduleController.js');
 
 
 const TourSchedule = express.Router();
@@ -9,4 +9,4 @@ TourSchedule.post('/tourschedule', PostTourSchedule);
 TourSchedule.put('/tourschedule/:id', PutTourSchedule);
 TourSchedule.delete('/tourschedule/:id', DeleteTourSchedule);
 
-export default TourSchedule
+module.exports = TourSchedule

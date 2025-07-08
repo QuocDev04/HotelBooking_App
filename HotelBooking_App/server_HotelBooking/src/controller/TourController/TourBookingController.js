@@ -1,7 +1,7 @@
-import RoomModel from "../../models/Room/RoomModel.js";
-import TourModel from "../../models/Tour/TourModel.js";
-import TourBookingSchema from "../../models/Tour/TourBooking.js";
-import cron from 'node-cron';
+const RoomModel = require("../../models/Room/RoomModel.js");
+const TourModel = require("../../models/Tour/TourModel.js");
+const TourBookingSchema = require("../../models/Tour/TourBooking.js");
+const cron = require('node-cron');
 
 async function releaseRooms(itemRoom) {
     const roomIds = itemRoom.map(item => item.roomId);
@@ -15,7 +15,7 @@ async function releaseRooms(itemRoom) {
     }));
 }
 
-export async function releaseExpiredWaitingRooms() {
+async function releaseExpiredWaitingRooms() {
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
 
     // Tìm các phòng waiting quá 10 phút
@@ -55,7 +55,7 @@ export async function releaseExpiredWaitingRooms() {
 }
 
 
-export async function releaseRoomsAndSlotsForCancelledPayment(bookingId) {
+async function releaseRoomsAndSlotsForCancelledPayment(bookingId) {
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -106,7 +106,7 @@ cron.schedule('* * * * *', async () => {
 });
 
 // Tạo booking tour
-export const createBookingTour = async (req, res) => {
+const createBookingTour = async (req, res) => {
     try {
         const {
             userId,
@@ -200,31 +200,36 @@ export const createBookingTour = async (req, res) => {
         res.status(201).json({
             message: "Đặt tour thành công",
             booking: newBooking,
-            endTime,
-            totalRoomPrice,
         });
     } catch (error) {
-        console.error("Lỗi khi đặt tour:", error);
-        res.status(500).json({ message: "Lỗi máy chủ" });
+        console.error("Lỗi khi tạo booking:", error);
+        res.status(500).json({ message: "Lỗi server", error: error.message });
     }
 };
 
-// Lấy booking theo ID
-export const getByIdBookingTour = async (req, res) => {
+const getByIdBookingTour = async (req, res) => {
     try {
-        const byId = await TourBookingSchema.findById(req.params.id)
-            .populate("itemRoom.roomId", "nameRoom locationId")
-            .populate("tourId");
+        const booking = await TourBookingSchema.findById(req.params.id)
+            .populate('userId', 'username email')
+            .populate('tourId', 'nameTour price duration')
+            .populate('itemRoom.roomId', 'nameRoom priceRoom');
 
-        return res.status(200).json({
+        if (!booking) {
+            return res.status(404).json({ message: "Không tìm thấy booking" });
+        }
+
+        res.status(200).json({
             success: true,
-            message: "Lấy thông tin booking thành công",
-            byId: byId,
+            booking: booking
         });
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: error.message,
-        });
+        res.status(500).json({ message: "Lỗi server", error: error.message });
     }
+};
+
+module.exports = { 
+    releaseExpiredWaitingRooms, 
+    releaseRoomsAndSlotsForCancelledPayment, 
+    createBookingTour, 
+    getByIdBookingTour 
 };

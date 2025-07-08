@@ -1,9 +1,10 @@
-import express from 'express';
-import { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } from 'vnpay';
-import BookingOnySchema from '../../models/Room/BookingRoom.js';
-import checkOutTourSchema from '../../models/Tour/checkOutTour.js';
-import RoomModel from '../../models/Room/RoomModel.js'; 
-import { sendMail } from "../../controller/mail/sendMail.js";
+const express = require('express');
+const { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } = require('vnpay');
+const BookingOnySchema = require('../../models/Room/BookingRoom.js');
+const checkOutTourSchema = require('../../models/Tour/checkOutTour.js');
+const RoomModel = require('../../models/Room/RoomModel.js');
+const { sendMail } = require("../../controller/mail/sendMail.js");
+
 const Vnpay = express.Router();
 
 Vnpay.post('/vnpay/:bookingId', async (req, res) => {
@@ -124,7 +125,6 @@ Vnpay.get('/check-payment-vnpay', async (req, res) => {
 
                 const booking = updated?.BookingTourId;
 
-
                 const email = updated?.emailUser;
                 const fullName = updated?.fullName;
 
@@ -235,12 +235,12 @@ Vnpay.get('/check-payment-vnpay', async (req, res) => {
                 // Nếu có logic update trạng thái phòng cho room booking khi thất bại, bạn thêm ở đây
             }
 
-            return res.redirect('http://localhost:5173/payment-result?success=false&message=Giao dịch thất bại');
+            return res.redirect('http://localhost:5173/payment-result?success=false');
         }
     } catch (error) {
-        console.error('Lỗi xử lý callback:', error);
-        return res.redirect('http://localhost:5173/payment-result?success=false&message=Lỗi hệ thống');
+        console.error(error);
+        return res.redirect('http://localhost:5173/payment-result?success=false&message=Error');
     }
 });
 
-export default Vnpay;
+module.exports = Vnpay;

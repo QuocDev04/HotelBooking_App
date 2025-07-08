@@ -1,5 +1,5 @@
-import express from 'express';
-import { DeleteCmtByUserTour, GetCmtByTourId, PostCmt, PostReply, PutCmtByUserTour } from '../../controller/Cmt/CmtController.js';
+const express = require('express');
+const { DeleteCmtByUserTour, GetCmtByTourId, PostCmt, PostReply, PutCmtByUserTour } = require('../../controller/Cmt/CmtController.js');
 
 
 const CmtRouter = express.Router();
@@ -10,4 +10,4 @@ CmtRouter.get('/cmt/tour/:tourId', GetCmtByTourId);
 CmtRouter.delete('/cmt/:userId/:tourId', DeleteCmtByUserTour)
 
 
-export default CmtRouter
+module.exports = CmtRouter
