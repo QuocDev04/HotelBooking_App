@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import instanceClient from "../../../../configs/instance";
-import { useEffect, useState, type AnyActionArg } from "react";
+import { useEffect, useState } from "react";
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -10,7 +10,9 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 
 dayjs.extend(utc);
-
+interface TourData {
+    dateTour: string;
+}
 interface LeftTourDetailProps {
     refDiv: React.RefObject<HTMLDivElement | null>;
     selectedDate: Date | null;
@@ -59,7 +61,7 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
     });
     function handleDateClick(info: any) {
         const clickedDate = dayjs(info.date).format("YYYY-MM-DD");
-        const isDateAvailable = events.some(event => event.date === clickedDate);
+        const isDateAvailable = events.some((event:any) => event.date === clickedDate);
 
         if (isDateAvailable) {
             setSelectedDate(info.date);
@@ -70,7 +72,7 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
     }
     function handleEventClick(clickInfo: any) {
         const clickedDate = dayjs(clickInfo.event.start).format("YYYY-MM-DD");
-        const isDateAvailable = events.some((event) => event.date === clickedDate);
+        const isDateAvailable = events.some((event:any) => event.date === clickedDate);
 
         if (isDateAvailable) {
             setSelectedDate(clickInfo.event.start);
@@ -78,7 +80,7 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
             console.log("Ngày này không có tour");
         }
       }
-    const selectedSlot = slots?.find((slot:AnyActionArg) =>
+    const selectedSlot = slots?.find((slot: TourData) =>
         dayjs(slot?.dateTour).isSame(selectedDate, 'day')
     );
     return (
