@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import instanceClient from "../../../configs/instance";
 import { useState, useEffect } from "react";
 import { Col, Form, Input, Row, Select, DatePicker, Button, message } from "antd";
@@ -304,7 +304,7 @@ const Checkout = () => {
                   <span className="italic text-gray-600 ml-2">(Từ 12 tuổi trở lên)</span>
                 </div>
                 <Form.List name="adultPassengers">
-                  {(fields, { add, remove }) => (
+                  {(fields) => (
                     <>
                       {fields.map((field, index) => (
                         <div key={field.key} style={{ display: 'flex' }}>
@@ -386,7 +386,7 @@ const Checkout = () => {
                   <span className="italic text-gray-600 ml-2">(Từ 2 - 4 tuổi)</span>
                 </div>
                 <Form.List name="toddlerPassengers">
-                  {(fields, { add, remove }) => (
+                  {(fields) => (
                     <>
                       {fields.map((field, index) => (
                         <div key={field.key} style={{ display: 'flex' }}>
@@ -444,7 +444,7 @@ const Checkout = () => {
                   <span className="italic text-gray-600 ml-2">(Từ 5 - 11 tuổi)</span>
                 </div>
                 <Form.List name="childPassengers">
-                  {(fields, { add, remove }) => (
+                  {(fields) => (
                     <>
                       {fields.map((field, index) => (
                         <div key={field.key} style={{ display: 'flex' }}>
@@ -502,7 +502,7 @@ const Checkout = () => {
                   <span className="italic text-gray-600 ml-2">(Dưới 2 tuổi)</span>
                 </div>
                 <Form.List name="infantPassengers">
-                  {(fields, { add, remove }) => (
+                  {(fields) => (
                     <>
                       {fields.map((field, index) => (
                         <div key={field.key} style={{ display: 'flex' }}>
