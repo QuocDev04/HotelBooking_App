@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import instanceClient from "../../../../configs/instance";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type AnyActionArg } from "react";
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -12,7 +12,7 @@ import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 
 interface LeftTourDetailProps {
-    refDiv: React.RefObject<HTMLDivElement>;
+    refDiv: React.RefObject<HTMLDivElement | null>;
     selectedDate: Date | null;
     setSelectedDate: (date: Date | null) => void;
 }
@@ -78,8 +78,8 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
             console.log("Ngày này không có tour");
         }
       }
-    const selectedSlot = slots?.find(slot =>
-        dayjs(slot.dateTour).isSame(selectedDate, 'day')
+    const selectedSlot = slots?.find((slot:AnyActionArg) =>
+        dayjs(slot?.dateTour).isSame(selectedDate, 'day')
     );
     return (
         <>

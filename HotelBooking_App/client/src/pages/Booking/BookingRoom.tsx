@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom"
 import instanceClient from "../../../configs/instance";
 import { useEffect, useState } from "react";
-import * as dayjs from 'dayjs';
+import  dayjs from 'dayjs';
 import type { AxiosError } from "axios";
 import { Form, Input, message } from "antd";
 

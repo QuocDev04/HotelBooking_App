@@ -9,6 +9,7 @@ import RightTourDetail from './Right/RightTourDetail';
 import Schedule from './Content/Schedule';
 import Evaluate from './Content/Evaluate';
 import { useEffect, useRef, useState } from 'react';
+
 const TourPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
