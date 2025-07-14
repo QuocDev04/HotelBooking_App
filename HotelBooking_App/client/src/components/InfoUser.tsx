@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import instanceClient from "../../configs/instance"
 import { useState } from "react"
@@ -75,7 +76,7 @@ const InfoUser = () => {
     // Filter bookings based on status
     const filteredbookings = selectedStatus === "all"
         ? bookings
-        : bookings.filter(bill => bill.payment_status === selectedStatus);
+        : bookings.filter((bill: any) => bill.payment_status === selectedStatus);
     console.log("booo9ing",filteredbookings);
     
     const getStatusColor = (status: string) => {
@@ -235,7 +236,7 @@ const InfoUser = () => {
                             <div className="ml-4">
                                 <p className="text-sm font-medium text-gray-600">Đã thanh toán</p>
                                 <p className="text-2xl font-bold text-gray-900">
-                                    {bookings.filter(bill => bill.payment_status === 'completed').length}
+                                    {bookings.filter((bill:any) => bill.payment_status === 'completed').length}
                                 </p>
                             </div>
                         </div>
@@ -250,7 +251,7 @@ const InfoUser = () => {
                             <div className="ml-4">
                                 <p className="text-sm font-medium text-gray-600">Chờ thanh toán</p>
                                 <p className="text-2xl font-bold text-gray-900">
-                                    {bookings.filter(bill => bill.payment_status === 'pending').length}
+                                    {bookings.filter((bill: any) => bill.payment_status === 'pending').length}
                                 </p>
                             </div>
                         </div>
@@ -265,7 +266,7 @@ const InfoUser = () => {
                             <div className="ml-4">
                                 <p className="text-sm font-medium text-gray-600">Tổng chi tiêu</p>
                                 <p className="text-2xl font-bold text-gray-900">
-                                    {bookings.reduce((sum, bill) => sum + (bill.totalPriceTour || 0), 0).toLocaleString()}₫
+                                    {bookings.reduce((sum: any, bill: any) => sum + (bill.totalPriceTour || 0), 0).toLocaleString()}₫
                                 </p>
                             </div>
                         </div>
