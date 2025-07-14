@@ -22,6 +22,7 @@ import Revenue from './Revenue';
 import Popular from './Popular';
 import WeeklyStatistics from './WeeklyStatistics';
 import NewCustomersData from './NewCustomersData';
+import BookingStats from './BookingStats';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -115,6 +116,9 @@ const ListDashboad = () => {
 
       {/* Thống kê tổng quan với gradient cards */}
       <Overview />
+
+      {/* Thống kê đặt chỗ */}
+      <BookingStats />
 
       {/* Biểu đồ doanh thu và tour đặt nhiều nhất với glassmorphism */}
       <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>

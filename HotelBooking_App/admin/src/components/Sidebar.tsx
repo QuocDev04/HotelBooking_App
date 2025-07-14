@@ -36,6 +36,13 @@ const Sidebar = () => {
             ],
         },
         {
+            name: 'Quản lý đặt chỗ',
+            icon: '📋',
+            children: [
+                { name: 'Danh sách đặt chỗ', path: '/admin/list-booking', icon: '📊' },
+            ],
+        },
+        {
             name: 'Phòng',
             icon: '🏨',
             children: [

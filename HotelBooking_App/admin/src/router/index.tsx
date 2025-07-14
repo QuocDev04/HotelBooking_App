@@ -16,6 +16,7 @@ import EditTSchedule from "../pages/TransportSchedule/EditTSchedule"
 import AddTourSchedule from "../pages/TourSchedule/AddTourSchedule"
 import ListTourSchedule from "../pages/TourSchedule/ListTourSchedule"
 import EditTourSchedule from "../pages/TourSchedule/EditTourSchedule"
+import ListBooking from "../pages/Tour/ListBooking"
 import Login from "../components/Login"
 import { useUser } from "@clerk/clerk-react"
 import AdminRoute from "../components/AdminRouter"
@@ -53,6 +54,7 @@ const Router = () => {
                     <Route path="/admin/list-tour" element={<ListTour />} />
                     <Route path="/admin/add-tour" element={<AddTour />} />
                     <Route path="/admin/edit-tour/:id" element={<EditTour />} />
+                    <Route path="/admin/list-booking" element={<ListBooking />} />
 
                     <Route path="/admin/list-transport" element={<ListTransport />} />
                     <Route path="/admin/add-transport" element={<AddTransport />} />

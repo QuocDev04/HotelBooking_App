@@ -8,58 +8,47 @@ import Content from './Content/Content';
 import RightTourDetail from './Right/RightTourDetail';
 import Schedule from './Content/Schedule';
 import Evaluate from './Content/Evaluate';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 const TourPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [selectedRoom, setSelectedRoom] = useState<any[]>([])
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const calendarRef = useRef<HTMLDivElement>(null);
+  const { id } = useParams<{ id: string }>();
+
+  // Hàm scroll
+  const scrollToCalendar = () => {
+    calendarRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [])
-  const { id } = useParams();
+  const { id: tourId } = useParams<{ id: string }>();
+  const { data: tourD } = useQuery({
+    queryKey: ['/date/tour/', tourId],
+    queryFn: () => instanceClient.get(`/date/tour/${tourId}`)
+  })
+  const slots = tourD?.data?.data || [];
+  console.log(slots);
+  
   const { data: tour } = useQuery({
     queryKey: ['tour', id],
     queryFn: () => instanceClient.get(`/tour/${id}`)
   })
-  
-  const { data: room } = useQuery({
-    queryKey: ['room'],
-    queryFn: () => instanceClient.get('/room')
-  })
-  
-  const rooms = room?.data?.rooms
-  const toggleSelectRoom = (roomItem: any) => {
-    if (selectedRoom.some(r => r._id === roomItem._id)) {
-      // Nếu đã chọn rồi thì bỏ chọn
-      setSelectedRoom(prev => prev.filter(r => r._id !== roomItem._id));
-    } else {
-      // Nếu chưa chọn thì thêm vào
-      setSelectedRoom(prev => [...prev, roomItem]);
-    }
+  const tours = tour?.data?.tour
+
+  // Hàm vừa reset ngày vừa cuộn xuống lịch
+  const handleChooseOtherDate = () => {
+    setSelectedDate(null);
+    scrollToCalendar();
   };
-  const destinationLocation = tour?.data?.tour?.destination;
-  
-  const matchedRooms = rooms?.filter((roomItem: any) => {
-    return (
-      roomItem?.locationId?.locationName === destinationLocation?.locationName &&
-      roomItem?.locationId?.country === destinationLocation?.country
-    );
-  });  
   return (
     <>
-      <div className="max-w-screen-xl p-4 mx-auto font-sans mt-32">
+      <div className="max-w-screen-xl p-4 mx-auto font-sans mt-20">
         {/* Title */}
         <h1 className="mb-2 text-2xl font-semibold">
-          {tour?.data?.tour.nameTour}
+          {tours?.nameTour}
         </h1>
-
-        {/* Icons */}
-        <div className="flex flex-wrap gap-4 mb-4 text-3xl text-gray-700">
-          <div className="flex items-center gap-1">
-            <span className="text-blue-600">★ ★ ★ ★ ☆</span>
-          </div>
-        </div>
         <div className="flex flex-wrap gap-4 mb-4">
-
           <div className="flex items-center">
             <div className=" rounded-2xl p-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="24" viewBox="0 0 18 24" fill="none">
@@ -69,7 +58,7 @@ const TourPage = () => {
             </div>
             <div className="ml-2">
               <div className="text-sm text-gray-500">Khởi hành từ</div>
-              <div className="text-sm font-semibold text-blue-500">{tour?.data?.tour.departure_location}</div>
+              <div className="text-sm font-semibold text-blue-500">{tours?.departure_location}</div>
             </div>
           </div>
           <div className="flex items-center">
@@ -81,7 +70,7 @@ const TourPage = () => {
             </div>
             <div className="ml-2">
               <div className="text-sm text-gray-500">Điểm đến</div>
-              <div className="text-sm font-semibold text-blue-500">{tour?.data?.tour?.destination?.locationName} - {tour?.data?.tour?.destination?.country}</div>
+              <div className="text-sm font-semibold text-blue-500">{tours?.destination?.locationName} - {tours?.destination?.country}</div>
             </div>
           </div>
           <div className="flex items-center">
@@ -96,26 +85,18 @@ const TourPage = () => {
             </div>
             <div className="ml-2">
               <div className="text-sm text-gray-500">Thời gian</div>
-              <div className="text-sm font-semibold text-blue-500">{tour?.data?.tour?.duration}</div>
-            </div>
-          </div>
-          <div className="flex items-center">
-            <div className=" rounded-2xl p-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="22" viewBox="0 0 20 22" fill="none">
-                <path d="M14.5 6.5C14.5 9.12336 12.3733 11.25 9.75 11.25C7.12668 11.25 5 9.12336 5 6.5C5 3.87664 7.12668 1.75 9.75 1.75C12.3733 1.75 14.5 3.87664 14.5 6.5Z" stroke="#3B82F6" stroke-width="2"></path>
-                <path d="M19 22V20C19 16.6863 16.3137 14 13 14H7C3.68629 14 1 16.6863 1 20V22" stroke="#3B82F6" stroke-width="2"></path>
-              </svg>
-            </div>
-            <div className="ml-2">
-              <div className="text-sm text-gray-500">Số chỗ còn nhận</div>
-              <div className="text-sm font-semibold text-blue-500">{tour?.data?.tour?.available_slots}</div>
+              <div className="text-sm font-semibold text-blue-500">{tours?.duration}</div>
             </div>
           </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           <div className="w-full lg:w-2/3">
-            <LeftTourDetail />
+            <LeftTourDetail
+              refDiv={calendarRef}
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
+            />
             <div className="mt-8">
               <div className="flex border-b">
                 <button
@@ -123,12 +104,6 @@ const TourPage = () => {
                   onClick={() => setActiveTab('overview')}
                 >
                   Tổng quan
-                </button>
-                <button
-                  className={`px-4 py-2 font-medium ${activeTab === 'rooms' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
-                  onClick={() => setActiveTab('rooms')}
-                >
-                  Phòng nghỉ
                 </button>
               </div>
               {activeTab === 'overview' && (
@@ -138,107 +113,16 @@ const TourPage = () => {
                   <Evaluate />
                 </div>
               )}
-              {activeTab === 'rooms' && (
-                <div className="space-y-6 max-w-3xl mt-6">
-                  {matchedRooms?.map((room: any) => {
-                    const isSelected = selectedRoom.some((r: any) => r._id === room._id);
-                    const isAvailable = room.statusRoom === 'available';
-                    const isWaiting = room.statusRoom === 'waiting';
-                    const isFull = room.statusRoom === 'full';
-                    const isCancelled = room.statusRoom === 'cancelled';
-
-                    let roomStatusText = '';
-                    if (isWaiting) roomStatusText = 'Chờ xác nhận';
-                    else if (isFull) roomStatusText = 'Đã đầy';
-                    else if (isCancelled) roomStatusText = 'Đã hủy';
-                    else if (!isAvailable) roomStatusText = 'Không khả dụng';
-
-                    return (
-                      <div
-                        key={room._id}
-                        className={`border rounded-lg overflow-hidden transition-all p-4 bg-blue-100 ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
-                        onClick={() => isAvailable && toggleSelectRoom(room)}
-                        title={!isAvailable ? `Phòng ${roomStatusText}` : ''}
-                        style={{ borderColor: '#2563eb' }}
-                      >
-                        <div className="flex flex-col md:flex-row gap-4">
-                          <img
-                            src={room.imageRoom[0]}
-                            alt={room.typeRoom}
-                            className="rounded-lg w-full md:w-64 h-40 object-cover border border-gray-300 shadow-sm"
-                          />
-                          <div className="flex flex-col flex-1 justify-between">
-                            <div>
-                              <div className="flex justify-between items-center">
-                                <h3 className="font-bold text-lg md:text-xl text-black">
-                                  {room.nameRoom?.split(' ').slice(0, 5).join(' ') + '...' || ''}
-                                </h3>
-                                <div className="md:mt-0 text-right">
-                                  <div className="flex items-center space-x-1 md:space-x-2">
-                                    <p className="text-blue-700 font-bold text-lg md:text-xl">
-                                      {new Intl.NumberFormat('vi-VN').format(room.priceRoom)}₫
-                                    </p>
-                                    <p className="text-sm text-gray-700">/khách</p>
-                                  </div>
-                                </div>
-                              </div>
-                              <p className="text-blue-400 mt-1">
-                                {room.typeRoom} - sức chứa tối đa {room.capacityRoom} người
-                              </p>
-                              <p
-                                className="my-2"
-                                dangerouslySetInnerHTML={{
-                                  __html: room.descriptionRoom?.split(' ').slice(0, 10).join(' ') + '...' || '',
-                                }}
-                              />
-                              <div className="flex flex-wrap gap-2 mt-3 max-h-16 overflow-hidden">
-                                {room.amenitiesRoom?.map((item: any, i: number) => (
-                                  <span
-                                    key={i}
-                                    className="bg-blue-200 text-blue-700 px-2 py-1 rounded text-xs whitespace-nowrap"
-                                  >
-                                    {item}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (!isAvailable) return;
-                                if (isSelected) {
-                                  setSelectedRoom(selectedRoom.filter((r) => r._id !== room._id));
-                                } else {
-                                  setSelectedRoom([...selectedRoom, room]);
-                                }
-                              }}
-                              className={`mt-4 w-full py-2 rounded-lg ${isAvailable
-                                  ? isSelected
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 hover:bg-gray-200'
-                                  : 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                                }`}
-                              disabled={!isAvailable}
-                            >
-                              {!isAvailable
-                                ? roomStatusText
-                                : isSelected
-                                  ? 'Bỏ chọn'
-                                  : 'Chọn phòng'}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
             </div>
           </div>
 
-          <div className="w-full lg:w-1/3 h-full">
-            <RightTourDetail selectedRoom={selectedRoom} />
+          <div className="w-full lg:w-1/3">
+            <RightTourDetail
+              onChooseDate={selectedDate ? handleChooseOtherDate : scrollToCalendar}
+              selectedDate={selectedDate}
+              tour={tours}
+              slots={slots} 
+            />
           </div>
         </div>
       </div >

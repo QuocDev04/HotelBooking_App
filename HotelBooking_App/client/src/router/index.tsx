@@ -14,8 +14,9 @@ import { HotelPolicy } from "../pages/Blog/hotelPolicy"
 import JapanTourPage from "../pages/Tour/detailTour"
 import BookingRoom from "../pages/Booking/BookingRoom"
 import BookingAll from "../pages/Booking/BookingAll"
-import PaymentResult from "../pages/Booking/Payment"
 import InfoUser from "../components/InfoUser"
+import Checkout from "../pages/Booking/Checkout"
+import CheckOutTour from "../pages/Booking/CheckOutTour"
 const Router = () => {
     return (
         <Routes>
@@ -34,8 +35,9 @@ const Router = () => {
                 <Route path="/detailtour/:id" element={<JapanTourPage />} />
                 <Route path="/bookingroom/:id" element={<BookingRoom />} />
                 <Route path="/bookingall/:id" element={<BookingAll />} />
-                <Route path="/payment-result" element={<PaymentResult />} />
                 <Route path="/infouser" element={<InfoUser />} />
+                <Route path="/date/slot/:id/" element={<Checkout />} />
+                <Route path="/booking/:id" element={<CheckOutTour />} />
             </Route>
         </Routes>
     )

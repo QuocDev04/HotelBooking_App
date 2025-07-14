@@ -9,7 +9,7 @@ const sendMail = async ({ email, subject, html }) => {
 
     let transporter;
     try {
-        transporter = nodemailer.createTransporter({
+        transporter = nodemailer.createTransport({
             host: 'smtp.gmail.com',
             service: 'gmail',
             auth: {
@@ -17,7 +17,7 @@ const sendMail = async ({ email, subject, html }) => {
                 pass: process.env.Mail_Pass,
             },
             tls: {
-                rejectUnauthorized: false, 
+                rejectUnauthorized: false,
             },
         });
 
@@ -33,7 +33,7 @@ const sendMail = async ({ email, subject, html }) => {
     } catch (error) {
         throw new Error(`Failed to send email: ${error.message}`);
     } finally {
-        if (transporter) {
+        if (transporter && typeof transporter.close === 'function') {
             transporter.close();
         }
     }

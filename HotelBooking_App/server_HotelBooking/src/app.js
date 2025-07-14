@@ -15,6 +15,7 @@ const UserRouter = require('./router/PeopleRouter/UserRouter');
 const RouterChecOutBookingTour = require("./router/TourRouter/checkOutTour");
 const routerLocation = require("./router/Location/locationRouter");
 const CmtRouter = require("./router/Cmt/CmtRouter");
+const { dateRouter } = require("./router/TourRouter/DateTour");
 
 const app = express();
 app.use(express.json());
@@ -39,6 +40,7 @@ app.use('/api/', RouterBookingTour);
 app.use('/api/', RouterChecOutBookingTour);
 app.use('/api/', routerLocation);
 app.use('/api/', CmtRouter);
+app.use('/api/', dateRouter);
 
 // Error handler
 app.use((err, req, res, next) => {

@@ -8,9 +8,6 @@ const checkOutTourSchema = new mongoose.Schema({
         ref: 'BookingTour',
         required: true,
     },
-    fullName: { type: String, required: true },
-    emailUser: { type: String, required: true },
-    phoneUser: { type: String, required: true },
     payment_date: { type: Date},
     payment_method: {
         type: String,
