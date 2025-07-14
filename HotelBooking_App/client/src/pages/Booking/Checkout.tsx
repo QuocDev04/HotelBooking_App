@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
@@ -13,33 +14,9 @@ import type { AxiosError } from "axios";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 const { TextArea } = Input;
-const { Option } = Select;
 
-interface PassengerInfo {
-  fullName: string;
-  gender: string;
-  birthDate: any;
-  singleRoom?: boolean;
-}
 
-interface FormData {
-  userId: string;
-  slotId: string;
-  fullNameUser: string;
-  email: string;
-  phone: string;
-  address: string;
-  totalPriceTour: number;
-  adultsTour: number;
-  childrenTour?: number;
-  toddlerTour?: number;
-  infantTour?: number;
-  adultPassengers?: PassengerInfo[];
-  childPassengers?: PassengerInfo[];
-  toddlerPassengers?: PassengerInfo[];
-  infantPassengers?: PassengerInfo[];
-  note?: string;
-}
+
 
 const Checkout = () => {
   const [form] = Form.useForm();
@@ -48,7 +25,6 @@ const Checkout = () => {
   const [childCount, setChildCount] = useState(0);
   const [kidCount, setKidCount] = useState(0);
   const [babyCount, setBabyCount] = useState(0);
-  const navigate = useNavigate()
   const handleAdultCountChange = (newCount: any) => {
     setAdultCount(newCount);
     setSingleRoom((prev) => {
@@ -133,7 +109,7 @@ const Checkout = () => {
         if (!userId) throw new Error("Bạn cần đăng nhập trước khi đặt tour.");
         if (!id) throw new Error("Slot ID không hợp lệ.");
 
-        const { userId: _, slotId: __, ...restData } = data;
+        const { userId: any, slotId: __, ...restData } = data;
 
         const payload = {
           userId,
