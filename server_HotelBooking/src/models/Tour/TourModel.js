@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const TransportItemSchema = new mongoose.Schema({
     TransportId: {
@@ -17,17 +17,15 @@ const TourModel = new mongoose.Schema({
     discountPercent: { type: Number },                     // Giá khuyến mãi (nếu có)
     finalPrice: { type: Number },                    // Giá cuối cùng sau áp dụng phiếu giảm giá
     discountExpiryDate: { type: Date },                    // Thời hạn phiếu giảm giá
+    available_slots: { type: Number },
+    maxPeople: { type: Number, required: true },
     imageTour: [{ type: String, required: true }],
     tourType: { type: String, required: true },
     status: { type: Boolean, default: true },
     descriptionTour: { type: String },
-    featured: { type: Boolean, default: false },
-    priceChildren: { type: Number, required: true },
-    priceLittleBaby: { type: Number, required: true },
-    pricebaby: { type: Number, default: 0 },
-    singleRoom: { type: Boolean },
-    priceSingleRoom: { type: Number, required: true },
-    hasFlightTicket: { type: Boolean, default: false },  // Xác định tour có vé máy bay hay không
-    flightTicketPrice: { type: Number, default: 0 }      // Giá vé máy bay (nếu có)
+    featured: {
+        type: Boolean,
+        default: false,
+    },
 }, { timestamps: true })
-module.exports = mongoose.model("Tour", TourModel)
+export default mongoose.model("Tour", TourModel)

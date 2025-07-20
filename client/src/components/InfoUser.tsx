@@ -1,53 +1,46 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import instanceClient from "../../configs/instance"
 import { useState } from "react"
 
-// Define bill type interface for the new data structure
+// Define bill type interface
 interface Bill {
     _id: string;
-    userId: {
-        _id: string;
-        username: string;
-        email: string;
-    };
-    slotId: {
-        _id: string;
-        tour: {
-            _id: string;
-            nameTour: string;
-            destination: string;
-            departure_location: string;
-            duration: string;
-            finalPrice: number;
-            imageTour: string[];
-            tourType: string;
-        };
-        dateTour: string;
-        availableSeats: number;
-    };
-    fullNameUser: string;
-    email: string;
-    phone: string;
-    totalPriceTour: number;
-    adultsTour: number;
-    childrenTour: number;
-    toddlerTour: number;
-    infantTour: number;
-    adultPassengers: Array<{
-        fullName: string;
-        gender: string;
-        birthDate: string;
-        singleRoom: boolean;
-    }>;
-    childPassengers: any[];
-    toddlerPassengers: any[];
-    infantPassengers: any[];
-    payment_method: string;
-    payment_status: string;
+    roomId: string;
+    nameRoom: string;
+    locationId: string;
+    amenitiesRoom: string[];
+    capacityRoom: number;
+    priceRoom: number;
+    statusRoom: string;
+    typeRoom: string;
+    imageRoom: string[];
     createdAt: string;
     updatedAt: string;
-    __v: number;
+    waitingSince?: string;
+    // Additional properties that might exist
+    id?: string;
+    BookingTourId?: {
+        tourId?: {
+            nameTour?: string;
+            imageTour?: string;
+            destination?: string;
+            departure_location?: string;
+            duration?: number;
+            description?: string;
+            tourType?: string;
+        };
+    };
+    phoneUser?: string;
+    emailUser?: string;
+    amount?: number;
+    payment_status?: string;
+    hotel?: string;
+    room?: string;
+    date?: string;
+    nights?: number;
+    total?: number;
+    status?: string;
+    itemRoom?: Bill[];
 }
 
 const InfoUser = () => {
@@ -55,30 +48,26 @@ const InfoUser = () => {
     const [selectedStatus, setSelectedStatus] = useState<string>("all");
     const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
-    const [showCancelModal, setShowCancelModal] = useState(false);
-    const [bookingToCancel, setBookingToCancel] = useState<Bill | null>(null);
-    const [cancelReason, setCancelReason] = useState<string>('');
-    const queryClient = useQueryClient();
-
     const { data: user } = useQuery({
         queryKey: ['user', userId],
         queryFn: () => instanceClient.get(`user/${userId}`)
     })
-    const users = user?.data?.user
-    const { data: bill } = useQuery({
-        queryKey: ['/bookingTour/user', userId],
-        queryFn: () => instanceClient.get(`/bookingTour/user/${userId}`)
-    })
-    const bookings = bill?.data?.bookings || []
-    console.log(bookings);
-    
+    console.log('user', user?.data?.user);
+    const users = user?.data?.user || [];
 
-    // Filter bookings based on status
-    const filteredbookings = selectedStatus === "all"
-        ? bookings
-        : bookings.filter((bill: any) => bill.payment_status === selectedStatus);
-    console.log("booo9ing",filteredbookings);
-    
+    const { data: bill } = useQuery({
+        queryKey: ['checkOutBookingTour', userId],
+        queryFn: () => instanceClient.get(`checkOutBookingTour/${userId}`)
+    })
+
+    const bills: Bill[] = bill?.data?.data || [];
+    console.log(bills);
+
+    // Filter bills based on status
+    const filteredBills = selectedStatus === "all"
+        ? bills
+        : bills.filter(bill => bill.payment_status === selectedStatus);
+
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'completed':
@@ -101,7 +90,7 @@ const InfoUser = () => {
             case 'cancelled':
                 return 'Đã hủy';
             default:
-                return 'Chờ Xác Nhận';
+                return 'Không xác định';
         }
     };
 
@@ -115,54 +104,8 @@ const InfoUser = () => {
         setSelectedBill(null);
     };
 
-    // Hàm kiểm tra có thể hủy
-    const canCancelBooking = (bill: Bill) => {
-        const tourDate = new Date(bill.slotId.dateTour);
-        const now = new Date();
-        return (
-            bill.payment_status !== 'cancelled' &&
-            bill.payment_status !== 'pending_cancel' &&
-            tourDate > now
-        );
-    };
-
-    const handleCancelBooking = (bill: Bill) => {
-        setBookingToCancel(bill);
-        setShowCancelModal(true);
-    };
-
-    const closeCancelModal = () => {
-        setShowCancelModal(false);
-        setBookingToCancel(null);
-        setCancelReason('');
-    };
-
-    const requestCancelMutation = useMutation({
-        mutationFn: (bookingId: string) => 
-            instanceClient.put(`/bookingTour/request-cancel/${bookingId}`, {
-                userId: userId,
-                reason: cancelReason
-            }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['/bookingTour/user', userId] });
-            setShowCancelModal(false);
-            setBookingToCancel(null);
-            setCancelReason('');
-        },
-        onError: (error) => {
-            console.error('Error requesting cancel:', error);
-            alert('Có lỗi xảy ra khi yêu cầu hủy đặt chỗ. Vui lòng thử lại.');
-        }
-    });
-
-    const confirmCancelBooking = () => {
-        if (bookingToCancel) {
-            requestCancelMutation.mutate(bookingToCancel._id);
-        }
-    };
-
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header Section */}
                 <div className="text-center mb-12 ">
@@ -222,7 +165,7 @@ const InfoUser = () => {
                             </div>
                             <div className="ml-4">
                                 <p className="text-sm font-medium text-gray-600">Tổng đặt chỗ</p>
-                                <p className="text-2xl font-bold text-gray-900">{bookings.length}</p>
+                                <p className="text-2xl font-bold text-gray-900">{bills.length}</p>
                             </div>
                         </div>
                     </div>
@@ -236,7 +179,7 @@ const InfoUser = () => {
                             <div className="ml-4">
                                 <p className="text-sm font-medium text-gray-600">Đã thanh toán</p>
                                 <p className="text-2xl font-bold text-gray-900">
-                                    {bookings.filter((bill:any) => bill.payment_status === 'completed').length}
+                                    {bills.filter(bill => bill.payment_status === 'completed').length}
                                 </p>
                             </div>
                         </div>
@@ -251,7 +194,7 @@ const InfoUser = () => {
                             <div className="ml-4">
                                 <p className="text-sm font-medium text-gray-600">Chờ thanh toán</p>
                                 <p className="text-2xl font-bold text-gray-900">
-                                    {bookings.filter((bill: any) => bill.payment_status === 'pending').length}
+                                    {bills.filter(bill => bill.payment_status === 'pending').length}
                                 </p>
                             </div>
                         </div>
@@ -266,7 +209,7 @@ const InfoUser = () => {
                             <div className="ml-4">
                                 <p className="text-sm font-medium text-gray-600">Tổng chi tiêu</p>
                                 <p className="text-2xl font-bold text-gray-900">
-                                    {bookings.reduce((sum: any, bill: any) => sum + (bill.totalPriceTour || 0), 0).toLocaleString()}₫
+                                    {bills.reduce((sum, bill) => sum + (bill.amount || bill.total || 0), 0).toLocaleString()}₫
                                 </p>
                             </div>
                         </div>
@@ -305,21 +248,12 @@ const InfoUser = () => {
                             >
                                 Chờ thanh toán
                             </button>
-                            <button
-                                onClick={() => setSelectedStatus("cancelled")}
-                                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${selectedStatus === "cancelled"
-                                    ? "bg-red-600 text-white shadow-lg"
-                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                    }`}
-                            >
-                                Đã hủy
-                            </button>
                         </div>
                     </div>
                 </div>
 
-                {/* bookings Grid */}
-                {filteredbookings.length === 0 ? (
+                {/* Bills Grid */}
+                {filteredBills.length === 0 ? (
                     <div className="text-center py-12">
                         <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                             <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -331,32 +265,55 @@ const InfoUser = () => {
                     </div>
                 ) : (
                     <div className="space-y-6">
-                        {filteredbookings.map((bill: Bill, index: number) => (
-                            <div key={bill._id || index} className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
+                        {filteredBills.map((bill: Bill, index: number) => (
+                            <div key={bill._id || bill.id || index} className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
+                                {/* Main Content */}
                                 <div className="p-8">
                                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                                        {/* Left Side - Room Info */}
                                         <div className="flex-1 mb-6 lg:mb-0">
                                             <div className="flex items-start space-x-4">
+                                                {/* Room Image */}
                                                 <div className="flex-shrink-0">
-                                                    <div className="w-20 h-20 rounded-xl flex items-center justify-center shadow-lg overflow-hidden bg-gradient-to-br from-purple-400 to-pink-500">
-                                                        {bill?.slotId?.tour?.imageTour && bill.slotId.tour.imageTour.length > 0 ? (
-                                                            <img
-                                                                src={bill.slotId.tour.imageTour[0]}
-                                                                alt="Tour"
-                                                                className="w-full h-full object-cover"
-                                                            />
+                                                    <div className={`w-20 h-20 rounded-xl flex items-center justify-center shadow-lg overflow-hidden ${bill?.BookingTourId?.tourId?.nameTour
+                                                        ? 'bg-gradient-to-br from-purple-400 to-pink-500'
+                                                        : 'bg-gradient-to-br from-blue-400 to-purple-500'
+                                                        }`}>
+                                                        {bill?.BookingTourId?.tourId?.nameTour ? (
+                                                            // Tour image
+                                                            bill?.BookingTourId?.tourId?.imageTour ? (
+                                                                <img
+                                                                    src={bill.BookingTourId.tourId.imageTour}
+                                                                    alt="Tour"
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                </svg>
+                                                            )
                                                         ) : (
-                                                            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                            </svg>
+                                                            // Hotel room image
+                                                            bill?.imageRoom && bill.imageRoom.length > 0 ? (
+                                                                <img
+                                                                    src={bill.imageRoom[0]}
+                                                                    alt="Room"
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                                </svg>
+                                                            )
                                                         )}
                                                     </div>
                                                 </div>
 
+                                                {/* Room Details */}
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center space-x-3 mb-2">
                                                         <h3 className="text-xl font-bold text-gray-900 truncate">
-                                                            {bill?.slotId?.tour?.nameTour || 'Không có tên'}
+                                                            {bill?.BookingTourId?.tourId?.nameTour || bill?.nameRoom || 'Không có tên'}
                                                         </h3>
                                                         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(bill.payment_status || '')}`}>
                                                             {getStatusText(bill.payment_status || '')}
@@ -369,38 +326,71 @@ const InfoUser = () => {
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                                             </svg>
-                                                            <span>{bill?.slotId?.tour?.departure_location || 'N/A'}</span>
+                                                            <span>
+                                                                {bill?.BookingTourId?.tourId?.nameTour
+                                                                    ? 'Tour du lịch'
+                                                                    : bill?.locationId || 'N/A'
+                                                                }
+                                                            </span>
                                                         </div>
                                                         <div className="flex items-center space-x-1">
                                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                             </svg>
-                                                            <span>{bill?.slotId?.tour?.duration || 'N/A'}</span>
+                                                            <span>
+                                                                {bill?.BookingTourId?.tourId?.nameTour
+                                                                    ? 'Du lịch'
+                                                                    : `${bill?.capacityRoom || 1} người`
+                                                                }
+                                                            </span>
                                                         </div>
                                                     </div>
 
+                                                    {/* Room Features */}
                                                     <div className="flex flex-wrap gap-2">
-                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                                            Tour
-                                                        </span>
-                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                            {bill?.slotId?.tour?.tourType === 'noidia' ? 'Nội địa' : 'Quốc tế'}
-                                                        </span>
-                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                            {bill.adultsTour + bill.childrenTour + bill.toddlerTour + bill.infantTour} hành khách
-                                                        </span>
+                                                        {bill?.BookingTourId?.tourId?.nameTour ? (
+                                                            // Tour features
+                                                            <>
+                                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                                    Tour
+                                                                </span>
+                                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                                    Du lịch
+                                                                </span>
+                                                            </>
+                                                        ) : (
+                                                            // Hotel room features
+                                                            <>
+                                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                                    {bill?.typeRoom || 'Standard'}
+                                                                </span>
+                                                                {bill?.amenitiesRoom && bill.amenitiesRoom.slice(0, 2).map((amenity, idx) => (
+                                                                    <span key={idx} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                                        {amenity}
+                                                                    </span>
+                                                                ))}
+                                                                {bill?.amenitiesRoom && bill.amenitiesRoom.length > 2 && (
+                                                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                                        +{bill.amenitiesRoom.length - 2} khác
+                                                                    </span>
+                                                                )}
+                                                            </>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
+                                        {/* Right Side - Price and Actions */}
                                         <div className="flex flex-col items-end space-y-4">
+                                            {/* Price */}
                                             <div className="text-right">
                                                 <div className="text-2xl font-bold text-gray-900">
-                                                    {(bill?.totalPriceTour || 0).toLocaleString()}₫
+                                                    {(bill?.priceRoom || bill.amount || bill.total || 0).toLocaleString()}₫
                                                 </div>
                                             </div>
 
+                                            {/* Action Buttons */}
                                             <div className="flex space-x-3">
                                                 <button
                                                     onClick={() => handleViewDetail(bill)}
@@ -420,22 +410,12 @@ const InfoUser = () => {
                                                         Thanh toán
                                                     </button>
                                                 )}
-                                                {canCancelBooking(bill) && (
-                                                    <button 
-                                                        onClick={() => handleCancelBooking(bill)}
-                                                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
-                                                    >
-                                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                        </svg>
-                                                        Hủy
-                                                    </button>
-                                                )}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
+                                {/* Bottom Section - Additional Info */}
                                 <div className="bg-gray-50 px-8 py-4 border-t border-gray-100">
                                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
                                         <div className="flex items-center space-x-6 text-sm text-gray-600">
@@ -449,7 +429,7 @@ const InfoUser = () => {
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
-                                                <span>Mã: {bill._id?.slice(-8) || 'N/A'}</span>
+                                                <span>Mã: {bill._id?.slice(-8) || bill.id || 'N/A'}</span>
                                             </div>
                                         </div>
 
@@ -479,7 +459,7 @@ const InfoUser = () => {
                         {/* Modal Header */}
                         <div className="flex items-center justify-between p-6 border-b border-gray-200">
                             <h2 className="text-2xl font-bold text-gray-900">
-                                Chi tiết Tour
+                                Chi tiết {selectedBill?.BookingTourId?.tourId?.nameTour ? 'Tour' : 'Đặt phòng'}
                             </h2>
                             <button
                                 onClick={closeDetailModal}
@@ -493,231 +473,302 @@ const InfoUser = () => {
 
                         {/* Modal Content */}
                         <div className="p-6">
-                            <div className="space-y-6">
-                                {/* Tour Header */}
-                                <div className="flex items-start space-x-6">
-                                    <div className="flex-shrink-0">
-                                        <div className="w-32 h-32 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl overflow-hidden shadow-lg">
-                                            {selectedBill?.slotId?.tour?.imageTour && selectedBill.slotId.tour.imageTour.length > 0 ? (
-                                                <img
-                                                    src={selectedBill.slotId.tour.imageTour[0]}
-                                                    alt="Tour"
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center">
-                                                    <svg className="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            {selectedBill?.BookingTourId?.tourId?.nameTour ? (
+                                // Tour Detail
+                                <div className="space-y-6">
+                                    {/* Tour Header */}
+                                    <div className="flex items-start space-x-6">
+                                        <div className="flex-shrink-0">
+                                            <div className="w-32 h-32 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl overflow-hidden shadow-lg">
+                                                {selectedBill?.BookingTourId?.tourId?.imageTour ? (
+                                                    <img
+                                                        src={selectedBill.BookingTourId.tourId.imageTour}
+                                                        alt="Tour"
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center">
+                                                        <svg className="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="text-3xl font-bold text-gray-900 mb-2">
+                                                {selectedBill.BookingTourId.tourId.nameTour}
+                                            </h3>
+                                            <div className="flex items-center space-x-4 text-gray-600 mb-4">
+                                                <div className="flex items-center space-x-2">
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                                     </svg>
+                                                    <span>{selectedBill.BookingTourId.tourId.destination || 'N/A'}</span>
                                                 </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="flex-1">
-                                        <h3 className="text-3xl font-bold text-gray-900 mb-2">
-                                            {selectedBill.slotId.tour.nameTour}
-                                        </h3>
-                                        <div className="flex items-center space-x-4 text-gray-600 mb-4">
-                                            <div className="flex items-center space-x-2">
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                </svg>
-                                                <span>{selectedBill.slotId.tour.departure_location}</span>
+                                                <div className="flex items-center space-x-2">
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    <span>{selectedBill.BookingTourId.tourId.duration || 0} ngày</span>
+                                                </div>
                                             </div>
                                             <div className="flex items-center space-x-2">
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                                <span>{selectedBill.slotId.tour.duration}</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedBill.payment_status || '')}`}>
-                                                {getStatusText(selectedBill.payment_status || '')}
-                                            </span>
-                                            <span className="text-sm text-gray-500">
-                                                Mã: {selectedBill._id?.slice(-8)}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Tour Details Grid */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="bg-gray-50 rounded-xl p-6">
-                                        <h4 className="text-lg font-semibold text-gray-900 mb-4">Thông tin tour</h4>
-                                        <div className="space-y-3">
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Điểm khởi hành:</span>
-                                                <span className="font-medium">{selectedBill.slotId.tour.departure_location}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Thời gian:</span>
-                                                <span className="font-medium">{selectedBill.slotId.tour.duration}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Loại tour:</span>
-                                                <span className="font-medium">{selectedBill.slotId.tour.tourType === 'noidia' ? 'Nội địa' : 'Quốc tế'}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Ngày khởi hành:</span>
-                                                <span className="font-medium">
-                                                    {new Date(selectedBill.slotId.dateTour).toLocaleDateString('vi-VN')}
+                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedBill.payment_status || '')}`}>
+                                                    {getStatusText(selectedBill.payment_status || '')}
+                                                </span>
+                                                <span className="text-sm text-gray-500">
+                                                    Mã: {selectedBill._id?.slice(-8)}
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="bg-gray-50 rounded-xl p-6">
-                                        <h4 className="text-lg font-semibold text-gray-900 mb-4">Thông tin đặt chỗ</h4>
-                                        <div className="space-y-3">
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Họ tên:</span>
-                                                <span className="font-medium">{selectedBill.fullNameUser}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Số điện thoại:</span>
-                                                <span className="font-medium">{selectedBill.phone}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Email:</span>
-                                                <span className="font-medium">{selectedBill.email}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Tổng tiền:</span>
-                                                <span className="font-bold text-lg text-green-600">
-                                                    {selectedBill.totalPriceTour.toLocaleString()}₫
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Passenger Information */}
-                                <div className="bg-gray-50 rounded-xl p-6">
-                                    <h4 className="text-lg font-semibold text-gray-900 mb-4">Thông tin hành khách</h4>
+                                    {/* Tour Details Grid */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        {/* Adults */}
-                                        {selectedBill.adultPassengers.length > 0 && (
-                                            <div>
-                                                <h5 className="text-md font-medium text-gray-900 mb-3">Người lớn ({selectedBill.adultsTour})</h5>
-                                                <div className="space-y-3">
-                                                    {selectedBill.adultPassengers.map((passenger, idx) => (
-                                                        <div key={idx} className="bg-white rounded-lg p-4 border border-gray-200">
-                                                            <div className="flex justify-between items-center mb-2">
-                                                                <span className="font-medium">{passenger.fullName}</span>
-                                                                <span className="text-sm text-gray-500">{passenger.gender}</span>
-                                                            </div>
-                                                            <div className="text-sm text-gray-600">
-                                                                <div>Ngày sinh: {new Date(passenger.birthDate).toLocaleDateString('vi-VN')}</div>
-                                                                <div>Phòng riêng: {passenger.singleRoom ? 'Có' : 'Không'}</div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
+                                        <div className="bg-gray-50 rounded-xl p-6">
+                                            <h4 className="text-lg font-semibold text-gray-900 mb-4">Thông tin tour</h4>
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">Điểm đến:</span>
+                                                    <span className="font-medium">{selectedBill.BookingTourId.tourId.destination || 'N/A'}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">Điểm khởi hành:</span>
+                                                    <span className="font-medium">{selectedBill.BookingTourId.tourId.departure_location || 'N/A'}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">Thời gian:</span>
+                                                    <span className="font-medium">{selectedBill.BookingTourId.tourId.duration || 0}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">Loại tour:</span>
+                                                    <span className="font-medium">{selectedBill.BookingTourId.tourId?.tourType || 'N/A'}</span>
                                                 </div>
                                             </div>
-                                        )}
+                                        </div>
 
-                                        {/* Children */}
-                                        {selectedBill.childrenTour > 0 && (
-                                            <div>
-                                                <h5 className="text-md font-medium text-gray-900 mb-3">Trẻ em ({selectedBill.childrenTour})</h5>
-                                                <div className="space-y-3">
-                                                    {selectedBill.childPassengers.map((passenger, idx) => (
-                                                        <div key={idx} className="bg-white rounded-lg p-4 border border-gray-200">
-                                                            <div className="flex justify-between items-center mb-2">
-                                                                <span className="font-medium">{passenger.fullName}</span>
-                                                                <span className="text-sm text-gray-500">{passenger.gender}</span>
-                                                            </div>
-                                                            <div className="text-sm text-gray-600">
-                                                                <div>Ngày sinh: {new Date(passenger.birthDate).toLocaleDateString('vi-VN')}</div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
+                                        <div className="bg-gray-50 rounded-xl p-6">
+                                            <h4 className="text-lg font-semibold text-gray-900 mb-4">Thông tin đặt chỗ</h4>
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">Ngày xuẩt phát:</span>
+                                                    <span className="font-medium">
+                                                        {new Date(selectedBill.createdAt).toLocaleDateString('vi-VN')}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">Số điện thoại:</span>
+                                                    <span className="font-medium">{selectedBill.phoneUser || 'N/A'}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">Email:</span>
+                                                    <span className="font-medium">{selectedBill.emailUser || 'N/A'}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">Tổng tiền:</span>
+                                                    <span className="font-bold text-lg text-green-600">
+                                                        {(selectedBill.amount || 0).toLocaleString()}₫
+                                                    </span>
                                                 </div>
                                             </div>
-                                        )}
-
-                                        {/* Toddlers */}
-                                        {selectedBill.toddlerTour > 0 && (
-                                            <div>
-                                                <h5 className="text-md font-medium text-gray-900 mb-3">Trẻ nhỏ ({selectedBill.toddlerTour})</h5>
-                                                <div className="space-y-3">
-                                                    {selectedBill.toddlerPassengers.map((passenger, idx) => (
-                                                        <div key={idx} className="bg-white rounded-lg p-4 border border-gray-200">
-                                                            <div className="flex justify-between items-center mb-2">
-                                                                <span className="font-medium">{passenger.fullName}</span>
-                                                                <span className="text-sm text-gray-500">{passenger.gender}</span>
-                                                            </div>
-                                                            <div className="text-sm text-gray-600">
-                                                                <div>Ngày sinh: {new Date(passenger.birthDate).toLocaleDateString('vi-VN')}</div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Infants */}
-                                        {selectedBill.infantTour > 0 && (
-                                            <div>
-                                                <h5 className="text-md font-medium text-gray-900 mb-3">Em bé ({selectedBill.infantTour})</h5>
-                                                <div className="space-y-3">
-                                                    {selectedBill.infantPassengers.map((passenger, idx) => (
-                                                        <div key={idx} className="bg-white rounded-lg p-4 border border-gray-200">
-                                                            <div className="flex justify-between items-center mb-2">
-                                                                <span className="font-medium">{passenger.fullName}</span>
-                                                                <span className="text-sm text-gray-500">{passenger.gender}</span>
-                                                            </div>
-                                                            <div className="text-sm text-gray-600">
-                                                                <div>Ngày sinh: {new Date(passenger.birthDate).toLocaleDateString('vi-VN')}</div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Payment Information */}
-                                <div className="bg-gray-50 rounded-xl p-6">
-                                    <h4 className="text-lg font-semibold text-gray-900 mb-4">Thông tin thanh toán</h4>
+                                    {/* Tour Description */}
+                                    {selectedBill.BookingTourId.tourId.description && (
+                                        <div className="bg-gray-50 rounded-xl p-6">
+                                            <h4 className="text-lg font-semibold text-gray-900 mb-4">Mô tả tour</h4>
+                                            <p className="text-gray-700 leading-relaxed">
+                                                {selectedBill.BookingTourId.tourId.description}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* Booked Rooms for this Tour */}
+                                    {Array.isArray(selectedBill.itemRoom) && selectedBill.itemRoom.length > 0 && (
+                                        <div className="bg-gray-50 rounded-xl p-6">
+                                            <h4 className="text-lg font-semibold text-gray-900 mb-4">Phòng đã đặt kèm tour</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                {selectedBill.itemRoom.map((room, idx) => (
+                                                    <div key={room._id || idx} className="rounded-xl border border-gray-200 bg-white p-4 flex flex-col gap-3 shadow-sm">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                                                                {room.imageRoom && room.imageRoom.length > 0 ? (
+                                                                    <img src={room.imageRoom[0]} alt={room.nameRoom} className="w-full h-full object-cover" />
+                                                                ) : (
+                                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">No image</div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex items-center gap-2 mb-1">
+                                                                    <span className="font-bold text-lg text-gray-900 truncate">{room.nameRoom}</span>
+                                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 ml-2">{room.typeRoom}</span>
+                                                                </div>
+                                                                <div className="text-gray-600 text-sm truncate">{room.locationId}</div>
+                                                                <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                                                                    <span>Sức chứa: {room.capacityRoom}</span>
+                                                                    <span>•</span>
+                                                                    <span>Giá: {room.priceRoom.toLocaleString()}₫</span>
+                                                                    <span>•</span>
+                                                                    <span>Trạng thái: {room.statusRoom}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        {room.amenitiesRoom && room.amenitiesRoom.length > 0 && (
+                                                            <div className="flex flex-wrap gap-1 mt-2">
+                                                                {room.amenitiesRoom.map((amenity, i) => (
+                                                                    <span key={i} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">{amenity}</span>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                // Hotel Room Detail
+                                <div className="space-y-6">
+                                    {/* Room Header */}
+                                    <div className="flex items-start space-x-6">
+                                        <div className="flex-shrink-0">
+                                            <div className="w-32 h-32 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl overflow-hidden shadow-lg">
+                                                {selectedBill?.imageRoom && selectedBill.imageRoom.length > 0 ? (
+                                                    <img
+                                                        src={selectedBill.imageRoom[0]}
+                                                        alt="Room"
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center">
+                                                        <svg className="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                        </svg>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="text-3xl font-bold text-gray-900 mb-2">
+                                                {selectedBill.nameRoom}
+                                            </h3>
+                                            <div className="flex items-center space-x-4 text-gray-600 mb-4">
+                                                <div className="flex items-center space-x-2">
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    </svg>
+                                                    <span>{selectedBill.locationId}</span>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    <span>{selectedBill.capacityRoom} người</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedBill.payment_status || '')}`}>
+                                                    {getStatusText(selectedBill.payment_status || '')}
+                                                </span>
+                                                <span className="text-sm text-gray-500">
+                                                    Mã: {selectedBill._id?.slice(-8)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Room Details Grid */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-3">
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Phương thức thanh toán:</span>
-                                                <span className="font-medium">
-                                                    {selectedBill.payment_method === 'cash' ? 'Tiền mặt' : 
-                                                     selectedBill.payment_method === 'bank_transfer' ? 'Chuyển khoản' : 
-                                                     selectedBill.payment_method}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Trạng thái:</span>
-                                                <span className={`font-medium ${getStatusColor(selectedBill.payment_status)}`}>
-                                                    {getStatusText(selectedBill.payment_status)}
-                                                </span>
+                                        <div className="bg-gray-50 rounded-xl p-6">
+                                            <h4 className="text-lg font-semibold text-gray-900 mb-4">Thông tin phòng</h4>
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">Loại phòng:</span>
+                                                    <span className="font-medium">{selectedBill.typeRoom}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">Sức chứa:</span>
+                                                    <span className="font-medium">{selectedBill.capacityRoom} người</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">Trạng thái:</span>
+                                                    <span className="font-medium">{selectedBill.statusRoom}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">Giá phòng:</span>
+                                                    <span className="font-bold text-lg text-green-600">
+                                                        {selectedBill.priceRoom.toLocaleString()}₫
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="space-y-3">
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Ngày đặt:</span>
-                                                <span className="font-medium">
-                                                    {new Date(selectedBill.createdAt).toLocaleDateString('vi-VN')}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Cập nhật:</span>
-                                                <span className="font-medium">
-                                                    {new Date(selectedBill.updatedAt).toLocaleDateString('vi-VN')}
-                                                </span>
+
+                                        <div className="bg-gray-50 rounded-xl p-6">
+                                            <h4 className="text-lg font-semibold text-gray-900 mb-4">Thông tin đặt phòng</h4>
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">Ngày đặt:</span>
+                                                    <span className="font-medium">
+                                                        {new Date(selectedBill.createdAt).toLocaleDateString('vi-VN')}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">Cập nhật:</span>
+                                                    <span className="font-medium">
+                                                        {new Date(selectedBill.updatedAt).toLocaleDateString('vi-VN')}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">Mã phòng:</span>
+                                                    <span className="font-medium">{selectedBill.roomId}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">Tổng tiền:</span>
+                                                    <span className="font-bold text-lg text-green-600">
+                                                        {(selectedBill.priceRoom || 0).toLocaleString()}₫
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* Room Amenities */}
+                                    {selectedBill.amenitiesRoom && selectedBill.amenitiesRoom.length > 0 && (
+                                        <div className="bg-gray-50 rounded-xl p-6">
+                                            <h4 className="text-lg font-semibold text-gray-900 mb-4">Tiện ích phòng</h4>
+                                            <div className="flex flex-wrap gap-2">
+                                                {selectedBill.amenitiesRoom.map((amenity, idx) => (
+                                                    <span key={idx} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                                        {amenity}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Room Images Gallery */}
+                                    {selectedBill.imageRoom && selectedBill.imageRoom.length > 1 && (
+                                        <div className="bg-gray-50 rounded-xl p-6">
+                                            <h4 className="text-lg font-semibold text-gray-900 mb-4">Hình ảnh phòng</h4>
+                                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                                {selectedBill.imageRoom.map((image, idx) => (
+                                                    <div key={idx} className="aspect-square rounded-lg overflow-hidden">
+                                                        <img
+                                                            src={image}
+                                                            alt={`Room ${idx + 1}`}
+                                                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
+                            )}
                         </div>
 
                         {/* Modal Footer */}
@@ -733,108 +784,6 @@ const InfoUser = () => {
                                     Thanh toán ngay
                                 </button>
                             )}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Modal xác nhận hủy booking */}
-            {showCancelModal && bookingToCancel && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-gray-200">
-                        {/* Modal Header */}
-                        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                            <h2 className="text-xl font-bold text-gray-900">
-                                Xác nhận hủy đặt chỗ
-                            </h2>
-                            <button
-                                onClick={closeCancelModal}
-                                className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                        {/* Modal Content */}
-                        <div className="p-6">
-                            <div className="text-center">
-                                <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
-                                    <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                                    Xác nhận hủy đặt chỗ này?
-                                </h3>
-                                <p className="text-gray-600 mb-6">
-                                    Tour: <span className="font-medium">{bookingToCancel.slotId.tour.nameTour}</span>
-                                </p>
-                                <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                                    <div className="text-sm text-gray-600 space-y-2">
-                                        <div className="flex justify-between">
-                                            <span>Ngày khởi hành:</span>
-                                            <span className="font-medium">
-                                                {new Date(bookingToCancel.slotId.dateTour).toLocaleDateString('vi-VN')}
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span>Tổng tiền:</span>
-                                            <span className="font-medium text-red-600">
-                                                {bookingToCancel.totalPriceTour.toLocaleString()}₫
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span>Trạng thái:</span>
-                                            <span className={`font-medium ${getStatusColor(bookingToCancel.payment_status)}`}>
-                                                {getStatusText(bookingToCancel.payment_status)}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="mb-6">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Lý do yêu cầu hủy
-                                    </label>
-                                    <textarea
-                                        value={cancelReason}
-                                        onChange={(e) => setCancelReason(e.target.value)}
-                                        placeholder="Nhập lý do yêu cầu hủy..."
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        rows={3}
-                                    />
-                                </div>
-                                <p className="text-sm text-gray-500 mb-6">
-                                    Lưu ý: Yêu cầu hủy sẽ được gửi đến admin để xác nhận. Bạn sẽ được thông báo khi có kết quả.
-                                </p>
-                            </div>
-                        </div>
-                        {/* Modal Footer */}
-                        <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200">
-                            <button
-                                onClick={closeCancelModal}
-                                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-200"
-                                disabled={requestCancelMutation.isPending}
-                            >
-                                Không, giữ lại
-                            </button>
-                            <button
-                                onClick={confirmCancelBooking}
-                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled={requestCancelMutation.isPending}
-                            >
-                                {requestCancelMutation.isPending ? (
-                                    <div className="flex items-center">
-                                        <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Đang gửi yêu cầu...
-                                    </div>
-                                ) : (
-                                    'Gửi yêu cầu hủy'
-                                )}
-                            </button>
                         </div>
                     </div>
                 </div>
