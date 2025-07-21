@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 interface Slot {
     dateTour: string; // định dạng 'DD-MM-YYYY'
@@ -19,7 +20,7 @@ interface RightTourDetailProps {
     onChooseDate: () => void;
     selectedDate: Date | null;
     tour: {
-        finalPrice?: number;
+        price?: number;
         _id?: string;
         code?: string;
         departure_location?: string;
@@ -44,14 +45,18 @@ const RightTourDetail = ({
           );
     const navigate = useNavigate();
     const handleBooking = () => {
+        if (!selectedSlot || selectedSlot.availableSeats === 0) {
+            toast.error("Ngày này đã hết chỗ, không thể đặt tour!, vui lòng chọn ngày khác");
+            return;
+          }
         if (selectedSlot?._id) {
-            // Chuyển hướng đến đường dẫn có slot ID
             navigate(`/date/slot/${selectedSlot._id}`);
         } else {
-            alert("Vui lòng chọn ngày hợp lệ!");
+            toast.error("Vui lòng chọn ngày hợp lệ!");
         }
       };
       console.log(selectedSlot);
+      console.log(tour);
       
     return (
         <div className="max-w-[460px] w-full bg-white p-3 md:p-5 max-md:mt-4 border rounded-2xl md:rounded-4xl border-gray-300/70 fixed right-8 top-48 z-50">
@@ -61,7 +66,7 @@ const RightTourDetail = ({
                         <span className="text-black text-xl">Giá từ:</span>
                     </div>
                     <div className="text-3xl font-bold text-red-600 mb-2">
-                        {tour?.finalPrice?.toLocaleString("vi-VN") || "..."}{" "}
+                        {tour?.price?.toLocaleString("vi-VN") || "..."}{" "}
                         <span className="text-xl font-medium">đ</span>{" "}
                         <span className="text-base text-gray-500 font-normal">/ Khách</span>
                     </div>
@@ -79,7 +84,7 @@ const RightTourDetail = ({
                         <span className="text-black text-xl">Giá:</span>
                     </div>
                     <div className="text-3xl font-bold text-red-600 mb-2">
-                        {tour?.finalPrice?.toLocaleString("vi-VN")}{" "}
+                            {tour?.price?.toLocaleString("vi-VN")}{" "}
                         <span className="text-xl font-medium">đ</span>{" "}
                         <span className="text-base text-gray-500 font-normal">/ Khách</span>
                     </div>

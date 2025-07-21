@@ -22,13 +22,13 @@ interface BookingStats {
 
 const BookingStats = () => {
   const { data: stats, isLoading } = useQuery({
-    queryKey: ['booking-stats'],
-    queryFn: () => instanceAdmin.get('/admin/bookings/stats'),
+    queryKey: ['admin/bookings'],
+    queryFn: () => instanceAdmin.get('admin/bookings'),
     refetchInterval: 10000, // Cập nhật mỗi 10 giây
     staleTime: 0, // Luôn coi data là stale để cập nhật ngay
     refetchOnWindowFocus: true // Refetch khi focus lại window
   });
-
+  
   const bookingStats: BookingStats = stats?.data || {
     total: 0,
     pending: 0,

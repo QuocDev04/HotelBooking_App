@@ -533,6 +533,76 @@ const getBookingToursByUser = async (req, res) => {
     }
 };
 
+// Hàm tính hoàn tiền dựa trên chính sách
+function calculateRefund(tourType, isFlight, daysBefore, totalPrice) {
+    let refund = 0;
+    let note = '';
+    if (isFlight) {
+        if (daysBefore >= 15) {
+            refund = totalPrice; note = 'Trừ vé máy bay nếu không hoàn được';
+        } else if (daysBefore >= 7) {
+            refund = totalPrice * 0.6; note = 'Vé máy bay thu theo điều kiện';
+        } else {
+            refund = 0; note = 'Không hoàn hoặc hoàn rất ít, vé máy bay đã chốt';
+        }
+    } else {
+        if (daysBefore >= 7) {
+            refund = totalPrice; note = 'Trừ phí đặt cọc nhỏ';
+        } else if (daysBefore >= 3) {
+            refund = totalPrice * 0.6; note = 'Có thể đã đặt trước dịch vụ';
+        } else {
+            refund = totalPrice * 0.1; note = 'Gần ngày tour, tổ chức khó thay đổi';
+        }
+    }
+    return { refund, note };
+}
+
+// API: User gửi yêu cầu hủy booking
+exports.requestCancel = async (req, res) => {
+    try {
+        const { userId, reason } = req.body;
+        const booking = await TourBookingSchema.findById(req.params.id).populate({
+            path: 'slotId',
+            populate: { path: 'tour' }
+        });
+        if (!booking) return res.status(404).json({ message: 'Booking not found' });
+        if (booking.userId.toString() !== userId) return res.status(403).json({ message: 'Forbidden' });
+        const now = new Date();
+        const tourDate = new Date(booking.slotId.dateTour);
+        const daysBefore = Math.ceil((tourDate - now) / (1000 * 60 * 60 * 24));
+        const isFlight = booking.slotId.tour.tourType === 'maybay';
+        const { refund, note } = calculateRefund(booking.slotId.tour.tourType, isFlight, daysBefore, booking.totalPriceTour);
+        booking.cancel_requested = true;
+        booking.cancel_reason = reason;
+        booking.cancel_status = 'pending';
+        booking.refund_amount = refund;
+        booking.cancel_policy_note = note;
+        await booking.save();
+        res.json({ message: 'Yêu cầu hủy đã gửi', refund, note });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+// API: Admin duyệt yêu cầu hủy
+exports.approveCancel = async (req, res) => {
+    try {
+        const { approve } = req.body;
+        const booking = await TourBookingSchema.findById(req.params.id);
+        if (!booking) return res.status(404).json({ message: 'Booking not found' });
+        if (approve) {
+            booking.cancel_status = 'approved';
+            booking.payment_status = 'cancelled';
+        } else {
+            booking.cancel_status = 'rejected';
+        }
+        await booking.save();
+        res.json({ message: 'Cập nhật thành công' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
 
 module.exports = {
     getByIdBookingTour,

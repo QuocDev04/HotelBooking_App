@@ -16,9 +16,10 @@ const Overview = () => {
         isLoading: bookingLoading,
         isError: bookingError,
     } = useQuery({
-        queryKey: ["checkOutBookingTour"],
-        queryFn: () => instance.get("/checkOutBookingTour")
+        queryKey: ["admin/bookings"],
+        queryFn: () => instance.get("/admin/bookings")
     });
+console.log(bookingRes);
 
     const {
         data: userRes,
@@ -32,7 +33,7 @@ const Overview = () => {
     if (bookingLoading || userLoading) return <Spin size="large" />;
     if (bookingError || userError) return <div>Đã có lỗi xảy ra…</div>;
 
-    const bookings = bookingRes?.data?.getCheckOutUserTour || [];
+    const bookings = bookingRes?.data?.bookings || [];
     const users = userRes?.data?.user || [];
 
     // Tổng khách hàng
@@ -45,7 +46,8 @@ const Overview = () => {
         const price =
             typeof b.amount === "number"
                 ? b.amount
-                : b.BookingTourId?.totalPriceBooking || 0;
+                : b.
+                totalPriceTour || 0;
         return sum + price;
     }, 0);
 

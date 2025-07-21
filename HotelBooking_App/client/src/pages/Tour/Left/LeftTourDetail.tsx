@@ -37,13 +37,13 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
         queryFn: () => instanceClient.get(`/date/tour/${tourId}`)
     })
     const slots = data?.data?.data || [];
-    
-    const {data:tour} = useQuery({
-        queryKey:['tour',id],
+
+    const { data: tour } = useQuery({
+        queryKey: ['tour', id],
         queryFn: () => instanceClient.get(`/tour/${id}`)
     })
     const tours = tour?.data?.tour
-    
+
     const [mainImage, setMainImage] = useState(tours?.imageTour?.[0]);
     useEffect(() => {
         if (tours?.imageTour?.[0]?.length > 0) {
@@ -61,7 +61,7 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
     });
     function handleDateClick(info: any) {
         const clickedDate = dayjs(info.date).format("YYYY-MM-DD");
-        const isDateAvailable = events.some((event:any) => event.date === clickedDate);
+        const isDateAvailable = events.some((event: any) => event.date === clickedDate);
 
         if (isDateAvailable) {
             setSelectedDate(info.date);
@@ -72,14 +72,14 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
     }
     function handleEventClick(clickInfo: any) {
         const clickedDate = dayjs(clickInfo.event.start).format("YYYY-MM-DD");
-        const isDateAvailable = events.some((event:any) => event.date === clickedDate);
+        const isDateAvailable = events.some((event: any) => event.date === clickedDate);
 
         if (isDateAvailable) {
             setSelectedDate(clickInfo.event.start);
         } else {
             console.log("Ngày này không có tour");
         }
-      }
+    }
     const selectedSlot = slots?.find((slot: TourData) =>
         dayjs(slot?.dateTour).isSame(selectedDate, 'day')
     );
@@ -150,7 +150,7 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
 
                             <div className="mb-4">
                                 <div className="text-center text-blue-700 text-2xl font-bold flex items-center justify-center gap-2 mb-6">
-                                        Phương tiện di chuyển {selectedSlot?.tour?.itemTransport?.[0]?.TransportId?.transportType}
+                                    Phương tiện di chuyển {selectedSlot?.tour?.itemTransport?.[0]?.TransportId?.transportType}
                                 </div>
 
                                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">

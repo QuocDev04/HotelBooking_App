@@ -75,7 +75,7 @@ const ListBooking = () => {
 
     // Cancel booking mutation
     const cancelBookingMutation = useMutation({
-        mutationFn: (bookingId: string) => 
+        mutationFn: (bookingId: string) =>
             instanceAdmin.put(`/admin/bookings/cancel/${bookingId}`, {
                 adminId: localStorage.getItem('adminId'),
                 reason: cancelReason
@@ -87,7 +87,7 @@ const ListBooking = () => {
             setShowCancelModal(false);
             setSelectedBooking(null);
             setCancelReason('');
-            
+
             // Hiển thị thông báo thành công
             setToast({
                 message: '✅ Xác nhận hủy đặt chỗ thành công! Thông báo đã được cập nhật.',
@@ -161,8 +161,8 @@ const ListBooking = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="min-h-screen">
+            <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900">Quản lý đặt chỗ Tour</h1>
@@ -210,7 +210,7 @@ const ListBooking = () => {
                             Danh sách đặt chỗ ({bookings.length})
                         </h2>
                     </div>
-                    
+
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
@@ -257,15 +257,15 @@ const ListBooking = () => {
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div>
                                                 <div className="text-sm font-medium text-gray-900">
-                                                    {booking.slotId.tour.nameTour}
+                                                    {booking?.slotId?.tour?.nameTour}
                                                 </div>
                                                 <div className="text-sm text-gray-500">
-                                                    {booking.slotId.tour.departure_location}
+                                                    {booking?.slotId?.tour?.departure_location}
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {new Date(booking.slotId.dateTour).toLocaleDateString('vi-VN')}
+                                            {new Date(booking?.slotId?.dateTour).toLocaleDateString('vi-VN')}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {booking.adultsTour + booking.childrenTour + booking.toddlerTour + booking.infantTour} người

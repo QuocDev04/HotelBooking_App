@@ -53,6 +53,11 @@ const TourBookingSchema = new mongoose.Schema({
     cancelledBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' }, // Admin xác nhận hủy
     cancelReason: { type: String }, // Lý do hủy
     cancelRequestedAt: { type: Date }, // Thời gian yêu cầu hủy
+    cancel_requested: { type: Boolean, default: false },
+    cancel_reason: { type: String },
+    cancel_status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+    refund_amount: { type: Number, default: 0 },
+    cancel_policy_note: { type: String },
 }, { timestamps: true });
 
 module.exports = mongoose.model('BookingTour', TourBookingSchema);
