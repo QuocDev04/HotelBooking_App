@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card, Row, Col, Statistic, Progress, Typography } from 'antd';
 import { useQuery } from '@tanstack/react-query';
 import { instanceAdmin } from '../../configs/axios';

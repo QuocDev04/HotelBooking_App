@@ -18,7 +18,7 @@ const WeeklyStatistics = () => {
     const weeklyBookingDataRaw = weeklyBookingData?.data?.getCheckOutUserTour || [];
 
     const groupedData = weeklyBookingDataRaw.reduce((acc: any, booking: any) => {
-        const dayIndex = dayjs(booking.BookingTourId.createdAt).day(); 
+        const dayIndex = dayjs(booking.BookingTourId?.createdAt).day(); 
         const dayName = daysOfWeek[dayIndex];
 
         if (!acc[dayName]) {
