@@ -78,7 +78,11 @@ const International = () => {
                     }}
                     onSwiper={(swiper) => {
                         setTimeout(() => {
+<<<<<<< HEAD:HotelBooking_App/HotelBooking_App/client/src/pages/Home/Main/Internatinal.tsx
                             if (swiper.params.navigation && typeof swiper.params.navigation !== 'boolean') {
+=======
+                            if (typeof swiper?.params?.navigation !== 'boolean') {
+>>>>>>> 55ef12ab3d840a41c44e04988f88f2c48a8831e1:client/src/pages/Home/Main/Internatinal.tsx
                                 swiper.params.navigation.prevEl = prevRef.current;
                                 swiper.params.navigation.nextEl = nextRef.current;
                                 swiper.navigation.destroy();
@@ -86,7 +90,11 @@ const International = () => {
                                 swiper.navigation.update();
                             }
                         });
+<<<<<<< HEAD:HotelBooking_App/HotelBooking_App/client/src/pages/Home/Main/Internatinal.tsx
                       }}
+=======
+                    }}
+>>>>>>> 55ef12ab3d840a41c44e04988f88f2c48a8831e1:client/src/pages/Home/Main/Internatinal.tsx
                     breakpoints={{
                         640: { slidesPerView: 2 },
                         1024: { slidesPerView: 3 },

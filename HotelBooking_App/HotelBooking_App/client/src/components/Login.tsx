@@ -42,6 +42,10 @@ const Login = ({ onClose = () => { }, openRegister = () => { } }) => {
                     localStorage.setItem("user", username);
                     localStorage.setItem("userId", userId);
                     onClose();
+<<<<<<< HEAD:HotelBooking_App/HotelBooking_App/client/src/components/Login.tsx
+=======
+
+>>>>>>> 55ef12ab3d840a41c44e04988f88f2c48a8831e1:client/src/components/Login.tsx
                 }
             } catch (error: unknown) {
                 const err = error as AxiosError<{ messages: string[] }>;

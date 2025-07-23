@@ -1,8 +1,6 @@
-const DateTour = require("../../models/Tour/DateTour")
+import DateTour from "../../models/Tour/DateTour.js"
 
-
-
-const PostdateTour = async (req, res) => {
+export const PostdateTour = async (req, res) => {
     try {
         const { tourId, slots } = req.body;
 
@@ -26,7 +24,7 @@ const PostdateTour = async (req, res) => {
       }
 }
 
-const GetDateTour = async (req, res) => {
+export const GetDateTour = async (req, res) => {
     try {
         const { id: slotId } = req.params;
 
@@ -65,7 +63,7 @@ const GetDateTour = async (req, res) => {
     }
 }
 
-const GetAllSlotsByTourId = async (req, res) => {
+export const GetAllSlotsByTourId = async (req, res) => {
     try {
         const { tourId } = req.params;
 
@@ -108,8 +106,3 @@ const GetAllSlotsByTourId = async (req, res) => {
         });
       }
 };
-module.exports = {
-    PostdateTour,
-    GetDateTour,
-    GetAllSlotsByTourId
-}

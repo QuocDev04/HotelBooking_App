@@ -46,7 +46,6 @@ export interface User {
     email: string;
     phone: string;
 }
-
 export interface Hotel {
     hotel_id: number;
     name: string;

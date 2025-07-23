@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+import mongoose from 'mongoose';
+
 const RoomItemSchema = new mongoose.Schema({
     roomId: {
         type: mongoose.Schema.Types.ObjectId,

@@ -1,10 +1,11 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const PassengerSchema = new mongoose.Schema({
-    fullName: { type: String, required: true },
-    gender: { type: String, enum: ["Nam", "Nữ"], required: true },
-    birthDate: { type: Date, required: true },
-    singleRoom: { type: Boolean, default: false } 
+const RoomItemBookingSchema = new mongoose.Schema({
+    roomId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Room',
+        required: true,
+    },
 }, { _id: false });
 
 const TourBookingSchema = new mongoose.Schema({
@@ -13,18 +14,12 @@ const TourBookingSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
-    slotId: {
+    tourId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "DateSlot",  
+        ref: 'Tour',
         required: true,
     },
-    // Thông tin liên hệ
-    fullNameUser: { type: String, required: true },
-    email: { type: String, required: true },
-    phone: { type: String, required: true },
-    address: { type: String },
-
-    // Tổng giá tour
+    itemRoom: [RoomItemBookingSchema],
     totalPriceTour: { type: Number, default: 0 },
     // Số tiền đặt cọc (50% tổng giá)
     depositAmount: { type: Number, default: 0 },
@@ -68,4 +63,4 @@ const TourBookingSchema = new mongoose.Schema({
     cancel_policy_note: { type: String },
 }, { timestamps: true });
 
-module.exports = mongoose.model('BookingTour', TourBookingSchema);
+export default mongoose.model('BookingTour', TourBookingSchema);

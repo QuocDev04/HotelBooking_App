@@ -478,7 +478,6 @@ const AddTour = () => {
 
               {/* Cột phải */}
               <Col xs={24} lg={8}>
-
                 <Form.Item
                   required={false}
                   label={requiredLabel("Chọn Phương Tiện")}

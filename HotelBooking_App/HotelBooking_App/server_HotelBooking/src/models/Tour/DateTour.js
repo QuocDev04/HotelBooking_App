@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const DateSlotSchema = new mongoose.Schema({
     tour: {
@@ -16,4 +16,4 @@ const DateSlotSchema = new mongoose.Schema({
     },
 }, { timestamps: true });
 
-module.exports = mongoose.model("DateSlot", DateSlotSchema);
+export default mongoose.model("DateSlot", DateSlotSchema);
