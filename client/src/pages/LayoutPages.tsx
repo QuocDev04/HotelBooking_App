@@ -4,7 +4,12 @@ import Footer from "../components/Footer"
 
 const LayoutPages = () => {
   return (
-    <div>
+    <div 
+      style={{
+        background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+        minHeight: '100vh'
+      }}
+    >
       <Header />
       <div>
         <Outlet />

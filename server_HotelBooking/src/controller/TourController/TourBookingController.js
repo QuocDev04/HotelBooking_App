@@ -832,6 +832,122 @@ const confirmFullPayment = async (req, res) => {
     }
 };
 
+// Tính doanh thu chính xác (chỉ tính booking completed và trừ refund)
+const getAccurateRevenue = async (req, res) => {
+    try {
+        const { startDate, endDate, groupBy = 'month' } = req.query;
+        
+        let matchCondition = {
+            payment_status: 'completed'
+        };
+        
+        // Nếu có filter theo thời gian
+        if (startDate || endDate) {
+            matchCondition.createdAt = {};
+            if (startDate) {
+                matchCondition.createdAt.$gte = new Date(startDate);
+            }
+            if (endDate) {
+                matchCondition.createdAt.$lte = new Date(endDate);
+            }
+        }
+        
+        // Tính tổng doanh thu từ booking completed
+        const completedBookings = await TourBookingSchema.aggregate([
+            { $match: matchCondition },
+            {
+                $group: {
+                    _id: null,
+                    totalRevenue: { $sum: '$totalPriceTour' },
+                    totalBookings: { $sum: 1 }
+                }
+            }
+        ]);
+        
+        // Tính tổng số tiền hoàn lại từ booking cancelled
+        const refundAmount = await TourBookingSchema.aggregate([
+            {
+                $match: {
+                    payment_status: 'cancelled',
+                    refund_amount: { $exists: true, $ne: null }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalRefund: { $sum: '$refund_amount' },
+                    totalCancelledBookings: { $sum: 1 }
+                }
+            }
+        ]);
+        
+        const revenue = completedBookings[0] || { totalRevenue: 0, totalBookings: 0 };
+        const refund = refundAmount[0] || { totalRefund: 0, totalCancelledBookings: 0 };
+        
+        // Doanh thu thực tế = Doanh thu từ booking completed - Số tiền hoàn lại
+        const actualRevenue = revenue.totalRevenue - refund.totalRefund;
+        
+        // Nếu cần group theo tháng/tuần/ngày
+        let revenueByPeriod = [];
+        if (groupBy) {
+            let groupFormat;
+            switch (groupBy) {
+                case 'day':
+                    groupFormat = {
+                        year: { $year: '$createdAt' },
+                        month: { $month: '$createdAt' },
+                        day: { $dayOfMonth: '$createdAt' }
+                    };
+                    break;
+                case 'week':
+                    groupFormat = {
+                        year: { $year: '$createdAt' },
+                        week: { $week: '$createdAt' }
+                    };
+                    break;
+                case 'month':
+                default:
+                    groupFormat = {
+                        year: { $year: '$createdAt' },
+                        month: { $month: '$createdAt' }
+                    };
+                    break;
+            }
+            
+            revenueByPeriod = await TourBookingSchema.aggregate([
+                { $match: matchCondition },
+                {
+                    $group: {
+                        _id: groupFormat,
+                        revenue: { $sum: '$totalPriceTour' },
+                        bookings: { $sum: 1 }
+                    }
+                },
+                { $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1, '_id.week': 1 } }
+            ]);
+        }
+        
+        res.status(200).json({
+            success: true,
+            data: {
+                actualRevenue,
+                grossRevenue: revenue.totalRevenue,
+                totalRefund: refund.totalRefund,
+                completedBookings: revenue.totalBookings,
+                cancelledBookings: refund.totalCancelledBookings,
+                revenueByPeriod
+            }
+        });
+    } catch (error) {
+        console.error('Lỗi tính doanh thu:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi server khi tính doanh thu',
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     getByIdBookingTour,
     BookingTour,
@@ -842,5 +958,6 @@ module.exports = {
     requestCancelBooking,
     getBookingStats,
     confirmCashPayment,
-    confirmFullPayment
+    confirmFullPayment,
+    getAccurateRevenue
 };

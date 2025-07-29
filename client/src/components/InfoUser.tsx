@@ -303,76 +303,117 @@ const InfoUser = () => {
                 </div>
 
                 {/* Stats Section */}
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-12 mx-2">
-                    <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                        <div className="flex items-center">
-                            <div className="p-3 rounded-full bg-blue-100 text-blue-600">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                            <div className="ml-4">
-                                <p className="text-sm font-medium text-gray-600">Tổng đặt chỗ</p>
-                                <p className="text-2xl font-bold text-gray-900">{bills.length}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-12 mx-2">
+                    {/* Tổng đặt chỗ */}
+                    <div className="group bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-2xl p-6 shadow-lg hover:shadow-xl border border-blue-200 transition-all duration-300 transform hover:-translate-y-1">
+                        <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                                <div className="flex items-center mb-3">
+                                    <div className="p-3 rounded-xl bg-blue-500 text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p className="text-sm font-semibold text-blue-700 mb-1">Tổng đặt chỗ</p>
+                                <p className="text-3xl font-bold text-blue-900 group-hover:text-blue-800 transition-colors">{bills.length}</p>
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                        <div className="flex items-center">
-                            <div className="p-3 rounded-full bg-green-100 text-green-600">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div className="ml-4">
-                                <p className="text-sm font-medium text-gray-600">Đã thanh toán đủ</p>
-                                <p className="text-2xl font-bold text-gray-900">
+
+                    {/* Đã thanh toán đủ */}
+                    <div className="group bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 rounded-2xl p-6 shadow-lg hover:shadow-xl border border-green-200 transition-all duration-300 transform hover:-translate-y-1">
+                        <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                                <div className="flex items-center mb-3">
+                                    <div className="p-3 rounded-xl bg-green-500 text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p className="text-sm font-semibold text-green-700 mb-1">Đã thanh toán đủ</p>
+                                <p className="text-3xl font-bold text-green-900 group-hover:text-green-800 transition-colors">
                                     {bills.filter(bill => bill.payment_status === 'completed').length}
                                 </p>
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                        <div className="flex items-center">
-                            <div className="p-3 rounded-full bg-blue-100 text-blue-600">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <div className="ml-4">
-                                <p className="text-sm font-medium text-gray-600">Chờ hoàn tất thanh toán</p>
-                                <p className="text-2xl font-bold text-gray-900">
+
+                    {/* Chờ hoàn tất thanh toán */}
+                    <div className="group bg-gradient-to-br from-indigo-50 to-indigo-100 hover:from-indigo-100 hover:to-indigo-200 rounded-2xl p-6 shadow-lg hover:shadow-xl border border-indigo-200 transition-all duration-300 transform hover:-translate-y-1">
+                        <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                                <div className="flex items-center mb-3">
+                                    <div className="p-3 rounded-xl bg-indigo-500 text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p className="text-sm font-semibold text-indigo-700 mb-1">Chờ hoàn tất thanh toán</p>
+                                <p className="text-3xl font-bold text-indigo-900 group-hover:text-indigo-800 transition-colors">
                                     {bills.filter((bill: any) => bill.payment_status === 'deposit_paid' || (bill.isDeposit && !bill.isFullyPaid)).length}
                                 </p>
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                        <div className="flex items-center">
-                            <div className="p-3 rounded-full bg-yellow-100 text-yellow-600">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div className="ml-4">
-                                <p className="text-sm font-medium text-gray-600">Chờ thanh toán</p>
-                                <p className="text-2xl font-bold text-gray-900">
+
+                    {/* Chờ thanh toán */}
+                    <div className="group bg-gradient-to-br from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 rounded-2xl p-6 shadow-lg hover:shadow-xl border border-yellow-200 transition-all duration-300 transform hover:-translate-y-1">
+                        <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                                <div className="flex items-center mb-3">
+                                    <div className="p-3 rounded-xl bg-yellow-500 text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p className="text-sm font-semibold text-yellow-700 mb-1">Chờ thanh toán</p>
+                                <p className="text-3xl font-bold text-yellow-900 group-hover:text-yellow-800 transition-colors">
                                     {bills.filter(bill => bill.payment_status === 'pending').length}
                                 </p>
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                        <div className="flex items-center">
-                            <div className="p-3 rounded-full bg-purple-100 text-purple-600">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                                </svg>
+
+                    {/* Tổng chi tiêu */}
+                    <div className="group bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-2xl p-6 shadow-lg hover:shadow-xl border border-purple-200 transition-all duration-300 transform hover:-translate-y-1">
+                        <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                                <div className="flex items-center mb-3">
+                                    <div className="p-3 rounded-xl bg-purple-500 text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p className="text-sm font-semibold text-purple-700 mb-1">Tổng chi tiêu</p>
+                                <p className="text-2xl font-bold text-purple-900 group-hover:text-purple-800 transition-colors">
+                                    {bills
+                                        .filter(bill => bill.payment_status === 'completed')
+                                        .reduce((sum, bill) => sum + (bill.totalPriceTour || 0), 0)
+                                        .toLocaleString()}₫
+                                </p>
                             </div>
-                            <div className="ml-4">
-                                <p className="text-sm font-medium text-gray-600">Tổng chi tiêu</p>
-                                <p className="text-2xl font-bold text-gray-900">
-                                    {bills.reduce((sum, bill) => sum + (bill.totalPriceTour || 0), 0).toLocaleString()}₫
+                        </div>
+                    </div>
+
+                    {/* Đã hủy */}
+                    <div className="group bg-gradient-to-br from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 rounded-2xl p-6 shadow-lg hover:shadow-xl border border-red-200 transition-all duration-300 transform hover:-translate-y-1">
+                        <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                                <div className="flex items-center mb-3">
+                                    <div className="p-3 rounded-xl bg-red-500 text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p className="text-sm font-semibold text-red-700 mb-1">Đã hủy</p>
+                                <p className="text-3xl font-bold text-red-900 group-hover:text-red-800 transition-colors">
+                                    {bills.filter(bill => bill.payment_status === 'cancelled').length}
                                 </p>
                             </div>
                         </div>

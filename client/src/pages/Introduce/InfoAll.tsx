@@ -12,28 +12,45 @@ const sections = [
 ];
 
 const InfoAll = () => {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [openIndex, setOpenIndex] = useState<number | null>(0); // Mặc định mở phần đầu tiên (Giới thiệu)
 
   return (
-    <div className="max-w-6xl mx-auto p-4">
-      <h1 className="text-3xl font-bold  my-20 text-center">Thông tin chung</h1>
-      <div className="space-y-4">
-        {sections.map((sec, idx) => (
-          <div key={idx} className="border rounded-lg bg-white shadow">
-            <button
-              className="w-full text-left px-6 py-4 font-semibold text-lg flex justify-between items-center focus:outline-none"
-              onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
+    <div 
+      className="min-h-screen"
+      style={{
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        padding: '32px'
+      }}
+    >
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold my-20 text-center text-white">Thông tin chung</h1>
+        <div className="space-y-4">
+          {sections.map((sec, idx) => (
+            <div 
+              key={idx} 
+              className="border rounded-lg shadow-lg"
+              style={{
+                background: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '16px',
+                border: 'none'
+              }}
             >
-              <span>{sec.title}</span>
-              <span>{openIndex === idx ? "▲" : "▼"}</span>
-            </button>
-            {openIndex === idx && (
-              <div className="px-2 pb-4">
-                {sec.component}
-              </div>
-            )}
-          </div>
-        ))}
+              <button
+                className="w-full text-left px-6 py-4 font-semibold text-lg flex justify-between items-center focus:outline-none hover:bg-gray-50 rounded-t-lg"
+                onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
+              >
+                <span>{sec.title}</span>
+                <span>{openIndex === idx ? "▲" : "▼"}</span>
+              </button>
+              {openIndex === idx && (
+                <div className="px-6 pb-6">
+                  {sec.component}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

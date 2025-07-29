@@ -19,6 +19,15 @@ const Overview = () => {
         queryKey: ["admin/bookings"],
         queryFn: () => instance.get("/admin/bookings")
     });
+
+    const {
+        data: revenueRes,
+        isLoading: revenueLoading,
+        isError: revenueError,
+    } = useQuery({
+        queryKey: ["admin/revenue"],
+        queryFn: () => instance.get("/admin/bookings/revenue")
+    });
 console.log(bookingRes);
 
     const {
@@ -30,8 +39,8 @@ console.log(bookingRes);
         queryFn: () => instance.get("/user")
     });
 
-    if (bookingLoading || userLoading) return <Spin size="large" />;
-    if (bookingError || userError) return <div>Đã có lỗi xảy ra…</div>;
+    if (bookingLoading || userLoading || revenueLoading) return <Spin size="large" />;
+    if (bookingError || userError || revenueError) return <div>Đã có lỗi xảy ra…</div>;
 
     const bookings = bookingRes?.data?.bookings || [];
     const users = userRes?.data?.user || [];
@@ -42,14 +51,8 @@ console.log(bookingRes);
     // Tổng lượt đặt tour
     const totalBooking = bookings.length;
 
-    const totalRevenue = bookings.reduce((sum:any, b:any) => {
-        const price =
-            typeof b.amount === "number"
-                ? b.amount
-                : b.
-                totalPriceTour || 0;
-        return sum + price;
-    }, 0);
+    const revenueData = revenueRes?.data?.data || {};
+    const totalRevenue = revenueData.actualRevenue || 0;
 
     const completedBooking = bookings.filter(
         (b:any) => b.payment_status === "completed"

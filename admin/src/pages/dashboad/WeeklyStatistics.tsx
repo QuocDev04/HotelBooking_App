@@ -9,29 +9,26 @@ import dayjs from "dayjs";
 const WeeklyStatistics = () => {
     const { Text } = Typography;
     const { data: weeklyBookingData } = useQuery({
-        queryKey: ["checkOutBookingTour"],
-        queryFn: () => instance.get("/checkOutBookingTour"),
+        queryKey: ["weeklyRevenue"],
+        queryFn: () => instance.get("/admin/bookings/revenue?groupBy=week"),
     });
 
     const daysOfWeek = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 
-    const weeklyBookingDataRaw = weeklyBookingData?.data?.getCheckOutUserTour || [];
+    const revenueData = weeklyBookingData?.data?.data || {};
+    const weeklyData = revenueData.revenueByPeriod || [];
 
-    const groupedData = weeklyBookingDataRaw.reduce((acc: any, booking: any) => {
-        const dayIndex = dayjs(booking.BookingTourId?.createdAt).day(); 
-        const dayName = daysOfWeek[dayIndex];
-
-        if (!acc[dayName]) {
-            acc[dayName] = { day: dayName, bookings: 0, revenue: 0 };
-        }
-
-        acc[dayName].bookings += 1;
-        acc[dayName].revenue += booking.amount;
-
-        return acc;
-    }, {});
-
-    const chartData = daysOfWeek.map(day => groupedData[day] || { day, bookings: 0, revenue: 0 });
+    // Tạo dữ liệu cho 7 ngày trong tuần từ dữ liệu tuần
+    const chartData = daysOfWeek.map((day, index) => {
+        // Tìm dữ liệu tuần hiện tại (tuần gần nhất)
+        const currentWeekData = weeklyData.length > 0 ? weeklyData[weeklyData.length - 1] : null;
+        
+        return {
+            day,
+            bookings: currentWeekData ? Math.floor(currentWeekData.bookings / 7) : 0, // Chia đều cho 7 ngày
+            revenue: currentWeekData ? Math.floor(currentWeekData.revenue / 7) : 0 // Chia đều cho 7 ngày
+        };
+    });
     const customTicks = [10_000_000, 20_000_000, 30_000_000, 40_000_000, 50_000_000];
 
   return (

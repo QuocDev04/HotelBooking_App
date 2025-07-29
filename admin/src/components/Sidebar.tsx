@@ -66,6 +66,14 @@ const Sidebar = () => {
                 { name: 'Thêm Lịch trình', path: '/admin/add-Transport_Schedule', icon: '🆕' },
             ],
         },
+        {
+            name: 'Quản lý Blog',
+            icon: '📝',
+            children: [
+                { name: 'Danh sách Blog', path: '/admin/list-blog', icon: '📋' },
+                { name: 'Thêm Blog', path: '/admin/add-blog', icon: '✍️' },
+            ],
+        },
     ];
 
     return (
