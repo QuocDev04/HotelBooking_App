@@ -25,6 +25,9 @@ app.use(express.json());
 app.use(cors());
 app.use(morgan("tiny"));
 
+// Serve static files for uploads
+app.use('/uploads', express.static('uploads'));
+
 // MongoDB connection
 connectDB();
 
@@ -57,4 +60,4 @@ app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     // Khởi động cron job tự động hủy booking
     startAutoCancelJob();
-}); // Server restart trigger
+}); // Server restart trigger - updated

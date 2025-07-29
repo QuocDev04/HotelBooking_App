@@ -674,6 +674,11 @@ const confirmCashPayment = async (req, res) => {
         const { adminId, note } = req.body;
         const paymentImage = req.file; // File được upload từ middleware
         
+        console.log('🔍 Debug confirmCashPayment:');
+        console.log('- adminId:', adminId);
+        console.log('- note:', note);
+        console.log('- paymentImage:', paymentImage ? paymentImage.filename : 'No file uploaded');
+        
         // Tìm booking cần xác nhận thanh toán
         const booking = await TourBookingSchema.findById(id)
             .populate('slotId')

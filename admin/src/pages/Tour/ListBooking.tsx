@@ -42,6 +42,42 @@ interface Booking {
     cancelledBy?: string;
     createdAt: string;
     updatedAt: string;
+    // Thêm các trường cho thanh toán
+    isDeposit?: boolean;
+    isFullyPaid?: boolean;
+    depositAmount?: number;
+    depositPaidAt?: string;
+    depositPaymentConfirmedBy?: string;
+    depositPaymentNote?: string;
+    paymentImage?: string;
+    fullPaidAt?: string;
+    fullPaymentConfirmedBy?: string;
+    fullPaymentNote?: string;
+    fullPaymentImage?: string;
+    address?: string;
+    note?: string;
+    // Thông tin hành khách chi tiết
+    adultPassengers?: Array<{
+        fullName: string;
+        gender: string;
+        birthDate?: string;
+        singleRoom?: boolean;
+    }>;
+    childPassengers?: Array<{
+        fullName: string;
+        gender: string;
+        birthDate?: string;
+    }>;
+    toddlerPassengers?: Array<{
+        fullName: string;
+        gender: string;
+        birthDate?: string;
+    }>;
+    infantPassengers?: Array<{
+        fullName: string;
+        gender: string;
+        birthDate?: string;
+    }>;
 }
 
 const ListBooking = () => {
@@ -57,8 +93,11 @@ const ListBooking = () => {
     const [showFullPaymentModal, setShowFullPaymentModal] = useState(false);
     const [fullPaymentNote, setFullPaymentNote] = useState<string>('');
     const [showDetailModal, setShowDetailModal] = useState(false);
+    const [showPaymentImages, setShowPaymentImages] = useState(false);
     const [paymentImage, setPaymentImage] = useState<File | null>(null);
     const [fullPaymentImage, setFullPaymentImage] = useState<File | null>(null);
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [selectedImageUrl, setSelectedImageUrl] = useState<string>('');
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info'; isVisible: boolean }>({
         message: '',
         type: 'info',
@@ -275,7 +314,7 @@ const ListBooking = () => {
             confirmPaymentMutation.mutate({
                 bookingId: selectedBooking._id,
                 note: paymentNote,
-                paymentImage: paymentImage
+                image: paymentImage
             });
         } else {
             setToast({
@@ -315,7 +354,7 @@ const ListBooking = () => {
             confirmFullPaymentMutation.mutate({
                 bookingId: selectedBooking._id,
                 note: fullPaymentNote,
-                paymentImage: fullPaymentImage
+                image: fullPaymentImage
             });
         } else {
             setToast({
@@ -336,11 +375,13 @@ const ListBooking = () => {
     const handleShowDetail = (booking: Booking) => {
         setSelectedBooking(booking);
         setShowDetailModal(true);
+        setShowPaymentImages(false); // Reset state khi mở modal mới
     };
 
     const closeDetailModal = () => {
         setShowDetailModal(false);
         setSelectedBooking(null);
+        setShowPaymentImages(false); // Reset state khi đóng modal
     };
 
     if (isLoading) {
@@ -656,15 +697,9 @@ const ListBooking = () => {
                                                             <div className="text-sm text-gray-600">
                                                                 {new Date(selectedBooking.depositPaidAt).toLocaleString('vi-VN')}
                                                             </div>
-                                                            {selectedBooking.depositPaymentImage && (
-                                                                <div className="mt-2">
-                                                                    <img 
-                                                                        src={selectedBooking.depositPaymentImage} 
-                                                                        alt="Hình ảnh xác nhận thanh toán cọc" 
-                                                                        className="w-32 h-32 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
-                                                                        onClick={() => window.open(selectedBooking.depositPaymentImage, '_blank')}
-                                                                    />
-                                                                    <p className="text-xs text-gray-500 mt-1">Hình ảnh xác nhận cọc</p>
+                                                            {selectedBooking.depositPaymentNote && (
+                                                                <div className="text-sm text-gray-500 mt-1">
+                                                                    Ghi chú: {selectedBooking.depositPaymentNote}
                                                                 </div>
                                                             )}
                                                         </div>
@@ -680,15 +715,9 @@ const ListBooking = () => {
                                                             <div className="text-sm text-gray-600">
                                                                 {new Date(selectedBooking.fullPaidAt).toLocaleString('vi-VN')}
                                                             </div>
-                                                            {selectedBooking.fullPaymentImage && (
-                                                                <div className="mt-2">
-                                                                    <img 
-                                                                        src={selectedBooking.fullPaymentImage} 
-                                                                        alt="Hình ảnh xác nhận thanh toán toàn bộ" 
-                                                                        className="w-32 h-32 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
-                                                                        onClick={() => window.open(selectedBooking.fullPaymentImage, '_blank')}
-                                                                    />
-                                                                    <p className="text-xs text-gray-500 mt-1">Hình ảnh xác nhận toàn bộ</p>
+                                                            {selectedBooking.fullPaymentNote && (
+                                                                <div className="text-sm text-gray-500 mt-1">
+                                                                    Ghi chú: {selectedBooking.fullPaymentNote}
                                                                 </div>
                                                             )}
                                                         </div>
@@ -696,6 +725,118 @@ const ListBooking = () => {
                                                 )}
                                             </div>
                                         </div>
+
+
+                                        {/* Nút xem hình ảnh xác nhận thanh toán - Tạm thời luôn hiển thị để test */}
+                                        {true && (
+                                            <div className="bg-white p-4 rounded-lg border">
+                                                <div className="mb-4">
+                                                    <h4 className="font-medium text-gray-900 flex items-center mb-3">
+                                                        <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                        Hình ảnh xác nhận thanh toán
+                                                    </h4>
+                                                    
+                                                    {/* Thông tin tóm tắt */}
+                                                    <div className="text-sm text-gray-600 mb-4">
+                                                        Có {[selectedBooking.paymentImage, selectedBooking.fullPaymentImage].filter(Boolean).length} hình ảnh xác nhận thanh toán
+                                                    </div>
+                                                    
+                                                    {/* Nút xem hình ảnh */}
+                                                    <button
+                                                        onClick={() => setShowPaymentImages(!showPaymentImages)}
+                                                        className="flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 border border-blue-600 rounded-lg hover:from-blue-600 hover:to-blue-700 focus:ring-4 focus:ring-blue-200 transition-all duration-200 shadow-md hover:shadow-lg w-full"
+                                                    >
+                                                        {showPaymentImages ? (
+                                                            <>
+                                                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464M9.878 9.878a3 3 0 00-4.243-4.243m7.071 7.071L15.536 15.536m0 0l1.414 1.414M15.536 15.536a3 3 0 01-4.243 4.243" />
+                                                                </svg>
+                                                                Ẩn hình ảnh
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                </svg>
+                                                                Xem hình ảnh
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </div>
+
+                                                {/* Hiển thị hình ảnh khi được toggle */}
+                                                {showPaymentImages && (
+                                                    <div className="space-y-6 mt-6 animate-in slide-in-from-top-2 duration-300">
+                                                        {/* Hình ảnh thanh toán cọc */}
+                                                        {selectedBooking.paymentImage && (
+                                                            <div className="bg-green-50 p-6 rounded-xl border border-green-200 shadow-sm">
+                                                                <div className="text-sm font-medium text-green-800 mb-4 flex items-center">
+                                                                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                                                                    Xác nhận thanh toán cọc
+                                                                </div>
+                                                                <div className="relative group mb-4">
+                                                                    <img 
+                                                                        src={`http://localhost:3002/uploads/payment-confirmations/${selectedBooking.paymentImage}`} 
+                                                                        alt="Hình ảnh xác nhận thanh toán cọc" 
+                                                                        className="w-full h-64 object-cover rounded-xl border border-gray-200 cursor-pointer hover:opacity-95 hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-xl"
+                                                                        onClick={() => {
+                                                                            setSelectedImageUrl(`http://localhost:3002/uploads/payment-confirmations/${selectedBooking.paymentImage}`);
+                                                                            setShowImageModal(true);
+                                                                        }}
+                                                                    />
+                                                                    <div className="absolute top-3 right-3 bg-white bg-opacity-90 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md">
+                                                                        <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                                        </svg>
+                                                                    </div>
+                                                                </div>
+                                                                <p className="text-sm text-green-700 text-center font-medium mb-2">Nhấn để xem ảnh gốc</p>
+                                                                {selectedBooking.depositPaidAt && (
+                                                                    <p className="text-xs text-gray-500 text-center">
+                                                                        {new Date(selectedBooking.depositPaidAt).toLocaleString('vi-VN')}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        )}
+
+                                                        {/* Hình ảnh thanh toán toàn bộ */}
+                                                        {selectedBooking.fullPaymentImage && (
+                                                            <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                                                                <div className="text-sm font-medium text-purple-800 mb-2 flex items-center">
+                                                                    <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+                                                                    Xác nhận thanh toán toàn bộ
+                                                                </div>
+                                                                <div className="relative group">
+                                                                    <img 
+                                                                        src={`http://localhost:3002/uploads/payment-confirmations/${selectedBooking.fullPaymentImage}`} 
+                                                                        alt="Hình ảnh xác nhận thanh toán toàn bộ" 
+                                                                        className="w-full h-88 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-95 hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg"
+                                                                        onClick={() => {
+                                                                            setSelectedImageUrl(`http://localhost:3002/uploads/payment-confirmations/${selectedBooking.fullPaymentImage}`);
+                                                                            setShowImageModal(true);
+                                                                        }}
+                                                                    />
+                                                                    <div className="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                                                        <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                                        </svg>
+                                                                    </div>
+                                                                </div>
+                                                                <p className="text-xs text-purple-600 mt-2 text-center font-medium">Nhấn để xem ảnh gốc</p>
+                                                                {selectedBooking.fullPaidAt && (
+                                                                    <p className="text-xs text-gray-500 mt-1 text-center">
+                                                                        {new Date(selectedBooking.fullPaidAt).toLocaleString('vi-VN')}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -1254,6 +1395,54 @@ const ListBooking = () => {
                                 )}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Image Modal */}
+            {showImageModal && (
+                <div 
+                    className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+                    onClick={() => setShowImageModal(false)}
+                >
+                    <div 
+                        className="relative max-w-7xl max-h-full w-full h-full flex items-center justify-center"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Close button */}
+                        <button
+                            onClick={() => setShowImageModal(false)}
+                            className="absolute top-4 right-4 z-10 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full p-3 transition-all duration-200 hover:scale-110"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        
+                        {/* Image */}
+                        <img
+                            src={selectedImageUrl}
+                            alt="Hình ảnh xác nhận thanh toán"
+                            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl cursor-pointer"
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                        
+                        {/* Download button */}
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                const link = document.createElement('a');
+                                link.href = selectedImageUrl;
+                                link.download = 'payment-confirmation.jpg';
+                                link.click();
+                            }}
+                            className="absolute bottom-4 right-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 flex items-center space-x-2 transition-all duration-200 hover:scale-105 shadow-lg"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span>Tải xuống</span>
+                        </button>
                     </div>
                 </div>
             )}
