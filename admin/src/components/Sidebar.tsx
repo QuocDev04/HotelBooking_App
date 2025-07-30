@@ -74,6 +74,14 @@ const Sidebar = () => {
                 { name: 'Thêm Blog', path: '/admin/add-blog', icon: '✍️' },
             ],
         },
+        {
+            name: 'Quản lý Thời Gian Tour',
+            icon: '📝',
+            children: [
+                { name: 'Danh sách Thời Gian Tour', path: '/admin/list-time', icon: '📋' },
+                { name: 'Thêm Thời Gian Tour', path: '/admin/add-timetour', icon: '✍️' },
+            ],
+        },
     ];
 
     return (

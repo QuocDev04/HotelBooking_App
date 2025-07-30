@@ -108,8 +108,66 @@ const GetAllSlotsByTourId = async (req, res) => {
         });
       }
 };
+
+const UpdateDateSlot = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { date, seats } = req.body;
+
+        if (!date || !seats) {
+            return res.status(400).json({ success: false, message: "Thiếu thông tin cần thiết" });
+        }
+
+        const updatedSlot = await DateTour.findByIdAndUpdate(
+            id,
+            { 
+                dateTour: date, 
+                availableSeats: seats 
+            },
+            { new: true }
+        );
+
+        if (!updatedSlot) {
+            return res.status(404).json({ success: false, message: "Không tìm thấy slot để cập nhật" });
+        }
+
+        return res.status(200).json({ 
+            success: true, 
+            message: "Cập nhật slot thành công",
+            data: updatedSlot
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: "Lỗi server" });
+    }
+};
+
+const DeleteDateSlot = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const deletedSlot = await DateTour.findByIdAndDelete(id);
+
+        if (!deletedSlot) {
+            return res.status(404).json({ success: false, message: "Không tìm thấy slot để xóa" });
+        }
+
+        return res.status(200).json({ 
+            success: true, 
+            message: "Xóa slot thành công"
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: "Lỗi server" });
+    }
+};
+
 module.exports = {
     PostdateTour,
     GetDateTour,
-    GetAllSlotsByTourId
+    GetAllSlotsByTourId,
+    UpdateDateSlot,
+    DeleteDateSlot
 }

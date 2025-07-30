@@ -23,6 +23,9 @@ import EditBlog from "../pages/Blog/EditBlog"
 import Login from "../components/Login"
 import { useUser } from "@clerk/clerk-react"
 import AdminRoute from "../components/AdminRouter"
+import AddTimeTour from "../pages/TimeTour/AddTimeTour"
+import ListTime from "../pages/TimeTour/ListTime"
+import EditTimeTour from "../pages/TimeTour/EditTimeTour"
 
 
 
@@ -76,6 +79,9 @@ const Router = () => {
                     <Route path="/admin/add-blog" element={<AddBlog />} />
                     <Route path="/admin/edit-blog/:id" element={<EditBlog />} />
 
+                    <Route path="/admin/list-time" element={<ListTime />} />
+                    <Route path="/admin/add-timetour" element={<AddTimeTour />} />
+                    <Route path="/admin/edit-time-tour/:id" element={<EditTimeTour />} />
                 </Route>
             </Routes>
         </>
