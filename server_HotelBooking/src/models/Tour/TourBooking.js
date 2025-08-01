@@ -100,6 +100,32 @@ const TourBookingSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+    // Trạng thái không tham gia tour
+    no_show_status: {
+        type: String,
+        enum: ['participated', 'no_show', null],
+        default: null
+    },
+    // Thời gian đánh dấu không tham gia
+    no_show_marked_at: {
+        type: Date,
+        default: null
+    },
+    // Tiền cọc chuyển thành doanh thu
+    deposit_converted_to_revenue: {
+        type: Boolean,
+        default: false
+    },
+    // Email thông báo đã gửi
+    no_show_email_sent: {
+        type: Boolean,
+        default: false
+    },
+    // Thời gian gửi email thông báo
+    no_show_email_sent_at: {
+        type: Date,
+        default: null
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model('BookingTour', TourBookingSchema);

@@ -1,5 +1,95 @@
 const DateTour = require("../../models/Tour/DateTour");
 const TourBooking = require("../../models/Tour/TourBooking.js");
+const nodemailer = require('nodemailer');
+
+// Cấu hình email transporter
+const emailTransporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.Mail_User,
+        pass: process.env.Mail_Pass
+    }
+});
+
+// Hàm xử lý khách hàng không tham gia tour
+const processNoShowCustomers = async (slotId) => {
+    try {
+        // Tìm các booking có trạng thái deposit_paid và chưa được xử lý no_show
+        const depositPaidBookings = await TourBooking.find({
+            slotId: slotId,
+            payment_status: 'deposit_paid',
+            no_show_status: null
+        });
+
+        for (const booking of depositPaidBookings) {
+            // Đánh dấu là không tham gia tour
+            booking.no_show_status = 'no_show';
+            booking.no_show_marked_at = new Date();
+            booking.deposit_converted_to_revenue = true;
+            
+            // Gửi email thông báo nếu chưa gửi
+            if (!booking.no_show_email_sent) {
+                await sendNoShowNotificationEmail(booking);
+                booking.no_show_email_sent = true;
+                booking.no_show_email_sent_at = new Date();
+            }
+            
+            await booking.save();
+            console.log(`Đã xử lý khách hàng không tham gia: ${booking.fullNameUser} - Booking ID: ${booking._id}`);
+        }
+    } catch (error) {
+        console.error('Lỗi xử lý khách hàng không tham gia tour:', error);
+    }
+};
+
+// Hàm gửi email thông báo khách hàng không tham gia
+const sendNoShowNotificationEmail = async (booking) => {
+    try {
+        const tourName = booking.slotId?.tour?.nameTour || 'Tour';
+        const destination = booking.slotId?.tour?.destination || '';
+        const tourDate = new Date(booking.slotId?.dateTour).toLocaleDateString('vi-VN');
+        
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: booking.email,
+            subject: `Thông báo về việc không tham gia tour - ${tourName}`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #d32f2f;">Thông báo về việc không tham gia tour</h2>
+                    
+                    <p>Kính gửi <strong>${booking.fullNameUser}</strong>,</p>
+                    
+                    <p>Chúng tôi rất tiếc khi phải thông báo rằng Quý khách đã không tham gia tour như đã đăng ký:</p>
+                    
+                    <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                        <p><strong>Tên tour:</strong> ${tourName}</p>
+                        <p><strong>Điểm đến:</strong> ${destination}</p>
+                        <p><strong>Ngày khởi hành:</strong> ${tourDate}</p>
+                        <p><strong>Mã đặt tour:</strong> ${booking._id}</p>
+                    </div>
+                    
+                    <p>Theo chính sách của công ty, số tiền đặt cọc <strong>${booking.depositAmount?.toLocaleString()} VNĐ</strong> sẽ không được hoàn lại do Quý khách không tham gia tour mà không có thông báo trước.</p>
+                    
+                    <p>Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi qua:</p>
+                    <ul>
+                        <li>Email: ${process.env.EMAIL_USER}</li>
+                        <li>Hotline: ${process.env.COMPANY_PHONE || '1900-xxxx'}</li>
+                    </ul>
+                    
+                    <p>Chúng tôi hy vọng sẽ có cơ hội phục vụ Quý khách trong những chuyến du lịch tiếp theo.</p>
+                    
+                    <p>Trân trọng,<br>
+                    <strong>Đội ngũ ${process.env.COMPANY_NAME || 'Công ty Du lịch'}</strong></p>
+                </div>
+            `
+        };
+        
+        await emailTransporter.sendMail(mailOptions);
+        console.log(`Đã gửi email thông báo không tham gia tour cho: ${booking.email}`);
+    } catch (error) {
+        console.error('Lỗi gửi email thông báo không tham gia tour:', error);
+    }
+};
 
 // Hàm cập nhật trạng thái tour dựa trên ngày hiện tại
 const updateTourStatus = async () => {
@@ -46,6 +136,11 @@ const updateTourBookingStats = async () => {
         const slots = await DateTour.find();
         
         for (const slot of slots) {
+            // Xử lý khách hàng không tham gia tour cho tour đang diễn ra và đã hoàn thành
+            if (slot.status === 'ongoing' || slot.status === 'completed') {
+                await processNoShowCustomers(slot._id);
+            }
+            
             // Lấy tất cả booking cho slot này
             const bookings = await TourBooking.find({ slotId: slot._id });
             
@@ -61,9 +156,10 @@ const updateTourBookingStats = async () => {
                     (booking.toddlerTour || 0) + 
                     (booking.infantTour || 0);
                     
-                // Chỉ tính booking đã thanh toán hoặc đã đặt cọc
-                if (booking.payment_status === 'completed' || 
-                    booking.payment_status === 'deposit_paid') {
+                // Chỉ tính booking đã thanh toán hoặc đã đặt cọc (trừ những người không tham gia)
+                if ((booking.payment_status === 'completed' || 
+                     booking.payment_status === 'deposit_paid') &&
+                    booking.no_show_status !== 'no_show') {
                     bookedSeats += totalPassengers;
                 }
                 
@@ -72,8 +168,13 @@ const updateTourBookingStats = async () => {
                     totalRevenue += booking.totalPriceTour;
                 }
                 
-                // Tính tiền cọc đã thu
-                if (booking.isDeposit && !booking.isFullyPaid) {
+                // Tính doanh thu từ tiền cọc của khách không tham gia
+                if (booking.no_show_status === 'no_show' && booking.deposit_converted_to_revenue) {
+                    totalRevenue += booking.depositAmount;
+                }
+                
+                // Tính tiền cọc đã thu (chưa chuyển thành doanh thu)
+                if (booking.isDeposit && !booking.isFullyPaid && !booking.deposit_converted_to_revenue) {
                     depositAmount += booking.depositAmount;
                 }
                 
@@ -265,6 +366,9 @@ const getTourStats = async (req, res) => {
         // Cập nhật trạng thái tour trước khi lấy thống kê
         await updateTourStatus();
         
+        // Cập nhật thống kê booking và xử lý no-show customers
+        await updateTourBookingStats();
+        
         // Lấy thống kê số lượng tour theo trạng thái
         const stats = await DateTour.aggregate([
             {
@@ -332,6 +436,9 @@ const getToursByStatus = async (req, res) => {
         // Cập nhật trạng thái tour trước khi lấy danh sách
         await updateTourStatus();
         
+        // Cập nhật thống kê booking và xử lý no-show customers
+        await updateTourBookingStats();
+        
         // Tạo query
         let query = {};
         if (status && status !== 'all') {
@@ -378,6 +485,95 @@ const updateTourBookingStatsAPI = async (req, res) => {
     }
 };
 
+// API đánh dấu khách hàng không tham gia tour
+const markCustomerNoShow = async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        const { reason } = req.body;
+        
+        const booking = await TourBooking.findById(bookingId).populate({
+            path: 'slotId',
+            populate: {
+                path: 'tour',
+                select: 'nameTour destination'
+            }
+        });
+        
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy booking'
+            });
+        }
+        
+        // Chỉ cho phép đánh dấu booking có trạng thái deposit_paid
+        if (booking.payment_status !== 'deposit_paid') {
+            return res.status(400).json({
+                success: false,
+                message: 'Chỉ có thể đánh dấu không tham gia cho booking đã đặt cọc'
+            });
+        }
+        
+        // Cập nhật trạng thái
+        booking.no_show_status = 'no_show';
+        booking.no_show_marked_at = new Date();
+        booking.deposit_converted_to_revenue = true;
+        booking.cancelReason = reason || 'Khách hàng không tham gia tour';
+        
+        // Gửi email thông báo
+        if (!booking.no_show_email_sent) {
+            await sendNoShowNotificationEmail(booking);
+            booking.no_show_email_sent = true;
+            booking.no_show_email_sent_at = new Date();
+        }
+        
+        await booking.save();
+        
+        return res.status(200).json({
+            success: true,
+            message: 'Đã đánh dấu khách hàng không tham gia tour',
+            data: booking
+        });
+    } catch (error) {
+        console.error('Lỗi đánh dấu khách hàng không tham gia tour:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Lỗi server khi đánh dấu khách hàng không tham gia tour'
+        });
+    }
+};
+
+// API lấy danh sách khách hàng không tham gia tour
+const getNoShowCustomers = async (req, res) => {
+    try {
+        const { slotId } = req.params;
+        
+        const noShowBookings = await TourBooking.find({
+            slotId: slotId,
+            no_show_status: 'no_show'
+        }).populate('userId', 'username email')
+          .populate({
+              path: 'slotId',
+              populate: {
+                  path: 'tour',
+                  select: 'nameTour destination'
+              }
+          });
+        
+        return res.status(200).json({
+            success: true,
+            count: noShowBookings.length,
+            data: noShowBookings
+        });
+    } catch (error) {
+        console.error('Lỗi lấy danh sách khách hàng không tham gia tour:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Lỗi server khi lấy danh sách khách hàng không tham gia tour'
+        });
+    }
+};
+
 module.exports = {
     PostdateTour,
     GetDateTour,
@@ -388,5 +584,8 @@ module.exports = {
     getToursByStatus,
     updateTourBookingStatsAPI,
     updateTourStatus,
-    updateTourBookingStats
+    updateTourBookingStats,
+    markCustomerNoShow,
+    getNoShowCustomers,
+    processNoShowCustomers
 }

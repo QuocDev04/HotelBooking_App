@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import dayjs from 'dayjs';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useUser } from '@clerk/clerk-react';
 import { instanceAdmin } from '../../configs/axios';
@@ -105,17 +106,37 @@ const ListBooking = () => {
     });
     const queryClient = useQueryClient();
 
+    // Lấy slotId từ URL nếu có
+    const [slotId, setSlotId] = useState<string | null>(null);
+    
+    // Kiểm tra URL có chứa slotId không
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const slotIdParam = urlParams.get('slotId');
+        if (slotIdParam) {
+            setSlotId(slotIdParam);
+        }
+    }, []);
+
     // Fetch bookings
     const { data: bookingsData, isLoading } = useQuery({
-        queryKey: ['admin-bookings', selectedStatus, searchTerm, currentPage],
+        queryKey: ['admin-bookings', selectedStatus, searchTerm, currentPage, slotId],
         queryFn: () => instanceAdmin.get('/admin/bookings', {
             params: {
                 status: selectedStatus,
                 search: searchTerm,
                 page: currentPage,
-                limit: 10
+                limit: 10,
+                slotId: slotId
             }
         })
+    });
+    
+    // Lấy thông tin tour nếu có slotId
+    const { data: tourData } = useQuery({
+        queryKey: ['tour-slot', slotId],
+        queryFn: () => instanceAdmin.get(`/date/slot/${slotId}`),
+        enabled: !!slotId
     });
 
     const bookings = bookingsData?.data?.bookings || [];
@@ -397,8 +418,29 @@ const ListBooking = () => {
             <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">Quản lý đặt chỗ Tour</h1>
-                    <p className="text-gray-600 mt-2">Quản lý và xử lý các đặt chỗ tour du lịch</p>
+                    {slotId && tourData?.data?.data ? (
+                        <div className="p-4 bg-blue-50 rounded-lg">
+                            <h1 className="text-3xl font-bold text-gray-900">
+                                Danh sách đặt chỗ cho tour: {tourData.data.data.tour.nameTour}
+                            </h1>
+                            <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2">
+                                <p className="text-gray-700">
+                                    <span className="font-semibold">Ngày khởi hành:</span> {dayjs(tourData.data.data.dateTour).format('DD/MM/YYYY')}
+                                </p>
+                                <p className="text-gray-700">
+                                    <span className="font-semibold">Điểm đến:</span> {tourData.data.data.tour.destination}
+                                </p>
+                                <p className="text-gray-700">
+                                    <span className="font-semibold">Số chỗ còn trống:</span> {tourData.data.data.availableSeats}
+                                </p>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <h1 className="text-3xl font-bold text-gray-900">Quản lý đặt chỗ Tour</h1>
+                            <p className="text-gray-600 mt-2">Quản lý và xử lý các đặt chỗ tour du lịch</p>
+                        </>
+                    )}
                 </div>
 
                 {/* Filters */}

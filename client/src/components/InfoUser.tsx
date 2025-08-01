@@ -252,6 +252,29 @@ const InfoUser = () => {
         }
     };
 
+    // Xử lý thanh toán ban đầu
+    const handlePayment = (bill: Bill) => {
+        // Chuyển hướng đến trang thanh toán với thông tin booking
+        navigate(`/booking/${bill._id}`, {
+            state: { bookingData: bill }
+        });
+    };
+
+    // Xử lý hoàn tất thanh toán (sau khi đã đặt cọc)
+    const handleCompletePayment = (bill: Bill) => {
+        // Tính số tiền còn lại cần thanh toán
+        const remainingAmount = bill.totalPriceTour - (bill.depositAmount || 0);
+        
+        // Chuyển hướng đến trang thanh toán với thông tin booking và số tiền còn lại
+        navigate(`/booking/${bill._id}`, {
+            state: { 
+                bookingData: bill,
+                isCompletePayment: true,
+                remainingAmount: remainingAmount
+            }
+        });
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
             <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
@@ -656,7 +679,10 @@ const InfoUser = () => {
                                                     Chi tiết
                                                 </button>
                                                 {bill.payment_status === 'pending' && !bill.isDeposit && (
-                                                    <button className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200 flex-shrink-0">
+                                                    <button 
+                                                        onClick={() => handlePayment(bill)}
+                                                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200 flex-shrink-0"
+                                                    >
                                                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                                                         </svg>
@@ -665,7 +691,10 @@ const InfoUser = () => {
                                                 )}
                                                 {/* Nếu đã đặt cọc nhưng chưa thanh toán đầy đủ và không bị hủy */}
                                                 {bill.isDeposit && !bill.isFullyPaid && bill.payment_status !== 'cancelled' && (
-                                                    <button className="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 flex-shrink-0">
+                                                    <button 
+                                                        onClick={() => handleCompletePayment(bill)}
+                                                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 flex-shrink-0"
+                                                    >
                                                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                                                         </svg>
@@ -1119,12 +1148,18 @@ const InfoUser = () => {
                                 Đóng
                             </button>
                             {selectedBill?.payment_status === 'pending' && !selectedBill?.isDeposit && (
-                                <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
+                                <button 
+                                    onClick={() => handlePayment(selectedBill)}
+                                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
+                                >
                                     Thanh toán ngay
                                 </button>
                             )}
                             {selectedBill?.isDeposit && !selectedBill?.isFullyPaid && selectedBill?.payment_status !== 'cancelled' && (
-                                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                                <button 
+                                    onClick={() => handleCompletePayment(selectedBill)}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                                >
                                     Hoàn tất thanh toán
                                 </button>
                             )}

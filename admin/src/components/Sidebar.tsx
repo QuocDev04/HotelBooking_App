@@ -47,26 +47,9 @@ const Sidebar = () => {
             name: 'Thống kê Tour',
             icon: '📈',
             children: [
-                { name: 'Thống kê tổng quan', path: '/admin/tour-stats', icon: '📊' },
                 { name: 'Tour sắp diễn ra', path: '/admin/tour-status/upcoming', icon: '🔜' },
                 { name: 'Tour đang diễn ra', path: '/admin/tour-status/ongoing', icon: '🔄' },
                 { name: 'Tour đã hoàn thành', path: '/admin/tour-status/completed', icon: '✅' },
-            ],
-        },
-        {
-            name: 'Phòng',
-            icon: '🏨',
-            children: [
-                { name: 'Danh sách phòng', path: '/admin/list-room', icon: '📋' },
-                { name: 'Thêm phòng', path: '/admin/add-room', icon: '➕' },
-            ],
-        },
-        {
-            name: 'Phương Tiện',
-            icon: '🚌',
-            children: [
-                { name: 'Danh sách chuyến', path: '/admin/list-transport', icon: '📃' },
-                { name: 'Thêm chuyến', path: '/admin/add-transport', icon: '🛠️' },
             ],
         },
         {
@@ -87,7 +70,7 @@ const Sidebar = () => {
         },
         {
             name: 'Quản lý Thời Gian Tour',
-            icon: '📝',
+            icon: '⏱️',
             children: [
                 { name: 'Danh sách Thời Gian Tour', path: '/admin/list-time', icon: '📋' },
                 { name: 'Thêm Thời Gian Tour', path: '/admin/add-timetour', icon: '✍️' },

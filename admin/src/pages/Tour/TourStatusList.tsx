@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Card, Select, Tag, Button, Space, Typography, Image, Badge, Tooltip } from 'antd';
+import { Table, Card, Select, Tag, Button, Space, Typography, Image, Badge, Tooltip, Alert } from 'antd';
 import { useQuery } from '@tanstack/react-query';
-import axios from '../../configs/axios';
+import axios, { instanceAdmin } from '../../configs/axios';
 import dayjs from 'dayjs';
-import { Link } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { EditOutlined, DeleteOutlined, EyeOutlined, TeamOutlined, DollarOutlined } from '@ant-design/icons';
+import { useAuth } from '@clerk/clerk-react';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -33,18 +34,48 @@ interface Tour {
 }
 
 const TourStatusList: React.FC = () => {
-  const [status, setStatus] = useState<string>('all');
+  const { status: urlStatus } = useParams<{ status: string }>();
+  const navigate = useNavigate();
+  const { getToken } = useAuth();
+  const [status, setStatus] = useState<string>(urlStatus || 'all');
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
-  const { data, isLoading, refetch } = useQuery<{ success: boolean; data: Tour[] }>(
-    ['tours', status],
-    async () => {
-      const response = await axios.get(`/date/status/${status}`);
-      return response.data;
+  // Cập nhật status khi URL thay đổi
+  useEffect(() => {
+    if (urlStatus) {
+      setStatus(urlStatus);
     }
-  );
+  }, [urlStatus]);
+
+  const { data, isLoading, refetch } = useQuery<{ success: boolean; data: Tour[] }>({  
+    queryKey: ['tours', status],
+    queryFn: async () => {
+      try {
+        const token = await getToken();
+        if (!token) {
+          throw new Error('Không có token xác thực');
+        }
+        
+        // Sử dụng instanceAdmin với token xác thực
+        const response = await instanceAdmin.get(`/status/${status}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        return response.data;
+      } catch (err: any) {
+        console.error('Error fetching tour status:', err);
+        setErrorMessage(err.response?.data?.message || err.message || 'Lỗi khi tải dữ liệu');
+        throw err;
+      }
+    },
+    refetchInterval: 60000, // Refresh every minute
+    staleTime: 30000, // Consider data fresh for 30 seconds
+  });
 
   const handleStatusChange = (value: string) => {
     setStatus(value);
+    navigate(`/admin/tour-status/${value}`);
   };
 
   const getStatusTag = (status: string) => {
@@ -65,17 +96,23 @@ const TourStatusList: React.FC = () => {
       title: 'Tên Tour',
       dataIndex: ['tour', 'nameTour'],
       key: 'nameTour',
-      render: (text: string, record: Tour) => (
-        <Space>
-          <Image 
-            width={50} 
-            src={record.tour.imagesTour[0]} 
-            preview={false} 
-            style={{ borderRadius: '5px' }} 
-          />
-          <span>{text}</span>
-        </Space>
-      ),
+      render: (text: string, record: Tour) => {
+        // Kiểm tra dữ liệu hợp lệ trước khi render
+        if (!record?.tour?.imagesTour?.length) {
+          return <span>{text || 'N/A'}</span>;
+        }
+        return (
+          <Space>
+            <Image 
+              width={50} 
+              src={record.tour.imagesTour[0]} 
+              preview={false} 
+              style={{ borderRadius: '5px' }} 
+            />
+            <span>{text || 'N/A'}</span>
+          </Space>
+        );
+      },
     },
     {
       title: 'Điểm đến',
@@ -134,30 +171,58 @@ const TourStatusList: React.FC = () => {
     {
       title: 'Thao tác',
       key: 'action',
-      render: (text: string, record: Tour) => (
-        <Space size="middle">
-          <Tooltip title="Xem chi tiết">
-            <Link to={`/tour/${record.tour._id}`}>
-              <Button type="primary" icon={<EyeOutlined />} size="small" />
-            </Link>
-          </Tooltip>
-          <Tooltip title="Xem danh sách đặt chỗ">
-            <Link to={`/tour/bookings/${record._id}`}>
-              <Button type="default" icon={<TeamOutlined />} size="small" />
-            </Link>
-          </Tooltip>
-        </Space>
-      ),
+      render: (text: string, record: Tour) => {
+        // Kiểm tra dữ liệu hợp lệ trước khi render
+        if (!record?.tour?._id || !record?._id) {
+          return null;
+        }
+        return (
+          <Space size="middle">
+            <Tooltip title="Xem chi tiết tour">
+              <Link to={`/tour/${record.tour._id}`}>
+                <Button type="primary" icon={<EyeOutlined />} size="small" />
+              </Link>
+            </Tooltip>
+            <Tooltip title="Xem danh sách đặt chỗ">
+              <Link to={`/admin/list-booking?slotId=${record._id}`}>
+                <Button type="default" icon={<TeamOutlined />} size="small" />
+              </Link>
+            </Tooltip>
+            <Tooltip title="Xem danh sách người tham gia">
+              <Link to={`/admin/tour/participants/${record._id}`}>
+                <Button type="dashed" icon={<TeamOutlined />} size="small" />
+              </Link>
+            </Tooltip>
+          </Space>
+        );
+      },
     },
   ];
+
+  // Hiển thị thông báo lỗi nếu có
+  if (errorMessage) {
+    return (
+      <Alert
+        message="Lỗi"
+        description={errorMessage}
+        type="error"
+        showIcon
+        style={{ marginBottom: 16 }}
+      />
+    );
+  }
 
   return (
     <Card>
       <Space direction="vertical" style={{ width: '100%' }}>
         <Space style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
-          <Title level={4}>Danh sách Tour theo trạng thái</Title>
+          <Title level={4}>
+            {status === 'upcoming' && 'Danh sách Tour sắp diễn ra'}
+            {status === 'ongoing' && 'Danh sách Tour đang diễn ra'}
+            {status === 'completed' && 'Danh sách Tour đã hoàn thành'}
+            {status === 'all' && 'Danh sách tất cả Tour'}
+          </Title>
           <Select 
-            defaultValue="all" 
             style={{ width: 200 }} 
             onChange={handleStatusChange}
             value={status}
@@ -171,10 +236,11 @@ const TourStatusList: React.FC = () => {
         
         <Table 
           columns={columns} 
-          dataSource={data?.data} 
+          dataSource={data?.data || []} 
           rowKey="_id" 
           loading={isLoading}
           pagination={{ pageSize: 10 }}
+          locale={{ emptyText: 'Không có dữ liệu' }}
         />
       </Space>
     </Card>

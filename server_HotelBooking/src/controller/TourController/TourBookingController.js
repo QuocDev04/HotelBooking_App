@@ -52,13 +52,18 @@ const getByIdBookingTour = async (req, res) => {
 // Admin: Lấy tất cả booking để quản lý
 const getAllBookingsForAdmin = async (req, res) => {
     try {
-        const { status, page = 1, limit = 10, search } = req.query;
+        const { status, page = 1, limit = 10, search, slotId } = req.query;
         
         let query = {};
         
         // Filter theo trạng thái
         if (status && status !== 'all') {
             query.payment_status = status;
+        }
+        
+        // Filter theo slotId (cho trang danh sách người tham gia tour)
+        if (slotId) {
+            query.slotId = slotId;
         }
         
         // Search theo tên tour hoặc tên khách hàng
@@ -1138,6 +1143,56 @@ const getRefundStats = async (req, res) => {
     }
 };
 
+// Xử lý yêu cầu hoàn tiền từ client
+const submitRefundRequest = async (req, res) => {
+    try {
+        const { bookingId, refundAmount, bankInfo } = req.body;
+        
+        // Tìm booking
+        const booking = await TourBookingSchema.findById(bookingId);
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy booking'
+            });
+        }
+        
+        // Kiểm tra trạng thái booking
+        if (booking.status !== 'confirmed') {
+            return res.status(400).json({
+                success: false,
+                message: 'Chỉ có thể yêu cầu hoàn tiền cho booking đã xác nhận'
+            });
+        }
+        
+        // Cập nhật thông tin hoàn tiền
+        booking.refundInfo = {
+            amount: refundAmount,
+            bankInfo: bankInfo,
+            requestedAt: new Date(),
+            status: 'pending'
+        };
+        
+        booking.cancelRequestedAt = new Date();
+        booking.status = 'cancel_requested';
+        
+        await booking.save();
+        
+        res.status(200).json({
+            success: true,
+            message: 'Yêu cầu hoàn tiền đã được gửi thành công',
+            data: booking
+        });
+        
+    } catch (error) {
+        console.error('Error submitting refund request:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi server khi gửi yêu cầu hoàn tiền'
+        });
+    }
+};
+
 module.exports = {
     getByIdBookingTour,
     BookingTour,
@@ -1152,5 +1207,6 @@ module.exports = {
     getAccurateRevenue,
     getRefundList,
     updateRefundStatus,
-    getRefundStats
+    getRefundStats,
+    submitRefundRequest
 };

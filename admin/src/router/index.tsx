@@ -26,9 +26,10 @@ import AdminRoute from "../components/AdminRouter"
 import AddTimeTour from "../pages/TimeTour/AddTimeTour"
 import ListTime from "../pages/TimeTour/ListTime"
 import EditTimeTour from "../pages/TimeTour/EditTimeTour"
-import TourStats from "../pages/dashboad/TourStats"
+// import TourStats from "../pages/dashboad/TourStats" // Đã bỏ trang thống kê tổng quan
 import TourStatusList from "../pages/Tour/TourStatusList"
 import RefundManagement from "../pages/Tour/RefundManagement"
+import TourParticipants from "../pages/Tour/TourParticipants"
 
 
 
@@ -64,9 +65,10 @@ const Router = () => {
                     <Route path="/admin/add-tour" element={<AddTour />} />
                     <Route path="/admin/edit-tour/:id" element={<EditTour />} />
                     <Route path="/admin/list-booking" element={<ListBooking />} />
-                    <Route path="/admin/tour-stats" element={<TourStats />} />
+                    {/* <Route path="/admin/tour-stats" element={<TourStats />} /> */} {/* Đã bỏ trang thống kê tổng quan */}
                     <Route path="/admin/tour-status/:status" element={<TourStatusList />} />
                     <Route path="/admin/refund-management" element={<RefundManagement />} />
+                    <Route path="/admin/tour/participants/:slotId" element={<TourParticipants />} />
 
                     <Route path="/admin/list-transport" element={<ListTransport />} />
                     <Route path="/admin/add-transport" element={<AddTransport />} />
