@@ -60,6 +60,7 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
             date: date.format("YYYY-MM-DD")
         };
     });
+    
     function handleDateClick(info: any) {
         const clickedDate = dayjs(info.date).format("YYYY-MM-DD");
         const isDateAvailable = events.some((event: any) => event.date === clickedDate);
@@ -164,25 +165,19 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                 </span>
                             </div>
 
-                            <div className="mb-4">
+                            {/* <div className="mb-4">
                                 <div className="text-center text-blue-700 text-2xl font-bold flex items-center justify-center gap-2 mb-6">
                                     Phương tiện di chuyển {selectedSlot?.tour?.itemTransport?.[0]?.TransportId?.transportType}
                                 </div>
 
                                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                                    {/* Ngày đi */}
+                                    
                                     <div className="flex-1 text-center">
                                         <div className="font-semibold text-gray-700">
                                             Ngày đi -{" "}
                                             <span className="text-blue-600">
                                                 {selectedDate ? dayjs(selectedDate).format("DD/MM/YYYY") : ""}
                                             </span>
-                                        </div>
-                                        <div className="flex items-center justify-center gap-2 mt-1">
-                                            <span className="text-blue-600 font-bold">
-                                                {selectedSlot?.tour?.itemTransport?.[0]?.TransportId?.transportNumber}
-                                            </span>
-                                            <span className="text-gray-600">08:50 <span className="text-xl">→</span> 10:55</span>
                                         </div>
                                         <div className="text-xs text-gray-500 mt-1">
                                             <span className="text-red-500 font-bold">
@@ -193,7 +188,7 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
 
                                     <div className="hidden md:block w-px h-16 bg-gray-200 mx-4"></div>
 
-                                    {/* Ngày về */}
+                                   
                                     <div className="flex-1 text-center">
                                         <div className="font-semibold text-gray-700">
                                             Ngày về - <span className="text-blue-600">13/07/2025</span>
@@ -211,7 +206,7 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
                             <div className="hidden md:block w-full h-px bg-gray-200 mx-4 my-6"></div>
                             {/* Giá */}
                             <div className="mb-4">

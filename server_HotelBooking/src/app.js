@@ -41,7 +41,7 @@ app.use('/api/', TransportScheduleRouter);
 app.use('/api/', TourSchedule);
 app.use('/api/', AdminRouter);
 app.use('/api/', RouterBookingOnly);
-app.use('/api/', Vnpay);
+app.use('/api/vnpay', Vnpay);
 app.use('/api/', RouterBookingTour);
 app.use('/api/', RouterChecOutBookingTour);
 app.use('/api/', routerLocation);

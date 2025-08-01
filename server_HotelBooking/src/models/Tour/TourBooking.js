@@ -49,6 +49,11 @@ const TourBookingSchema = new mongoose.Schema({
         required: true,
         enum: ['cash', 'bank_transfer'],
     },
+    paymentType: {
+        type: String,
+        enum: ['deposit', 'full', 'remaining'],
+        default: 'full'
+    },
     payment_status: {
         type: String,
         enum: ['pending', 'confirmed', 'completed', 'cancelled', 'pending_cancel', 'deposit_paid'],

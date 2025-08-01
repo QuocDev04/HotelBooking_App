@@ -17,11 +17,11 @@ const { verifyClerkTokenAndAdmin } = require("../../Middleware/Middleware");
 const dateRouter = express.Router();
 
 // Các API cơ bản cho quản lý slot thời gian tour
-dateRouter.post('/date', verifyTokenAndAdmin, PostdateTour);
+dateRouter.post('/date', PostdateTour);
 dateRouter.get('/date/slot/:id', GetDateTour);
 dateRouter.get('/date/tour/:tourId', GetAllSlotsByTourId);
-dateRouter.put('/date/slot/:id', verifyTokenAndAdmin, UpdateDateSlot);
-dateRouter.delete('/date/slot/:id', verifyTokenAndAdmin, DeleteDateSlot);
+dateRouter.put('/date/slot/:id', UpdateDateSlot);
+dateRouter.delete('/date/slot/:id', DeleteDateSlot);
 
 // API mới cho quản lý tour theo trạng thái
 dateRouter.get('/stats', verifyClerkTokenAndAdmin, getTourStats);

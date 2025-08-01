@@ -452,14 +452,6 @@ const BookingTour = async (req, res) => {
             createdAt: { $gte: fiveMinutesAgo }
         });
         
-        if (existingBooking) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "Bạn đã đặt tour này rồi. Vui lòng kiểm tra lại.",
-                existingBookingId: existingBooking._id
-            });
-        }
-
         // Tìm slot tương ứng
         const slot = await DateTourModel.findById(slotId).populate("tour");
         if (!slot) {
@@ -560,12 +552,12 @@ const BookingTour = async (req, res) => {
 
             // Tạo url thanh toán
             const paymentUrl = await vnpay.buildPaymentUrl({
-                vnp_Amount: paymentAmount,
+                vnp_Amount: paymentAmount, // VNPay yêu cầu số tiền tính bằng xu
                 vnp_IpAddr: req.ip || '127.0.0.1',
                 vnp_TxnRef: `${booking._id}-${Date.now()}`, // dùng cho callback xác định booking
                 vnp_OrderInfo: `Thanh toán ${isFullPayment ? 'đầy đủ' : 'đặt cọc'} đơn #${booking._id}`,
                 vnp_OrderType: ProductCode.Other,
-                vnp_ReturnUrl: `http://localhost:5175/payment-result`, // URL callback
+                vnp_ReturnUrl: `http://localhost:8080/api/vnpay/payment-callback`, // URL callback về backend
                 vnp_Locale: VnpLocale.VN,
                 vnp_CreateDate: dateFormat(new Date()),
                 vnp_ExpireDate: dateFormat(tomorrow),

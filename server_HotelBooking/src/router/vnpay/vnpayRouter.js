@@ -1,14 +1,45 @@
 const express = require('express');
 const { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } = require('vnpay');
-const TourBookingSchema = require("../../models/Tour/TourBooking.js")
+const TourBookingSchema = require("../../models/Tour/TourBooking.js");
 const { sendMail } = require("../../controller/mail/sendMail.js");
 
 const Vnpay = express.Router();
 
-
-// Xử lý callback VNPAY khi khách hàng thanh toán xong
-Vnpay.get('/check-payment-vnpay', async (req, res) => {
+// Tạo URL thanh toán VNPay
+Vnpay.post('/create-payment', async (req, res) => {
     try {
+        const bookingData = req.body;
+
+        if (!bookingData) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Thiếu dữ liệu booking' 
+            });
+        }
+
+        // Tính tổng giá nếu không có
+        if (!bookingData.totalPriceTour) {
+            // Tính giá dựa trên số lượng khách (ví dụ)
+            const adultPrice = 5000000; // 5 triệu/người lớn
+            const childPrice = 3000000; // 3 triệu/trẻ em
+            const toddlerPrice = 1000000; // 1 triệu/trẻ nhỏ
+            const infantPrice = 0; // Em bé miễn phí
+
+            bookingData.totalPriceTour = 
+                (bookingData.adultsTour || 0) * adultPrice +
+                (bookingData.childrenTour || 0) * childPrice +
+                (bookingData.toddlerTour || 0) * toddlerPrice +
+                (bookingData.infantTour || 0) * infantPrice;
+        }
+
+        // Tạo booking mới
+        const booking = new TourBookingSchema(bookingData);
+        await booking.save();
+        
+        console.log('Booking đã được tạo:', booking._id);
+        console.log('Tổng giá tour:', booking.totalPriceTour);
+
+        // Cấu hình VNPay
         const vnpay = new VNPay({
             tmnCode: 'LH54Z11C',
             secureSecret: 'PO0WDG07TJOGP1P8SO6Z9PHVPIBUWBGQ',
@@ -18,66 +49,938 @@ Vnpay.get('/check-payment-vnpay', async (req, res) => {
             loggerFn: ignoreLogger,
         });
 
-        // Kiểm tra chữ ký hợp lệ từ VNPay
+        // Tạo URL thanh toán
+        const paymentUrl = await vnpay.buildPaymentUrl({
+            vnp_Amount: booking.totalPriceTour , // VNPay yêu cầu số tiền tính bằng xu
+            vnp_IpAddr: req.ip || '127.0.0.1',
+            vnp_TxnRef: `${booking._id}-${Date.now()}`,
+            vnp_OrderInfo: `Thanh toán tour #${booking._id}`,
+            vnp_OrderType: ProductCode.Other,
+            vnp_ReturnUrl: `http://localhost:8080/api/vnpay/payment-callback`,
+            vnp_Locale: VnpLocale.VN,
+            vnp_CreateDate: dateFormat(new Date()),
+            vnp_ExpireDate: dateFormat(new Date(Date.now() + 24 * 60 * 60 * 1000)), // 24 giờ
+        });
+
+        console.log('URL thanh toán đã tạo:', paymentUrl);
+
+        return res.status(200).json({
+            success: true,
+            paymentUrl,
+            bookingId: booking._id
+        });
+
+    } catch (error) {
+        console.error('Lỗi tạo thanh toán:', error);
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// Callback từ VNPay sau khi thanh toán
+Vnpay.get('/payment-callback', async (req, res) => {
+    try {
+        console.log('Nhận callback từ VNPay:', req.query);
+
+        // Cấu hình VNPay
+        const vnpay = new VNPay({
+            tmnCode: 'LH54Z11C',
+            secureSecret: 'PO0WDG07TJOGP1P8SO6Z9PHVPIBUWBGQ',
+            vnpayHost: 'https://sandbox.vnpayment.vn',
+            testMode: true,
+            hashAlgorithm: 'SHA512',
+            loggerFn: ignoreLogger,
+        });
+
+        // Kiểm tra chữ ký
         const isValid = vnpay.verifyReturnUrl(req.query);
         if (!isValid) {
-            return res.redirect('http://localhost:5173/payment-result?success=false&message=Invalid signature');
+            console.error('Chữ ký không hợp lệ');
+            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Invalid signature');
         }
 
-        const responseCode = req.query.vnp_ResponseCode; // Mã kết quả thanh toán
-        const txnRef = req.query.vnp_TxnRef; // bookingId + timestamp (ví dụ: bookingId-timestamp)
-        const bookingId = txnRef.split('-')[0]; // Lấy bookingId từ txnRef
+        const responseCode = req.query.vnp_ResponseCode;
+        const txnRef = req.query.vnp_TxnRef;
+        const bookingId = txnRef.split('-')[0];
 
-        // Lấy booking dựa trên bookingId từ TourBookingSchema
-        const booking = await TourBookingSchema.findById(bookingId)
-
-        if (!booking) {
-            return res.redirect('http://localhost:5173/payment-result?success=false&message=Booking not found');
-        }
+        console.log('Response Code:', responseCode);
+        console.log('Booking ID:', bookingId);
 
         if (responseCode === '00') {
-            // Thanh toán thành công, cập nhật trạng thái thanh toán
-            booking.payment_status = 'completed';
-            booking.payment_date = new Date();
-            await booking.save();
+            // Thanh toán thành công
+            console.log('Thanh toán thành công cho booking:', bookingId);
 
-            // Gửi email xác nhận nếu có email
-            if (booking.email) {
+            // Tìm booking và cập nhật trạng thái
+            const updatedBooking = await TourBookingSchema.findByIdAndUpdate(
+                    bookingId,
+                    {
+                        payment_status: 'completed',
+                    isFullyPaid: true,
+                    fullPaidAt: new Date(),
+                    },
+                    { new: true }
+                ).populate({
+                path: 'slotId',
+                select: 'dateTour tour',
+                            populate: {
+                    path: 'tour',
+                    select: 'nameTour',
+                },
+            });
+
+            if (!updatedBooking) {
+                console.error('Không tìm thấy booking:', bookingId);
+                return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Booking not found');
+            }
+
+            console.log('Booking đã được cập nhật:', updatedBooking._id);
+
+            // Gửi email xác nhận
+            if (updatedBooking.email) {
                 try {
-                    const totalPriceVN = booking.totalPriceTour.toLocaleString('vi-VN');
+                    const totalPriceVN = updatedBooking.totalPriceTour.toLocaleString('vi-VN');
+                    
+                    // Tạo nội dung email dựa trên loại thanh toán
+                    let emailSubject = 'Xác nhận thanh toán tour thành công';
+                    let paymentTypeText = 'thanh toán thành công';
+                    
+                    if (updatedBooking.paymentType === 'deposit') {
+                        emailSubject = 'Xác nhận đặt cọc tour thành công';
+                        paymentTypeText = 'đặt cọc thành công';
+                    } else if (updatedBooking.paymentType === 'remaining') {
+                        emailSubject = 'Xác nhận thanh toán số tiền còn lại thành công';
+                        paymentTypeText = 'thanh toán số tiền còn lại thành công';
+                    }
+                    
                     await sendMail({
-                        email: booking.email,
-                        subject: 'Xác nhận thanh toán tour thành công',
+                        email: updatedBooking.email,
+                        subject: emailSubject,
                         html: `
-              <p>Xin chào <strong>${booking.fullNameUser}</strong>,</p>
-              <p>Bạn đã <b>thanh toán thành công</b> cho tour <b>${booking.tourId?.nameTour || 'N/A'}</b>.</p>
-              <ul>
-                <li><strong>Mã đặt chỗ:</strong> ${bookingId}</li>
-                <li><strong>Tổng giá:</strong> ${totalPriceVN} VNĐ</li>
-                <li><strong>Phương thức thanh toán:</strong> VNPay</li>
-              </ul>
-              <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi!</p>
-            `,
+                            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                                <h2 style="color: #28a745;">${paymentTypeText.charAt(0).toUpperCase() + paymentTypeText.slice(1)}!</h2>
+                                <p>Xin chào <strong>${updatedBooking.fullNameUser}</strong>,</p>
+                                <p>Bạn đã <b>${paymentTypeText}</b> cho tour <b>${updatedBooking.slotId?.tour?.nameTour || 'N/A'}</b>.</p>
+                                
+                                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                                    <h3>Thông tin đặt chỗ:</h3>
+                                    <ul style="list-style: none; padding: 0;">
+                                        <li><strong>Mã đặt chỗ:</strong> ${bookingId}</li>
+                                        <li><strong>Ngày đi:</strong> ${updatedBooking.slotId?.dateTour || 'N/A'}</li>
+                                        <li><strong>Người lớn:</strong> ${updatedBooking.adultsTour} người</li>
+                                        <li><strong>Trẻ em:</strong> ${updatedBooking.childrenTour || 0} người</li>
+                                        <li><strong>Trẻ nhỏ:</strong> ${updatedBooking.toddlerTour || 0} người</li>
+                                        <li><strong>Em bé:</strong> ${updatedBooking.infantTour || 0} người</li>
+                                        <li><strong>Tổng giá:</strong> ${totalPriceVN} VNĐ</li>
+                                        <li><strong>Loại thanh toán:</strong> ${updatedBooking.paymentType || 'Không xác định'}</li>
+                                    </ul>
+                                </div>
+                                
+                                <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi!</p>
+                                <p>Nếu có thắc mắc, vui lòng liên hệ: <strong>support@example.com</strong></p>
+                            </div>
+                        `,
                     });
-                    console.log('Đã gửi email xác nhận tới', booking.email);
+                    
+                    console.log('Email xác nhận đã gửi tới:', updatedBooking.email);
                 } catch (mailErr) {
-                    console.error('Gửi email thất bại:', mailErr);
+                    console.error('Lỗi gửi email:', mailErr);
                 }
             }
 
-            return res.redirect(`http://localhost:5173/booking/${bookingId}?success=true`);
+            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=00&success=true');
+
         } else {
-            // Thanh toán thất bại, cập nhật trạng thái hủy
-            booking.payment_status = 'cancelled';
-            await booking.save();
+            // Thanh toán thất bại
+            console.log('Thanh toán thất bại cho booking:', bookingId);
+            
+            await TourBookingSchema.findByIdAndUpdate(
+                bookingId,
+                { payment_status: 'cancelled' }
+            );
 
-            // Nếu cần reset lại số ghế hoặc trạng thái slot, bạn có thể thêm logic ở đây
-
-            return res.redirect('http://localhost:5173/payment-result?success=false');
+            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Payment failed');
         }
+
     } catch (error) {
-        console.error('Lỗi xử lý trả về thanh toán VNPay:', error);
-        return res.redirect('http://localhost:5173/payment-result?success=false&message=Error');
+        console.error('Lỗi xử lý callback:', error);
+        return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=System error');
+    }
+});
+
+// Kiểm tra trạng thái booking
+Vnpay.get('/booking-status/:bookingId', async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        
+        const booking = await TourBookingSchema.findById(bookingId);
+        
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: 'Booking không tồn tại'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            booking: {
+                _id: booking._id,
+                payment_status: booking.payment_status,
+                isFullyPaid: booking.isFullyPaid,
+                fullPaidAt: booking.fullPaidAt,
+                payment_method: booking.payment_method,
+                totalPriceTour: booking.totalPriceTour,
+                fullNameUser: booking.fullNameUser,
+                email: booking.email,
+                adultsTour: booking.adultsTour,
+                childrenTour: booking.childrenTour,
+                toddlerTour: booking.toddlerTour,
+                infantTour: booking.infantTour
+            }
+        });
+
+    } catch (error) {
+        console.error('Lỗi kiểm tra trạng thái:', error);
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// Cập nhật thủ công trạng thái (chỉ để debug)
+Vnpay.put('/update-status/:bookingId', async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        const { payment_status, isFullyPaid } = req.body;
+
+        const updated = await TourBookingSchema.findByIdAndUpdate(
+            bookingId,
+            {
+                payment_status: payment_status || 'completed',
+                isFullyPaid: isFullyPaid !== undefined ? isFullyPaid : true,
+                fullPaidAt: new Date(),
+            },
+            { new: true }
+        );
+
+        if (!updated) {
+            return res.status(404).json({
+                success: false,
+                message: 'Booking không tồn tại'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Cập nhật thành công',
+            booking: {
+                _id: updated._id,
+                payment_status: updated.payment_status,
+                isFullyPaid: updated.isFullyPaid,
+                fullPaidAt: updated.fullPaidAt
+            }
+        });
+
+    } catch (error) {
+        console.error('Lỗi cập nhật trạng thái:', error);
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// Route để xử lý thanh toán trực tiếp từ frontend
+Vnpay.post('/process-payment', async (req, res) => {
+    try {
+        console.log('Body nhận được:', req.body);
+        
+        const bookingData = req.body;
+
+        if (!bookingData) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Thiếu dữ liệu booking' 
+            });
+        }
+
+        let existingBooking = null;
+        
+        // Nếu có bookingId, tìm booking hiện tại
+        if (bookingData.bookingId) {
+            existingBooking = await TourBookingSchema.findById(bookingData.bookingId);
+            if (!existingBooking) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Không tìm thấy booking'
+                });
+            }
+            console.log('Tìm thấy booking hiện tại:', existingBooking._id);
+        }
+
+        // Tính tổng giá nếu không có
+        if (!bookingData.totalPriceTour) {
+            // Tính giá dựa trên số lượng khách (ví dụ)
+            const adultPrice = 5000000; // 5 triệu/người lớn
+            const childPrice = 3000000; // 3 triệu/trẻ em
+            const toddlerPrice = 1000000; // 1 triệu/trẻ nhỏ
+            const infantPrice = 0; // Em bé miễn phí
+
+            bookingData.totalPriceTour = 
+                (bookingData.adultsTour || 0) * adultPrice +
+                (bookingData.childrenTour || 0) * childPrice +
+                (bookingData.toddlerTour || 0) * toddlerPrice +
+                (bookingData.infantTour || 0) * infantPrice;
+        }
+
+        // Sử dụng booking hiện tại hoặc tạo mới nếu cần
+        const bookingToUse = existingBooking || new TourBookingSchema({
+            ...bookingData,
+            payment_status: 'pending',
+            isFullyPaid: false,
+            createdAt: new Date()
+        });
+        
+        if (!existingBooking) {
+            await bookingToUse.save();
+            console.log('Booking mới đã được tạo:', bookingToUse._id);
+        }
+        
+        console.log('Tổng giá tour:', bookingData.totalPriceTour);
+        console.log('Loại thanh toán:', bookingData.paymentType);
+
+        // Cấu hình VNPay
+        const vnpay = new VNPay({
+            tmnCode: 'LH54Z11C',
+            secureSecret: 'PO0WDG07TJOGP1P8SO6Z9PHVPIBUWBGQ',
+            vnpayHost: 'https://sandbox.vnpayment.vn',
+            testMode: true,
+            hashAlgorithm: 'SHA512',
+            loggerFn: ignoreLogger,
+        });
+
+        // Tạo thông tin đơn hàng dựa trên loại thanh toán
+        let orderInfo = '';
+        if (bookingData.paymentType === 'deposit') {
+            orderInfo = `Đặt cọc tour #${bookingToUse._id}`;
+        } else if (bookingData.paymentType === 'full') {
+            orderInfo = `Thanh toán toàn bộ tour #${bookingToUse._id}`;
+        } else if (bookingData.paymentType === 'remaining') {
+            orderInfo = `Thanh toán số tiền còn lại tour #${bookingToUse._id}`;
+        } else {
+            orderInfo = `Thanh toán tour #${bookingToUse._id}`;
+        }
+
+        // Tạo URL thanh toán
+        const paymentUrl = await vnpay.buildPaymentUrl({
+            vnp_Amount: bookingData.totalPriceTour, // VNPay yêu cầu số tiền tính bằng xu
+            vnp_IpAddr: req.ip || '127.0.0.1',
+            vnp_TxnRef: `${bookingToUse._id}-${Date.now()}`,
+            vnp_OrderInfo: orderInfo,
+            vnp_OrderType: ProductCode.Other,
+            vnp_ReturnUrl: `http://localhost:8080/api/vnpay/payment-callback`,
+            vnp_Locale: VnpLocale.VN,
+            vnp_CreateDate: dateFormat(new Date()),
+            vnp_ExpireDate: dateFormat(new Date(Date.now() + 24 * 60 * 60 * 1000)), // 24 giờ
+        });
+
+        console.log('Generated VNPay URL:', paymentUrl);
+
+        return res.status(200).json({
+            success: true,
+            paymentUrl,
+            bookingId: bookingToUse._id,
+            paymentType: bookingData.paymentType,
+            amount: bookingData.totalPriceTour,
+            isExistingBooking: !!existingBooking
+        });
+
+    } catch (error) {
+        console.error('Lỗi tạo thanh toán:', error);
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// Route test callback
+Vnpay.get('/test-callback', async (req, res) => {
+    try {
+        console.log('Test callback được gọi với query:', req.query);
+        
+        const responseCode = req.query.vnp_ResponseCode;
+        const txnRef = req.query.vnp_TxnRef;
+        const bookingId = txnRef ? txnRef.split('-')[0] : null;
+        
+        console.log('Response Code:', responseCode);
+        console.log('Booking ID:', bookingId);
+        
+        if (responseCode === '00' && bookingId) {
+            const updatedBooking = await TourBookingSchema.findByIdAndUpdate(
+                bookingId,
+                {
+                    payment_status: 'completed',
+                    isFullyPaid: true,
+                    fullPaidAt: new Date(),
+                },
+                { new: true }
+            );
+            
+            console.log('Booking đã được cập nhật:', updatedBooking);
+        }
+        
+        return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=00&success=true');
+        
+    } catch (error) {
+        console.error('Lỗi test callback:', error);
+        return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Test error');
+    }
+});
+
+// Route để xử lý callback từ frontend (khi user quay lại từ VNPay)
+Vnpay.get('/frontend-callback', async (req, res) => {
+    try {
+        console.log('Frontend callback được gọi với query:', req.query);
+        
+        const responseCode = req.query.vnp_ResponseCode;
+        const txnRef = req.query.vnp_TxnRef;
+        const bookingId = txnRef ? txnRef.split('-')[0] : null;
+        
+        console.log('Response Code:', responseCode);
+        console.log('Booking ID:', bookingId);
+        
+        if (responseCode === '00' && bookingId) {
+            // Thanh toán thành công
+            const updatedBooking = await TourBookingSchema.findByIdAndUpdate(
+                bookingId,
+                {
+                    payment_status: 'completed',
+                    isFullyPaid: true,
+                    fullPaidAt: new Date(),
+                },
+                { new: true }
+            );
+            
+            if (updatedBooking) {
+                console.log('Booking đã được cập nhật thành công:', updatedBooking._id);
+                
+                // Gửi email xác nhận
+                if (updatedBooking.email) {
+                    try {
+                        const totalPriceVN = updatedBooking.totalPriceTour.toLocaleString('vi-VN');
+                        
+                        await sendMail({
+                            email: updatedBooking.email,
+                            subject: 'Xác nhận thanh toán tour thành công',
+                            html: `
+                                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                                    <h2 style="color: #28a745;">Thanh toán thành công!</h2>
+                                    <p>Xin chào <strong>${updatedBooking.fullNameUser}</strong>,</p>
+                                    <p>Bạn đã <b>thanh toán thành công</b> cho tour.</p>
+                                    
+                                    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                                        <h3>Thông tin đặt chỗ:</h3>
+                                        <ul style="list-style: none; padding: 0;">
+                          <li><strong>Mã đặt chỗ:</strong> ${bookingId}</li>
+                                            <li><strong>Người lớn:</strong> ${updatedBooking.adultsTour} người</li>
+                                            <li><strong>Trẻ em:</strong> ${updatedBooking.childrenTour || 0} người</li>
+                                            <li><strong>Trẻ nhỏ:</strong> ${updatedBooking.toddlerTour || 0} người</li>
+                                            <li><strong>Em bé:</strong> ${updatedBooking.infantTour || 0} người</li>
+                          <li><strong>Tổng giá:</strong> ${totalPriceVN} VNĐ</li>
+                        </ul>
+                                    </div>
+                                    
+                        <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi!</p>
+                                </div>
+                      `,
+                        });
+                        
+                        console.log('Email xác nhận đã gửi tới:', updatedBooking.email);
+                    } catch (mailErr) {
+                        console.error('Lỗi gửi email:', mailErr);
+                    }
+                }
+                
+                return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=00&success=true&bookingId=' + bookingId);
+            } else {
+                console.error('Không tìm thấy booking:', bookingId);
+                return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Booking not found');
+            }
+        } else {
+            // Thanh toán thất bại
+            if (bookingId) {
+                await TourBookingSchema.findByIdAndUpdate(
+                    bookingId,
+                    { payment_status: 'cancelled' }
+                );
+            }
+            
+            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Payment failed');
+        }
+        
+    } catch (error) {
+        console.error('Lỗi frontend callback:', error);
+        return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=System error');
+    }
+});
+
+// Route để test cập nhật trạng thái thủ công
+Vnpay.get('/manual-update/:bookingId', async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        
+        console.log('Manual update cho booking:', bookingId);
+        
+        const updatedBooking = await TourBookingSchema.findByIdAndUpdate(
+            bookingId,
+            {
+                payment_status: 'completed',
+                isFullyPaid: true,
+                fullPaidAt: new Date(),
+            },
+            { new: true }
+        );
+        
+        if (updatedBooking) {
+            console.log('Booking đã được cập nhật:', updatedBooking._id);
+            return res.json({
+                success: true,
+                message: 'Cập nhật thành công',
+                booking: {
+                    _id: updatedBooking._id,
+                    payment_status: updatedBooking.payment_status,
+                    isFullyPaid: updatedBooking.isFullyPaid,
+                    fullPaidAt: updatedBooking.fullPaidAt
+                }
+            });
+        } else {
+            return res.status(404).json({
+                success: false,
+                message: 'Booking không tồn tại'
+            });
+        }
+        
+    } catch (error) {
+        console.error('Lỗi manual update:', error);
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// Route để test callback với dữ liệu mẫu
+Vnpay.get('/test-payment-callback/:bookingId', async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        
+        console.log('Test payment callback cho booking:', bookingId);
+        
+        // Giả lập dữ liệu callback từ VNPay
+        const mockCallbackData = {
+            vnp_ResponseCode: '00',
+            vnp_TxnRef: `${bookingId}-${Date.now()}`,
+            vnp_Amount: '6699000000',
+            vnp_OrderInfo: `Thanh toán đầy đủ đơn #${bookingId}`,
+            vnp_TransactionNo: '12345678',
+            vnp_BankCode: 'NCB',
+            vnp_PayDate: '20250802101732',
+            vnp_SecureHash: 'test_hash'
+        };
+        
+        // Xử lý như callback thật
+        const responseCode = mockCallbackData.vnp_ResponseCode;
+        const txnRef = mockCallbackData.vnp_TxnRef;
+        const extractedBookingId = txnRef.split('-')[0];
+        
+        console.log('Response Code:', responseCode);
+        console.log('Booking ID:', extractedBookingId);
+        
+        if (responseCode === '00' && extractedBookingId) {
+            const updatedBooking = await TourBookingSchema.findByIdAndUpdate(
+                extractedBookingId,
+                {
+                    payment_status: 'completed',
+                    isFullyPaid: true,
+                    fullPaidAt: new Date(),
+                },
+                { new: true }
+            );
+            
+            if (updatedBooking) {
+                console.log('Booking đã được cập nhật thành công:', updatedBooking._id);
+                return res.json({
+                    success: true,
+                    message: 'Test callback thành công',
+                    booking: {
+                        _id: updatedBooking._id,
+                        payment_status: updatedBooking.payment_status,
+                        isFullyPaid: updatedBooking.isFullyPaid,
+                        fullPaidAt: updatedBooking.fullPaidAt
+                    }
+                });
+            } else {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Booking không tồn tại'
+                });
+            }
+        } else {
+            return res.status(400).json({
+                success: false,
+                message: 'Response code không hợp lệ'
+            });
+        }
+        
+    } catch (error) {
+        console.error('Lỗi test callback:', error);
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// Route để xử lý callback từ TourBookingController.js
+Vnpay.get('/payment-callback', async (req, res) => {
+    try {
+        console.log('Nhận callback từ VNPay (TourBookingController):', req.query);
+
+        // Cấu hình VNPay
+        const vnpay = new VNPay({
+            tmnCode: 'LH54Z11C',
+            secureSecret: 'PO0WDG07TJOGP1P8SO6Z9PHVPIBUWBGQ',
+            vnpayHost: 'https://sandbox.vnpayment.vn',
+            testMode: true,
+            hashAlgorithm: 'SHA512',
+            loggerFn: ignoreLogger,
+        });
+
+        // Kiểm tra chữ ký
+        const isValid = vnpay.verifyReturnUrl(req.query);
+        if (!isValid) {
+            console.error('Chữ ký không hợp lệ');
+            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Invalid signature');
+        }
+
+        const responseCode = req.query.vnp_ResponseCode;
+        const txnRef = req.query.vnp_TxnRef;
+        const bookingId = txnRef.split('-')[0];
+
+        console.log('Response Code:', responseCode);
+        console.log('Booking ID:', bookingId);
+
+        if (responseCode === '00') {
+            // Thanh toán thành công
+            console.log('Thanh toán thành công cho booking:', bookingId);
+
+            const updatedBooking = await TourBookingSchema.findByIdAndUpdate(
+                bookingId,
+                {
+                    payment_status: 'completed',
+                    isFullyPaid: true,
+                    fullPaidAt: new Date(),
+                },
+                { new: true }
+            ).populate({
+                path: 'slotId',
+                select: 'dateTour tour',
+                populate: {
+                    path: 'tour',
+                    select: 'nameTour',
+                },
+            });
+
+            if (!updatedBooking) {
+                console.error('Không tìm thấy booking:', bookingId);
+                return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Booking not found');
+            }
+
+            console.log('Booking đã được cập nhật:', updatedBooking._id);
+
+            // Gửi email xác nhận
+            if (updatedBooking.email) {
+                try {
+                    const totalPriceVN = updatedBooking.totalPriceTour.toLocaleString('vi-VN');
+                    
+                    // Tạo nội dung email dựa trên loại thanh toán
+                    let emailSubject = 'Xác nhận thanh toán tour thành công';
+                    let paymentTypeText = 'thanh toán thành công';
+                    
+                    if (updatedBooking.paymentType === 'deposit') {
+                        emailSubject = 'Xác nhận đặt cọc tour thành công';
+                        paymentTypeText = 'đặt cọc thành công';
+                    } else if (updatedBooking.paymentType === 'remaining') {
+                        emailSubject = 'Xác nhận thanh toán số tiền còn lại thành công';
+                        paymentTypeText = 'thanh toán số tiền còn lại thành công';
+                    }
+                    
+                    await sendMail({
+                        email: updatedBooking.email,
+                        subject: emailSubject,
+                        html: `
+                            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                                <h2 style="color: #28a745;">${paymentTypeText.charAt(0).toUpperCase() + paymentTypeText.slice(1)}!</h2>
+                                <p>Xin chào <strong>${updatedBooking.fullNameUser}</strong>,</p>
+                                <p>Bạn đã <b>${paymentTypeText}</b> cho tour <b>${updatedBooking.slotId?.tour?.nameTour || 'N/A'}</b>.</p>
+                                
+                                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                                    <h3>Thông tin đặt chỗ:</h3>
+                                    <ul style="list-style: none; padding: 0;">
+                                        <li><strong>Mã đặt chỗ:</strong> ${bookingId}</li>
+                                        <li><strong>Ngày đi:</strong> ${updatedBooking.slotId?.dateTour || 'N/A'}</li>
+                                        <li><strong>Người lớn:</strong> ${updatedBooking.adultsTour} người</li>
+                                        <li><strong>Trẻ em:</strong> ${updatedBooking.childrenTour || 0} người</li>
+                                        <li><strong>Trẻ nhỏ:</strong> ${updatedBooking.toddlerTour || 0} người</li>
+                                        <li><strong>Em bé:</strong> ${updatedBooking.infantTour || 0} người</li>
+                                        <li><strong>Tổng giá:</strong> ${totalPriceVN} VNĐ</li>
+                                        <li><strong>Loại thanh toán:</strong> ${updatedBooking.paymentType || 'Không xác định'}</li>
+                                    </ul>
+                                </div>
+                                
+                                <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi!</p>
+                                <p>Nếu có thắc mắc, vui lòng liên hệ: <strong>support@example.com</strong></p>
+                            </div>
+                        `,
+                    });
+                    
+                    console.log('Email xác nhận đã gửi tới:', updatedBooking.email);
+                } catch (mailErr) {
+                    console.error('Lỗi gửi email:', mailErr);
+                }
+            }
+
+            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=00&success=true');
+
+        } else {
+            // Thanh toán thất bại
+            console.log('Thanh toán thất bại cho booking:', bookingId);
+            
+            await TourBookingSchema.findByIdAndUpdate(
+                bookingId,
+                { payment_status: 'cancelled' }
+            );
+
+            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Payment failed');
+        }
+
+    } catch (error) {
+        console.error('Lỗi xử lý callback:', error);
+        return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=System error');
+    }
+});
+
+// Route xử lý hoàn tiền
+Vnpay.post('/process-refund', async (req, res) => {
+    try {
+        const { bookingId, refundReason, refundAmount, refundType } = req.body;
+        
+        console.log('Xử lý hoàn tiền cho booking:', bookingId);
+        
+        // Tìm booking
+        const booking = await TourBookingSchema.findById(bookingId);
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy booking'
+            });
+        }
+        
+        // Kiểm tra trạng thái booking
+        if (booking.payment_status !== 'completed') {
+            return res.status(400).json({
+                success: false,
+                message: 'Booking chưa thanh toán hoàn tất'
+            });
+        }
+        
+        // Kiểm tra xem booking có bị hủy không
+        if (!booking.cancel_status || booking.cancel_status !== 'approved') {
+            return res.status(400).json({
+                success: false,
+                message: 'Chỉ có thể hoàn tiền cho booking đã được hủy'
+            });
+        }
+        
+        // Tính toán số tiền hoàn
+        let refundAmountToProcess = refundAmount;
+        if (!refundAmountToProcess) {
+            // Tính theo chính sách hoàn tiền
+            const tourDate = new Date(booking.slotId?.dateTour);
+            const currentDate = new Date();
+            const daysUntilTour = Math.ceil((tourDate - currentDate) / (1000 * 60 * 60 * 24));
+            
+            if (refundType === 'customer_cancellation') {
+                if (daysUntilTour > 14) {
+                    refundAmountToProcess = booking.totalPriceTour; // 100%
+                } else if (daysUntilTour > 7) {
+                    refundAmountToProcess = booking.totalPriceTour * 0.7; // 70%
+                } else if (daysUntilTour > 0) {
+                    refundAmountToProcess = booking.totalPriceTour * 0.5; // 50%
+                } else {
+                    refundAmountToProcess = 0; // No-show
+                }
+            } else if (refundType === 'company_cancellation') {
+                refundAmountToProcess = booking.totalPriceTour; // 100%
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Chỉ hỗ trợ hoàn tiền khi khách hàng hủy hoặc công ty hủy'
+                });
+            }
+        }
+        
+        // Cấu hình VNPay
+        const vnpay = new VNPay({
+            tmnCode: 'LH54Z11C',
+            secureSecret: 'PO0WDG07TJOGP1P8SO6Z9PHVPIBUWBGQ',
+            vnpayHost: 'https://sandbox.vnpayment.vn',
+            testMode: true,
+            hashAlgorithm: 'SHA512',
+            loggerFn: ignoreLogger,
+        });
+        
+        // Tạo URL hoàn tiền VNPay
+        const refundUrl = await vnpay.buildRefundUrl({
+            vnp_Amount: refundAmountToProcess * 100, // VNPay yêu cầu số tiền tính bằng xu
+            vnp_IpAddr: req.ip || '127.0.0.1',
+            vnp_TxnRef: `${booking._id}-refund-${Date.now()}`,
+            vnp_OrderInfo: `Hoàn tiền tour #${booking._id} - ${refundReason}`,
+            vnp_TransactionType: '02', // Refund
+            vnp_CreateDate: dateFormat(new Date()),
+        });
+        
+        // Cập nhật trạng thái hoàn tiền
+        await TourBookingSchema.findByIdAndUpdate(bookingId, {
+            refund_status: 'processing',
+            refund_amount: refundAmountToProcess,
+            refund_method: 'bank_transfer',
+            refund_note: refundReason,
+            cancel_reason: refundReason,
+            cancel_status: 'approved',
+            cancelledAt: new Date()
+        });
+        
+        console.log('URL hoàn tiền đã tạo:', refundUrl);
+        
+        return res.status(200).json({
+            success: true,
+            refundUrl,
+            bookingId: booking._id,
+            refundAmount: refundAmountToProcess,
+            refundReason,
+            refundType
+        });
+        
+    } catch (error) {
+        console.error('Lỗi xử lý hoàn tiền:', error);
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// Route callback hoàn tiền
+Vnpay.get('/refund-callback', async (req, res) => {
+    try {
+        console.log('Nhận callback hoàn tiền từ VNPay:', req.query);
+        
+        const responseCode = req.query.vnp_ResponseCode;
+        const txnRef = req.query.vnp_TxnRef;
+        const bookingId = txnRef.split('-')[0];
+        
+        console.log('Response Code:', responseCode);
+        console.log('Booking ID:', bookingId);
+
+        if (responseCode === '00') {
+            // Hoàn tiền thành công
+            console.log('Hoàn tiền thành công cho booking:', bookingId);
+            
+            const updatedBooking = await TourBookingSchema.findByIdAndUpdate(
+                bookingId,
+                {
+                    refund_status: 'completed',
+                    refund_date: new Date(),
+                    payment_status: 'refunded'
+                },
+                { new: true }
+            ).populate({
+                path: 'slotId',
+                select: 'dateTour tour',
+                populate: {
+                    path: 'tour',
+                    select: 'nameTour',
+                },
+            });
+            
+            if (!updatedBooking) {
+                console.error('Không tìm thấy booking:', bookingId);
+                return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Booking not found');
+            }
+            
+            console.log('Booking đã được cập nhật hoàn tiền:', updatedBooking._id);
+            
+            // Gửi email thông báo hoàn tiền
+            if (updatedBooking.email) {
+                try {
+                    const refundAmountVN = updatedBooking.refund_amount.toLocaleString('vi-VN');
+                    
+                    await sendMail({
+                        email: updatedBooking.email,
+                        subject: 'Xác nhận hoàn tiền tour',
+                        html: `
+                            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                                <h2 style="color: #28a745;">Hoàn tiền thành công!</h2>
+                                <p>Xin chào <strong>${updatedBooking.fullNameUser}</strong>,</p>
+                                <p>Chúng tôi đã <b>hoàn tiền thành công</b> cho tour <b>${updatedBooking.slotId?.tour?.nameTour || 'N/A'}</b>.</p>
+                                
+                                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                                    <h3>Thông tin hoàn tiền:</h3>
+                                    <ul style="list-style: none; padding: 0;">
+                <li><strong>Mã đặt chỗ:</strong> ${bookingId}</li>
+                                        <li><strong>Số tiền hoàn:</strong> ${refundAmountVN} VNĐ</li>
+                                        <li><strong>Lý do hoàn tiền:</strong> ${updatedBooking.refund_note || 'N/A'}</li>
+                                        <li><strong>Ngày hoàn tiền:</strong> ${new Date().toLocaleDateString('vi-VN')}</li>
+              </ul>
+                                </div>
+                                
+                                <p>Tiền sẽ được chuyển về tài khoản của bạn trong 3-5 ngày làm việc.</p>
+                                <p>Nếu có thắc mắc, vui lòng liên hệ: <strong>support@example.com</strong></p>
+                            </div>
+            `,
+                    });
+                    
+                    console.log('Email thông báo hoàn tiền đã gửi tới:', updatedBooking.email);
+                } catch (mailErr) {
+                    console.error('Lỗi gửi email hoàn tiền:', mailErr);
+                }
+            }
+
+            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=00&success=true&type=refund');
+            
+        } else {
+            // Hoàn tiền thất bại
+            console.log('Hoàn tiền thất bại cho booking:', bookingId);
+            
+            await TourBookingSchema.findByIdAndUpdate(
+                bookingId,
+                { 
+                    refund_status: 'pending',
+                    cancel_status: 'pending'
+                }
+            );
+            
+            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Refund failed');
+        }
+        
+    } catch (error) {
+        console.error('Lỗi xử lý callback hoàn tiền:', error);
+        return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=System error');
     }
 });
 

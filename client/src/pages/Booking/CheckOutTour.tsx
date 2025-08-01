@@ -15,6 +15,7 @@ const CheckOutTour = () => {
     queryFn: () => instanceClient.get(`bookingTour/${id}`)
   });
   console.log(data?.data?.booking);
+  console.log('Booking object structure:', JSON.stringify(data?.data?.booking, null, 2));
   const booking = data?.data?.booking;
   const paymentInfo = data?.data?.paymentInfo;
   
@@ -28,16 +29,108 @@ const CheckOutTour = () => {
     try {
       setIsProcessingPayment(true);
       
-      const response = await instanceClient.post('/bookingTour/vnpay-payment', {
-        bookingId: id,
-        amount: amount,
-        paymentType: paymentType,
-        returnUrl: `${window.location.origin}/payment-result`
-      });
+      // Kiểm tra và lấy userId
+      let userId = null;
+      
+      // Thử lấy từ booking object trước
+      if (booking?.userId?._id) {
+        userId = booking.userId._id;
+      } else if (booking?.userId && booking.userId !== null) {
+        userId = booking.userId;
+      } else if (bookingData?.userId) {
+        userId = bookingData.userId;
+      } else {
+        // Thử lấy từ localStorage với error handling
+        try {
+          const userFromStorage = localStorage.getItem('user');
+          if (userFromStorage) {
+            const user = JSON.parse(userFromStorage);
+            userId = user._id || user.id;
+          }
+        } catch (parseError) {
+          console.error('Lỗi parse user từ localStorage:', parseError);
+        }
+        
+        // Thử lấy từ sessionStorage
+        if (!userId) {
+          try {
+            const userFromSession = sessionStorage.getItem('user');
+            if (userFromSession) {
+              const user = JSON.parse(userFromSession);
+              userId = user._id || user.id;
+            }
+          } catch (parseError) {
+            console.error('Lỗi parse user từ sessionStorage:', parseError);
+          }
+        }
+        
+        // Thử lấy từ Clerk localStorage
+        if (!userId) {
+          const clerkUserId = localStorage.getItem('userId');
+          if (clerkUserId) {
+            userId = clerkUserId;
+          }
+        }
+        
+        // Thử lấy từ URL params
+        if (!userId) {
+          const urlParams = new URLSearchParams(window.location.search);
+          userId = urlParams.get('userId');
+        }
+        
+        // Thử lấy từ auth token
+        if (!userId) {
+          try {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            if (token) {
+              // Decode JWT token để lấy userId (nếu có)
+              const payload = JSON.parse(atob(token.split('.')[1]));
+              userId = payload.userId || payload.id;
+            }
+          } catch (error) {
+            console.error('Lỗi decode token:', error);
+          }
+        }
+      }
+      
+      if (!userId) {
+        throw new Error('Không tìm thấy userId. Vui lòng đăng nhập lại.');
+      }
+      
+      console.log('UserId được sử dụng:', userId);
+      
+      // Sử dụng booking hiện tại thay vì tạo mới
+      const existingBookingData = {
+        bookingId: booking?._id, // ID của booking hiện tại
+        userId: userId,
+        slotId: booking?.slotId?._id || booking?.slotId,
+        fullNameUser: booking?.fullNameUser,
+        phone: booking?.phone,
+        email: booking?.email,
+        adultPassengers: booking?.adultPassengers || [],
+        payment_method: 'bank_transfer',
+        isFullPayment: paymentType === 'full',
+        adultsTour: booking?.adultsTour || 0,
+        childrenTour: booking?.childrenTour || 0,
+        toddlerTour: booking?.toddlerTour || 0,
+        infantTour: booking?.infantTour || 0,
+        childPassengers: booking?.childPassengers || [],
+        toddlerPassengers: booking?.toddlerPassengers || [],
+        infantPassengers: booking?.infantPassengers || [],
+        totalPriceTour: amount, // Sử dụng amount được truyền vào
+        paymentType: paymentType // Thêm loại thanh toán
+      };
+      
+      console.log('Gửi dữ liệu thanh toán cho booking hiện tại:', existingBookingData);
+      
+      const response = await instanceClient.post('/vnpay/process-payment', existingBookingData);
       
       if (response.data.paymentUrl) {
+        console.log('Chuyển hướng đến VNPay:', response.data.paymentUrl);
         // Chuyen huong den VNPay
         window.location.href = response.data.paymentUrl;
+      } else {
+        throw new Error('Không nhận được URL thanh toán');
       }
     } catch (error) {
       console.error('Loi khi tao thanh toan VNPay:', error);
@@ -62,6 +155,36 @@ const CheckOutTour = () => {
   const handleCompletePaymentAction = () => {
     const remaining = remainingAmount || (booking?.totalPriceTour - (booking?.depositAmount || 0));
     handleVNPayPayment(remaining, 'remaining');
+  };
+
+  // Xu ly hoan tien
+  const handleRefund = async (refundType: 'customer_cancellation' | 'company_cancellation' | 'technical_error', refundReason: string) => {
+    try {
+      setIsProcessingPayment(true);
+      
+      const refundData = {
+        bookingId: booking?._id,
+        refundType,
+        refundReason,
+        refundAmount: null // Để backend tính toán theo chính sách
+      };
+      
+      console.log('Gửi yêu cầu hoàn tiền:', refundData);
+      
+      const response = await instanceClient.post('/vnpay/process-refund', refundData);
+      
+      if (response.data.refundUrl) {
+        console.log('Chuyển hướng đến VNPay hoàn tiền:', response.data.refundUrl);
+        window.location.href = response.data.refundUrl;
+      } else {
+        throw new Error('Không nhận được URL hoàn tiền');
+      }
+    } catch (error) {
+      console.error('Lỗi khi xử lý hoàn tiền:', error);
+      alert('Có lỗi xảy ra khi xử lý hoàn tiền. Vui lòng thử lại.');
+    } finally {
+      setIsProcessingPayment(false);
+    }
   };
   
   const getPaymentStatusLabel = (status: string) => {
@@ -338,6 +461,11 @@ const CheckOutTour = () => {
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                     Da thanh toan day du
+                  </div>
+                  
+                  <div className="mt-4 text-sm text-gray-600">
+                    <p>Tour đã được thanh toán hoàn tất.</p>
+                    <p>Nếu cần hủy tour, vui lòng liên hệ admin.</p>
                   </div>
                 </div>
               )}
