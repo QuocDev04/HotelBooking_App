@@ -1,14 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Table, Select, Tag, Button, Popconfirm, message } from "antd";
+import { Table, Select, Tag, Button, Popconfirm, message, DatePicker, Space, Typography } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import instance from "../../configs/axios";
 import dayjs from "dayjs";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined, FilterOutlined } from "@ant-design/icons";
+
+const { RangePicker } = DatePicker;
+const { Text } = Typography;
 
 const ListTime = () => {
     const [selectedTour, setSelectedTour] = useState<string | undefined>(undefined);
+    const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null] | null>(null);
+    const [filteredSlots, setFilteredSlots] = useState<any[]>([]);
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const [messageApi, contextHolder] = message.useMessage();
@@ -20,17 +25,42 @@ const ListTime = () => {
     });
     const tours = tourData?.data?.tours || [];
 
-    // Fetch slots for selected tour
+    // Fetch all slots if no tour is selected, or slots for selected tour
     const { data: slotData, isLoading: isSlotLoading } = useQuery({
         queryKey: ["slots", selectedTour],
         queryFn: async () => {
-            if (!selectedTour) return [];
+            if (!selectedTour) {
+                // Fetch all slots from all tours
+                const res = await instance.get(`/status/all`);
+                return res.data.data || [];
+            }
             const res = await instance.get(`/date/tour/${selectedTour}`);
             return res.data.data || [];
         },
-        enabled: !!selectedTour,
+        // Always enabled, even without selectedTour
+        enabled: true,
     });
-    const slots = slotData || [];
+    
+    // Apply date range filter
+    const applyFilters = () => {
+        let filtered = slotData || [];
+        
+        // Apply date range filter if set
+        if (dateRange && dateRange[0] && dateRange[1]) {
+            const startDate = dateRange[0].startOf('day');
+            const endDate = dateRange[1].endOf('day');
+            
+            filtered = filtered.filter((slot: any) => {
+                const slotDate = dayjs(slot.dateTour);
+                return slotDate.isAfter(startDate) && slotDate.isBefore(endDate);
+            });
+        }
+        
+        return filtered;
+    };
+    
+    // Update filtered slots whenever data or filters change
+    const slots = applyFilters();
 
     // Delete slot mutation
     const { mutate: deleteSlot, isPending: isDeleting } = useMutation({
@@ -49,10 +79,57 @@ const ListTime = () => {
     // Table columns
     const columns = [
         {
+            title: "Tên Tour",
+            dataIndex: ["tour", "nameTour"],
+            key: "tourName",
+            render: (_: string, record: any) => (
+                <span>{record.tour?.nameTour || "N/A"}</span>
+            ),
+        },
+        {
+            title: "Điểm đến",
+            key: "destination",
+            render: (_: any, record: any) => (
+                <span>
+                    {record.tour?.destination?.locationName || "N/A"} - {record.tour?.destination?.country || "N/A"}
+                </span>
+            ),
+        },
+        {
             title: "Ngày diễn ra",
             dataIndex: "dateTour",
             key: "dateTour",
+            sorter: (a: any, b: any) => dayjs(a.dateTour).unix() - dayjs(b.dateTour).unix(),
             render: (date: string) => dayjs(date).format("YYYY-MM-DD"),
+        },
+        {
+            title: "Trạng thái",
+            dataIndex: "status",
+            key: "status",
+            render: (status: string) => {
+                let color = "";
+                let text = "";
+                
+                switch(status) {
+                    case "upcoming":
+                        color = "green";
+                        text = "Sắp diễn ra";
+                        break;
+                    case "ongoing":
+                        color = "blue";
+                        text = "Đang diễn ra";
+                        break;
+                    case "completed":
+                        color = "gray";
+                        text = "Đã hoàn thành";
+                        break;
+                    default:
+                        color = "default";
+                        text = status || "N/A";
+                }
+                
+                return <Tag color={color}>{text}</Tag>;
+            },
         },
         {
             title: "Số chỗ còn lại",
@@ -103,30 +180,61 @@ const ListTime = () => {
 
     return (
         <div className="min-h-screen p-6">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-6xl mx-auto">
                 <h1 className="text-3xl font-bold text-blue-600 mb-6">📅 Danh Sách Ngày & Số Chỗ Tour</h1>
                 {contextHolder}
-                <div className="mb-6">
-                    <Select
-                        showSearch
-                        placeholder="Chọn tour để xem ngày & số chỗ"
-                        loading={isTourLoading}
-                        options={tourOptions}
-                        value={selectedTour}
-                        onChange={setSelectedTour}
-                        style={{ width: 400 }}
-                        size="large"
-                        filterOption={(input, option) =>
-                            (option?.label as string).toLowerCase().includes(input.toLowerCase())
-                        }
-                    />
+                
+                <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
+                    <div className="flex flex-wrap items-center gap-4 mb-4">
+                        <div className="flex-1">
+                            <Text strong>Lọc theo Tour:</Text>
+                            <Select
+                                showSearch
+                                placeholder="Tất cả tour"
+                                loading={isTourLoading}
+                                options={[{ label: "Tất cả tour", value: "" }, ...tourOptions]}
+                                value={selectedTour}
+                                onChange={setSelectedTour}
+                                style={{ width: '100%' }}
+                                size="large"
+                                allowClear
+                                filterOption={(input, option) =>
+                                    (option?.label as string).toLowerCase().includes(input.toLowerCase())
+                                }
+                            />
+                        </div>
+                        
+                        <div className="flex-1">
+                            <Text strong>Lọc theo ngày:</Text>
+                            <RangePicker 
+                                size="large"
+                                style={{ width: '100%' }}
+                                onChange={(dates) => setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs])}
+                                allowClear
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                        <Text type="secondary">
+                            <FilterOutlined /> Hiển thị {slots.length} kết quả
+                        </Text>
+                        <Button 
+                            type="primary" 
+                            onClick={() => navigate('/admin/add-time-tour')}
+                        >
+                            Thêm ngày & số chỗ mới
+                        </Button>
+                    </div>
                 </div>
+                
                 <Table
                     columns={columns}
                     dataSource={slots.map((slot: any) => ({ ...slot, key: String(slot._id) }))}
                     loading={isSlotLoading}
                     pagination={{ pageSize: 10 }}
-                    locale={{ emptyText: selectedTour ? "Không có slot nào cho tour này." : "Vui lòng chọn tour." }}
+                    locale={{ emptyText: "Không có dữ liệu phù hợp với bộ lọc." }}
+                    scroll={{ x: 1000 }}
                 />
             </div>
         </div>

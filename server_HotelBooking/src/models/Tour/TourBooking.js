@@ -78,6 +78,28 @@ const TourBookingSchema = new mongoose.Schema({
     cancel_status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
     refund_amount: { type: Number, default: 0 },
     cancel_policy_note: { type: String },
+    // Trạng thái hoàn tiền: pending (đang chờ), processing (đang xử lý), completed (đã hoàn tiền)
+    refund_status: {
+        type: String,
+        enum: ['pending', 'processing', 'completed', null],
+        default: null
+    },
+    // Ngày hoàn tiền
+    refund_date: {
+        type: Date,
+        default: null
+    },
+    // Phương thức hoàn tiền
+    refund_method: {
+        type: String,
+        enum: ['cash', 'bank_transfer', null],
+        default: null
+    },
+    // Ghi chú hoàn tiền
+    refund_note: {
+        type: String,
+        default: null
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model('BookingTour', TourBookingSchema);

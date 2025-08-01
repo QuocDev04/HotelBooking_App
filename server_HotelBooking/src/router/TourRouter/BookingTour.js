@@ -10,7 +10,10 @@ const {
     getBookingStats,
     confirmCashPayment,
     confirmFullPayment,
-    getAccurateRevenue
+    getAccurateRevenue,
+    getRefundList,
+    updateRefundStatus,
+    getRefundStats
 } = require('./../../controller/TourController/TourBookingController.js');
 const { uploadPaymentImage } = require('../../Middleware/uploadMiddleware');
 const RouterBookingTour = express.Router();
@@ -28,6 +31,11 @@ RouterBookingTour.get('/admin/bookings/stats', getBookingStats)
 RouterBookingTour.get('/admin/bookings/revenue', getAccurateRevenue)
 RouterBookingTour.put('/admin/bookings/cancel/:id', adminConfirmCancelBooking)
 RouterBookingTour.put('/admin/bookings/confirm-payment/:id', uploadPaymentImage, confirmCashPayment)
+
+// Quản lý hoàn tiền
+RouterBookingTour.get('/admin/refunds', getRefundList)
+RouterBookingTour.get('/admin/refunds/stats', getRefundStats)
+RouterBookingTour.put('/admin/refunds/:bookingId', updateRefundStatus)
 RouterBookingTour.put('/admin/bookings/confirm-full-payment/:id', uploadPaymentImage, confirmFullPayment)
 
 module.exports = RouterBookingTour

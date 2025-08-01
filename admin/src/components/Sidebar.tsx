@@ -40,6 +40,17 @@ const Sidebar = () => {
             icon: '📋',
             children: [
                 { name: 'Danh sách đặt chỗ', path: '/admin/list-booking', icon: '📊' },
+                { name: 'Quản lý hoàn tiền', path: '/admin/refund-management', icon: '💰' },
+            ],
+        },
+        {
+            name: 'Thống kê Tour',
+            icon: '📈',
+            children: [
+                { name: 'Thống kê tổng quan', path: '/admin/tour-stats', icon: '📊' },
+                { name: 'Tour sắp diễn ra', path: '/admin/tour-status/upcoming', icon: '🔜' },
+                { name: 'Tour đang diễn ra', path: '/admin/tour-status/ongoing', icon: '🔄' },
+                { name: 'Tour đã hoàn thành', path: '/admin/tour-status/completed', icon: '✅' },
             ],
         },
         {
