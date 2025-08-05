@@ -30,6 +30,9 @@ import EditTimeTour from "../pages/TimeTour/EditTimeTour"
 import TourStatusList from "../pages/Tour/TourStatusList"
 import RefundManagement from "../pages/Tour/RefundManagement"
 import TourParticipants from "../pages/Tour/TourParticipants"
+import CustomerAccounts from "../pages/Account/CustomerAccounts"
+import EmployeeAccounts from "../pages/Account/EmployeeAccounts"
+import EmployeeAssignment from "../pages/Account/EmployeeAssignment"
 
 
 
@@ -90,6 +93,10 @@ const Router = () => {
                     <Route path="/admin/list-time" element={<ListTime />} />
                     <Route path="/admin/add-timetour" element={<AddTimeTour />} />
                     <Route path="/admin/edit-time-tour/:id" element={<EditTimeTour />} />
+
+                    <Route path="/admin/customer-accounts" element={<CustomerAccounts />} />
+                    <Route path="/admin/employee-accounts" element={<EmployeeAccounts />} />
+                    <Route path="/admin/employee-assignment" element={<EmployeeAssignment />} />
                 </Route>
             </Routes>
         </>
