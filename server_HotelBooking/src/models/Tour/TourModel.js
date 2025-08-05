@@ -26,6 +26,7 @@ const TourModel = new mongoose.Schema({
     priceLittleBaby: { type: Number, required: true },
     pricebaby: { type: Number, default: 0 },
     singleRoom: { type: Boolean },
-    priceSingleRoom: { type: Number, required: true }
+    priceSingleRoom: { type: Number, required: true },
+    assignedEmployee: { type: mongoose.Schema.Types.ObjectId, ref: "Admin", default: null }
 }, { timestamps: true })
 module.exports = mongoose.model("Tour", TourModel)

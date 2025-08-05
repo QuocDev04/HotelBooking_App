@@ -9,6 +9,7 @@ const getAllTours = async (req, res) => {
         const tour = await TourModel.find()
         .populate("itemTransport.TransportId", "transportName transportNumber transportType")
             .populate("destination", "locationName country")
+            .populate("assignedEmployee", "name email firstName lastName full_name")
         return res.status(StatusCodes.OK).json({
             success: true,
             message: "Get all tours successfully",
@@ -171,4 +172,38 @@ const TourTopSelling = async (req, res) => {
     }
 }
 
-module.exports = { getAllTours, AddTour, DeleteTour, UpdateTour, GetTourById, TourFeatured, TourTopSelling };
+const assignEmployeeToTour = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { employeeId } = req.body;
+
+        // Kiểm tra tour có tồn tại không
+        const tour = await TourModel.findById(id);
+        if (!tour) {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                success: false,
+                message: "Tour không tồn tại"
+            });
+        }
+
+        // Cập nhật phân công nhân viên
+        const updatedTour = await TourModel.findByIdAndUpdate(
+            id,
+            { assignedEmployee: employeeId },
+            { new: true }
+        ).populate('assignedEmployee', 'name email');
+
+        return res.status(StatusCodes.OK).json({
+            success: true,
+            message: "Phân công nhân viên thành công",
+            tour: updatedTour
+        });
+    } catch (error) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+module.exports = { getAllTours, AddTour, DeleteTour, UpdateTour, GetTourById, TourFeatured, TourTopSelling, assignEmployeeToTour };
