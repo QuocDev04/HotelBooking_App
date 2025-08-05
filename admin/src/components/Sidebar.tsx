@@ -85,6 +85,7 @@ const Sidebar = () => {
                 { name: 'Thêm Khách Sạn', path: '/admin/add-room', icon: '✍️' },
             ],
         },
+        {
             name: 'Quản lý Tài Khoản',
             icon: '👥',
             children: [
@@ -92,7 +93,7 @@ const Sidebar = () => {
                 { name: 'Tài khoản Nhân viên', path: '/admin/employee-accounts', icon: '👨‍💼' },
                 { name: 'Phân công Nhân viên', path: '/admin/employee-assignment', icon: '📋' },
             ],
-        }
+        },
     ];
 
     return (
