@@ -76,6 +76,15 @@ const Sidebar = () => {
                 { name: 'Thêm Thời Gian Tour', path: '/admin/add-timetour', icon: '✍️' },
             ],
         },
+        {
+            name: 'Quản lý Khách Sạn',
+            icon: '⏱️',
+            children: [
+                {
+                    name: 'Danh sách Khách Sạn', path: '/admin/list-room', icon: '📋' },
+                { name: 'Thêm Khách Sạn', path: '/admin/add-room', icon: '✍️' },
+            ],
+        }
     ];
 
     return (
