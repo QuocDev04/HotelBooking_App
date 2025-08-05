@@ -58,7 +58,7 @@ const EmployeeAssignment: React.FC = () => {
       setLoading(true);
       const token = await getToken();
       
-      // Fetch tours
+      // Fetch tours with populated assignedEmployee
       const toursResponse = await fetch('http://localhost:8080/api/tour', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -118,11 +118,23 @@ const EmployeeAssignment: React.FC = () => {
       
       const token = await getToken();
       
-      // Giả lập API call để lưu phân công
-      // Trong thực tế, bạn cần tạo API endpoint để lưu thông tin phân công
-      console.log(`Assigning tour ${tourId} to admin ${adminId}`);
+      // Gọi API để lưu phân công
+      const response = await fetch(`http://localhost:8080/api/tour/${tourId}/assign-employee`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ employeeId: adminId })
+      });
       
-      // Cập nhật local state
+      if (!response.ok) {
+        throw new Error('Failed to assign employee');
+      }
+      
+      const result = await response.json();
+      
+      // Cập nhật local state với dữ liệu từ server
       setTours(prev => prev.map(tour => 
         tour._id === tourId 
           ? { ...tour, assignedEmployee: admins.find(admin => admin._id === adminId) }
@@ -138,6 +150,7 @@ const EmployeeAssignment: React.FC = () => {
       
       alert('Phân công thành công!');
     } catch (err) {
+      console.error('Error assigning employee:', err);
       alert('Có lỗi xảy ra khi phân công!');
     }
   };
