@@ -8,12 +8,18 @@ import Content from './Content/Content';
 import RightTourDetail from './Right/RightTourDetail';
 import Schedule from './Content/Schedule';
 import Evaluate from './Content/Evaluate';
+import Clause from './Content/Clause'; // Thêm dòng này ở đầu file
 import { useEffect, useRef, useState } from 'react';
 
 const TourPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
+  const overviewRef = useRef<HTMLDivElement>(null);
+  const scheduleRef = useRef<HTMLDivElement>(null);
+  const termsRef = useRef<HTMLDivElement>(null);
+  const evaluateRef = useRef<HTMLDivElement>(null);
+
   const { id } = useParams<{ id: string }>();
 
   // Hàm scroll
@@ -70,6 +76,17 @@ const TourPage = () => {
       console.log("Matching slot after selection:", matchingSlot);
     }
   };
+
+  const handleTabClick = (tab: string) => {
+    setActiveTab(tab);
+    let ref: React.RefObject<HTMLDivElement> | null = null;
+    if (tab === 'overview') ref = overviewRef;
+    if (tab === 'lichtrinh') ref = scheduleRef;
+    if (tab === 'dieukhoan') ref = termsRef;
+    if (tab === 'danhgia') ref = evaluateRef;
+    ref?.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
     <>
       <div className="max-w-screen-xl p-4 mx-auto font-sans mt-20">
@@ -127,21 +144,38 @@ const TourPage = () => {
               setSelectedDate={handleDateSelect}
             />
             <div className="mt-8">
-              <div className="flex border-b">
+              <div className="flex border-b gap-6">
                 <button
-                  className={`px-4 py-2 font-medium ${activeTab === 'overview' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
-                  onClick={() => setActiveTab('overview')}
+                  className={`pb-2 font-semibold text-[16px] transition ${activeTab === 'overview' ? 'text-black border-b-2 border-blue-500' : 'text-gray-500 border-b-2 border-transparent hover:text-black'}`}
+                  onClick={() => handleTabClick('overview')}
                 >
-                  Tổng quan
+                  Giới thiệu
+                </button>
+                <button
+                  className={`pb-2 font-semibold text-[16px] transition ${activeTab === 'lichtrinh' ? 'text-black border-b-2 border-blue-500' : 'text-gray-500 border-b-2 border-transparent hover:text-black'}`}
+                  onClick={() => handleTabClick('lichtrinh')}
+                >
+                  Lịch trình
+                </button>
+                <button
+                  className={`pb-2 font-semibold text-[16px] transition ${activeTab === 'dieukhoan' ? 'text-black border-b-2 border-blue-500' : 'text-gray-500 border-b-2 border-transparent hover:text-black'}`}
+                  onClick={() => handleTabClick('dieukhoan')}
+                >
+                  Bao gồm và điều khoản
+                </button>
+                <button
+                  className={`pb-2 font-semibold text-[16px] transition ${activeTab === 'danhgia' ? 'text-black border-b-2 border-blue-500' : 'text-gray-500 border-b-2 border-transparent hover:text-black'}`}
+                  onClick={() => handleTabClick('danhgia')}
+                >
+                  Đánh giá tour
                 </button>
               </div>
-              {activeTab === 'overview' && (
-                <div className="mt-6">
-                  <Content />
-                  <Schedule />
-                  <Evaluate />
-                </div>
-              )}
+              <div className="mt-6 space-y-10">
+                <div ref={overviewRef}><Content /></div>
+                <div ref={scheduleRef}><Schedule /></div>
+                <div ref={termsRef}><Clause /></div> {/* Thay thế dòng này */}
+                <div ref={evaluateRef}><Evaluate /></div>
+              </div>
             </div>
           </div>
 

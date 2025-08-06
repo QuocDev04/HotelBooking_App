@@ -560,6 +560,66 @@ const AddTour = () => {
                 </Form.Item>
               </Col>
             </Row>
+
+            <Form.List name="priceTable">
+  {(fields, { add, remove }) => (
+    <>
+      <label className="font-semibold">Bảng giá tour</label>
+      {fields.map(({ key, name, ...restField }) => (
+        <div key={key} className="flex gap-2 mb-2">
+          <Form.Item {...restField} name={[name, "date"]} rules={[{ required: true, message: "Ngày khởi hành" }]}>
+            <Input placeholder="Ngày khởi hành" />
+          </Form.Item>
+          <Form.Item {...restField} name={[name, "roomType"]} rules={[{ required: true, message: "Loại phòng" }]}>
+            <Input placeholder="Số lượng khách/phòng" />
+          </Form.Item>
+          <Form.Item {...restField} name={[name, "price"]} rules={[{ required: true, message: "Giá người lớn" }]}>
+            <Input placeholder="Giá người lớn" />
+          </Form.Item>
+          <Button danger onClick={() => remove(name)}>Xóa</Button>
+        </div>
+      ))}
+      <Button type="dashed" onClick={() => add()} block>Thêm dòng giá</Button>
+    </>
+  )}
+</Form.List>
+
+<Form.List name="promotions">
+  {(fields, { add, remove }) => (
+    <>
+      <label className="font-semibold mt-4">Khuyến mãi</label>
+      {fields.map(({ key, name, ...restField }) => (
+        <div key={key} className="flex gap-2 mb-2">
+          <Form.Item {...restField} name={[name, "title"]} rules={[{ required: true, message: "Tiêu đề" }]}>
+            <Input placeholder="Tiêu đề khuyến mãi" />
+          </Form.Item>
+          <Form.Item {...restField} name={[name, "detail"]} rules={[{ required: true, message: "Chi tiết" }]}>
+            <Input placeholder="Chi tiết khuyến mãi" />
+          </Form.Item>
+          <Button danger onClick={() => remove(name)}>Xóa</Button>
+        </div>
+      ))}
+      <Button type="dashed" onClick={() => add()} block>Thêm khuyến mãi</Button>
+    </>
+  )}
+</Form.List>
+
+<Form.List name="highlights">
+  {(fields, { add, remove }) => (
+    <>
+      <label className="font-semibold mt-4">Điểm nổi bật</label>
+      {fields.map(({ key, name, ...restField }) => (
+        <div key={key} className="flex gap-2 mb-2">
+          <Form.Item {...restField} name={name} rules={[{ required: true, message: "Điểm nổi bật" }]}>
+            <Input placeholder="Điểm nổi bật" />
+          </Form.Item>
+          <Button danger onClick={() => remove(name)}>Xóa</Button>
+        </div>
+      ))}
+      <Button type="dashed" onClick={() => add()} block>Thêm điểm nổi bật</Button>
+    </>
+  )}
+</Form.List>
           </Form>
         </div>
       </div>
