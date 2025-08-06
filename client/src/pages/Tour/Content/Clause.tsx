@@ -121,20 +121,20 @@ const Clause = () => {
 
     return (
         <section className="mt-10">
-            <h2 className="text-2xl font-bold mb-6">Bao gồm và điều khoản</h2>
+            <h2 className="text-2xl font-bold mb-6 text-blue-700">Bao gồm và điều khoản</h2>
             <div className="space-y-4">
                 {clauses.map((item, idx) => (
-                    <div key={idx} className="bg-white border rounded-lg">
+                    <div key={idx} className="bg-white border rounded-xl shadow">
                         <button
-                            className="flex items-center w-full px-6 py-5 text-left focus:outline-none"
+                            className="flex items-center w-full px-6 py-5 text-left focus:outline-none hover:bg-blue-50 transition rounded-t-xl"
                             onClick={() => handleToggle(idx)}
                         >
                             {item.icon}
                             <span className="font-semibold text-base flex-1">{item.title}</span>
-                            <span className="text-blue-500">{openIndexes.includes(idx) ? "˄" : "˅"}</span>
+                            <span className={`text-blue-500 text-lg font-bold transition-transform ${openIndexes.includes(idx) ? "rotate-180" : ""}`}>{openIndexes.includes(idx) ? "˄" : "˅"}</span>
                         </button>
                         {openIndexes.includes(idx) && (
-                            <div className="px-6 pb-5 text-gray-700 text-sm">
+                            <div className="px-6 pb-5 text-gray-700 text-base bg-blue-50 rounded-b-xl">
                                 {item.content}
                             </div>
                         )}
