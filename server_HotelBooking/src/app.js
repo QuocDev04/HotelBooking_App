@@ -5,7 +5,7 @@ const morgan = require("morgan");
 const connectDB = require("./config/mongodb");
 const Vnpay = require("./router/vnpay/vnpayRouter");
 const RouterBookingTour = require('./router/TourRouter/BookingTour');
-const RouterBookingOnly = require('./router/RoomRouer/BookingOnLyRouter');
+
 const AdminRouter = require('./router/PeopleRouter/AdminRouter');
 const TourSchedule = require('./router/TourRouter/TourScheduleRouter');
 const TransportScheduleRouter = require('./router/TransportRouter/TransportScheduleModel');
@@ -40,7 +40,7 @@ app.use('/api/', TransportRouter);
 app.use('/api/', TransportScheduleRouter);
 app.use('/api/', TourSchedule);
 app.use('/api/', AdminRouter);
-app.use('/api/', RouterBookingOnly);
+
 app.use('/api/vnpay', Vnpay);
 app.use('/api/', RouterBookingTour);
 app.use('/api/', RouterChecOutBookingTour);
@@ -60,5 +60,4 @@ app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     // Khởi động cron job tự động hủy booking
     startAutoCancelJob();
-}); // Server restart trigger - updated
-
+}); // Server restart

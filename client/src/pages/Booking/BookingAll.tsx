@@ -7,7 +7,7 @@ import { Form, Input, message, type FormProps } from "antd";
 import type { AxiosError } from "axios";
 import { useState, useEffect } from "react";
 
-const BookingRoom = () => {
+const BookingTour = () => {
   const [form] = Form.useForm();
   const { id } = useParams();
   const location = useLocation();
@@ -312,13 +312,7 @@ const BookingRoom = () => {
               </div>
               <div className="md:table-cell py-3 px-4 align-top">
                 <div className="font-bold mb-1">{bookingTour?.tourId?.nameTour}</div>
-                <div>
-                  {bookingTour?.itemRoom?.map((item: any, index: any) => (
-                    <div key={index} className="text-lg text-black mb-1">
-                      {item.roomId?.nameRoom}
-                    </div>
-                  ))}
-                </div>
+
                 <div className="text-green-700 text-xs font-medium mb-1">
                   Vị trí tuyệt vời – <span className="font-bold">8.8</span>
                 </div>
@@ -529,4 +523,4 @@ const BookingRoom = () => {
   );
 };
 
-export default BookingRoom;
+export default BookingTour;

@@ -33,6 +33,7 @@ import TourParticipants from "../pages/Tour/TourParticipants"
 import CustomerAccounts from "../pages/Account/CustomerAccounts"
 import EmployeeAccounts from "../pages/Account/EmployeeAccounts"
 import EmployeeAssignment from "../pages/Account/EmployeeAssignment"
+import ListRoomBooking from "../pages/Room/ListRoomBooking"
 
 
 
@@ -63,6 +64,7 @@ const Router = () => {
                     <Route path="/admin/list-room" element={<ListRoom />} />
                     <Route path="/admin/add-room" element={<AddRoom />} />
                     <Route path="/admin/edit-room/:id" element={<EditRoom />} />
+                    <Route path="/admin/room-bookings" element={<ListRoomBooking />} />
 
                     <Route path="/admin/list-tour" element={<ListTour />} />
                     <Route path="/admin/add-tour" element={<AddTour />} />

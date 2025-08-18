@@ -209,9 +209,22 @@ const ListRoom = () => {
   }));
   const { styles } = useStyle();
   return (
-    <div>
-
+    <div className="p-6">
       {contextHolder}
+      
+      {/* Header */}
+      <div className="mb-6 flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Danh sách Khách Sạn</h1>
+          <p className="text-gray-600">Quản lý tất cả các phòng khách sạn trong hệ thống</p>
+        </div>
+        <Link to="/admin/add-room">
+          <Button type="primary" size="large" className="bg-blue-600 hover:bg-blue-700">
+            + Thêm Khách Sạn
+          </Button>
+        </Link>
+      </div>
+
       <Table
         className={styles.customTable}
         columns={columns}

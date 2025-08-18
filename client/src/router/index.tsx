@@ -13,11 +13,12 @@ import PaymentResult from "../pages/Booking/Payment"
 import Blog from "../pages/Blog/blog"
 import { HotelPolicy } from "../pages/Blog/hotelPolicy"
 import JapanTourPage from "../pages/Tour/detailTour"
-import BookingRoom from "../pages/Booking/BookingRoom"
+
 import BookingAll from "../pages/Booking/BookingAll"
 import InfoUser from "../components/InfoUser"
 import Checkout from "../pages/Booking/Checkout"
 import CheckOutTour from "../pages/Booking/CheckOutTour"
+
 import Clause from "../pages/Introduce/Clause"
 import RefundInfo from "../pages/Booking/RefundInfo"
 
@@ -38,11 +39,12 @@ const Router = () => {
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/hotelPolicy" element={<HotelPolicy />} />
                 <Route path="/detailtour/:id" element={<JapanTourPage />} />
-                <Route path="/bookingroom/:id" element={<BookingRoom />} />
+
                 <Route path="/bookingall/:id" element={<BookingAll />} />
                 <Route path="/infouser" element={<InfoUser />} />
                 <Route path="/date/slot/:id/" element={<Checkout />} />
                 <Route path="/booking/:id" element={<CheckOutTour />} />
+
                 <Route path="/clause" element={<Clause />} />
                 <Route path="/refund/:bookingId" element={<RefundInfo />} />
             </Route>

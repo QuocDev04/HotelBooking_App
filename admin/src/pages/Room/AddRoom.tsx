@@ -177,13 +177,12 @@ const AddRoom = () => {
                                             {
                                                 type: 'number',
                                                 min: 1,
-                                                max: 10,
-                                                message: 'Sức chứa tối đa là 10 người và tối thiểu là 1 người',
+                                                message: 'Sức chứa tối thiểu là 1 người',
                                                 transform: (value) => Number(value),  // chuyển giá trị sang number để kiểm tra
                                             },
                                         ]}
                                     >
-                                        <Input type="number" placeholder="Số người tối đa" disabled={isPending} style={{ width: "100%" }}
+                                        <Input type="number" placeholder="Phòng chứa được bao nhiêu người" disabled={isPending} style={{ width: "100%" }}
                                             size="large" />
                                     </Form.Item>
                                 </Col>
