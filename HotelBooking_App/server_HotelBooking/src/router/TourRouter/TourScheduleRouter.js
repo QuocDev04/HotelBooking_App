@@ -1,6 +1,6 @@
-import express from 'express'
-import { DeleteTourSchedule, GetByIdTourSchedule, GetTourScheduleAll, PostTourSchedule, PutTourSchedule } from './../../controller/TourController/TourScheduleController';
-
+const express = require('express')
+const { DeleteTourSchedule, GetByIdTourSchedule, GetTourScheduleAll, PostTourSchedule, PutTourSchedule } = require('./../../controller/TourController/TourScheduleController.js');
+const { verifyToken, verifyTokenAndAdmin } = require("../../Middleware/verifyToken");
 
 const TourSchedule = express.Router();
 TourSchedule.get('/tourschedule', GetTourScheduleAll);
@@ -9,4 +9,4 @@ TourSchedule.post('/tourschedule', PostTourSchedule);
 TourSchedule.put('/tourschedule/:id', PutTourSchedule);
 TourSchedule.delete('/tourschedule/:id', DeleteTourSchedule);
 
-export default TourSchedule
+module.exports = TourSchedule

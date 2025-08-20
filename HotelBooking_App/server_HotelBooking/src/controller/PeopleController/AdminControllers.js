@@ -1,9 +1,9 @@
-import { StatusCodes } from "http-status-codes";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import Admin from "../../models/People/AdminModel";
+const { StatusCodes } = require("http-status-codes");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const Admin = require("../../models/People/AdminModel.js");
 
-export const registerAdmin = async (req, res) => {
+const registerAdmin = async (req, res) => {
     try {
         const { adminname, password, email, full_name } = req.body;
 
@@ -41,7 +41,7 @@ export const registerAdmin = async (req, res) => {
     }
 };
 
-export const loginAdmin = async (req, res) => {
+const loginAdmin = async (req, res) => {
     try {
         const { adminname, password } = req.body;
 
@@ -86,7 +86,7 @@ export const loginAdmin = async (req, res) => {
 };
 
 // (Tùy chọn) Lấy danh sách admin (chỉ admin mới có quyền)
-export const getAllAdmins = async (req, res) => {
+const getAllAdmins = async (req, res) => {
     try {
         const admins = await Admin.find().select('-password_hash');
         return res.status(StatusCodes.OK).json({
@@ -100,3 +100,5 @@ export const getAllAdmins = async (req, res) => {
         });
     }
 };
+
+module.exports = { registerAdmin, loginAdmin, getAllAdmins };

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 
 const TransportModel = new mongoose.Schema({
@@ -9,4 +9,4 @@ const TransportModel = new mongoose.Schema({
     arrivalLocation: { type: String, required: true },
     imageTransport: [{ type: String, required: true }],
 }, { timestamps: true })
-export default mongoose.model("Transport", TransportModel)
+module.exports = mongoose.model("Transport", TransportModel)

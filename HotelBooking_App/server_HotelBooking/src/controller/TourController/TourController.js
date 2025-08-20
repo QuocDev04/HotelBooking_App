@@ -1,13 +1,15 @@
-import { StatusCodes } from "http-status-codes";
-import TourModel from "../../models/Tour/TourModel";
-import TourScheduleModel from "../../models/Tour/TourScheduleModel";
-import TourBooking from "../../models/Tour/TourBooking";
-import RoomModel from "../../models/Room/RoomModel";
+const { StatusCodes } = require("http-status-codes");
+const TourModel = require("../../models/Tour/TourModel.js");
+const TourScheduleModel = require("../../models/Tour/TourScheduleModel.js");
+const TourBooking = require("../../models/Tour/TourBooking.js");
 
 
-export const getAllTours = async (req, res) => {
+const getAllTours = async (req, res) => {
     try {
-        const tour = await TourModel.find().populate("itemTransport.TransportId", "transportName transportNumber transportType")
+        const tour = await TourModel.find()
+        .populate("itemTransport.TransportId", "transportName transportNumber transportType")
+            .populate("destination", "locationName country")
+            .populate("assignedEmployee", "name email firstName lastName full_name")
         return res.status(StatusCodes.OK).json({
             success: true,
             message: "Get all tours successfully",
@@ -21,7 +23,7 @@ export const getAllTours = async (req, res) => {
     }
 }
 
-export const AddTour = async (req, res) => {
+const AddTour = async (req, res) => {
     try {
         const { price, discountPercent = 0, discountExpiryDate } = req.body;
         const now = new Date();
@@ -50,7 +52,7 @@ export const AddTour = async (req, res) => {
     }
 }
 
-export const DeleteTour = async (req, res) => {
+const DeleteTour = async (req, res) => {
     try {
         const tour = await TourModel.findByIdAndDelete(req.params.id);
         return res.status(StatusCodes.OK).json({
@@ -67,7 +69,7 @@ export const DeleteTour = async (req, res) => {
     }
 }
 
-export const UpdateTour = async (req, res) => {
+const UpdateTour = async (req, res) => {
     try {
         const { price, discountPercent = 0, discountExpiryDate } = req.body;
         const now = new Date();
@@ -99,9 +101,9 @@ export const UpdateTour = async (req, res) => {
     }
 };
 
-export const GetTourById = async (req, res) => {
+const GetTourById = async (req, res) => {
     try {
-        const tour = await TourModel.findById(req.params.id).populate("itemTransport.TransportId", "transportName transportNumber transportType")
+        const tour = await TourModel.findById(req.params.id).populate("itemTransport.TransportId", "transportName transportNumber transportType").populate("destination", "locationName country")
         if (!tour) {
             return res.status(404).json({ success: false, message: "Không tìm thấy tour" });
         }
@@ -135,9 +137,9 @@ export const GetTourById = async (req, res) => {
 };
 
 //get tour featured
-export const TourFeatured = async (req, res) => {
+const TourFeatured = async (req, res) => {
     try {
-        const tourFeatured = await TourModel.find({ featured: true });
+        const tourFeatured = await TourModel.find({ featured: true }).populate("destination", "locationName country");
         return res.status(StatusCodes.OK).json({
             success: true,
             message: "get tourFeatured successfully",
@@ -152,9 +154,9 @@ export const TourFeatured = async (req, res) => {
 }
 
 //get tour top_selling
-export const TourTopSelling = async (req, res) => {
+const TourTopSelling = async (req, res) => {
     try {
-        const topSellingTours = await TourModel.find()
+        const topSellingTours = await TourModel.find().populate("destination", "locationName country")
             .sort({ totalSold: -1 })
             .limit(7); // Lấy 7 tour có lượt đặt nhiều nhất
         return res.status(StatusCodes.OK).json({
@@ -170,54 +172,31 @@ export const TourTopSelling = async (req, res) => {
     }
 }
 
-// Lấy danh sách phòng khả dụng cho một tour cụ thể
-export const getAvailableRoomsForTour = async (req, res) => {
+const assignEmployeeToTour = async (req, res) => {
     try {
         const { id } = req.params;
+        const { employeeId } = req.body;
+
+        // Kiểm tra tour có tồn tại không
         const tour = await TourModel.findById(id);
-        
         if (!tour) {
-            return res.status(StatusCodes.NOT_FOUND).json({ 
-                success: false, 
-                message: "Tour không tồn tại" 
-            });
-        }
-        
-        // Lấy thông tin lịch trình tour
-        const tourSchedule = await TourScheduleModel.findOne({ Tour: tour._id });
-        if (!tourSchedule || !tourSchedule.schedules || tourSchedule.schedules.length === 0) {
-            return res.status(StatusCodes.BAD_REQUEST).json({
+            return res.status(StatusCodes.NOT_FOUND).json({
                 success: false,
-                message: "Tour chưa có lịch trình"
+                message: "Tour không tồn tại"
             });
         }
-        
-        // Lấy ngày bắt đầu và kết thúc tour từ lịch trình
-        const startDate = new Date(tourSchedule.schedules[0].date);
-        const endDate = new Date(tourSchedule.schedules[tourSchedule.schedules.length - 1].date);
-        
-        // Lấy tất cả các phòng
-        const allRooms = await RoomModel.find({});
-        
-        // Lọc các phòng khả dụng trong khoảng thời gian tour
-        const availableRooms = allRooms.filter(room => {
-            // Kiểm tra xem phòng có đang được đặt trong khoảng thời gian của tour không
-            return !room.availabilitySchedule.some(schedule => 
-                schedule.isBooked && 
-                ((startDate >= schedule.startDate && startDate <= schedule.endDate) ||
-                 (endDate >= schedule.startDate && endDate <= schedule.endDate) ||
-                 (startDate <= schedule.startDate && endDate >= schedule.endDate))
-            );
-        });
-        
+
+        // Cập nhật phân công nhân viên
+        const updatedTour = await TourModel.findByIdAndUpdate(
+            id,
+            { assignedEmployee: employeeId },
+            { new: true }
+        ).populate('assignedEmployee', 'name email');
+
         return res.status(StatusCodes.OK).json({
             success: true,
-            message: "Lấy danh sách phòng khả dụng thành công",
-            availableRooms,
-            tourDates: {
-                startDate,
-                endDate
-            }
+            message: "Phân công nhân viên thành công",
+            tour: updatedTour
         });
     } catch (error) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -226,3 +205,5 @@ export const getAvailableRoomsForTour = async (req, res) => {
         });
     }
 };
+
+module.exports = { getAllTours, AddTour, DeleteTour, UpdateTour, GetTourById, TourFeatured, TourTopSelling, assignEmployeeToTour };

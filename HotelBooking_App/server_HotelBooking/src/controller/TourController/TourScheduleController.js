@@ -1,10 +1,10 @@
-import { StatusCodes } from "http-status-codes";
-import TourScheduleModel from "../../models/Tour/TourScheduleModel";
+const { StatusCodes } = require("http-status-codes");
+const TourScheduleModel = require("../../models/Tour/TourScheduleModel.js");
 
 
 
 
-export const GetTourScheduleAll = async (req,res) => {
+const GetTourScheduleAll = async (req,res) => {
    try {
            const tourSchedule = await TourScheduleModel.find().populate('Tour');
            return res.status(StatusCodes.OK).json({
@@ -21,7 +21,7 @@ export const GetTourScheduleAll = async (req,res) => {
 }
 
 
-export const PostTourSchedule = async (req, res) => {
+const PostTourSchedule = async (req, res) => {
     try {
         const { Tour, schedules } = req.body;
 
@@ -58,7 +58,7 @@ export const PostTourSchedule = async (req, res) => {
   };
 
 
-export const PutTourSchedule = async (req, res) => {
+const PutTourSchedule = async (req, res) => {
     try {
         const tourSchedule = await TourScheduleModel.findByIdAndUpdate(req.params.id, req.body);
         return res.status(StatusCodes.OK).json({
@@ -74,7 +74,7 @@ export const PutTourSchedule = async (req, res) => {
     }
 }
 
-export const GetByIdTourSchedule = async (req, res) => {
+const GetByIdTourSchedule = async (req, res) => {
     try {
         const tourSchedule = await TourScheduleModel.findById(req.params.id, req.body);
         return res.status(StatusCodes.OK).json({
@@ -90,7 +90,7 @@ export const GetByIdTourSchedule = async (req, res) => {
     }
 }
 
-export const DeleteTourSchedule = async (req, res) => {
+const DeleteTourSchedule = async (req, res) => {
     try {
         const tourSchedule = await TourScheduleModel.findByIdAndDelete(req.params.id);
         return res.status(StatusCodes.OK).json({
@@ -105,3 +105,5 @@ export const DeleteTourSchedule = async (req, res) => {
         })
     }
 }
+
+module.exports = { GetTourScheduleAll, PostTourSchedule, PutTourSchedule, GetByIdTourSchedule, DeleteTourSchedule };

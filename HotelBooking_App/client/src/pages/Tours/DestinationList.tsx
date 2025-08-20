@@ -1,10 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import Sidebar from "../Room/RoomList/Sidebar";
 import { useState } from "react";
 import instanceClient from "../../../configs/instance";
 import TourList from "../../components/TourList";
 
-
+// Định nghĩa hoặc import DestinationType phù hợp với dữ liệu
+interface DestinationType {
+  nameTour: string;
+  departure_location: string;
+  // ... các trường khác nếu có ...
+}
 
 const DestinationList = () => {
   const {data} = useQuery({
@@ -16,14 +20,13 @@ const DestinationList = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const filtered = tours?.filter(
-    (d) =>
+    (d: DestinationType) =>
       d.nameTour.toLowerCase().includes(searchTerm.toLowerCase()) ||
       d.departure_location.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <main className="flex flex-col md:flex-row gap-6 px-4 md:px-8 py-6 max-w-screen-2xl mx-auto mt-20">
-      <Sidebar />
+    <main className="flex flex-col gap-6 px-4 md:px-8 py-6 max-w-screen-2xl mx-auto mt-20">
       <section className="flex-1">
         <div className="bg-white rounded-xl shadow p-6 mb-8">
           <h2 className="text-xl font-bold text-center mb-2">Bạn lựa chọn địa điểm du lịch nào?</h2>

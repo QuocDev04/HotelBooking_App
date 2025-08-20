@@ -36,7 +36,7 @@ export default function Blog() {
                 Cẩm nang du lịch
               </div>
               <ul className="divide-y divide-gray-100">
-                {[1, 2, 3, 4, 5].map((item, idx) => (
+                {[1, 2, 3, 4, 5].map((_, idx) => (
                   <li
                     key={idx}
                     className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition"
@@ -58,7 +58,7 @@ export default function Blog() {
           {/* Nội dung chính */}
           <main className="md:col-span-3 space-y-8">
             <div className="grid gap-8 sm:grid-cols-2">
-              {[1, 2, 3, 4].map((item, idx) => (
+              {[1, 2, 3, 4].map((_, idx) => (
                 <div
                   key={idx}
                   className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow transition transform hover:scale-[1.01] hover:shadow-md"

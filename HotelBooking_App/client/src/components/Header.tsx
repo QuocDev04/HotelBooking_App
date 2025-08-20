@@ -9,19 +9,18 @@ import { Link } from 'react-router-dom';
 
 const Header = () => {
     const navLinks = [
-        { name: 'Phòng', path: '/rooms' },
+
         { name: 'Các địa điểm du lịch', path: '/destinations' },
+        { name: 'Khách sạn', path: '/hotels' },
         { name: 'Giới Thiệu', path: '/introduce' },
         { name: 'Blog', path: '/blog' },
         { name: 'Các câu hỏi thường gặp', path: '/hotelPolicy' },
     ];
-
     const [userId, setUserId] = useState<string | null>(null);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [showLogin, setShowLogin] = useState(false);
     const [showRegister, setShowRegister] = useState(false);
-
     useEffect(() => {
         setUserId(localStorage.getItem("userId"));
 
@@ -31,7 +30,6 @@ const Header = () => {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
-
     const handleLogout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
@@ -68,16 +66,18 @@ const Header = () => {
                 <Link to="/" className="flex items-center gap-2">
                     <img src={logo} alt="logo" className="h-20" />
                 </Link>
-
-                <div className="hidden md:flex text-white items-center gap-4 lg:gap-8">
+                <div className="hidden md:flex text-black font-semibold text-lg items-center gap-4 lg:gap-8">
                     {navLinks.map((link, i) => (
-                        <Link key={i} to={link.path} className="group flex flex-col gap-0.5">
+                        <Link
+                            key={i}
+                            to={link.path}
+                            className="group flex flex-col gap-0.5 hover:text-blue-800 transition-colors duration-200"
+                        >
                             {link.name}
                         </Link>
                     ))}
                 </div>
-
-                <div className="hidden md:flex items-center gap-4">
+                <div className="hidden md:flex items-center gap-4 ">
                     {token ? (
                         <Popover content={user} trigger="click" className="cursor-pointer">
                             <div className="text-[#8B4513] hover:text-[#6B3E26] transition-all duration-300 hover:scale-110 text-center">

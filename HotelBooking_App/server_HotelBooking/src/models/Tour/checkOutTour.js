@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 
 
@@ -8,9 +8,6 @@ const checkOutTourSchema = new mongoose.Schema({
         ref: 'BookingTour',
         required: true,
     },
-    fullName: { type: String, required: true },
-    emailUser: { type: String, required: true },
-    phoneUser: { type: String, required: true },
     payment_date: { type: Date},
     payment_method: {
         type: String,
@@ -26,4 +23,4 @@ const checkOutTourSchema = new mongoose.Schema({
     amount: { type: Number },
 }, { timestamps: true })
 
-export default mongoose.model("checkOutTour", checkOutTourSchema)
+module.exports = mongoose.model("checkOutTour", checkOutTourSchema)

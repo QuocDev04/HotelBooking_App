@@ -1,9 +1,7 @@
 import { Route, Routes } from "react-router-dom"
 import Layout from "../pages/Layout"
 import ListDashboad from "../pages/dashboad/ListDashboad"
-import ListRoom from "../pages/Room/ListRoom"
-import AddRoom from "../pages/Room/AddRoom"
-import EditRoom from "../pages/Room/EditRoom"
+
 import ListTour from "../pages/Tour/ListTour"
 import AddTour from "../pages/Tour/AddTour"
 import EditTour from "../pages/Tour/EditTour"
@@ -16,9 +14,28 @@ import EditTSchedule from "../pages/TransportSchedule/EditTSchedule"
 import AddTourSchedule from "../pages/TourSchedule/AddTourSchedule"
 import ListTourSchedule from "../pages/TourSchedule/ListTourSchedule"
 import EditTourSchedule from "../pages/TourSchedule/EditTourSchedule"
+import ListBooking from "../pages/Tour/ListBooking"
+import ListBlog from "../pages/Blog/ListBlog"
+import AddBlog from "../pages/Blog/AddBlog"
+import EditBlog from "../pages/Blog/EditBlog"
 import Login from "../components/Login"
 import { useUser } from "@clerk/clerk-react"
 import AdminRoute from "../components/AdminRouter"
+import AddTimeTour from "../pages/TimeTour/AddTimeTour"
+import ListTime from "../pages/TimeTour/ListTime"
+import EditTimeTour from "../pages/TimeTour/EditTimeTour"
+// import TourStats from "../pages/dashboad/TourStats" // Đã bỏ trang thống kê tổng quan
+import TourStatusList from "../pages/Tour/TourStatusList"
+import RefundManagement from "../pages/Tour/RefundManagement"
+import TourParticipants from "../pages/Tour/TourParticipants"
+import CustomerAccounts from "../pages/Account/CustomerAccounts"
+import EmployeeAccounts from "../pages/Account/EmployeeAccounts"
+import EmployeeAssignment from "../pages/Account/EmployeeAssignment"
+import ListHotel from "../pages/Hotel/ListHotel"
+import AddHotel from "../pages/Hotel/AddHotel"
+import EditHotel from "../pages/Hotel/EditHotel"
+import HotelDetail from "../pages/Hotel/HotelDetail"
+import ListHotelBooking from "../pages/Hotel/ListHotelBooking"
 
 
 
@@ -46,13 +63,14 @@ const Router = () => {
 
                     <Route path="/admin/dashboad" element={<ListDashboad />} />
 
-                    <Route path="/admin/list-room" element={<ListRoom />} />
-                    <Route path="/admin/add-room" element={<AddRoom />} />
-                    <Route path="/admin/edit-room/:id" element={<EditRoom />} />
-
-                    <Route path="/admin/list-tour" element={<ListTour />} />
+                     <Route path="/admin/list-tour" element={<ListTour />} />
                     <Route path="/admin/add-tour" element={<AddTour />} />
                     <Route path="/admin/edit-tour/:id" element={<EditTour />} />
+                    <Route path="/admin/list-booking" element={<ListBooking />} />
+                    {/* <Route path="/admin/tour-stats" element={<TourStats />} /> */} {/* Đã bỏ trang thống kê tổng quan */}
+                    <Route path="/admin/tour-status/:status" element={<TourStatusList />} />
+                    <Route path="/admin/refund-management" element={<RefundManagement />} />
+                    <Route path="/admin/tour/participants/:slotId" element={<TourParticipants />} />
 
                     <Route path="/admin/list-transport" element={<ListTransport />} />
                     <Route path="/admin/add-transport" element={<AddTransport />} />
@@ -67,6 +85,23 @@ const Router = () => {
                     <Route path="/admin/add-tourschedule" element={<AddTourSchedule />} />
                     <Route path="/admin/edit-tourschedule/:id" element={<EditTourSchedule />} />
 
+                    <Route path="/admin/list-blog" element={<ListBlog />} />
+                    <Route path="/admin/add-blog" element={<AddBlog />} />
+                    <Route path="/admin/edit-blog/:id" element={<EditBlog />} />
+
+                    <Route path="/admin/list-time" element={<ListTime />} />
+                    <Route path="/admin/add-timetour" element={<AddTimeTour />} />
+                    <Route path="/admin/edit-time-tour/:id" element={<EditTimeTour />} />
+
+                    <Route path="/admin/customer-accounts" element={<CustomerAccounts />} />
+                    <Route path="/admin/employee-accounts" element={<EmployeeAccounts />} />
+                    <Route path="/admin/employee-assignment" element={<EmployeeAssignment />} />
+
+                    <Route path="/admin/hotels" element={<ListHotel />} />
+                    <Route path="/admin/hotels/add" element={<AddHotel />} />
+                    <Route path="/admin/hotels/edit/:id" element={<EditHotel />} />
+                    <Route path="/admin/hotels/view/:id" element={<HotelDetail />} />
+                    <Route path="/admin/hotel-bookings" element={<ListHotelBooking />} />
                 </Route>
             </Routes>
         </>

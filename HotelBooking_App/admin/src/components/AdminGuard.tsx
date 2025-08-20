@@ -4,13 +4,12 @@ import { Spin, Typography } from "antd";
 import instance from "../configs/axios";
 
 const { Text } = Typography;
-   
+
 const SyncUserToBackend: React.FC = () => {
     const { isSignedIn, user } = useUser();
     const { getToken } = useAuth();
     const [loading, setLoading] = useState(false);
 
-    
     useEffect(() => {
         if (!isSignedIn || !user) return;
 
@@ -34,11 +33,15 @@ const SyncUserToBackend: React.FC = () => {
                     lastName: user.lastName || "",
                 };
 
-                await instance.post("/syncUser", userData, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-
-                console.log("User synced to backend successfully");
+                try {
+                    await instance.post("/syncUser", userData, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    console.log("User synced to backend successfully");
+                } catch (syncError) {
+                    console.warn("Could not sync user to backend, but continuing anyway:", syncError);
+                    // Không dừng luồng xử lý nếu đồng bộ thất bại
+                }
             } catch (error) {
                 console.error("Error syncing user to backend:", error);
             } finally {

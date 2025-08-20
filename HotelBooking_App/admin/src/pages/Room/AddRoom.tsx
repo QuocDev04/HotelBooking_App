@@ -3,7 +3,7 @@ import { Button, Checkbox, Col, Empty, Form, Image, Input, InputNumber, message,
 import { useState } from 'react'
 import ReactQuill from "react-quill";
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import instance from '../../configs/axios';
 
 
@@ -17,7 +17,12 @@ const AddRoom = () => {
     const [fileList, setFileList] = useState<UploadFile[]>([]);
     const [form] = Form.useForm();
     const [messageApi, contextHolder] = message.useMessage();
-
+    const {data:location} = useQuery({
+        queryKey:['location'],
+        queryFn:async () => {
+            return await instance.get("/location")
+        }
+    })
     const { mutate, isPending, isError } = useMutation({
         mutationFn: async (data: any) => {
             try {
@@ -172,13 +177,12 @@ const AddRoom = () => {
                                             {
                                                 type: 'number',
                                                 min: 1,
-                                                max: 10,
-                                                message: 'Sức chứa tối đa là 10 người và tối thiểu là 1 người',
+                                                message: 'Sức chứa tối thiểu là 1 người',
                                                 transform: (value) => Number(value),  // chuyển giá trị sang number để kiểm tra
                                             },
                                         ]}
                                     >
-                                        <Input type="number" placeholder="Số người tối đa" disabled={isPending} style={{ width: "100%" }}
+                                        <Input type="number" placeholder="Phòng chứa được bao nhiêu người" disabled={isPending} style={{ width: "100%" }}
                                             size="large" />
                                     </Form.Item>
                                 </Col>
@@ -231,21 +235,23 @@ const AddRoom = () => {
                                     <Form.Item
                                         required={false}
                                         label={requiredLabel("Địa Chỉ")}
-                                        name="addressRoom"
+                                        name="locationId"
                                         rules={[
-                                            { required: true, message: 'Vui lòng nhập Địa Chỉ' },
-                                            {
-                                                min: 5,
-                                                message: 'Địa chỉ phải có ít nhất 5 ký tự',
-                                            },
-                                            {
-                                                max: 200,
-                                                message: 'Địa chỉ không được vượt quá 200 ký tự',
-                                            },
+                                            { required: true, message: 'Vui lòng chọn Địa Chỉ' },
+                                        
                                         ]}
                                     >
-                                        <Input type="text" placeholder="VD: Số 123, Ngõ abc, ..." disabled={isPending} style={{ width: "100%" }}
-                                            size="large" />
+                                        <Select  placeholder="Chọn Địa Chỉ" disabled={isPending} style={{ width: "100%" }}
+                                            size="large" options={location?.data?.location?.map((location: any) => ({
+                                                label: location.locationName + ' - ' + location.country,
+                                                value: location._id
+                                            }))}
+                                            onChange={(value) => {
+                                                // Cập nhật giá trị của trường category
+                                                form.setFieldsValue({
+                                                    location: value,
+                                                });
+                                              }}/>
                                     </Form.Item>
                                 </Col>
 

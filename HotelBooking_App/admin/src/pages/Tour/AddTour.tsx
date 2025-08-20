@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { PlusOutlined } from "@ant-design/icons";
+import {  PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Button, Checkbox, Col, DatePicker, Form, Image, Input, InputNumber, message, Row, Select, Upload, type FormProps, type GetProp, type UploadFile, type UploadProps } from "antd";
+import { Button, Checkbox, Col, DatePicker, Form, Image, Input, InputNumber, message, Row, Select, Space, Upload, type FormProps, type GetProp, type UploadFile, type UploadProps } from "antd";
 import { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import instance from "../../configs/axios";
 import { Option } from "antd/lib/mentions";
+import dayjs from "dayjs";
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
 const AddTour = () => {
@@ -23,13 +24,18 @@ const AddTour = () => {
       {text} <span className="text-red-500">*</span>
     </>
   );
-  const {data} = useQuery({
-    queryKey:['transport'],
+  const { data } = useQuery({
+    queryKey: ['transport'],
     queryFn: () => instance.get('/transport')
   })
   const transports = data?.data?.transport;
-  
-  const { mutate } = useMutation({
+  const { data: location } = useQuery({
+    queryKey: ['location'],
+    queryFn: async () => {
+      return await instance.get("/location")
+    }
+  })
+  const { mutate, isPending } = useMutation({
     mutationFn: async (data: any) => {
       try {
         return await instance.post("/tour", data)
@@ -100,15 +106,18 @@ const AddTour = () => {
       .filter((file) => file.status === "done")
       .map((file) => file.response?.secure_url);
 
+
+
     const newValues = {
       ...values,
       imageTour: imageUrls,
-      itemTransport: values.itemTransport.map((id:any) => ({ TransportId: id })),
+      itemTransport: values.itemTransport.map((id: any) => ({ TransportId: id })),
     };
 
     console.log("Data being sent:", newValues);
     mutate(newValues);
   };
+  
 
 
 
@@ -137,7 +146,7 @@ const AddTour = () => {
                 }
               }
             }}
-            >
+          >
             <Row gutter={[32, 32]}>
               {/* Cột trái */}
               <Col xs={24} lg={16}>
@@ -157,11 +166,20 @@ const AddTour = () => {
                       label={requiredLabel("Điểm Đến")}
                       name="destination"
                       rules={[
-                        { required: true, message: "Nhập điểm đến" },
-                        { min: 2, max: 100, message: "Phải từ 2–100 ký tự" },
+                        { required: true, message: "Chọn điểm đến" },
                       ]}
                     >
-                      <Input placeholder="VD: Đà Nẵng" size="large" />
+                      <Select placeholder="Chọn Địa Chỉ" disabled={isPending} style={{ width: "100%" }}
+                        size="large" options={location?.data?.location?.map((location: any) => ({
+                          label: location.locationName + ' - ' + location.country,
+                          value: location._id
+                        }))}
+                        onChange={(value) => {
+                          // Cập nhật giá trị của trường category
+                          form.setFieldsValue({
+                            location: value,
+                          });
+                        }} />
                     </Form.Item>
                   </Col>
 
@@ -303,7 +321,152 @@ const AddTour = () => {
                     </Form.Item>
                   </Col>
                 </Row>
+                <Row gutter={24}>
+                  <Col span={6}>
+                    <Form.Item
+                      required={false}
+                      label={requiredLabel("Giá Trẻ em")}
+                      name="priceChildren"
+                      rules={[
+                        {
+                          validator(_, value) {
+                            const num = Number(value);
+                            if (!value) return Promise.reject("Vui lòng nhập giá");
+                            if (isNaN(num) || !Number.isInteger(num)) return Promise.reject("Giá phải là số nguyên");
+                            if (num <= 0) return Promise.reject("Giá phải lớn hơn 0");
+                            return Promise.resolve();
+                          },
+                        },
+                      ]}
+                    >
+                      <InputNumber
+                        placeholder="VD: 2000000"
+                        size="large"
+                        style={{ width: "100%" }}
+                        min={0}
+                        formatter={(value) =>
+                          value ? `${Number(value).toLocaleString("vi-VN")} ₫` : ""
+                        }
+                        parser={(value) =>
+                          value ? value.replace(/[₫\s,.]/g, "") : ""
+                        }
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={6}>
+                    <Form.Item
+                      required={false}
+                      label={requiredLabel("Giá Trẻ Nhỏ")}
+                      name="priceLittleBaby"
+                      rules={[
+                        {
+                          validator(_, value) {
+                            const num = Number(value);
+                            if (!value) return Promise.reject("Vui lòng nhập giá");
+                            if (isNaN(num) || !Number.isInteger(num)) return Promise.reject("Giá phải là số nguyên");
+                            if (num <= 0) return Promise.reject("Giá phải lớn hơn 0");
+                            return Promise.resolve();
+                          },
+                        },
+                      ]}
+                    >
+                      <InputNumber
+                        placeholder="VD: 2000000"
+                        size="large"
+                        style={{ width: "100%" }}
+                        min={0}
+                        formatter={(value) =>
+                          value ? `${Number(value).toLocaleString("vi-VN")} ₫` : ""
+                        }
+                        parser={(value) =>
+                          value ? value.replace(/[₫\s,.]/g, "") : ""
+                        }
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={6}>
+                    <Form.Item
+                      required={false}
+                      label={requiredLabel("Giá Phụ Thu Phòng Đơn")}
+                      name="priceSingleRoom"
+                      rules={[
+                        {
+                          validator(_, value) {
+                            const num = Number(value);
+                            if (!value) return Promise.reject("Vui lòng nhập giá");
+                            if (isNaN(num) || !Number.isInteger(num)) return Promise.reject("Giá phải là số nguyên");
+                            if (num <= 0) return Promise.reject("Giá phải lớn hơn 0");
+                            return Promise.resolve();
+                          },
+                        },
+                      ]}
+                    >
+                      <InputNumber
+                        placeholder="VD: 2000000"
+                        size="large"
+                        style={{ width: "100%" }}
+                        min={0}
+                        formatter={(value) =>
+                          value ? `${Number(value).toLocaleString("vi-VN")} ₫` : ""
+                        }
+                        parser={(value) =>
+                          value ? value.replace(/[₫\s,.]/g, "") : ""
+                        }
+                      />
+                    </Form.Item>
+                  </Col>
+                  {/* <Col span={6}>
+                    <Form.Item
+                      required={false}
+                      label={requiredLabel("Ngày Diễn Ra Tour")}
+                      name="dateTour"
+                    >
+                      <DatePicker
+                        showTime={{ format: "HH:mm" }}
+                        format="YYYY-MM-DD HH:mm"
+                        size="large"
+                        style={{ width: "100%" }}
+                        placeholder="Chọn ngày giờ diễn ra"
+                        disabledDate={(current) => current && current < dayjs().startOf("day")}
+                        disabledTime={(current) => {
+                          const now = dayjs();
+                          if (current && current.isSame(now, "day")) {
+                            const hour = now.hour();
+                            const minute = now.minute();
 
+                            return {
+                              disabledHours: () =>
+                                Array.from({ length: hour }, (_, i) => i),
+                              disabledMinutes: (selectedHour) =>
+                                selectedHour === hour
+                                  ? Array.from({ length: minute }, (_, i) => i)
+                                  : [],
+                            };
+                          }
+                          return {};
+                        }}
+                      />
+                    </Form.Item>
+                  </Col> */}
+                 <Col span={6}>
+                    <Form.Item
+                      required={false}
+                      label={requiredLabel("Loại Tour")}
+                      name="tourType"
+                      rules={[{ required: true, message: "Vui lòng chọn loại tour" }]}
+                    >
+                      <Select
+                        size="large"
+                        placeholder="Chọn loại tour"
+                        options={[
+                          { label: "Nội địa", value: "noidia" },
+                          { label: "Quốc tế", value: "quocte" },
+                        ]}
+                      />
+                    </Form.Item></Col>
+                </Row>
+               
+                 
                 <Form.Item label="📝 Mô tả Tour" name="descriptionTour" className="mt-6">
                   <ReactQuill className="h-[300px]"
                     theme="snow"
@@ -317,21 +480,6 @@ const AddTour = () => {
               <Col xs={24} lg={8}>
                 <Form.Item
                   required={false}
-                  label={requiredLabel("Loại Tour")}
-                  name="tourType"
-                  rules={[{ required: true, message: "Vui lòng chọn loại tour" }]}
-                >
-                  <Select
-                    size="large"
-                    placeholder="Chọn loại tour"
-                    options={[
-                      { label: "Nội địa", value: "noidia" },
-                      { label: "Quốc tế", value: "quocte" },
-                    ]}
-                  />
-                </Form.Item>
-                <Form.Item
-                  required={false}
                   label={requiredLabel("Chọn Phương Tiện")}
                   name="itemTransport"
                   rules={[{ required: true, message: "Vui lòng chọn Phương Tiện" }]}
@@ -342,7 +490,7 @@ const AddTour = () => {
                     mode="multiple"               // cho phép chọn nhiều
                     allowClear
                   >
-                    {transports?.map((transport:any) => (
+                    {transports?.map((transport: any) => (
                       <Option key={transport?._id} value={transport._id}>
                         {transport.transportName} - {transport.transportType}
                       </Option>

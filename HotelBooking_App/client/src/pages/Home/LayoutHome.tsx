@@ -13,7 +13,7 @@ const LayoutHome = () => {
     window.scrollTo(0, 0)
   }, [])
   return (
-    <div>
+    <div style={{ background: 'transparent' }}>
       <Banner/>
       <AboutUs/>
       <Internatinal/>

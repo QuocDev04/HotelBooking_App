@@ -4,7 +4,8 @@ import Footer from "../components/Footer"
 
 const LayoutPages = () => {
   return (
-    <div>
+    <div 
+    >
       <Header />
       <div>
         <Outlet />

@@ -1,39 +1,65 @@
-
-import express from "express";
-import cors from "cors";
-import morgan from "morgan";
-import mongoose from "mongoose";
-import connectDB from "./config/mongodb";
-import Vnpay from "./router/vnpay/vnpayRouter.js";
-import RouterBookingTour from './router/TourRouter/BookingTour';
-import RouterBookingOnly from './router/RoomRouer/BookingOnLyRouter';
-import AdminRouter from './router/PeopleRouter/AdminRouter';
-import TourSchedule from './router/TourRouter/TourScheduleRouter';
-import TransportSchedulemodel from './router/TransportRouter/TransportScheduleModel';
-import TransportRouter from './router/TransportRouter/TransportRouter';
-import TourRouter from './router/TourRouter/TourRouter';
-import RouterRoom from './router/RoomRouer/RoomRouter';
-import UserRouter from './router/PeopleRouter/UserRouter';
-import RouterChecOutBookingTour from "./router/TourRouter/checkOutTour";
+require('dotenv').config();
+const express = require("express");
+const cors = require("cors");
+const morgan = require("morgan");
+const path = require("path");
+const connectDB = require("./config/mongodb");
+const Vnpay = require("./router/vnpay/vnpayRouter");
+const RouterBookingTour = require('./router/TourRouter/BookingTour');
+const AdminRouter = require('./router/PeopleRouter/AdminRouter');
+const TourSchedule = require('./router/TourRouter/TourScheduleRouter');
+const TransportScheduleRouter = require('./router/TransportRouter/TransportScheduleModel');
+const TransportRouter = require('./router/TransportRouter/TransportRouter');
+const TourRouter = require('./router/TourRouter/TourRouter');
+const UserRouter = require('./router/PeopleRouter/UserRouter');
+const RouterChecOutBookingTour = require("./router/TourRouter/checkOutTour");
+const routerLocation = require("./router/Location/locationRouter");
+const CmtRouter = require("./router/Cmt/CmtRouter");
+const { dateRouter } = require("./router/TourRouter/DateTour");
+const autoCancelRouter = require("./router/autoCancel/autoCancelRouter");
+const RouterHotel = require('./router/HotelRouter/HotelRouter');
+const RouterHotelBooking = require('./router/HotelRouter/HotelBookingRouter');
+const { startAutoCancelJob } = require("./jobs/autoCancelJob");
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(morgan("tiny"));
-//monggo
 
+// Serve static files for uploads
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// MongoDB connection
 connectDB();
 
-app.use('/api', UserRouter)
-app.use('/api/', RouterRoom)
-app.use('/api/', TourRouter)
-app.use('/api/', TransportRouter)
-app.use('/api/', TransportSchedulemodel)
-app.use('/api/', TourSchedule)
-app.use('/api/', AdminRouter)
-app.use('/api/', RouterBookingOnly)
-app.use('/api/', Vnpay)
-app.use('/api/', RouterBookingTour)
-app.use('/api/', RouterChecOutBookingTour)
+app.get('/', (req, res) => res.send("API is working"));
 
-export const viteNodeApp = app;
+app.use('/api', UserRouter);
+app.use('/api/', TourRouter);
+app.use('/api/', TransportRouter);
+app.use('/api/', TransportScheduleRouter);
+app.use('/api/', TourSchedule);
+app.use('/api/', AdminRouter);
+app.use('/api/vnpay', Vnpay);
+app.use('/api/', RouterBookingTour);
+app.use('/api/', RouterChecOutBookingTour);
+app.use('/api/', routerLocation);
+app.use('/api/', CmtRouter);
+app.use('/api/', dateRouter);
+app.use('/api/auto-cancel', autoCancelRouter);
+app.use('/api/', RouterHotel);
+app.use('/api/', RouterHotelBooking);
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal Server Error', message: err.message });
+});
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    // Khởi động cron job tự động hủy booking
+    startAutoCancelJob();
+}); // Server restart
+

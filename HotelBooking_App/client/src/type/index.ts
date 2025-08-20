@@ -1,40 +1,30 @@
+export interface Destination {
+    _id: string;
+    locationName: string;
+    country: string;
+}
+
 export interface Tour {
-    _id: number;                 
-    nameTour: string;                
-    destination: string;             
-    departure_location: string;       
-    duration: number;                
-    price: number;                   
-    finalPrice: number;             
-    discountPercent: number;        
-    discount_expiry_date: string;    
-    remainingSlots: number;         
-    max_people: number;              
-    imageTour: string;              
-    status: string;                  
-    description: string;             
-    tour_type: string;              
-    featured: boolean;               
-    total_sold: number;              
-
-}
-  
-
-export interface Room {
-    room_id: number;
-    room_name: string;
-    hotel_id: number;
+    _id: number;
+    nameTour: string;
+    destination: Destination;
+    departure_location: string;
+    duration: number;
     price: number;
-    amenities: string[];
-}
+    finalPrice: number;
+    discountPercent: number;
+    discount_expiry_date: string;
+    remainingSlots: number;
+    max_people: number;
+    imageTour: string;
+    status: string;
+    description: string;
+    tour_type: string;
+    featured: boolean;
+    total_sold: number;
+  }
 
-export interface Review {
-    review_id: number;
-    user_id: number;
-    room_id: number;
-    rating: number;
-    comment: string;
-}
+
 
 export interface User {
     user_id: number;
@@ -48,4 +38,4 @@ export interface Hotel {
     address: string;
     rating: number;
     image: string;
-  }
+}

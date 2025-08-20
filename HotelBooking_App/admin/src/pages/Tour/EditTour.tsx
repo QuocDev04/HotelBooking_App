@@ -26,7 +26,12 @@ const EditTour = () => {
         queryFn: async () => instance.get(`/tour/${id}`)
     })
     console.log(data?.data.tour);
-
+    const { data: location } = useQuery({
+        queryKey: ['location'],
+        queryFn: async () => {
+            return await instance.get("/location")
+        }
+    })
     const requiredLabel = (text: string) => (
         <>
             {text} <span className="text-red-500">*</span>
@@ -37,7 +42,7 @@ const EditTour = () => {
         queryFn: () => instance.get('/transport')
     })
     const transports = transport?.data?.transport;
-    const { mutate } = useMutation({
+    const { mutate, isPending } = useMutation({
         mutationFn: async (data: any) => {
             try {
                 return await instance.put(`/tour/${id}`, data)
@@ -204,7 +209,17 @@ const EditTour = () => {
                                                 { min: 2, max: 100, message: "Phải từ 2–100 ký tự" },
                                             ]}
                                         >
-                                            <Input placeholder="VD: Đà Nẵng" size="large" />
+                                            <Select placeholder="Chọn Địa Chỉ" disabled={isPending} style={{ width: "100%" }}
+                                                size="large" options={location?.data?.location?.map((location: any) => ({
+                                                    label: location.locationName + ' - ' + location.country,
+                                                    value: location._id
+                                                }))}
+                                                onChange={(value) => {
+                                                    form.setFieldsValue({
+                                                        location: value,
+                                                    });
+                                                }} 
+/>
                                         </Form.Item>
                                     </Col>
 

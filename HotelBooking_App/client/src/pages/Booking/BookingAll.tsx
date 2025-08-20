@@ -1,19 +1,57 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import instanceClient from "../../../configs/instance";
 import { Form, Input, message, type FormProps } from "antd";
 import type { AxiosError } from "axios";
+import { useState, useEffect } from "react";
 
-const BookingRoom = () => {
+const BookingTour = () => {
   const [form] = Form.useForm();
   const { id } = useParams();
-  const { data } = useQuery({
+  const location = useLocation();
+  
+  // Xử lý tham số URL khi quay lại từ VNPay
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const success = searchParams.get('success');
+    const status = searchParams.get('status');
+    const errorMessage = searchParams.get('message');
+    
+    if (success === 'true') {
+      if (status === 'completed') {
+        message.success('Thanh toán đầy đủ thành công!');
+      } else if (status === 'deposit_paid') {
+        message.success('Đặt cọc thành công!');
+      } else {
+        message.success('Thanh toán thành công!');
+      }
+    } else if (success === 'false') {
+      if (errorMessage === 'payment_failed') {
+        message.error('Thanh toán thất bại. Vui lòng thử lại sau.');
+      } else {
+        message.error(errorMessage || 'Đã xảy ra lỗi trong quá trình thanh toán.');
+      }
+    }
+  }, [location.search]);
+  
+  const { data, refetch } = useQuery({
     queryKey: ['bookingTour', id],
     queryFn: () => instanceClient.get(`/bookingTour/${id}`)
-  })
-  const bookingTour = data?.data?.byId
+  });
+  
+  // Tự động tải lại dữ liệu khi quay lại từ VNPay
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    if (searchParams.has('success')) {
+      refetch();
+    }
+  }, [location.search, refetch]);
+  
+  const bookingTour = data?.data?.booking;
+  console.log(bookingTour);
+  
   const formatDateVN = (dateString:any) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -21,12 +59,10 @@ const BookingRoom = () => {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
       timeZone: 'Asia/Ho_Chi_Minh',
     }).format(date);
   };
-  const { mutate } = useMutation({
+  const { mutate, isLoading } = useMutation({
     mutationFn: async (data: any) => {
       try {
         const response = await instanceClient.post(`/checkOutBookingTour/${bookingTour._id}`, data)
@@ -43,6 +79,23 @@ const BookingRoom = () => {
       const paymentMethod = data?.payment?.payment_method;
       console.log('paymentMethod:', paymentMethod);
 
+      // Nếu thanh toán qua VNPay và có paymentUrl
+      if (data.paymentUrl) {
+        try {
+          // Chuyển hướng trực tiếp đến URL thanh toán VNPay
+          console.log("Chuyển trang tới VNPAY:", data.paymentUrl);
+          window.location.href = data.paymentUrl;
+          return;
+        } catch (error) {
+          console.error("Lỗi khi chuyển hướng đến VNPay:", error);
+          message.error("Đã xảy ra lỗi khi chuyển hướng đến VNPay");
+          // Chuyển về trang chủ nếu có lỗi
+          window.location.href = '/';
+          return;
+        }
+      }
+
+      // Nếu thanh toán qua VNPay nhưng không có paymentUrl sẵn
       if (paymentMethod === "bank_transfer") {
         try {
           const res = await instanceClient.post(`/vnpay/${bookingId}`, null, {
@@ -58,31 +111,100 @@ const BookingRoom = () => {
           } else {
             console.log("Không có paymentUrl hoặc success false");
             message.error("Không thể lấy liên kết thanh toán từ VNPay");
+            // Chuyển về trang chủ
+            window.location.href = '/';
           }
         } catch (error) {
           console.error("Lỗi khi kết nối VNPay:", error);
           message.error("Đã xảy ra lỗi khi kết nối VNPay");
+          // Chuyển về trang chủ nếu có lỗi
+          window.location.href = '/';
         }
       } else {
-        console.log("Không phải phương thức thanh toán bank_transfer");
+        // Với các phương thức thanh toán khác
+        message.success(data.message || "Thanh toán thành công");
+        
+        // Chuyển hướng đến trang chủ
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1500);
       }
     },
     
     onError: (error: any) => {
-      alert(error.message || 'Đặt tour thất bại');
+      message.error(error.message || 'Đặt tour thất bại');
     },
   })
+
+  // Hiển thị modal chọn phương thức thanh toán
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const handlePayRemainingAmount = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleModalCancel = () => {
+    setIsModalVisible(false);
+  };
+
+  const handlePaymentMethodSelect = (method: string) => {
+    onFinish({ payment_method: method });
+    setIsModalVisible(false);
+  };
+
   const onFinish: FormProps<any>["onFinish"] = (values) => {
     const newValues = {
       ...values,
       BookingTourId: bookingTour._id,
+      isFullPayment: true, // Thanh toán phần còn lại
     };
     mutate(newValues);
   };
+
+  // Thêm hiển thị thông tin đặt cọc và số tiền còn lại
+  const renderPaymentStatus = () => {
+    if (!bookingTour) return null;
+    
+    if (bookingTour.isFullyPaid) {
+      return (
+        <div className="bg-green-100 text-green-800 p-3 rounded-md mb-4">
+          <p className="font-semibold">Đã thanh toán đầy đủ</p>
+          <p>Số tiền: {bookingTour.totalPriceTour?.toLocaleString()} VNĐ</p>
+        </div>
+      );
+    }
+    
+    if (bookingTour.isDeposit) {
+      const remainingAmount = bookingTour.totalPriceTour - bookingTour.depositAmount;
+      return (
+        <div className="bg-yellow-100 text-yellow-800 p-3 rounded-md mb-4">
+          <p className="font-semibold">Đã đặt cọc</p>
+          <p>Số tiền đã đặt cọc: {bookingTour.depositAmount?.toLocaleString()} VNĐ</p>
+          <p>Số tiền còn lại: {remainingAmount?.toLocaleString()} VNĐ</p>
+          {bookingTour.payment_status !== 'completed' && (
+            <button 
+              onClick={handlePayRemainingAmount}
+              className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:bg-blue-400"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Đang xử lý...' : 'Thanh toán phần còn lại'}
+            </button>
+          )}
+        </div>
+      );
+    }
+    
+    return (
+      <div className="bg-red-100 text-red-800 p-3 rounded-md mb-4">
+        <p className="font-semibold">Chưa thanh toán</p>
+        <p>Vui lòng thanh toán để xác nhận đặt tour</p>
+      </div>
+    );
+  };
   return (
-    <div className="max-w-screen-xl p-4 mx-auto font-sans">
+    <div className="max-w-screen-xl p-2 md:p-4 mx-auto font-sans">
       {/* Progress Bar */}
-      <div className="flex items-center mt-25 mb-10 w-full ">
+      <div className="hidden md:flex flex-col md:flex-row items-center mt-4 mb-6 w-full gap-2 md:gap-0">
         {/* Step 1 */}
         <div className="flex items-center flex-1">
           <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-base border-2 border-blue-600">
@@ -126,35 +248,71 @@ const BookingRoom = () => {
         </div>
       </div>
 
-      {/* Bảng tổng hợp thông tin khách sạn & vé máy bay */}
-      <div className="overflow-x-auto mb-6">
-        <table className="min-w-full bg-white rounded-xl shadow-md">
-          <thead>
-            <tr className="bg-blue-50 text-blue-700 text-left">
-              <th className="py-3 px-4 rounded-tl-xl">Dịch vụ</th>
-              <th className="py-3 px-4">Thông tin</th>
-              <th className="py-3 px-4 rounded-tr-xl">Tóm tắt giá</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* Khách sạn */}
-            <tr className="border-b">
-              <td className="py-3 px-4 align-top">
+      {/* Hiển thị trạng thái thanh toán */}
+      {renderPaymentStatus()}
+
+      {/* Modal chọn phương thức thanh toán */}
+      {isModalVisible && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-xl font-bold mb-4">Chọn phương thức thanh toán</h3>
+            <div className="space-y-3">
+              <button 
+                onClick={() => handlePaymentMethodSelect('cash')}
+                className="w-full py-3 px-4 border border-gray-300 rounded-md flex items-center justify-between hover:bg-gray-100"
+                disabled={isLoading}
+              >
+                <span>Tiền mặt</span>
+                <span className="text-gray-500">→</span>
+              </button>
+              <button 
+                onClick={() => handlePaymentMethodSelect('bank_transfer')}
+                className="w-full py-3 px-4 border border-gray-300 rounded-md flex items-center justify-between hover:bg-gray-100"
+                disabled={isLoading}
+              >
+                <span>Thanh toán qua VNPay</span>
+                <span className="text-gray-500">→</span>
+              </button>
+            </div>
+            <button 
+              onClick={handleModalCancel}
+              className="mt-4 w-full py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+              disabled={isLoading}
+            >
+              Hủy
+            </button>
+            
+            {isLoading && (
+              <div className="mt-3 text-center text-blue-600">
+                <p>Đang xử lý thanh toán, vui lòng đợi...</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Dịch vụ - chuyển table thành card ở mobile */}
+      <div className="mb-4 mt-20">
+        <div className="bg-white rounded-xl shadow-md flex flex-col md:table w-full">
+          <div className="hidden md:table-header-group bg-blue-50 text-blue-700">
+            <div className="table-row ">
+              <div className="table-cell py-3 px-4 rounded-tl-xl">Dịch vụ</div>
+              <div className="table-cell py-3 px-4">Thông tin</div>
+              <div className="table-cell py-3 px-4 rounded-tr-xl">Tóm tắt giá</div>
+            </div>
+          </div>
+          <div className="flex flex-col md:table-row-group">
+            <div className="flex flex-col md:table-row border-b">
+              <div className="md:table-cell py-3 px-4 align-top flex justify-center">
                 <img
                   src={bookingTour?.tourId?.imageTour[0]}
                   alt="La Vela Saigon Hotel"
-                  className="w-56 rounded mb-2"
+                  className="w-full max-w-[180px] rounded mb-2 mx-auto"
                 />
-              </td>
-              <td className="py-3 px-4 align-top">
+              </div>
+              <div className="md:table-cell py-3 px-4 align-top">
                 <div className="font-bold mb-1">{bookingTour?.tourId?.nameTour}</div>
-                <div>
-                  {bookingTour?.itemRoom?.map((item: any, index: any) => (
-                    <div key={index} className="text-lg text-black mb-1">
-                      {item.roomId?.nameRoom}
-                    </div>
-                  ))}
-                </div>
+
                 <div className="text-green-700 text-xs font-medium mb-1">
                   Vị trí tuyệt vời – <span className="font-bold">8.8</span>
                 </div>
@@ -163,26 +321,27 @@ const BookingRoom = () => {
                   Ngày về: <b>{formatDateVN(bookingTour?.endTime)}</b> <br />
                   {bookingTour?.tourId?.duration} - {bookingTour?.adultsTour} người lớn - {bookingTour?.childrenTour} trẻ em
                 </div>
-              </td>
-              <td className="py-10 px-4 align-top">
+              </div>
+              <div className="md:table-cell py-6 px-4 align-top">
                 <div className="font-semibold text-blue-700 mb-1">Tổng cộng</div>
                 <div className="text-rose-600 font-bold text-2xl mb-1">
                   {bookingTour?.totalPriceBooking.toLocaleString()} đ
                 </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+
       {/* Booking Form */}
-      <div className="bg-white rounded-lg p-6 shadow-md">
+      <div className="bg-white rounded-lg p-2 md:p-6 shadow-md">
         <div className="flex items-center mb-6">
           <div className="font-semibold text-3xl mr-4">
             Nhập thông tin chi tiết của bạn
           </div>
         </div>
         <Form form={form} onFinish={onFinish}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 mb-6">
             {/* Phần thông tin chính chiếm 2/3 */}
             <div className="md:col-span-2 grid grid-cols-1">
               {/* Họ */}
@@ -196,8 +355,12 @@ const BookingRoom = () => {
                   rules={[
                     { required: true, message: "Vui lòng nhập tên" },
                     {
-                      pattern: /^[a-zA-Z0-9._]{4,20}$/,
-                      message: "Tên phải từ 4–20 ký tự, không chứa khoảng trắng và chỉ gồm chữ, số, dấu _ hoặc ."
+                      pattern: /^[a-zA-ZÀ-ỹ\s]+$/,
+                      message: "Tên chỉ chứa chữ cái và khoảng trắng"
+                    },
+                    {
+                      max: 50,
+                      message: "Tên không được vượt quá 50 ký tự"
                     }
                   ]}
                 >
@@ -360,4 +523,4 @@ const BookingRoom = () => {
   );
 };
 
-export default BookingRoom;
+export default BookingTour;

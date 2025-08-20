@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 
 const TransportScheduleModel = new mongoose.Schema({
@@ -14,4 +14,4 @@ const TransportScheduleModel = new mongoose.Schema({
 
 
 }, {timestamps:true})
-export default mongoose.model("TransportSchedule", TransportScheduleModel)
+module.exports = mongoose.model("TransportSchedule", TransportScheduleModel)

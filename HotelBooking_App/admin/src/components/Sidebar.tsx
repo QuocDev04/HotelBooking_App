@@ -36,19 +36,20 @@ const Sidebar = () => {
             ],
         },
         {
-            name: 'Phòng',
-            icon: '🏨',
+            name: 'Quản lý đặt chỗ',
+            icon: '📋',
             children: [
-                { name: 'Danh sách phòng', path: '/admin/list-room', icon: '📋' },
-                { name: 'Thêm phòng', path: '/admin/add-room', icon: '➕' },
+                { name: 'Danh sách đặt chỗ', path: '/admin/list-booking', icon: '📊' },
+                { name: 'Quản lý hoàn tiền', path: '/admin/refund-management', icon: '💰' },
             ],
         },
         {
-            name: 'Phương Tiện',
-            icon: '🚌',
+            name: 'Thống kê Tour',
+            icon: '📈',
             children: [
-                { name: 'Danh sách chuyến', path: '/admin/list-transport', icon: '📃' },
-                { name: 'Thêm chuyến', path: '/admin/add-transport', icon: '🛠️' },
+                { name: 'Tour sắp diễn ra', path: '/admin/tour-status/upcoming', icon: '🔜' },
+                { name: 'Tour đang diễn ra', path: '/admin/tour-status/ongoing', icon: '🔄' },
+                { name: 'Tour đã hoàn thành', path: '/admin/tour-status/completed', icon: '✅' },
             ],
         },
         {
@@ -57,6 +58,42 @@ const Sidebar = () => {
             children: [
                 { name: 'Danh sách Lịch trình', path: '/admin/list-Transport_Schedule', icon: '📝' },
                 { name: 'Thêm Lịch trình', path: '/admin/add-Transport_Schedule', icon: '🆕' },
+            ],
+        },
+        {
+            name: 'Quản lý Blog',
+            icon: '📝',
+            children: [
+                { name: 'Danh sách Blog', path: '/admin/list-blog', icon: '📋' },
+                { name: 'Thêm Blog', path: '/admin/add-blog', icon: '✍️' },
+            ],
+        },
+        {
+            name: 'Quản lý Thời Gian Tour',
+            icon: '⏱️',
+            children: [
+                { name: 'Danh sách Thời Gian Tour', path: '/admin/list-time', icon: '📋' },
+                { name: 'Thêm Thời Gian Tour', path: '/admin/add-timetour', icon: '✍️' },
+            ],
+        },
+
+        {
+            name: 'Quản lý Khách sạn',
+            icon: '🏨',
+            children: [
+                { name: 'Danh sách Khách sạn', path: '/admin/hotels', icon: '🏢' },
+                { name: 'Thêm Khách sạn', path: '/admin/hotels/add', icon: '🆕' },
+                { name: 'Quản lý Đặt phòng', path: '/admin/hotel-bookings', icon: '📋' },
+            ],
+        },
+
+        {
+            name: 'Quản lý Tài Khoản',
+            icon: '👥',
+            children: [
+                { name: 'Tài khoản Khách hàng', path: '/admin/customer-accounts', icon: '👤' },
+                { name: 'Tài khoản Nhân viên', path: '/admin/employee-accounts', icon: '👨‍💼' },
+                { name: 'Phân công Nhân viên', path: '/admin/employee-assignment', icon: '📋' },
             ],
         },
     ];

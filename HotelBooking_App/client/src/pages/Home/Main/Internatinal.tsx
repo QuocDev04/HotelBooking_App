@@ -78,14 +78,15 @@ const International = () => {
                     }}
                     onSwiper={(swiper) => {
                         setTimeout(() => {
-                            if (!swiper?.params?.navigation) return;
-                            swiper.params.navigation.prevEl = prevRef.current;
-                            swiper.params.navigation.nextEl = nextRef.current;
-                            swiper.navigation.destroy();
-                            swiper.navigation.init();
-                            swiper.navigation.update();
+                            if (swiper.params.navigation && typeof swiper.params.navigation !== 'boolean') {
+                                swiper.params.navigation.prevEl = prevRef.current;
+                                swiper.params.navigation.nextEl = nextRef.current;
+                                swiper.navigation.destroy();
+                                swiper.navigation.init();
+                                swiper.navigation.update();
+                            }
                         });
-                    }}
+                      }}
                     breakpoints={{
                         640: { slidesPerView: 2 },
                         1024: { slidesPerView: 3 },

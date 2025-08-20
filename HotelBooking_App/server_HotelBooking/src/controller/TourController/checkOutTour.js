@@ -1,9 +1,9 @@
-import BookingTour from "../../models/Tour/TourBooking"
-import CheckOutTour from "../../models/Tour/checkOutTour"
+const BookingTour = require("../../models/Tour/TourBooking.js")
+const CheckOutTour = require("../../models/Tour/checkOutTour.js")
 
-export const checkOutBookingTour = async (req, res) => {
+const checkOutBookingTour = async (req, res) => {
     try {
-        const { BookingTourId, fullName, emailUser, phoneUser, payment_method, amount } = req.body;
+        const { BookingTourId,payment_method, amount } = req.body;
 
         // Kiểm tra xem BookingTour có tồn tại không
         const booking = await BookingTour.findById(BookingTourId);
@@ -14,13 +14,10 @@ export const checkOutBookingTour = async (req, res) => {
         // Tạo thông tin thanh toán
         const newPayment = new CheckOutTour({
             BookingTourId,
-            fullName,
-            emailUser,
-            phoneUser,
             payment_date: new Date(), 
             payment_method,
             payment_status: "pending" ,
-            amount: booking.totalPriceBooking
+            amount: booking.totalPriceTour
         });
 
         const savedPayment = await newPayment.save();
@@ -28,14 +25,14 @@ export const checkOutBookingTour = async (req, res) => {
         res.status(201).json({
             message: "Thanh toán thành công",
             payment: savedPayment,
-            finalPrice: booking.finalPrice
+            finalPrice: booking.totalPriceTour
         });
     } catch (error) {
         res.status(500).json({ message: "Lỗi khi thanh toán", error: error.message });
     }
 };
 
-export const getCheckOutUserTour = async (req, res) => {
+const getCheckOutUserTour = async (req, res) => {
     try {
         const getCheckOutUserTour = await CheckOutTour.find()
             .populate({
@@ -69,7 +66,7 @@ export const getCheckOutUserTour = async (req, res) => {
     }
 };
   
-export const getCheckOutUserTourByUserId = async (req, res) => {
+const getCheckOutUserTourByUserId = async (req, res) => {
     try {
         const userId = req.params.userId;
 
@@ -108,4 +105,6 @@ export const getCheckOutUserTourByUserId = async (req, res) => {
         });
     }
 };
+
+module.exports = { checkOutBookingTour, getCheckOutUserTour, getCheckOutUserTourByUserId };
   

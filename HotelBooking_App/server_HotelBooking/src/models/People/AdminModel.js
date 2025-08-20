@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const AdminSchema = new mongoose.Schema({
     clerkId: { type: String, unique: true, sparse: true }, 
@@ -20,4 +20,4 @@ AdminSchema.pre('save', function (next) {
 
 const Admin = mongoose.model('Admin', AdminSchema);
 
-export default Admin;
+module.exports = Admin;

@@ -1,7 +1,7 @@
-import TransportScheduleModel from "../../models/Transport/TransportScheduleModel";
-import { StatusCodes } from 'http-status-codes';
+const TransportScheduleModel = require("../../models/Transport/TransportScheduleModel.js");
+const { StatusCodes } = require('http-status-codes');
 
-export const PostTransport = async (req,res) =>{
+const PostTransport = async (req,res) =>{
      try {
          const transportScheduleModel = await TransportScheduleModel.create(req.body);
             return res.status(StatusCodes.OK).json({
@@ -17,7 +17,7 @@ export const PostTransport = async (req,res) =>{
         }
 }
 
-export const GetTransport= async (req, res) => {
+const GetTransport= async (req, res) => {
     try {
         const transportScheduleModel = await TransportScheduleModel.find().populate('transport');
         return res.status(StatusCodes.OK).json({
@@ -33,7 +33,7 @@ export const GetTransport= async (req, res) => {
     }
 }
 
-export const PutTransport = async (req, res) => {
+const PutTransport = async (req, res) => {
     try {
         const transportScheduleModel = await TransportScheduleModel.findByIdAndUpdate(req.params.id, req.body);
         return res.status(StatusCodes.OK).json({
@@ -49,7 +49,7 @@ export const PutTransport = async (req, res) => {
     }
 }
 
-export const DelTransport = async (req, res) => {
+const DelTransport = async (req, res) => {
     try {
         const transportScheduleModel = await TransportScheduleModel.findByIdAndDelete(req.params.id);
         return res.status(StatusCodes.OK).json({
@@ -65,7 +65,7 @@ export const DelTransport = async (req, res) => {
     }
 }
 
-export const GetByIdTransport = async (req, res) => {
+const GetByIdTransport = async (req, res) => {
     try {
         const transportScheduleModel = await TransportScheduleModel.findById(req.params.id);
         return res.status(StatusCodes.OK).json({
@@ -80,3 +80,5 @@ export const GetByIdTransport = async (req, res) => {
         })
     }
 }
+
+module.exports = { PostTransport, GetTransport, PutTransport, DelTransport, GetByIdTransport };

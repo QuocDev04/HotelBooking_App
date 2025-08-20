@@ -1,5 +1,5 @@
-import 'dotenv/config';
-import nodemailer from 'nodemailer';
+require('dotenv/config');
+const nodemailer = require('nodemailer');
 
 const sendMail = async ({ email, subject, html }) => {
     // Validate input parameters
@@ -17,7 +17,7 @@ const sendMail = async ({ email, subject, html }) => {
                 pass: process.env.Mail_Pass,
             },
             tls: {
-                rejectUnauthorized: false, 
+                rejectUnauthorized: false,
             },
         });
 
@@ -33,10 +33,10 @@ const sendMail = async ({ email, subject, html }) => {
     } catch (error) {
         throw new Error(`Failed to send email: ${error.message}`);
     } finally {
-        if (transporter) {
+        if (transporter && typeof transporter.close === 'function') {
             transporter.close();
         }
     }
 };
 
-export { sendMail };
+module.exports = { sendMail };
