@@ -22,6 +22,7 @@ interface RightTourDetailProps {
     tour:
         | {
               price?: number;
+              oldPrice?: number;
               _id?: string;
               code?: string;
               departure_location?: string;
@@ -41,70 +42,53 @@ const RightTourDetail = ({
         ? dayjs(selectedDate).format("DD-MM-YYYY")
         : null;
 
-    const selectedSlot = slots?.find((slot) =>
-        dayjs(slot.dateTour).isSame(selectedDate, "day")
-    );
+    // Nếu người dùng chưa chọn ngày thì tự động dùng slot đầu tiên (nếu có)
+    const selectedSlot = selectedDate
+        ? slots?.find((slot) =>
+              dayjs(slot.dateTour, "DD-MM-YYYY").isSame(dayjs(selectedDate), "day")
+          )
+        : slots && slots.length > 0
+        ? slots[0]
+        : undefined;
+
     const navigate = useNavigate();
     const handleBooking = () => {
-        // Kiểm tra xem người dùng đã chọn ngày chưa
-        if (!selectedDate) {
-            toast.error("Vui lòng chọn ngày khởi hành!");
-            return;
-        }
-
-        // Kiểm tra xem có slot nào cho ngày đã chọn không
+        // Sử dụng selectedSlot (đã fallback về slot đầu nếu chưa chọn ngày)
         if (!selectedSlot) {
-            toast.error(
-                "Không tìm thấy thông tin ngày khởi hành, vui lòng chọn ngày khác!"
-            );
+            toast.error("Không tìm thấy thông tin ngày khởi hành!");
             return;
         }
 
-        // Kiểm tra số chỗ còn trống
         if (selectedSlot.availableSeats === 0) {
             toast.error(
-                "Ngày này đã hết chỗ, không thể đặt tour! Vui lòng chọn ngày khác"
+                "Ngày này đã hết chỗ, không thể đặt tour! Vui lòng liên hệ để được hỗ trợ."
             );
             return;
         }
 
-        // Kiểm tra ID của slot
         if (!selectedSlot._id) {
-            toast.error(
-                "Lỗi thông tin ngày khởi hành, vui lòng chọn ngày khác!"
-            );
+            toast.error("Lỗi thông tin ngày khởi hành, vui lòng thử lại sau!");
             console.error("Selected slot has no ID:", selectedSlot);
             return;
         }
 
-        // Nếu mọi thứ đều hợp lệ, chuyển hướng đến trang đặt tour
-        console.log("Navigating to booking page with slot ID:", selectedSlot._id);
         navigate(`/date/slot/${selectedSlot._id}`);
     };
-    console.log(selectedSlot);
-    console.log(tour);
 
     return (
         <div className="w-full bg-white p-5 rounded-2xl border border-gray-200 shadow max-w-[360px] mx-auto">
             <div className="text-gray-700 text-base mb-1">Giá tour trọn gói</div>
-            {/* Giá cũ nếu có */}
             {tour?.oldPrice && (
                 <div className="text-gray-400 line-through text-lg mb-1">
                     {tour.oldPrice.toLocaleString("vi-VN")}đ
                 </div>
             )}
-            {/* Giá mới */}
             <div className="text-3xl font-bold text-orange-600 mb-4">
                 {tour?.price?.toLocaleString("vi-VN") || "..."}đ
             </div>
             <ul className="space-y-2 text-[15px] mb-5">
                 <li className="flex items-center gap-2">
-                    <svg
-                        width="18"
-                        height="18"
-                        fill="none"
-                        className="text-blue-500"
-                    >
+                    <svg width="18" height="18" fill="none" className="text-blue-500">
                         <path
                             d="M9 2a7 7 0 1 1 0 14A7 7 0 0 1 9 2Zm0 2v5l4 2"
                             stroke="currentColor"
@@ -117,12 +101,7 @@ const RightTourDetail = ({
                     <span>{tour?.duration || "..."}</span>
                 </li>
                 <li className="flex items-center gap-2">
-                    <svg
-                        width="18"
-                        height="18"
-                        fill="none"
-                        className="text-blue-500"
-                    >
+                    <svg width="18" height="18" fill="none" className="text-blue-500">
                         <path
                             d="M9 2a5 5 0 0 1 5 5c0 3.5-5 9-5 9S4 10.5 4 7a5 5 0 0 1 5-5Z"
                             stroke="currentColor"
@@ -134,12 +113,7 @@ const RightTourDetail = ({
                     <span>{tour?.departure_location || "..."}</span>
                 </li>
                 <li className="flex items-center gap-2">
-                    <svg
-                        width="18"
-                        height="18"
-                        fill="none"
-                        className="text-blue-500"
-                    >
+                    <svg width="18" height="18" fill="none" className="text-blue-500">
                         <rect
                             x="2"
                             y="3"
@@ -162,14 +136,14 @@ const RightTourDetail = ({
                         {selectedDate
                             ? dayjs(selectedDate).format("DD/MM/YYYY")
                             : slots && slots[0]?.dateTour
-                            ? dayjs(slots[0].dateTour).format("DD/MM/YYYY")
+                            ? dayjs(slots[0].dateTour, "DD-MM-YYYY").format("DD/MM/YYYY")
                             : "..."}{" "}
                     </span>
                 </li>
             </ul>
             <button
                 className="w-full py-3 rounded-lg bg-orange-500 text-white font-semibold text-lg hover:bg-orange-600 transition"
-                onClick={selectedDate ? handleBooking : onChooseDate}
+                onClick={handleBooking}
             >
                 Đặt tour ngay
             </button>
