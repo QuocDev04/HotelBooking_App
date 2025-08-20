@@ -54,7 +54,7 @@ const HotelList: React.FC = () => {
   const navigate = useNavigate();
 
   const cities = [
-    'Hồ Chí Minh', 'Hà Nội', 'Đà Nẵng', 'Nha Trang', 'Phú Quốc',
+    'Hồ Chí Minh', 'Hà Nội', 'Đà Nẵng', 'Hạ Long', 'Nha Trang', 'Phú Quốc',
     'Hội An', 'Huế', 'Vũng Tàu', 'Đà Lạt', 'Cần Thơ'
   ];
 
@@ -132,13 +132,14 @@ const HotelList: React.FC = () => {
 
   return (
     <div style={{ 
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'transparent',
       minHeight: '100vh',
-      padding: '0'
+      padding: '0',
+      marginTop: '80px'
     }}>
       {/* Hero Section */}
       <div style={{
-        background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%)',
+        background: 'linear-gradient(135deg, rgba(161, 196, 253, 0.9) 0%, rgba(194, 233, 251, 0.9) 50%, rgba(251, 194, 235, 0.9) 100%)',
         padding: '60px 24px',
         textAlign: 'center',
         color: 'white'

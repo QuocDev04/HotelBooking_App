@@ -255,7 +255,7 @@ const HotelDetail: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+    <div style={{ padding: '20px', maxWidth: '1200px', margin: '80px auto 0 auto' }}>
       {/* Header */}
       <div style={{ marginBottom: '20px' }}>
         <Button 
@@ -340,10 +340,10 @@ const HotelDetail: React.FC = () => {
                 <Text strong>Giờ trả phòng:</Text> {hotel.policies.checkOut}
               </Col>
               <Col span={24}>
-                <Text strong>Chính sách thú cưng:</Text> {hotel.policies.petPolicy}
+                <Text strong>Chính sách thú cưng:</Text> {hotel.policies.petPolicy === 'true' || hotel.policies.petPolicy === true ? 'Được phép' : 'Không được phép'}
               </Col>
               <Col span={24}>
-                <Text strong>Chính sách hút thuốc:</Text> {hotel.policies.smokingPolicy}
+                <Text strong>Chính sách hút thuốc:</Text> {hotel.policies.smokingPolicy === 'true' || hotel.policies.smokingPolicy === true ? 'Được phép' : 'Không được phép'}
               </Col>
             </Row>
           </Card>

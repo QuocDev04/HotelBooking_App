@@ -233,6 +233,8 @@ const deleteHotel = async (req, res) => {
 const searchHotels = async (req, res) => {
     try {
         const { 
+            search,
+            city,
             checkIn, 
             checkOut, 
             location, 
@@ -248,8 +250,27 @@ const searchHotels = async (req, res) => {
         
         let filter = { status: true };
         
-        // Filter theo location
-        if (location) {
+        // Filter theo search text (tên khách sạn)
+        if (search) {
+            filter.hotelName = { $regex: search, $options: 'i' };
+        }
+        
+        // Filter theo city (location name)
+        if (city) {
+            // Tìm location theo tên thành phố
+            const locations = await Location.find({ 
+                locationName: { $regex: city, $options: 'i' } 
+            });
+            if (locations.length > 0) {
+                filter.location = { $in: locations.map(loc => loc._id) };
+            } else {
+                // Nếu không tìm thấy location nào, trả về kết quả rỗng
+                filter.location = { $in: [] };
+            }
+        }
+        
+        // Filter theo location ID (nếu có)
+        if (location && !city) {
             filter.location = location;
         }
         
@@ -260,7 +281,7 @@ const searchHotels = async (req, res) => {
         
         // Filter theo amenities
         if (amenities) {
-            const amenityList = amenities.split(',');
+            const amenityList = Array.isArray(amenities) ? amenities : [amenities];
             filter['hotelAmenities.name'] = { $in: amenityList };
         }
         

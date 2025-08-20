@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Button, Card, message, Select, InputNumber, Upload, Space, Rate, Divider } from 'antd';
+import { Form, Input, Button, Card, message, Select, InputNumber, Upload, Space, Rate, Divider, Switch } from 'antd';
 import { PlusOutlined, ArrowLeftOutlined, StarFilled } from '@ant-design/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -24,6 +24,8 @@ interface HotelFormData {
     checkIn: string;
     checkOut: string;
     cancellationPolicy?: string;
+    petPolicy?: boolean;
+    smokingPolicy?: boolean;
   };
   roomTypes: {
     typeName: string;
@@ -135,6 +137,21 @@ const AddHotel: React.FC = () => {
     }
   };
 
+  const cities = [
+    { value: '', label: 'Tất cả thành phố' },
+    { value: 'Hồ Chí Minh', label: 'Hồ Chí Minh' },
+    { value: 'Hà Nội', label: 'Hà Nội' },
+    { value: 'Đà Nẵng', label: 'Đà Nẵng' },
+    { value: 'Hạ Long', label: 'Hạ Long' },
+    { value: 'Nha Trang', label: 'Nha Trang' },
+    { value: 'Phú Quốc', label: 'Phú Quốc' },
+    { value: 'Hội An', label: 'Hội An' },
+    { value: 'Huế', label: 'Huế' },
+    { value: 'Vũng Tàu', label: 'Vũng Tàu' },
+    { value: 'Đà Lạt', label: 'Đà Lạt' },
+    { value: 'Cần Thơ', label: 'Cần Thơ' }
+  ];
+
   const amenitiesOptions = [
     'WiFi miễn phí',
     'Bể bơi',
@@ -194,7 +211,9 @@ const AddHotel: React.FC = () => {
             starRating: 5,
             policies: {
               checkIn: '14:00',
-              checkOut: '12:00'
+              checkOut: '12:00',
+              petPolicy: false,
+              smokingPolicy: false
             },
             contactInfo: {
               phone: '',
@@ -234,9 +253,15 @@ const AddHotel: React.FC = () => {
               <Form.Item
                 label="Địa điểm"
                 name="location"
-                rules={[{ required: true, message: 'Vui lòng nhập địa điểm!' }]}
+                rules={[{ required: true, message: 'Vui lòng chọn địa điểm!' }]}
               >
-                <Input placeholder="Nhập địa điểm" size="large" />
+                <Select placeholder="Chọn thành phố" size="large">
+                  {cities.filter(city => city.value !== '').map(city => (
+                    <Option key={city.value} value={city.value}>
+                      {city.label}
+                    </Option>
+                  ))}
+                </Select>
               </Form.Item>
 
               <Form.Item
@@ -304,9 +329,22 @@ const AddHotel: React.FC = () => {
                             {...restField}
                             name={[name, 'typeName']}
                             label="Tên loại phòng"
-                            rules={[{ required: true, message: 'Vui lòng nhập tên loại phòng!' }]}
+                            rules={[{ required: true, message: 'Vui lòng chọn loại phòng!' }]}
                           >
-                            <Input placeholder="VD: Standard, Deluxe, Suite" />
+                            <Select placeholder="Chọn loại phòng">
+                             <Option value="Phòng Tiêu Chuẩn">Phòng Tiêu Chuẩn</Option>
+                             <Option value="Phòng Cao Cấp">Phòng Cao Cấp</Option>
+                             <Option value="Phòng Deluxe">Phòng Deluxe</Option>
+                             <Option value="Phòng Hạng Thương Gia">Phòng Hạng Thương Gia</Option>
+                             <Option value="Phòng Suite">Phòng Suite</Option>
+                             <Option value="Phòng Junior Suite">Phòng Junior Suite</Option>
+                             <Option value="Phòng Tổng Thống">Phòng Tổng Thống</Option>
+                             <Option value="Phòng Gia Đình">Phòng Gia Đình</Option>
+                             <Option value="Phòng Đôi Giường Đơn">Phòng Đôi Giường Đơn</Option>
+                             <Option value="Phòng Đơn">Phòng Đơn</Option>
+                             <Option value="Phòng Đôi">Phòng Đôi</Option>
+                             <Option value="Phòng Ba Người">Phòng Ba Người</Option>
+                           </Select>
                           </Form.Item>
                           <Form.Item
                             {...restField}
@@ -457,6 +495,32 @@ const AddHotel: React.FC = () => {
                   placeholder="Nhập chính sách hủy phòng"
                   showCount
                   maxLength={500}
+                />
+              </Form.Item>
+            </div>
+            
+            <div className="space-y-4">
+              <Form.Item
+                label="Chính sách thú cưng"
+                name={['policies', 'petPolicy']}
+                valuePropName="checked"
+              >
+                <Switch 
+                  checkedChildren="Cho phép" 
+                  unCheckedChildren="Không cho phép"
+                  size="default"
+                />
+              </Form.Item>
+
+              <Form.Item
+                label="Chính sách hút thuốc"
+                name={['policies', 'smokingPolicy']}
+                valuePropName="checked"
+              >
+                <Switch 
+                  checkedChildren="Cho phép" 
+                  unCheckedChildren="Không cho phép"
+                  size="default"
                 />
               </Form.Item>
             </div>

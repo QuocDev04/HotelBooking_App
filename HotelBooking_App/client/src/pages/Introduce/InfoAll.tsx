@@ -18,7 +18,7 @@ const InfoAll = () => {
     <div 
       className="min-h-screen"
       style={{
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: 'transparent',
         padding: '32px'
       }}
     >

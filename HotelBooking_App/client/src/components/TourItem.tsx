@@ -10,21 +10,19 @@ type TourItemProps = {
 
 const TourItem = ({ tour }: TourItemProps) => {
     return (
-        <>
-            <div className="">
-                <motion.div
-                    key={`${tour._id}`}
-                    className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden flex flex-col"
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, amount: 0.4 }}
-                >
+        <motion.div
+            key={`${tour._id}`}
+            className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden flex flex-col h-full w-full"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.4 }}
+        >
                     <div className="relative">
                         <Link to={`/detailtour/${tour._id}`}>
                             <img
                                 src={tour?.imageTour[0]}
                                 alt={tour?.nameTour}
-                                className="w-full object-cover"
+                                className="w-full h-48 object-cover"
                             />
                         </Link>
 
@@ -40,18 +38,18 @@ const TourItem = ({ tour }: TourItemProps) => {
 
 
                         {/* Ngày khởi hành, Địa điểm, Đánh giá */}
-                        <div className="flex items-center text-sm justify-between mb-2 leading-snug truncate">
-                            <div className="flex items-center gap-1 mr-4  text-gray-500">
-                                <CalendarIcon className="w-4 h-4" />
-                                <span>  {tour.destination.locationName} - {tour.destination.country}</span>
+                        <div className="space-y-2 mb-3">
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                                <CalendarIcon className="w-4 h-4 flex-shrink-0" />
+                                <span className="truncate">{tour.destination?.locationName || 'Chưa có thông tin'} - {tour.destination?.country || 'Chưa có thông tin'}</span>
                             </div>
-                            <div className="flex items-center gap-1 text-gray-500">
-                                <CalendarIcon className="w-4 h-4" />
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                                <CalendarIcon className="w-4 h-4 flex-shrink-0" />
                                 <span>Thời gian: {tour.duration}</span>
                             </div>
                         </div>
 
-                        <div className="flex justify-between items-end min-h-[56px]">
+                        <div className="flex justify-between items-center mb-3">
                             <div className="flex flex-col">
                                 <span className={`text-sm text-gray-400 line-through ${tour.price > tour.finalPrice ? '' : 'invisible'}`}>
                                     {tour.price.toLocaleString('vi-VN')}đ
@@ -62,7 +60,7 @@ const TourItem = ({ tour }: TourItemProps) => {
                             </div>
 
                             {tour.discountPercent && (
-                                <span className="flex items-center gap-1 bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded border border-red-400">
+                                <span className="flex items-center gap-1 bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded border border-red-400">
                                     <TicketIcon className="w-4 h-4" />
                                     -{tour.discountPercent}%
                                 </span>
@@ -71,7 +69,7 @@ const TourItem = ({ tour }: TourItemProps) => {
 
 
                         {/* Còn chỗ + chi tiết */}
-                        <div className="flex justify-between text-sm mb-4 text-gray-600">
+                        <div className="flex justify-between items-center text-sm mb-4 text-gray-600">
                             <span>
                                 Còn lại: <strong>{tour.remainingSlots} chỗ</strong>
                             </span>
@@ -80,7 +78,6 @@ const TourItem = ({ tour }: TourItemProps) => {
                                     Chi tiết
                                 </span>
                             </Link>
-
                         </div>
                         <Link to={`/detailtour/${tour._id}`}>
                             <button className="mt-auto w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition">
@@ -89,8 +86,6 @@ const TourItem = ({ tour }: TourItemProps) => {
                         </Link>
                     </div>
                 </motion.div>
-            </div>
-        </>
     )
 }
 
