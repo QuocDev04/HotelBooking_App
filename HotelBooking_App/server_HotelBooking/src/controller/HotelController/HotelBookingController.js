@@ -42,7 +42,7 @@ const getByIdHotelBooking = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            booking: booking,
+            data: booking,
             paymentInfo
         });
     } catch (error) {

@@ -53,7 +53,7 @@ const Router = () => {
                 {/* Hotel Routes */}
                 <Route path="/hotels" element={<HotelList />} />
                 <Route path="/hotels/:id" element={<HotelDetail />} />
-                <Route path="/hotel-booking/:id" element={<HotelBookingConfirmation />} />
+                <Route path="/hotel-booking-confirmation/:id" element={<HotelBookingConfirmation />} />
             </Route>
         </Routes>
     )
