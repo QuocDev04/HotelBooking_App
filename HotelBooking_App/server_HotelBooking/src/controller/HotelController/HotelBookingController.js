@@ -2,6 +2,7 @@ const HotelBooking = require("../../models/Hotel/HotelBooking.js");
 const Hotel = require("../../models/Hotel/HotelModel.js");
 const DateHotel = require("../../models/Hotel/DateHotel.js");
 const { checkHotelAvailability } = require('./HotelController.js');
+const { createVNPayPaymentUrl } = require('../VNPayController/vnpayController.js');
 
 // Lấy thông tin booking theo ID
 const getByIdHotelBooking = async (req, res) => {
@@ -161,9 +162,13 @@ const bookHotel = async (req, res) => {
             isDeposit = true;
         }
 
+        // Xử lý userId cho guest booking
+        const mongoose = require('mongoose');
+        const finalUserId = userId && userId !== '000000000000000000000000' ? userId : new mongoose.Types.ObjectId();
+
         // Tạo booking
         const newBooking = new HotelBooking({
-            userId,
+            userId: finalUserId,
             hotelId,
             checkInDate: checkIn,
             checkOutDate: checkOut,
@@ -198,6 +203,27 @@ const bookHotel = async (req, res) => {
         // Cập nhật tình trạng phòng
         await updateRoomAvailability(hotelId, checkIn, checkOut, roomBookings, 'book');
 
+        // Xử lý VNPay nếu payment_method là bank_transfer
+        let vnpayUrl = null;
+        if (payment_method === 'bank_transfer') {
+            try {
+                const paymentAmount = isDeposit ? depositAmount : totalPrice;
+                const vnpayData = {
+                    bookingId: newBooking._id,
+                    amount: paymentAmount,
+                    orderInfo: `Thanh toán đặt phòng khách sạn ${hotel.hotelName}`,
+                    orderType: 'hotel_booking',
+                    locale: 'vn',
+                    returnUrl: `${process.env.CLIENT_URL}/booking-success`,
+                    ipAddr: req.ip || '127.0.0.1'
+                };
+                vnpayUrl = await createVNPayPaymentUrl(vnpayData);
+            } catch (vnpayError) {
+                console.error('VNPay error:', vnpayError);
+                // Không throw error, chỉ log và tiếp tục
+            }
+        }
+
         // Populate thông tin để trả về
         const populatedBooking = await HotelBooking.findById(newBooking._id)
             .populate('userId', 'username email')
@@ -213,10 +239,14 @@ const bookHotel = async (req, res) => {
         res.status(201).json({
             success: true,
             message: "Đặt phòng thành công",
-            booking: populatedBooking
+            booking: populatedBooking,
+            bookingId: newBooking._id,
+            vnpayUrl: vnpayUrl
         });
 
     } catch (error) {
+        console.error('Lỗi trong bookHotel:', error);
+        console.error('Stack trace:', error.stack);
         res.status(500).json({
             success: false,
             message: "Lỗi server",
@@ -478,45 +508,110 @@ const getAllHotelBookingsForAdmin = async (req, res) => {
 const confirmHotelCashPayment = async (req, res) => {
     try {
         const { id } = req.params;
-        const { paymentNote, adminId } = req.body;
-        const paymentImage = req.file ? req.file.path : null;
-
-        const booking = await HotelBooking.findById(id);
+        const { adminId, note } = req.body;
+        const paymentImage = req.file; // File được upload từ middleware
+        
+        console.log('🔍 Debug confirmHotelCashPayment:');
+        console.log('- adminId:', adminId);
+        console.log('- note:', note);
+        console.log('- paymentImage:', paymentImage ? paymentImage.filename : 'No file uploaded');
+        
+        // Tìm booking cần xác nhận thanh toán
+        const booking = await HotelBooking.findById(id)
+            .populate('hotelId', 'hotelName location')
+            .populate('userId', 'username email');
+        
         if (!booking) {
-            return res.status(404).json({
-                success: false,
-                message: "Không tìm thấy booking"
+            return res.status(404).json({ 
+                success: false, 
+                message: "Không tìm thấy đặt phòng cần xác nhận thanh toán" 
             });
         }
 
+        // Kiểm tra trạng thái hiện tại
+        if (booking.payment_status !== 'pending') {
+            return res.status(400).json({ 
+                success: false, 
+                message: `Không thể xác nhận thanh toán cho đặt phòng có trạng thái: ${booking.payment_status}` 
+            });
+        }
+
+        // Kiểm tra phương thức thanh toán
+        if (booking.payment_method !== 'cash') {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Chỉ có thể xác nhận thanh toán cho đặt phòng thanh toán tiền mặt" 
+            });
+        }
+
+        // Kiểm tra deadline thanh toán tiền mặt
+        if (booking.cashPaymentDeadline && new Date() > new Date(booking.cashPaymentDeadline)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Đã quá hạn thanh toán tiền mặt (24 giờ)" 
+            });
+        }
+
+        // Xác định loại thanh toán dựa trên paymentType
         if (booking.paymentType === 'deposit') {
+            // Cập nhật trạng thái thanh toán cọc
             booking.payment_status = 'deposit_paid';
             booking.isDeposit = true;
-            booking.depositPaidAt = new Date();
+            booking.depositPaidAt = new Date(); // Thời gian thanh toán cọc
+            booking.paymentConfirmedBy = adminId;
+            if (note) {
+                booking.paymentNote = note;
+            }
+            if (paymentImage) {
+                booking.paymentImage = paymentImage.filename; // Lưu tên file ảnh
+            }
         } else {
+            // Thanh toán toàn bộ
             booking.payment_status = 'completed';
             booking.isFullyPaid = true;
             booking.fullPaidAt = new Date();
+            booking.paymentConfirmedBy = adminId;
+            if (note) {
+                booking.paymentNote = note;
+            }
+            if (paymentImage) {
+                booking.paymentImage = paymentImage.filename;
+            }
         }
-
-        booking.paymentConfirmedBy = adminId;
-        booking.paymentNote = paymentNote;
-        if (paymentImage) {
-            booking.paymentImage = paymentImage;
-        }
-
+        
         await booking.save();
 
         res.status(200).json({
             success: true,
-            message: "Xác nhận thanh toán thành công",
-            booking
+            message: booking.paymentType === 'deposit' ? "Xác nhận thanh toán cọc thành công" : "Xác nhận thanh toán toàn bộ thành công",
+            booking: {
+                _id: booking._id,
+                payment_status: booking.payment_status,
+                depositPaidAt: booking.depositPaidAt,
+                fullPaidAt: booking.fullPaidAt,
+                paymentConfirmedBy: booking.paymentConfirmedBy,
+                paymentNote: booking.paymentNote,
+                paymentImage: booking.paymentImage,
+                customerInfo: {
+                    name: booking.fullNameUser,
+                    email: booking.email,
+                    phone: booking.phone
+                },
+                hotelInfo: {
+                    name: booking.hotelId?.hotelName,
+                    checkIn: booking.checkInDate,
+                    checkOut: booking.checkOutDate,
+                    totalAmount: booking.totalPrice
+                }
+            }
         });
+
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Lỗi server",
-            error: error.message
+        console.error("Lỗi xác nhận thanh toán cọc:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Lỗi server khi xác nhận thanh toán cọc", 
+            error: error.message 
         });
     }
 };
@@ -525,39 +620,74 @@ const confirmHotelCashPayment = async (req, res) => {
 const confirmHotelFullPayment = async (req, res) => {
     try {
         const { id } = req.params;
-        const { paymentNote, adminId } = req.body;
-        const paymentImage = req.file ? req.file.path : null;
-
-        const booking = await HotelBooking.findById(id);
+        const { adminId, note } = req.body;
+        const paymentImage = req.file; // File được upload từ middleware
+        
+        // Tìm booking cần xác nhận thanh toán toàn bộ
+        const booking = await HotelBooking.findById(id)
+            .populate('hotelId', 'hotelName location')
+            .populate('userId', 'username email');
+        
         if (!booking) {
-            return res.status(404).json({
-                success: false,
-                message: "Không tìm thấy booking"
+            return res.status(404).json({ 
+                success: false, 
+                message: "Không tìm thấy đặt phòng cần xác nhận thanh toán" 
             });
         }
 
-        booking.payment_status = 'completed';
-        booking.isFullyPaid = true;
-        booking.fullPaidAt = new Date();
-        booking.fullPaymentConfirmedBy = adminId;
-        booking.fullPaymentNote = paymentNote;
-        
-        if (paymentImage) {
-            booking.fullPaymentImage = paymentImage;
+        // Kiểm tra trạng thái hiện tại
+        if (booking.payment_status !== 'deposit_paid') {
+            return res.status(400).json({ 
+                success: false, 
+                message: `Chỉ có thể xác nhận thanh toán toàn bộ cho đặt phòng đã thanh toán cọc. Trạng thái hiện tại: ${booking.payment_status}` 
+            });
         }
 
+        // Cập nhật trạng thái thanh toán toàn bộ
+        booking.payment_status = 'completed';
+        booking.isFullyPaid = true;
+        booking.fullPaidAt = new Date(); // Thời gian thanh toán toàn bộ
+        booking.fullPaymentConfirmedBy = adminId;
+        if (note) {
+            booking.fullPaymentNote = note;
+        }
+        if (paymentImage) {
+            booking.fullPaymentImage = paymentImage.filename; // Lưu tên file ảnh thanh toán toàn bộ
+        }
+        
         await booking.save();
 
         res.status(200).json({
             success: true,
             message: "Xác nhận thanh toán toàn bộ thành công",
-            booking
+            booking: {
+                _id: booking._id,
+                payment_status: booking.payment_status,
+                isFullyPaid: booking.isFullyPaid,
+                fullPaidAt: booking.fullPaidAt,
+                fullPaymentConfirmedBy: booking.fullPaymentConfirmedBy,
+                fullPaymentNote: booking.fullPaymentNote,
+                fullPaymentImage: booking.fullPaymentImage,
+                customerInfo: {
+                    name: booking.fullNameUser,
+                    email: booking.email,
+                    phone: booking.phone
+                },
+                hotelInfo: {
+                    name: booking.hotelId?.hotelName,
+                    checkIn: booking.checkInDate,
+                    checkOut: booking.checkOutDate,
+                    totalAmount: booking.totalPrice
+                }
+            }
         });
+
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Lỗi server",
-            error: error.message
+        console.error("Lỗi xác nhận thanh toán toàn bộ:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Lỗi server khi xác nhận thanh toán toàn bộ", 
+            error: error.message 
         });
     }
 };
@@ -643,6 +773,47 @@ const getHotelBookingStats = async (req, res) => {
     }
 };
 
+// Xác nhận thanh toán từ client (tương tự tour)
+const confirmHotelPayment = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const booking = await HotelBooking.findById(id);
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy booking"
+            });
+        }
+
+        // Cập nhật trạng thái thanh toán
+        if (booking.paymentType === 'deposit') {
+            booking.payment_status = 'deposit_paid';
+            booking.isDeposit = true;
+            booking.depositPaidAt = new Date();
+        } else {
+            booking.payment_status = 'completed';
+            booking.isFullyPaid = true;
+            booking.fullPaidAt = new Date();
+        }
+
+        booking.booking_status = 'confirmed';
+        await booking.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Xác nhận thanh toán thành công",
+            booking
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Lỗi server",
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     getByIdHotelBooking,
     bookHotel,
@@ -651,6 +822,7 @@ module.exports = {
     getAllHotelBookingsForAdmin,
     confirmHotelCashPayment,
     confirmHotelFullPayment,
+    confirmHotelPayment,
     getHotelBookingStats,
     updateRoomAvailability
 };

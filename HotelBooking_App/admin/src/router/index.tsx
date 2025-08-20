@@ -36,6 +36,7 @@ import AddHotel from "../pages/Hotel/AddHotel"
 import EditHotel from "../pages/Hotel/EditHotel"
 import HotelDetail from "../pages/Hotel/HotelDetail"
 import ListHotelBooking from "../pages/Hotel/ListHotelBooking"
+import RoomManagement from "../pages/Hotel/RoomManagement"
 
 
 
@@ -102,6 +103,7 @@ const Router = () => {
                     <Route path="/admin/hotels/edit/:id" element={<EditHotel />} />
                     <Route path="/admin/hotels/view/:id" element={<HotelDetail />} />
                     <Route path="/admin/hotel-bookings" element={<ListHotelBooking />} />
+                    <Route path="/admin/room-management" element={<RoomManagement />} />
                 </Route>
             </Routes>
         </>

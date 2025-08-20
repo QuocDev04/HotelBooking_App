@@ -1,6 +1,7 @@
 const express = require('express');
 const { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } = require('vnpay');
 const TourBookingSchema = require("../../models/Tour/TourBooking.js");
+const HotelBooking = require("../../models/Hotel/HotelBooking.js");
 const { sendMail } = require("../../controller/mail/sendMail.js");
 
 const Vnpay = express.Router();
@@ -112,23 +113,49 @@ Vnpay.get('/payment-callback', async (req, res) => {
             // Thanh toán thành công
             console.log('Thanh toán thành công cho booking:', bookingId);
 
-            // Tìm booking và cập nhật trạng thái
-            const updatedBooking = await TourBookingSchema.findByIdAndUpdate(
+            // Kiểm tra orderInfo để xác định loại booking
+            const orderInfo = req.query.vnp_OrderInfo || '';
+            const isHotelBooking = orderInfo.includes('khách sạn') || orderInfo.includes('hotel');
+
+            let updatedBooking;
+            
+            if (isHotelBooking) {
+                // Xử lý hotel booking
+                updatedBooking = await HotelBooking.findByIdAndUpdate(
                     bookingId,
                     {
                         payment_status: 'completed',
-                    isFullyPaid: true,
-                    fullPaidAt: new Date(),
+                        booking_status: 'confirmed',
+                        paidAt: new Date(),
                     },
                     { new: true }
                 ).populate({
-                path: 'slotId',
-                select: 'dateTour tour',
-                            populate: {
-                    path: 'tour',
-                    select: 'nameTour',
-                },
-            });
+                    path: 'hotelId',
+                    select: 'hotelName location',
+                    populate: {
+                        path: 'location',
+                        select: 'locationName country'
+                    }
+                });
+            } else {
+                // Xử lý tour booking (logic cũ)
+                updatedBooking = await TourBookingSchema.findByIdAndUpdate(
+                    bookingId,
+                    {
+                        payment_status: 'completed',
+                        isFullyPaid: true,
+                        fullPaidAt: new Date(),
+                    },
+                    { new: true }
+                ).populate({
+                    path: 'slotId',
+                    select: 'dateTour tour',
+                    populate: {
+                        path: 'tour',
+                        select: 'nameTour',
+                    },
+                });
+            }
 
             if (!updatedBooking) {
                 console.error('Không tìm thấy booking:', bookingId);
@@ -885,6 +912,149 @@ Vnpay.post('/process-refund', async (req, res) => {
     }
 });
 
+// Route tạo thanh toán cho hotel booking
+Vnpay.post('/create-hotel-payment', async (req, res) => {
+    try {
+        const { bookingId, amount, orderInfo, orderType, locale, returnUrl, ipAddr } = req.body;
+        
+        console.log('Tạo thanh toán hotel với dữ liệu:', req.body);
+        
+        // Kiểm tra booking tồn tại
+        const booking = await HotelBooking.findById(bookingId);
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy booking'
+            });
+        }
+        
+        // Cấu hình VNPay
+        const vnpay = new VNPay({
+            tmnCode: 'LH54Z11C',
+            secureSecret: 'PO0WDG07TJOGP1P8SO6Z9PHVPIBUWBGQ',
+            vnpayHost: 'https://sandbox.vnpayment.vn',
+            testMode: true,
+            hashAlgorithm: 'SHA512',
+            loggerFn: ignoreLogger,
+        });
+        
+        // Tạo URL thanh toán
+        const paymentUrl = await vnpay.buildPaymentUrl({
+            vnp_Amount: amount * 100, // VNPay yêu cầu số tiền tính bằng xu
+            vnp_IpAddr: ipAddr || '127.0.0.1',
+            vnp_TxnRef: `${bookingId}-${Date.now()}`,
+            vnp_OrderInfo: orderInfo,
+            vnp_OrderType: ProductCode.Other,
+            vnp_ReturnUrl: returnUrl || `http://localhost:8080/api/vnpay/hotel-payment-callback`,
+            vnp_Locale: locale === 'en' ? VnpLocale.EN : VnpLocale.VN,
+            vnp_CreateDate: dateFormat(new Date()),
+            vnp_ExpireDate: dateFormat(new Date(Date.now() + 24 * 60 * 60 * 1000)), // 24 giờ
+        });
+        
+        console.log('URL thanh toán hotel đã tạo:', paymentUrl);
+        
+        return res.status(200).json({
+            success: true,
+            paymentUrl,
+            bookingId: booking._id
+        });
+        
+    } catch (error) {
+        console.error('Lỗi tạo thanh toán hotel:', error);
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// Route hoàn tiền cho hotel booking
+Vnpay.post('/process-hotel-refund', async (req, res) => {
+    try {
+        const { bookingId, refundType, refundReason } = req.body;
+        
+        console.log('Xử lý hoàn tiền hotel với dữ liệu:', req.body);
+        
+        // Kiểm tra booking tồn tại
+        const booking = await HotelBooking.findById(bookingId);
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy booking'
+            });
+        }
+        
+        // Tính toán số tiền hoàn
+        let refundAmountToProcess = 0;
+        const checkInDate = new Date(booking.checkInDate);
+        const currentDate = new Date();
+        const daysUntilCheckIn = Math.ceil((checkInDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (refundType === 'customer_cancellation') {
+            if (daysUntilCheckIn > 7) {
+                refundAmountToProcess = booking.totalPrice * 0.8; // 80%
+            } else if (daysUntilCheckIn > 3) {
+                refundAmountToProcess = booking.totalPrice * 0.5; // 50%
+            } else if (daysUntilCheckIn > 0) {
+                refundAmountToProcess = booking.totalPrice * 0.2; // 20%
+            } else {
+                refundAmountToProcess = 0; // No-show
+            }
+        } else if (refundType === 'hotel_cancellation') {
+            refundAmountToProcess = booking.totalPrice; // 100%
+        }
+        
+        // Cấu hình VNPay
+        const vnpay = new VNPay({
+            tmnCode: 'LH54Z11C',
+            secureSecret: 'PO0WDG07TJOGP1P8SO6Z9PHVPIBUWBGQ',
+            vnpayHost: 'https://sandbox.vnpayment.vn',
+            testMode: true,
+            hashAlgorithm: 'SHA512',
+            loggerFn: ignoreLogger,
+        });
+        
+        // Tạo URL hoàn tiền VNPay
+        const refundUrl = await vnpay.buildRefundUrl({
+            vnp_Amount: refundAmountToProcess * 100, // VNPay yêu cầu số tiền tính bằng xu
+            vnp_IpAddr: req.ip || '127.0.0.1',
+            vnp_TxnRef: `${booking._id}-refund-${Date.now()}`,
+            vnp_OrderInfo: `Hoàn tiền đặt phòng #${booking._id} - ${refundReason}`,
+            vnp_TransactionType: '02', // Refund
+            vnp_CreateDate: dateFormat(new Date()),
+        });
+        
+        // Cập nhật trạng thái hoàn tiền
+        await HotelBooking.findByIdAndUpdate(bookingId, {
+            refund_status: 'processing',
+            refund_amount: refundAmountToProcess,
+            refund_method: 'bank_transfer',
+            refund_note: refundReason,
+            cancel_reason: refundReason,
+            booking_status: 'cancelled',
+            cancelledAt: new Date()
+        });
+        
+        console.log('URL hoàn tiền hotel đã tạo:', refundUrl);
+        
+        return res.status(200).json({
+            success: true,
+            refundUrl,
+            bookingId: booking._id,
+            refundAmount: refundAmountToProcess,
+            refundReason,
+            refundType
+        });
+        
+    } catch (error) {
+        console.error('Lỗi xử lý hoàn tiền hotel:', error);
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
 // Route callback hoàn tiền
 Vnpay.get('/refund-callback', async (req, res) => {
     try {
@@ -984,8 +1154,95 @@ Vnpay.get('/refund-callback', async (req, res) => {
     }
 });
 
+// Route callback cho hotel booking
+Vnpay.get('/hotel-payment-callback', async (req, res) => {
+    try {
+        console.log('Nhận callback từ VNPay (Hotel Booking):', req.query);
 
+        // Cấu hình VNPay
+        const vnpay = new VNPay({
+            tmnCode: 'LH54Z11C',
+            secureSecret: 'PO0WDG07TJOGP1P8SO6Z9PHVPIBUWBGQ',
+            vnpayHost: 'https://sandbox.vnpayment.vn',
+            testMode: true,
+            hashAlgorithm: 'SHA512',
+            loggerFn: ignoreLogger,
+        });
 
+        // Kiểm tra chữ ký
+        const isValid = vnpay.verifyReturnUrl(req.query);
+        if (!isValid) {
+            console.error('Chữ ký không hợp lệ');
+            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Invalid signature');
+        }
 
+        const responseCode = req.query.vnp_ResponseCode;
+        const txnRef = req.query.vnp_TxnRef;
+        const bookingId = txnRef.split('-')[0];
+
+        console.log('Response Code:', responseCode);
+        console.log('Hotel Booking ID:', bookingId);
+
+        if (responseCode === '00') {
+            // Thanh toán thành công
+            console.log('Thanh toán hotel thành công cho booking:', bookingId);
+            
+            const updatedBooking = await HotelBooking.findByIdAndUpdate(
+                bookingId,
+                {
+                    payment_status: 'completed',
+                    booking_status: 'confirmed',
+                    paidAt: new Date(),
+                },
+                { new: true }
+            );
+            
+            if (updatedBooking) {
+                console.log('Hotel booking đã được cập nhật thành công:', updatedBooking._id);
+                
+                // Gửi email xác nhận
+                if (updatedBooking.guestInfo && updatedBooking.guestInfo.email) {
+                    try {
+                        await sendMail({
+                            to: updatedBooking.guestInfo.email,
+                            subject: 'Xác nhận đặt phòng khách sạn thành công',
+                            html: `
+                                <h2>Xác nhận đặt phòng thành công</h2>
+                                <p>Chào ${updatedBooking.guestInfo.fullName},</p>
+                                <p>Đặt phòng của bạn đã được xác nhận thành công!</p>
+                                <p><strong>Mã đặt phòng:</strong> ${updatedBooking._id}</p>
+                                <p><strong>Khách sạn:</strong> ${updatedBooking.hotelId.hotelName}</p>
+                                <p><strong>Ngày nhận phòng:</strong> ${new Date(updatedBooking.checkInDate).toLocaleDateString('vi-VN')}</p>
+                                <p><strong>Ngày trả phòng:</strong> ${new Date(updatedBooking.checkOutDate).toLocaleDateString('vi-VN')}</p>
+                                <p><strong>Tổng tiền:</strong> ${updatedBooking.totalPrice.toLocaleString('vi-VN')} VND</p>
+                                <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</p>
+                            `
+                        });
+                        console.log('Email xác nhận hotel đã gửi tới:', updatedBooking.guestInfo.email);
+                    } catch (mailErr) {
+                        console.error('Lỗi gửi email hotel:', mailErr);
+                    }
+                }
+            }
+
+            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=00&success=true&type=hotel');
+
+        } else {
+            // Thanh toán thất bại
+            console.log('Thanh toán hotel thất bại cho booking:', bookingId);
+            
+            await HotelBooking.findByIdAndUpdate(
+                bookingId,
+                { payment_status: 'failed' }
+            );
+
+            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Hotel payment failed');
+        }
+
+    } catch (error) {
+        console.error('Lỗi xử lý callback hotel:', error);
+        return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=System error');
+    }
+});
 
 module.exports = Vnpay;

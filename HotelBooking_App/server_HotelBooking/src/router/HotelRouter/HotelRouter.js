@@ -6,7 +6,11 @@ const {
     updateHotel,
     deleteHotel,
     searchHotels,
-    getHotelAvailability
+    getHotelAvailability,
+    addRoomType,
+    updateRoomType,
+    deleteRoomType,
+    getRoomAvailability
 } = require('../../controller/HotelController/HotelController.js');
 const { uploadHotelImages } = require('../../Middleware/uploadMiddleware');
 
@@ -35,6 +39,12 @@ RouterHotel.get('/admin/hotels/:id', getHotelById);
 RouterHotel.post('/admin/hotels', createHotel);
 RouterHotel.put('/admin/hotels/:id', updateHotel);
 RouterHotel.delete('/admin/hotels/:id', deleteHotel);
+
+// Room management routes
+RouterHotel.post('/admin/hotels/:id/rooms', addRoomType);
+RouterHotel.put('/admin/hotels/:hotelId/rooms/:roomTypeId', updateRoomType);
+RouterHotel.delete('/admin/hotels/:hotelId/rooms/:roomTypeId', deleteRoomType);
+RouterHotel.get('/admin/hotels/:id/rooms/availability', getRoomAvailability);
 
 // Upload endpoint for hotel images
 RouterHotel.post('/admin/upload/hotel-images', uploadHotelImages, (req, res) => {

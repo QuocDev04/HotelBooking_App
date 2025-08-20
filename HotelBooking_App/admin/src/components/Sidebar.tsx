@@ -83,6 +83,7 @@ const Sidebar = () => {
             children: [
                 { name: 'Danh sách Khách sạn', path: '/admin/hotels', icon: '🏢' },
                 { name: 'Thêm Khách sạn', path: '/admin/hotels/add', icon: '🆕' },
+                { name: 'Quản lý Phòng', path: '/admin/room-management', icon: '🛏️' },
                 { name: 'Quản lý Đặt phòng', path: '/admin/hotel-bookings', icon: '📋' },
             ],
         },

@@ -1,5 +1,10 @@
 const cron = require('node-cron');
-const { autoCancel48hExpiredBookings, checkBookingsNearExpiry } = require('../controller/TourController/AutoCancelController');
+const { 
+    autoCancel48hExpiredBookings, 
+    checkBookingsNearExpiry,
+    autoCancelExpiredHotelBookings,
+    checkHotelBookingsNearExpiry 
+} = require('../controller/TourController/AutoCancelController');
 
 // Chạy mỗi giờ để kiểm tra và hủy booking quá hạn
 const startAutoCancelJob = () => {
@@ -8,18 +13,32 @@ const startAutoCancelJob = () => {
         console.log('🔄 Bắt đầu kiểm tra booking quá hạn thanh toán tiền mặt...');
         
         try {
-            // Tự động hủy booking quá hạn
-            const result = await autoCancel48hExpiredBookings();
+            // Tự động hủy tour booking quá hạn
+            const tourResult = await autoCancel48hExpiredBookings();
             
-            if (result.success && result.cancelledCount > 0) {
-                console.log(`✅ Đã tự động hủy ${result.cancelledCount} booking quá hạn`);
+            if (tourResult.success && tourResult.cancelledCount > 0) {
+                console.log(`✅ Đã tự động hủy ${tourResult.cancelledCount} tour booking quá hạn`);
                 
-                // Log chi tiết các booking đã hủy
-                result.cancelledBookings.forEach(booking => {
-                    console.log(`   - Booking ${booking.bookingId}: ${booking.customerName} (${booking.email})`);
+                // Log chi tiết các tour booking đã hủy
+                tourResult.cancelledBookings.forEach(booking => {
+                    console.log(`   - Tour Booking ${booking.bookingId}: ${booking.customerName} (${booking.email})`);
                 });
             } else {
-                console.log('ℹ️ Không có booking nào quá hạn cần hủy');
+                console.log('ℹ️ Không có tour booking nào quá hạn cần hủy');
+            }
+
+            // Tự động hủy hotel booking quá hạn
+            const hotelResult = await autoCancelExpiredHotelBookings();
+            
+            if (hotelResult.success && hotelResult.cancelledCount > 0) {
+                console.log(`✅ Đã tự động hủy ${hotelResult.cancelledCount} hotel booking quá hạn`);
+                
+                // Log chi tiết các hotel booking đã hủy
+                hotelResult.cancelledBookings.forEach(booking => {
+                    console.log(`   - Hotel Booking ${booking.bookingId}: ${booking.customerName} (${booking.email}) - ${booking.hotelName}`);
+                });
+            } else {
+                console.log('ℹ️ Không có hotel booking nào quá hạn cần hủy');
             }
             
         } catch (error) {
@@ -32,20 +51,34 @@ const startAutoCancelJob = () => {
         console.log('🔔 Kiểm tra booking sắp hết hạn thanh toán...');
         
         try {
-            const result = await checkBookingsNearExpiry();
+            // Kiểm tra tour booking sắp hết hạn
+            const tourResult = await checkBookingsNearExpiry();
             
-            if (result.success && result.count > 0) {
-                console.log(`⚠️ Có ${result.count} booking sắp hết hạn trong 6h tới:`);
+            if (tourResult.success && tourResult.count > 0) {
+                console.log(`⚠️ Có ${tourResult.count} tour booking sắp hết hạn trong 6h tới:`);
                 
-                result.bookings.forEach(booking => {
+                tourResult.bookings.forEach(booking => {
                     console.log(`   - ${booking.customerName} (${booking.phone}): ${booking.tourName} - Còn ${booking.hoursRemaining}h`);
                 });
-                
-                // Ở đây có thể thêm logic gửi email/SMS thông báo
-                // await sendExpiryWarningNotifications(result.bookings);
             } else {
-                console.log('ℹ️ Không có booking nào sắp hết hạn');
+                console.log('ℹ️ Không có tour booking nào sắp hết hạn');
             }
+
+            // Kiểm tra hotel booking sắp hết hạn
+            const hotelResult = await checkHotelBookingsNearExpiry();
+            
+            if (hotelResult.success && hotelResult.count > 0) {
+                console.log(`⚠️ Có ${hotelResult.count} hotel booking sắp hết hạn trong 6h tới:`);
+                
+                hotelResult.bookings.forEach(booking => {
+                    console.log(`   - ${booking.customerName} (${booking.phone}): ${booking.hotelName} - Còn ${booking.hoursRemaining}h`);
+                });
+            } else {
+                console.log('ℹ️ Không có hotel booking nào sắp hết hạn');
+            }
+                
+            // Ở đây có thể thêm logic gửi email/SMS thông báo
+            // await sendExpiryWarningNotifications([...tourResult.bookings, ...hotelResult.bookings]);
             
         } catch (error) {
             console.error('❌ Lỗi khi kiểm tra booking sắp hết hạn:', error);

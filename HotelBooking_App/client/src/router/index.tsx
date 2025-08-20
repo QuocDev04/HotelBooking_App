@@ -7,6 +7,8 @@ import Transport from "../pages/Tours/Transport"
 import DestinationList from "../pages/Tours/DestinationList"
 import TransportDetail from "../pages/Tours/TransportDeatil"
 import PaymentPage from "../pages/Payment/payment"
+import HotelPaymentPage from "../pages/Payment/HotelPayment"
+import CheckOutHotel from "../pages/Hotel/CheckOutHotel"
 import PaymentResult from "../pages/Booking/Payment"
 import Blog from "../pages/Blog/blog"
 import { HotelPolicy } from "../pages/Blog/hotelPolicy"
@@ -32,7 +34,9 @@ const Router = () => {
                 <Route path="/transport" element={<Transport />} />
                 <Route path="/destinations" element={<DestinationList />} />
                 <Route path="/transports" element={<TransportDetail />} />
-                <Route path="/payment" element={<PaymentPage />} />
+                <Route path="/payment/:bookingId" element={<PaymentPage />} />
+                <Route path="/payment/hotel-booking/:bookingId" element={<HotelPaymentPage />} />
+                <Route path="/checkout-hotel/:bookingId" element={<CheckOutHotel />} />
                 <Route path="/payment-result" element={<PaymentResult />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/hotelPolicy" element={<HotelPolicy />} />

@@ -56,10 +56,9 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal Server Error', message: err.message });
 });
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8081;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     // Khởi động cron job tự động hủy booking
     startAutoCancelJob();
-}); // Server restart
-
+});

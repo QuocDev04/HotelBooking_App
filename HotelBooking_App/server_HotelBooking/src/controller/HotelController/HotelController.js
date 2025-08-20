@@ -472,6 +472,215 @@ const getHotelAvailability = async (req, res) => {
     }
 };
 
+// Thêm loại phòng mới
+const addRoomType = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const roomTypeData = req.body;
+        
+        // Tính finalPrice
+        if (roomTypeData.discountPercent && roomTypeData.discountPercent > 0) {
+            roomTypeData.finalPrice = roomTypeData.basePrice * (1 - roomTypeData.discountPercent / 100);
+        } else {
+            roomTypeData.finalPrice = roomTypeData.basePrice;
+        }
+        
+        const hotel = await Hotel.findByIdAndUpdate(
+            id,
+            { $push: { roomTypes: roomTypeData } },
+            { new: true, runValidators: true }
+        ).populate('location', 'locationName country');
+        
+        if (!hotel) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Không tìm thấy khách sạn" 
+            });
+        }
+        
+        res.status(200).json({
+            success: true,
+            message: "Thêm loại phòng thành công",
+            data: hotel
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            message: "Lỗi server", 
+            error: error.message 
+        });
+    }
+};
+
+// Cập nhật loại phòng
+const updateRoomType = async (req, res) => {
+    try {
+        const { id, roomTypeId } = req.params;
+        const roomTypeData = req.body;
+        
+        // Tính finalPrice
+        if (roomTypeData.discountPercent && roomTypeData.discountPercent > 0) {
+            roomTypeData.finalPrice = roomTypeData.basePrice * (1 - roomTypeData.discountPercent / 100);
+        } else {
+            roomTypeData.finalPrice = roomTypeData.basePrice;
+        }
+        
+        const hotel = await Hotel.findOneAndUpdate(
+            { _id: id, "roomTypes._id": roomTypeId },
+            { 
+                $set: {
+                    "roomTypes.$.typeName": roomTypeData.typeName,
+                    "roomTypes.$.basePrice": roomTypeData.basePrice,
+                    "roomTypes.$.finalPrice": roomTypeData.finalPrice,
+                    "roomTypes.$.maxOccupancy": roomTypeData.maxOccupancy,
+                    "roomTypes.$.bedType": roomTypeData.bedType,
+                    "roomTypes.$.totalRooms": roomTypeData.totalRooms,
+                    "roomTypes.$.discountPercent": roomTypeData.discountPercent || 0,
+                    "roomTypes.$.amenities": roomTypeData.amenities || [],
+                    "roomTypes.$.images": roomTypeData.images || []
+                }
+            },
+            { new: true, runValidators: true }
+        ).populate('location', 'locationName country');
+        
+        if (!hotel) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Không tìm thấy khách sạn hoặc loại phòng" 
+            });
+        }
+        
+        res.status(200).json({
+            success: true,
+            message: "Cập nhật loại phòng thành công",
+            data: hotel
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            message: "Lỗi server", 
+            error: error.message 
+        });
+    }
+};
+
+// Xóa loại phòng
+const deleteRoomType = async (req, res) => {
+    try {
+        const { id, roomTypeId } = req.params;
+        
+        const hotel = await Hotel.findByIdAndUpdate(
+            id,
+            { $pull: { roomTypes: { _id: roomTypeId } } },
+            { new: true }
+        ).populate('location', 'locationName country');
+        
+        if (!hotel) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Không tìm thấy khách sạn" 
+            });
+        }
+        
+        res.status(200).json({
+            success: true,
+            message: "Xóa loại phòng thành công",
+            data: hotel
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            message: "Lỗi server", 
+            error: error.message 
+        });
+    }
+};
+
+// Lấy tình trạng phòng theo khoảng thời gian
+const getRoomAvailability = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { startDate, endDate } = req.query;
+        
+        if (!startDate || !endDate) {
+            return res.status(400).json({
+                success: false,
+                message: "Vui lòng cung cấp ngày bắt đầu và kết thúc"
+            });
+        }
+        
+        const hotel = await Hotel.findById(id);
+        if (!hotel) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Không tìm thấy khách sạn" 
+            });
+        }
+        
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const availability = [];
+        
+        // Lấy tất cả booking trong khoảng thời gian
+        const HotelBooking = require("../../models/Hotel/HotelBooking.js");
+        const bookings = await HotelBooking.find({
+            hotelId: id,
+            payment_status: { $in: ['confirmed', 'completed', 'deposit_paid'] },
+            $or: [
+                {
+                    checkInDate: { $lte: end },
+                    checkOutDate: { $gte: start }
+                }
+            ]
+        });
+        
+        // Tính toán tình trạng phòng cho từng ngày
+        const currentDate = new Date(start);
+        while (currentDate <= end) {
+            hotel.roomTypes.forEach((roomType, index) => {
+                const dateStr = currentDate.toISOString().split('T')[0];
+                
+                // Đếm số phòng đã đặt cho ngày này
+                const bookedRooms = bookings.filter(booking => {
+                    const checkIn = new Date(booking.checkInDate);
+                    const checkOut = new Date(booking.checkOutDate);
+                    return booking.roomTypeIndex === index &&
+                           currentDate >= checkIn && currentDate < checkOut;
+                }).reduce((sum, booking) => sum + booking.numberOfRooms, 0);
+                
+                availability.push({
+                    date: dateStr,
+                    roomTypeIndex: index,
+                    roomTypeName: roomType.typeName,
+                    totalRooms: roomType.totalRooms,
+                    bookedRooms: bookedRooms,
+                    availableRooms: Math.max(0, roomType.totalRooms - bookedRooms)
+                });
+            });
+            
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+        
+        res.status(200).json({
+            success: true,
+            data: {
+                hotel: {
+                    _id: hotel._id,
+                    hotelName: hotel.hotelName,
+                    roomTypes: hotel.roomTypes
+                },
+                availability: availability
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            message: "Lỗi server", 
+            error: error.message 
+        });
+    }
+};
+
 module.exports = {
     getAllHotels,
     getHotelById,
@@ -480,5 +689,9 @@ module.exports = {
     deleteHotel,
     searchHotels,
     getHotelAvailability,
-    checkHotelAvailability
+    checkHotelAvailability,
+    addRoomType,
+    updateRoomType,
+    deleteRoomType,
+    getRoomAvailability
 };

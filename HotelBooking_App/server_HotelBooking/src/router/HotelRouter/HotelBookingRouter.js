@@ -7,6 +7,7 @@ const {
     getAllHotelBookingsForAdmin,
     confirmHotelCashPayment,
     confirmHotelFullPayment,
+    confirmHotelPayment,
     getHotelBookingStats
 } = require('../../controller/HotelController/HotelBookingController.js');
 const { uploadPaymentImage } = require('../../Middleware/uploadMiddleware');
@@ -18,6 +19,7 @@ RouterHotelBooking.post('/hotel-booking', bookHotel);
 RouterHotelBooking.get('/hotel-booking/:id', getByIdHotelBooking);
 RouterHotelBooking.get('/hotel-booking/user/:userId', getHotelBookingsByUser);
 RouterHotelBooking.put('/hotel-booking/cancel/:id', cancelHotelBooking);
+RouterHotelBooking.put('/hotel-booking/confirm-payment/:id', confirmHotelPayment);
 
 // Admin routes
 RouterHotelBooking.get('/admin/hotel-bookings', getAllHotelBookingsForAdmin);

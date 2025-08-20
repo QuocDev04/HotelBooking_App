@@ -202,23 +202,45 @@ const HotelDetail: React.FC = () => {
     setBookingModalVisible(true);
   };
 
+  const [depositModalVisible, setDepositModalVisible] = useState(false);
+
   const handleBookingSubmit = async (values: any) => {
+    // Kiểm tra nếu là thanh toán cọc và phương thức thanh toán không phải là bank_transfer
+    if (values.paymentType === 'deposit' && values.paymentMethod !== 'bank_transfer') {
+      // Hiển thị modal thông báo
+      setDepositModalVisible(true);
+      return;
+    }
+
+    // Thực hiện đặt phòng
+    await processBooking(values);
+  };
+
+  const processBooking = async (values: any) => {
     setBookingLoading(true);
     try {
       const bookingData = {
+        userId: '000000000000000000000000', // Default ObjectId for guest booking
         hotelId: hotel?._id,
-        roomTypeIndex: hotel?.roomTypes.findIndex(rt => rt._id === selectedRoomType._id),
         checkInDate,
         checkOutDate,
-        numberOfRooms: values.numberOfRooms,
-        totalGuests: guests,
-        guestInfo: {
-          fullName: values.fullName,
-          email: values.email,
-          phone: values.phone,
-          specialRequests: values.specialRequests || ''
-        },
-        payment_method: values.paymentMethod
+        fullNameUser: values.fullName,
+        email: values.email,
+        phone: values.phone,
+        address: values.address || '',
+        roomBookings: [{
+          roomTypeIndex: hotel?.roomTypes.findIndex(rt => rt._id === selectedRoomType._id),
+          numberOfRooms: values.numberOfRooms,
+          guests: Array.from({ length: guests }, (_, i) => ({
+            fullName: i === 0 ? values.fullName : `Guest ${i + 1}`,
+            gender: 'Nam', // Default gender, can be customized later
+            birthDate: new Date('1990-01-01') // Default birth date, can be customized later
+          }))
+        }],
+        payment_method: values.paymentMethod,
+        paymentType: values.paymentType,
+        note: values.note || '',
+        specialRequests: values.specialRequests || ''
       };
 
       const response = await axios.post('http://localhost:8080/api/hotel-booking', bookingData);
@@ -227,6 +249,22 @@ const HotelDetail: React.FC = () => {
         message.success('Đặt phòng thành công!');
         setBookingModalVisible(false);
         form.resetFields();
+        
+        // Handle payment redirection
+        if (values.paymentMethod === 'bank_transfer' && response.data.vnpayUrl) {
+          // Redirect to VNPay
+          window.location.href = response.data.vnpayUrl;
+        } else if (values.paymentMethod === 'cash') {
+          // Navigate to hotel booking confirmation page
+          navigate(`/hotel-booking-confirmation/${response.data.bookingId}`);
+        } else if (values.paymentMethod === 'bank_transfer') {
+          // Navigate to checkout hotel page for VNPay payment options
+          navigate(`/checkout-hotel/${response.data.bookingId}`);
+        } else {
+          // Navigate to hotel payment page
+          navigate(`/payment/hotel-booking/${response.data.bookingId}`);
+        }
+        
         checkAvailability();
       } else {
         message.error(response.data.message || 'Đặt phòng thất bại');
@@ -236,6 +274,36 @@ const HotelDetail: React.FC = () => {
     } finally {
       setBookingLoading(false);
     }
+  };
+
+  const handleDepositConfirm = () => {
+    if (bookingLoading) return;
+    
+    setDepositModalVisible(false);
+    
+    // Lấy tất cả giá trị form hiện tại
+    const formValues = form.getFieldsValue();
+    
+    // Cập nhật phương thức thanh toán thành VNPay
+    formValues.paymentMethod = "bank_transfer";
+    
+    // Gọi API với phương thức thanh toán đã cập nhật
+    processBooking(formValues);
+  };
+
+  const handleCashPayment = () => {
+    if (bookingLoading) return;
+    
+    setDepositModalVisible(false);
+    
+    // Lấy tất cả giá trị form hiện tại
+    const formValues = form.getFieldsValue();
+    
+    // Đảm bảo phương thức thanh toán là tiền mặt
+    formValues.paymentMethod = "cash";
+    
+    // Gọi API với phương thức thanh toán tiền mặt
+    processBooking(formValues);
   };
 
   if (loading) {
@@ -517,6 +585,14 @@ const HotelDetail: React.FC = () => {
               <Input placeholder="Nhập email" />
             </Form.Item>
 
+            <Form.Item
+              label="Địa chỉ"
+              name="address"
+              rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' }]}
+            >
+              <Input placeholder="Nhập địa chỉ" />
+            </Form.Item>
+
             <Row gutter={16}>
               <Col span={12}>
                 <Form.Item
@@ -546,6 +622,22 @@ const HotelDetail: React.FC = () => {
               </Col>
             </Row>
 
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  label="Loại thanh toán"
+                  name="paymentType"
+                  rules={[{ required: true, message: 'Vui lòng chọn loại thanh toán!' }]}
+                  initialValue="deposit"
+                >
+                  <Select placeholder="Chọn loại thanh toán">
+                    <Option value="deposit">Đặt cọc (30%)</Option>
+                    <Option value="full">Thanh toán toàn bộ</Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+
             <Form.Item
               label="Yêu cầu đặc biệt"
               name="specialRequests"
@@ -569,6 +661,94 @@ const HotelDetail: React.FC = () => {
             </Form.Item>
           </Form>
         )}
+      </Modal>
+
+      {/* Modal thông báo khi chọn thanh toán cọc nhưng không chọn VNPay */}
+      <Modal
+        title={<div className="text-xl font-bold text-blue-700">Lựa chọn phương thức đặt cọc</div>}
+        open={depositModalVisible}
+        onCancel={bookingLoading ? undefined : () => setDepositModalVisible(false)}
+        closable={!bookingLoading}
+        maskClosable={!bookingLoading}
+        footer={null}
+        width={600}
+        centered
+      >
+        <div className="py-4">
+          <div className="flex items-center mb-4 text-yellow-500">
+            <span className="text-3xl mr-3">ℹ️</span>
+            <span className="text-lg font-semibold">Lựa chọn phương thức thanh toán đặt cọc</span>
+          </div>
+          
+          <p className="mb-4 text-gray-700">
+            Bạn có thể chọn một trong các phương thức thanh toán đặt cọc sau:
+          </p>
+          
+          <div className="space-y-4">
+            {/* Tùy chọn thanh toán VNPay */}
+            <div 
+              className={`bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4 ${!bookingLoading ? 'hover:bg-blue-100' : 'opacity-50'}`}
+            >
+              <div className="flex items-center mb-2">
+                <span className="text-xl mr-2">💳</span>
+                <h3 className="font-semibold text-blue-700">Thanh toán qua VNPay (Khuyến nghị)</h3>
+              </div>
+              <ul className="list-disc pl-5 text-gray-700">
+                <li>Số tiền cần thanh toán: <span className="font-semibold text-red-600">{selectedRoomType ? Math.round(selectedRoomType.finalPrice * 0.3).toLocaleString() : '0'} ₫</span></li>
+                <li>Thanh toán ngay trực tuyến qua thẻ</li>
+                <li>Xác nhận đặt phòng ngay lập tức</li>
+                <li>Đảm bảo giữ chỗ cho phòng</li>
+              </ul>
+              <div className="mt-3 text-right">
+                <Button 
+                  type="primary" 
+                  onClick={handleDepositConfirm}
+                  className="bg-blue-600"
+                  loading={bookingLoading}
+                  disabled={bookingLoading}
+                >
+                  {bookingLoading ? "Đang xử lý..." : "Tiếp tục với VNPay"}
+                </Button>
+              </div>
+            </div>
+            
+            {/* Tùy chọn thanh toán tiền mặt */}
+            <div 
+              className={`bg-green-50 p-4 rounded-lg border border-green-200 ${!bookingLoading ? 'hover:bg-green-100' : 'opacity-50'}`}
+            >
+              <div className="flex items-center mb-2">
+                <span className="text-xl mr-2">💵</span>
+                <h3 className="font-semibold text-green-700">Thanh toán tiền mặt tại văn phòng</h3>
+              </div>
+              <ul className="list-disc pl-5 text-gray-700">
+                <li>Số tiền cần đặt cọc: <span className="font-semibold text-red-600">{selectedRoomType ? Math.round(selectedRoomType.finalPrice * 0.3).toLocaleString() : '0'} ₫</span></li>
+                <li>Địa chỉ: Số 81A ngõ 295 - Phố Bằng Liệt - Phường Lĩnh Nam - Quận Hoàng Mai - Hà Nội</li>
+                <li>Thời gian: 9h00 - 17h30 từ thứ 2 - đến thứ 6 và 9h00 - 12h00 thứ 7</li>
+                <li><span className="text-red-500 font-medium">Lưu ý:</span> Đặt phòng chỉ được xác nhận sau khi đã thanh toán đặt cọc trong vòng 24 giờ</li>
+              </ul>
+              <div className="mt-3 text-right">
+                <Button 
+                  type="default" 
+                  onClick={handleCashPayment}
+                  className="bg-green-600 text-white hover:bg-green-700"
+                  loading={bookingLoading}
+                  disabled={bookingLoading}
+                >
+                  {bookingLoading ? "Đang xử lý..." : "Thanh toán tiền mặt"}
+                </Button>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-4 text-center">
+            <Button 
+              onClick={() => setDepositModalVisible(false)}
+              disabled={bookingLoading}
+            >
+              Quay lại chỉnh sửa
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
