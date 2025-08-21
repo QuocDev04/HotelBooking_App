@@ -5,8 +5,7 @@ import FeaturedDestination from "./Main/FeaturedDestination"
 import Internatinal from "./Main/Internatinal"
 import News from "./Main/News"
 import TourIn from "./Main/TourIn"
-import TourOut from "./Main/TourOut"
-import TourPromotion from "./Main/TourPromotion"
+import HotelPromotion from "./Main/HotelPromotion"
 
 const LayoutHome = () => {
   useEffect(() => {
@@ -18,8 +17,7 @@ const LayoutHome = () => {
       <AboutUs/>
       <Internatinal/>
       <FeaturedDestination/>
-      <TourPromotion/>
-      <TourOut/>
+      <HotelPromotion/>
       <TourIn/>
       <News/>
     </div>
