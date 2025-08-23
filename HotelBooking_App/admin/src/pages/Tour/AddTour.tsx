@@ -294,7 +294,6 @@ const AddTour = () => {
                         style={{ width: "100%" }} />
                     </Form.Item>
                   </Col>
-
                   <Col span={6}>
                     <Form.Item
                       label="Ngày hết hạn giảm giá"
@@ -302,13 +301,15 @@ const AddTour = () => {
                       rules={[
                         ({ getFieldValue }) => ({
                           validator(_, value) {
-                            const discount = getFieldValue('discountPercent');
+                            const discount = getFieldValue("discountPercent");
                             if (!discount || discount <= 0) return Promise.resolve();
-                            if (!value) return Promise.reject(new Error('Vui lòng chọn ngày hết hạn'));
-                            if (value.isBefore(new Date())) return Promise.reject(new Error('Ngày hết hạn phải lớn hơn hiện tại'));
+                            if (!value) return Promise.reject(new Error("Vui lòng chọn ngày hết hạn"));
+                            if (value.isBefore(dayjs())) {
+                              return Promise.reject(new Error("Ngày hết hạn phải lớn hơn hiện tại"));
+                            }
                             return Promise.resolve();
-                          }
-                        })
+                          },
+                        }),
                       ]}
                     >
                       <DatePicker
@@ -317,9 +318,28 @@ const AddTour = () => {
                         size="large"
                         style={{ width: "100%" }}
                         placeholder="Chọn ngày giờ hết hạn"
+                        disabledDate={(current) => {
+                          // Không cho chọn ngày trước hôm nay
+                          return current && current < dayjs().startOf("day");
+                        }}
+                        disabledTime={(current) => {
+                          if (!current) return {};
+                          if (current.isSame(dayjs(), "day")) {
+                            return {
+                              disabledHours: () =>
+                                Array.from({ length: 24 }, (_, i) => i).filter((h) => h < dayjs().hour()),
+                              disabledMinutes: () =>
+                                Array.from({ length: 60 }, (_, i) => i).filter((m) => m < dayjs().minute()),
+                              disabledSeconds: () =>
+                                Array.from({ length: 60 }, (_, i) => i).filter((s) => s < dayjs().second()),
+                            };
+                          }
+                          return {};
+                        }}
                       />
                     </Form.Item>
                   </Col>
+
                 </Row>
                 <Row gutter={24}>
                   <Col span={6}>

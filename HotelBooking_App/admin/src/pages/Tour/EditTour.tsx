@@ -9,6 +9,7 @@ import "react-quill/dist/quill.snow.css";
 import instance from "../../configs/axios";
 import { useParams } from "react-router-dom";
 import moment from "moment";
+import dayjs from "dayjs";
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
 const EditTour = () => {
@@ -96,10 +97,12 @@ const EditTour = () => {
 
             form.setFieldsValue({
                 ...tour,
-                itemTransport: transportId, 
+                itemTransport: transportId,
+                destination: tour.destination?._id || tour.destination, // 👈 thêm dòng này
             });
         }
     }, [data?.data?.tour, transports]);
+
     const toolbarOptions = [
         ["bold", "italic", "underline", "strike"], // toggled buttons
         ["blockquote", "code-block"],
@@ -348,26 +351,172 @@ const EditTour = () => {
                                             rules={[
                                                 ({ getFieldValue }) => ({
                                                     validator(_, value) {
-                                                        const discount = getFieldValue('discountPercent');
+                                                        const discount = getFieldValue("discountPercent");
                                                         if (!discount || discount <= 0) return Promise.resolve();
-                                                        if (!value) return Promise.reject(new Error('Vui lòng chọn ngày hết hạn'));
-                                                        if (value.isBefore(moment())) return Promise.reject(new Error('Ngày hết hạn phải lớn hơn hiện tại'));
+                                                        if (!value) return Promise.reject(new Error("Vui lòng chọn ngày hết hạn"));
                                                         return Promise.resolve();
-                                                    }
-                                                })
+                                                    },
+                                                }),
                                             ]}
                                         >
                                             <DatePicker
                                                 showTime
-                                                disabled={!discountPercent || discountPercent <= 0}
                                                 size="large"
                                                 style={{ width: "100%" }}
                                                 placeholder="Chọn ngày giờ hết hạn"
+                                                disabledDate={(current) => current && current < dayjs().startOf("day")}
+                                                disabled={!discountPercent || discountPercent <= 0}
+                                                defaultPickerValue={dayjs()} // lần đầu mở thì hiện tháng hiện tại
+                                            />
+                                        </Form.Item>
+
+                                    </Col>
+
+                                </Row>
+                                <Row gutter={24}>
+                                    <Col span={6}>
+                                        <Form.Item
+                                            required={false}
+                                            label={requiredLabel("Giá Trẻ em")}
+                                            name="priceChildren"
+                                            rules={[
+                                                {
+                                                    validator(_, value) {
+                                                        const num = Number(value);
+                                                        if (!value) return Promise.reject("Vui lòng nhập giá");
+                                                        if (isNaN(num) || !Number.isInteger(num)) return Promise.reject("Giá phải là số nguyên");
+                                                        if (num <= 0) return Promise.reject("Giá phải lớn hơn 0");
+                                                        return Promise.resolve();
+                                                    },
+                                                },
+                                            ]}
+                                        >
+                                            <InputNumber
+                                                placeholder="VD: 2000000"
+                                                size="large"
+                                                style={{ width: "100%" }}
+                                                min={0}
+                                                formatter={(value) =>
+                                                    value ? `${Number(value).toLocaleString("vi-VN")} ₫` : ""
+                                                }
+                                                parser={(value) =>
+                                                    value ? value.replace(/[₫\s,.]/g, "") : ""
+                                                }
                                             />
                                         </Form.Item>
                                     </Col>
-                                </Row>
+                                    <Col span={6}>
+                                        <Form.Item
+                                            required={false}
+                                            label={requiredLabel("Giá Trẻ Nhỏ")}
+                                            name="priceLittleBaby"
+                                            rules={[
+                                                {
+                                                    validator(_, value) {
+                                                        const num = Number(value);
+                                                        if (!value) return Promise.reject("Vui lòng nhập giá");
+                                                        if (isNaN(num) || !Number.isInteger(num)) return Promise.reject("Giá phải là số nguyên");
+                                                        if (num <= 0) return Promise.reject("Giá phải lớn hơn 0");
+                                                        return Promise.resolve();
+                                                    },
+                                                },
+                                            ]}
+                                        >
+                                            <InputNumber
+                                                placeholder="VD: 2000000"
+                                                size="large"
+                                                style={{ width: "100%" }}
+                                                min={0}
+                                                formatter={(value) =>
+                                                    value ? `${Number(value).toLocaleString("vi-VN")} ₫` : ""
+                                                }
+                                                parser={(value) =>
+                                                    value ? value.replace(/[₫\s,.]/g, "") : ""
+                                                }
+                                            />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={6}>
+                                        <Form.Item
+                                            required={false}
+                                            label={requiredLabel("Giá Phụ Thu Phòng Đơn")}
+                                            name="priceSingleRoom"
+                                            rules={[
+                                                {
+                                                    validator(_, value) {
+                                                        const num = Number(value);
+                                                        if (!value) return Promise.reject("Vui lòng nhập giá");
+                                                        if (isNaN(num) || !Number.isInteger(num)) return Promise.reject("Giá phải là số nguyên");
+                                                        if (num <= 0) return Promise.reject("Giá phải lớn hơn 0");
+                                                        return Promise.resolve();
+                                                    },
+                                                },
+                                            ]}
+                                        >
+                                            <InputNumber
+                                                placeholder="VD: 2000000"
+                                                size="large"
+                                                style={{ width: "100%" }}
+                                                min={0}
+                                                formatter={(value) =>
+                                                    value ? `${Number(value).toLocaleString("vi-VN")} ₫` : ""
+                                                }
+                                                parser={(value) =>
+                                                    value ? value.replace(/[₫\s,.]/g, "") : ""
+                                                }
+                                            />
+                                        </Form.Item>
+                                    </Col>
+                                    {/* <Col span={6}>
+                    <Form.Item
+                      required={false}
+                      label={requiredLabel("Ngày Diễn Ra Tour")}
+                      name="dateTour"
+                    >
+                      <DatePicker
+                        showTime={{ format: "HH:mm" }}
+                        format="YYYY-MM-DD HH:mm"
+                        size="large"
+                        style={{ width: "100%" }}
+                        placeholder="Chọn ngày giờ diễn ra"
+                        disabledDate={(current) => current && current < dayjs().startOf("day")}
+                        disabledTime={(current) => {
+                          const now = dayjs();
+                          if (current && current.isSame(now, "day")) {
+                            const hour = now.hour();
+                            const minute = now.minute();
 
+                            return {
+                              disabledHours: () =>
+                                Array.from({ length: hour }, (_, i) => i),
+                              disabledMinutes: (selectedHour) =>
+                                selectedHour === hour
+                                  ? Array.from({ length: minute }, (_, i) => i)
+                                  : [],
+                            };
+                          }
+                          return {};
+                        }}
+                      />
+                    </Form.Item>
+                  </Col> */}
+                                    <Col span={6}>
+                                        <Form.Item
+                                            required={false}
+                                            label={requiredLabel("Loại Tour")}
+                                            name="tourType"
+                                            rules={[{ required: true, message: "Vui lòng chọn loại tour" }]}
+                                        >
+                                            <Select
+                                                size="large"
+                                                placeholder="Chọn loại tour"
+                                                options={[
+                                                    { label: "Nội địa", value: "noidia" },
+                                                    { label: "Quốc tế", value: "quocte" },
+                                                ]}
+                                            />
+                                        </Form.Item></Col>
+                                </Row>
                                 <Form.Item label="📝 Mô tả Tour" name="descriptionTour" className="mt-6">
                                     <ReactQuill className="h-[300px]"
                                         theme="snow"

@@ -55,11 +55,15 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
     const events = slots?.map((slot: any) => {
         const date = dayjs(slot.dateTour);
 
+        // Nếu có finalPrice thì lấy finalPrice, không thì lấy price
+        const priceToShow = tours?.finalPrice ?? tours?.price;
+
         return {
-            title: `Còn: ${slot.availableSeats} chỗ \nGiá: ${tours?.finalPrice?.toLocaleString('vi-VN')} đ`,
+            title: `Còn: ${slot.availableSeats} chỗ \nGiá: ${priceToShow?.toLocaleString('vi-VN')} đ`,
             date: date.format("YYYY-MM-DD")
         };
     });
+
     
     function handleDateClick(info: any) {
         const clickedDate = dayjs(info.date).format("YYYY-MM-DD");
@@ -218,9 +222,10 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                         <div className="border mb-6 rounded-xl p-4">
                                             <div className="flex justify-between ">
                                                 <span>Người lớn</span>
-                                                <span className="text-red-600 font-bold">
-                                                    {selectedSlot?.tour?.finalPrice?.toLocaleString('vi-VN')} đ
-                                                </span>
+                                                    <span className="text-red-600 font-bold">
+                                                        {(selectedSlot?.tour?.finalPrice ?? selectedSlot?.tour?.price)?.toLocaleString('vi-VN')} đ
+                                                    </span>
+
                                             </div>
                                             <div className="text-xs text-gray-500 ">(Từ 12 tuổi trở lên)</div>
                                         </div>

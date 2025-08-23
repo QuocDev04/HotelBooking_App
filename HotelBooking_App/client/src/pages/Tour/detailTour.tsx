@@ -72,7 +72,7 @@ const TourPage = () => {
   };
   return (
     <>
-      <div className="max-w-screen-xl p-4 mx-auto font-sans mt-20">
+      <div className="max-w-screen-xl p-4 mx-auto font-sans ">
         {/* Title */}
         <h1 className="mb-2 text-2xl font-semibold">
           {tours?.nameTour}
