@@ -81,7 +81,8 @@ const RoomManagement: React.FC = () => {
     queryKey: ['hotels'],
     queryFn: async () => {
       const response = await instanceAdmin.get('/admin/hotels');
-      return response.data.hotels;
+      console.log("Hotels API:", response.data); 
+      return response.data.hotels || response.data.data || [];
     }
   });
 
