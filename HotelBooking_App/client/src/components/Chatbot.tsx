@@ -8,7 +8,7 @@ interface Message {
 }
 
 function ChatBot({
-    endpoint = "http://localhost:3001/chat",
+    endpoint = "http://localhost:8080/api/chat",
     welcomeMessage = "Xin chào! Mình có thể hỗ trợ bạn về chính sách, điều khoản, hủy/hoàn tour.",
 }: { endpoint?: string; welcomeMessage?: string }) {
     const [open, setOpen] = useState(false);
