@@ -21,8 +21,12 @@ import CheckOutTour from "../pages/Booking/CheckOutTour"
 import Clause from "../pages/Introduce/Clause"
 import RefundInfo from "../pages/Booking/RefundInfo"
 import HotelList from "../pages/Hotel/HotelList"
+import HotelListEnhanced from "../pages/Hotel/HotelListEnhanced"
 import HotelDetail from "../pages/Hotel/HotelDetail"
+import HotelDetailRefactored from "../pages/Hotel/HotelDetailRefactored"
 import HotelBookingConfirmation from "../pages/Hotel/HotelBookingConfirmation"
+import TestDateSelection from "../components/DateSelection/TestDateSelection"
+import TestCashDepositModal from "../components/Payment/TestCashDepositModal"
 
 const Router = () => {
     return (
@@ -51,9 +55,15 @@ const Router = () => {
                 <Route path="/refund/:bookingId" element={<RefundInfo />} />
                 
                 {/* Hotel Routes */}
-                <Route path="/hotels" element={<HotelList />} />
-                <Route path="/hotels/:id" element={<HotelDetail />} />
+                <Route path="/hotels" element={<HotelListEnhanced />} />
+                <Route path="/hotels/:id" element={<HotelDetailRefactored />} />
+                {/* Fallback routes for old components */}
+                <Route path="/hotels-old" element={<HotelList />} />
+                <Route path="/hotels-old/:id" element={<HotelDetail />} />
                 <Route path="/hotel-booking-confirmation/:id" element={<HotelBookingConfirmation />} />
+                {/* Test routes */}
+                <Route path="/test-date-selection" element={<TestDateSelection />} />
+                <Route path="/test-cash-deposit-modal" element={<TestCashDepositModal />} />
             </Route>
         </Routes>
     )

@@ -2,6 +2,7 @@
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { generateTourCode } from "../../../utils/tourUtils";
 
 interface Slot {
     dateTour: string; // định dạng 'DD-MM-YYYY'
@@ -115,7 +116,7 @@ const RightTourDetail = ({
                         <li className="flex items-center gap-2">
                             <span className="font-medium">Mã tour:</span>
                             <span className="text-blue-700 font-semibold underline cursor-pointer">
-                                {tour?._id?.slice(0, 6) || "..."}
+                                {generateTourCode(tour?._id)}
                             </span>
                         </li>
                         <li className="flex items-center gap-2">

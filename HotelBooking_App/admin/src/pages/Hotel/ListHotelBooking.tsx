@@ -5,6 +5,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { instanceAdmin } from "../../configs/axios";
+import { DepositConfirmationModal } from '../../components/DepositConfirmationModal';
+import { FullPaymentConfirmationModal } from '../../components/FullPaymentConfirmationModal';
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -50,6 +52,9 @@ const ListHotelBooking: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [paymentFilter, setPaymentFilter] = useState<string>('');
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);
+  const [depositModalVisible, setDepositModalVisible] = useState(false);
+  const [fullPaymentModalVisible, setFullPaymentModalVisible] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<HotelBooking | null>(null);
   const queryClient = useQueryClient();
 
   // Fetch hotel bookings
@@ -81,33 +86,65 @@ const ListHotelBooking: React.FC = () => {
     }
   });
 
-  // Confirm deposit payment mutation
+  // Confirm deposit payment mutation with image proof
   const confirmPaymentMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await instanceAdmin.put(`/admin/hotel-bookings/confirm-payment/${id}`);
+    mutationFn: async (data: { bookingId: string; proofImages: File[]; notes: string; receivedAmount: number; receivedBy: string }) => {
+      const formData = new FormData();
+      formData.append('note', data.notes); // Backend expects 'note', not 'notes'
+      formData.append('receivedAmount', data.receivedAmount.toString());
+      formData.append('receivedBy', data.receivedBy);
+      
+      // Backend chỉ nhận 1 file, lấy file đầu tiên
+      if (data.proofImages && data.proofImages.length > 0) {
+        formData.append('paymentImage', data.proofImages[0]); // Backend expects 'paymentImage'
+      }
+
+      const response = await instanceAdmin.put(`/admin/hotel-bookings/confirm-payment/${data.bookingId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hotel-bookings'] });
       message.success('Xác nhận đặt cọc thành công!');
+      setDepositModalVisible(false);
+      setSelectedBooking(null);
     },
     onError: (error: any) => {
       message.error(error.response?.data?.message || 'Có lỗi xảy ra khi xác nhận đặt cọc!');
     }
   });
 
-  // Confirm full payment mutation
+  // Confirm full payment mutation with image proof
   const confirmFullPaymentMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await instanceAdmin.put(`/admin/hotel-bookings/confirm-full-payment/${id}`);
+    mutationFn: async (data: { bookingId: string; proofImages: File[]; notes: string; receivedAmount: number; receivedBy: string }) => {
+      const formData = new FormData();
+      formData.append('note', data.notes); // Backend expects 'note', not 'notes'
+      formData.append('receivedAmount', data.receivedAmount.toString());
+      formData.append('receivedBy', data.receivedBy);
+      
+      // Backend chỉ nhận 1 file, lấy file đầu tiên
+      if (data.proofImages && data.proofImages.length > 0) {
+        formData.append('paymentImage', data.proofImages[0]); // Backend expects 'paymentImage'
+      }
+
+      const response = await instanceAdmin.put(`/admin/hotel-bookings/confirm-full-payment/${data.bookingId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hotel-bookings'] });
       message.success('Xác nhận thanh toán đầy đủ thành công!');
+      setFullPaymentModalVisible(false);
+      setSelectedBooking(null);
     },
     onError: (error: any) => {
-      message.error(error.response?.data?.message || 'Có lỗi xảy ra khi xác nhận thanh toán!');
+      message.error(error.response?.data?.message || 'Có lỗi xảy ra khi xác nhận thanh toán đầy đủ!');
     }
   });
 
@@ -120,6 +157,24 @@ const ListHotelBooking: React.FC = () => {
       okType: 'danger',
       onOk: () => deleteMutation.mutate(id)
     });
+  };
+
+  const handleConfirmDeposit = (booking: HotelBooking) => {
+    setSelectedBooking(booking);
+    setDepositModalVisible(true);
+  };
+
+  const handleDepositConfirmation = async (data: any) => {
+    await confirmPaymentMutation.mutateAsync(data);
+  };
+
+  const handleConfirmFullPayment = (booking: HotelBooking) => {
+    setSelectedBooking(booking);
+    setFullPaymentModalVisible(true);
+  };
+
+  const handleFullPaymentConfirmation = async (data: any) => {
+    await confirmFullPaymentMutation.mutateAsync(data);
   };
 
   const filteredBookings = bookings.filter((booking: HotelBooking) => {
@@ -314,15 +369,7 @@ const ListHotelBooking: React.FC = () => {
               type="default"
               icon={<CheckOutlined />} 
               size="small"
-              onClick={() => {
-                Modal.confirm({
-                  title: 'Xác nhận đặt cọc',
-                  content: `Bạn có chắc chắn muốn xác nhận đặt cọc cho đặt phòng tại "${record.hotelId?.hotelName}"?`,
-                  okText: 'Xác nhận',
-                  cancelText: 'Hủy',
-                  onOk: () => confirmPaymentMutation.mutate(record._id)
-                });
-              }}
+              onClick={() => handleConfirmDeposit(record)}
               loading={confirmPaymentMutation.isPending}
             >
               Xác nhận cọc
@@ -333,15 +380,7 @@ const ListHotelBooking: React.FC = () => {
               type="default"
               icon={<DollarOutlined />} 
               size="small"
-              onClick={() => {
-                Modal.confirm({
-                  title: 'Xác nhận thanh toán đầy đủ',
-                  content: `Bạn có chắc chắn muốn xác nhận thanh toán đầy đủ cho đặt phòng tại "${record.hotelId?.hotelName}"?`,
-                  okText: 'Xác nhận',
-                  cancelText: 'Hủy',
-                  onOk: () => confirmFullPaymentMutation.mutate(record._id)
-                });
-              }}
+              onClick={() => handleConfirmFullPayment(record)}
               loading={confirmFullPaymentMutation.isPending}
             >
               Xác nhận thanh toán
@@ -425,6 +464,49 @@ const ListHotelBooking: React.FC = () => {
           }}
           scroll={{ x: 1200 }}
           className="shadow-sm"
+        />
+
+        {/* Deposit Confirmation Modal */}
+        <DepositConfirmationModal
+          visible={depositModalVisible}
+          onCancel={() => {
+            setDepositModalVisible(false);
+            setSelectedBooking(null);
+          }}
+          onConfirm={handleDepositConfirmation}
+          loading={confirmPaymentMutation.isPending}
+          bookingInfo={selectedBooking ? {
+            id: selectedBooking._id,
+            hotelName: selectedBooking.hotelId?.hotelName || 'N/A',
+            customerName: selectedBooking.fullNameUser || 'N/A',
+            customerEmail: selectedBooking.email || 'N/A',
+            customerPhone: selectedBooking.phone || 'N/A',
+            totalAmount: selectedBooking.totalPrice || 0,
+            depositAmount: Math.floor((selectedBooking.totalPrice || 0) * 0.3), // 30% deposit
+            paymentMethod: selectedBooking.payment_method || 'cash'
+          } : undefined}
+        />
+
+        {/* Full Payment Confirmation Modal */}
+        <FullPaymentConfirmationModal
+          visible={fullPaymentModalVisible}
+          onCancel={() => {
+            setFullPaymentModalVisible(false);
+            setSelectedBooking(null);
+          }}
+          onConfirm={handleFullPaymentConfirmation}
+          loading={confirmFullPaymentMutation.isPending}
+          bookingInfo={selectedBooking ? {
+            id: selectedBooking._id,
+            hotelName: selectedBooking.hotelId?.hotelName || 'N/A',
+            customerName: selectedBooking.fullNameUser || 'N/A',
+            customerEmail: selectedBooking.email || 'N/A',
+            customerPhone: selectedBooking.phone || 'N/A',
+            totalAmount: selectedBooking.totalPrice || 0,
+            depositAmount: Math.floor((selectedBooking.totalPrice || 0) * 0.3), // 30% deposit
+            remainingAmount: Math.floor((selectedBooking.totalPrice || 0) * 0.7), // 70% remaining
+            paymentMethod: selectedBooking.payment_method || 'cash'
+          } : undefined}
         />
       </Card>
     </div>

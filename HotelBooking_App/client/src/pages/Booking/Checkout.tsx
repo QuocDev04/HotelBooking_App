@@ -792,7 +792,7 @@ const Checkout = () => {
               <img src={tours?.tour?.imageTour[0]} alt="tour" className="w-24 h-20 object-cover rounded-lg border" />
               <div className="flex-1">
                 <div className="font-semibold text-sm">{tours?.tour?.nameTour}</div>
-                <div className="text-xs text-gray-500 mt-1">Mã tour: {tours?.tour?._id}</div>
+                <div className="text-xs text-gray-500 mt-1">Mã tour: {tours?.tour?._id?.slice(0, 6).toUpperCase()}</div>
               </div>
             </div>
             {/* Thông tin chuyến bay */}

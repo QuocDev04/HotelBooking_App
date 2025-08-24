@@ -358,7 +358,7 @@ const CheckOutTour = () => {
                 {booking?.slotId?.tour?.nameTour}
               </div>
             </div>
-            <div className="text-sm">Ma tour: <span className="font-medium text-gray-700">{booking?.slotId?.tour?._id}</span></div>
+            <div className="text-sm">Mã tour: <span className="font-medium text-gray-700">{booking?.slotId?.tour?._id?.slice(0, 6).toUpperCase()}</span></div>
             <div className="font-semibold text-xs mt-3 text-blue-700">THONG TIN DI CHUYEN</div>
             
             {/* Chuyen di */}
