@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -85,24 +86,26 @@ const RoomManagement: React.FC = () => {
   });
 
   // Fetch room availability
-  const { data: roomAvailability, isLoading: availabilityLoading } = useQuery({
+  const { data: roomAvailability = [], isLoading: availabilityLoading } = useQuery({
     queryKey: ['room-availability', selectedHotel, selectedDateRange],
     queryFn: async () => {
       if (!selectedHotel || !selectedDateRange) return [];
       const [startDate, endDate] = selectedDateRange;
       const response = await instanceAdmin.get(
-        `/admin/hotels/${selectedHotel}/room-availability?startDate=${startDate.format('YYYY-MM-DD')}&endDate=${endDate.format('YYYY-MM-DD')}`
+        `/admin/hotels/${selectedHotel}/rooms/availability?startDate=${startDate.format('YYYY-MM-DD')}&endDate=${endDate.format('YYYY-MM-DD')}`
       );
-      return response.data.availability;
+      console.log("API response:", response.data);
+      return response.data.availability || [];
     },
-    enabled: !!selectedHotel && !!selectedDateRange
+    enabled: Boolean(selectedHotel && selectedDateRange?.length === 2),
   });
+
 
   // Update room mutation
   const updateRoomMutation = useMutation({
     mutationFn: async (data: { hotelId: string; roomTypeId: string; roomData: Partial<RoomType> }) => {
       const response = await instanceAdmin.put(
-        `/admin/hotels/${data.hotelId}/room-types/${data.roomTypeId}`,
+        `/admin/hotels/${data.hotelId}/rooms/${data.roomTypeId}`,
         data.roomData
       );
       return response.data;
@@ -123,7 +126,7 @@ const RoomManagement: React.FC = () => {
   const addRoomMutation = useMutation({
     mutationFn: async (data: { hotelId: string; roomData: Omit<RoomType, '_id'> }) => {
       const response = await instanceAdmin.post(
-        `/admin/hotels/${data.hotelId}/room-types`,
+        `/admin/hotels/${data.hotelId}/rooms`,
         data.roomData
       );
       return response.data;
@@ -143,7 +146,7 @@ const RoomManagement: React.FC = () => {
   const deleteRoomMutation = useMutation({
     mutationFn: async (data: { hotelId: string; roomTypeId: string }) => {
       const response = await instanceAdmin.delete(
-        `/admin/hotels/${data.hotelId}/room-types/${data.roomTypeId}`
+        `/admin/hotels/${data.hotelId}/rooms/${data.roomTypeId}`
       );
       return response.data;
     },
