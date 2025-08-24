@@ -21,9 +21,29 @@ const getByIdBookingTour = async (req, res) => {
             return res.status(404).json({ message: "Không tìm thấy booking" });
         }
 
+
+        // Thêm thông tin về deadline thanh toán tiền mặt
+        let paymentInfo = {};
+        if (booking.payment_method === 'cash' && booking.cashPaymentDeadline) {
+            const now = new Date();
+            const deadline = new Date(booking.cashPaymentDeadline);
+            const timeRemaining = deadline - now;
+            const hoursRemaining = Math.max(0, Math.floor(timeRemaining / (1000 * 60 * 60)));
+            const minutesRemaining = Math.max(0, Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)));
+            
+            paymentInfo = {
+                deadline: booking.cashPaymentDeadline,
+                isExpired: timeRemaining <= 0,
+                hoursRemaining,
+                minutesRemaining,
+                timeRemainingText: timeRemaining <= 0 ? 'Đã hết hạn' : `${hoursRemaining}h ${minutesRemaining}m`
+            };
+        }
+
         res.status(200).json({
             success: true,
-            booking: booking
+            booking: booking,
+            paymentInfo
         });
     } catch (error) {
         res.status(500).json({ message: "Lỗi server", error: error.message });
@@ -33,13 +53,20 @@ const getByIdBookingTour = async (req, res) => {
 // Admin: Lấy tất cả booking để quản lý
 const getAllBookingsForAdmin = async (req, res) => {
     try {
-        const { status, page = 1, limit = 10, search } = req.query;
+
+        const { status, page = 1, limit = 10, search, slotId } = req.query;
         
         let query = {};
         
         // Filter theo trạng thái
         if (status && status !== 'all') {
             query.payment_status = status;
+        }
+        
+
+        // Filter theo slotId (cho trang danh sách người tham gia tour)
+        if (slotId) {
+            query.slotId = slotId;
         }
         
         // Search theo tên tour hoặc tên khách hàng
@@ -87,7 +114,8 @@ const getAllBookingsForAdmin = async (req, res) => {
 const adminConfirmCancelBooking = async (req, res) => {
     try {
         const { id } = req.params;
-        const { adminId, reason } = req.body;
+
+        const { adminId, reason, refund_amount, refund_policy } = req.body;
         
         // Tìm booking cần hủy
         const booking = await TourBookingSchema.findById(id)
@@ -108,11 +136,39 @@ const adminConfirmCancelBooking = async (req, res) => {
             });
         }
 
+
+        // Tính số tiền hoàn trả dựa trên chính sách
+        let calculatedRefundAmount = 0;
+        
+        if (booking.payment_status === 'completed' || booking.payment_status === 'deposit_paid') {
+            if (refund_policy === 'full') {
+                // Hoàn trả toàn bộ số tiền đã thanh toán
+                calculatedRefundAmount = booking.payment_status === 'completed' ? 
+                    booking.totalPriceTour : booking.depositAmount || (booking.totalPriceTour * 0.5);
+            } else if (refund_policy === 'partial') {
+                // Hoàn trả một phần tiền (mặc định 50%)
+                calculatedRefundAmount = booking.payment_status === 'completed' ? 
+                    booking.totalPriceTour * 0.5 : (booking.depositAmount || (booking.totalPriceTour * 0.5)) * 0.5;
+            } else if (refund_policy === 'custom' && refund_amount) {
+                // Số tiền hoàn trả tùy chỉnh
+                calculatedRefundAmount = refund_amount;
+            }
+        }
+
         // Cập nhật trạng thái thành cancelled
         booking.payment_status = 'cancelled';
         booking.cancelledAt = new Date();
         booking.cancelledBy = adminId;
         booking.cancelReason = reason || 'Admin xác nhận hủy';
+
+        
+        // Nếu có hoàn tiền, cập nhật thông tin hoàn tiền
+        if (calculatedRefundAmount > 0) {
+            booking.refund_amount = calculatedRefundAmount;
+            booking.refund_status = 'pending';
+            booking.refund_policy = refund_policy;
+        }
+        
         await booking.save();
 
         // Hoàn trả số ghế về slot
@@ -129,9 +185,11 @@ const adminConfirmCancelBooking = async (req, res) => {
                 cancelledAt: booking.cancelledAt,
                 cancelledBy: booking.cancelledBy,
                 cancelReason: booking.cancelReason,
-                refundInfo: booking.payment_status === 'completed' ? {
-                    amount: booking.totalPriceTour,
-                    policy: "Hoàn tiền theo chính sách của công ty"
+
+                refundInfo: calculatedRefundAmount > 0 ? {
+                    amount: calculatedRefundAmount,
+                    policy: refund_policy,
+                    status: booking.refund_status
                 } : null
             }
         });
@@ -390,8 +448,18 @@ const BookingTour = async (req, res) => {
             infantPassengers,
             payment_method,
             note,
+
+            isFullPayment, // Thêm trường này để xác định thanh toán đầy đủ hay đặt cọc
         } = req.body;
 
+        // Kiểm tra duplicate booking trong vòng 5 phút gần đây
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        const existingBooking = await TourBookingSchema.findOne({
+            userId,
+            slotId,
+            createdAt: { $gte: fiveMinutesAgo }
+        });
+        
         // Tìm slot tương ứng
         const slot = await DateTourModel.findById(slotId).populate("tour");
         if (!slot) {
@@ -423,6 +491,23 @@ const BookingTour = async (req, res) => {
             Number(infantTour || 0) * priceInfant +
             singleRoomCount * priceSingleRoom;
 
+
+        // Tính toán số tiền đặt cọc (50% tổng giá)
+        const depositAmount = Math.round(totalFinalPriceTour * 0.5);
+
+        // Xác định trạng thái thanh toán và thông tin đặt cọc
+        let paymentStatus = "pending";
+        let isDeposit = false;
+        let depositAmountValue = 0;
+        let isFullyPaid = false;
+
+        // Thiết lập thời hạn thanh toán cho tiền mặt (48h)
+        let cashPaymentDeadline = null;
+        if (payment_method === "cash") {
+            cashPaymentDeadline = new Date();
+            cashPaymentDeadline.setHours(cashPaymentDeadline.getHours() + 48);
+        }
+
         // Tạo booking mới
         const booking = new TourBookingSchema({
             userId,
@@ -442,8 +527,13 @@ const BookingTour = async (req, res) => {
             toddlerPassengers,
             infantPassengers,
             payment_method,
-            payment_status: "pending",
+
+            payment_status: paymentStatus,
             note,
+            isDeposit: isDeposit,
+            depositAmount: depositAmountValue,
+            isFullyPaid: isFullyPaid,
+            cashPaymentDeadline: cashPaymentDeadline
         });
 
         await booking.save();
@@ -467,14 +557,18 @@ const BookingTour = async (req, res) => {
             const tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
 
+
+            // Xác định số tiền thanh toán (đặt cọc hoặc toàn bộ)
+            const paymentAmount = isFullPayment ? totalFinalPriceTour : depositAmount;
+
             // Tạo url thanh toán
             const paymentUrl = await vnpay.buildPaymentUrl({
-                vnp_Amount: booking.totalPriceTour,
+                vnp_Amount: paymentAmount, // VNPay yêu cầu số tiền tính bằng xu
                 vnp_IpAddr: req.ip || '127.0.0.1',
                 vnp_TxnRef: `${booking._id}-${Date.now()}`, // dùng cho callback xác định booking
-                vnp_OrderInfo: `Thanh toán đơn #${booking._id}`,
+                vnp_OrderInfo: `Thanh toán ${isFullPayment ? 'đầy đủ' : 'đặt cọc'} đơn #${booking._id}`,
                 vnp_OrderType: ProductCode.Other,
-                vnp_ReturnUrl: `http://localhost:8080/api/check-payment-vnpay`, // URL callback
+                vnp_ReturnUrl: `http://localhost:8080/api/vnpay/payment-callback`, // URL callback về backend
                 vnp_Locale: VnpLocale.VN,
                 vnp_CreateDate: dateFormat(new Date()),
                 vnp_ExpireDate: dateFormat(tomorrow),
@@ -487,6 +581,9 @@ const BookingTour = async (req, res) => {
                 message: "Đặt tour thành công - chuyển đến VNPay",
                 booking,
                 paymentUrl,
+
+                depositAmount: isFullPayment ? null : depositAmount,
+                totalAmount: totalFinalPriceTour
             });
         }
 
@@ -495,6 +592,9 @@ const BookingTour = async (req, res) => {
             success: true,
             message: "Đặt tour thành công",
             booking,
+
+            depositAmount: isFullPayment ? null : depositAmount,
+            totalAmount: totalFinalPriceTour
         });
 
     } catch (error) {
@@ -604,6 +704,501 @@ exports.approveCancel = async (req, res) => {
 };
 
 
+
+// Admin: Xác nhận thanh toán cọc tiền mặt
+const confirmCashPayment = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { adminId, note } = req.body;
+        const paymentImage = req.file; // File được upload từ middleware
+        
+        console.log('🔍 Debug confirmCashPayment:');
+        console.log('- adminId:', adminId);
+        console.log('- note:', note);
+        console.log('- paymentImage:', paymentImage ? paymentImage.filename : 'No file uploaded');
+        
+        // Tìm booking cần xác nhận thanh toán
+        const booking = await TourBookingSchema.findById(id)
+            .populate('slotId')
+            .populate('userId', 'username email');
+        
+        if (!booking) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Không tìm thấy đặt chỗ cần xác nhận thanh toán" 
+            });
+        }
+
+        // Kiểm tra trạng thái hiện tại
+        if (booking.payment_status !== 'pending') {
+            return res.status(400).json({ 
+                success: false, 
+                message: `Không thể xác nhận thanh toán cho đặt chỗ có trạng thái: ${booking.payment_status}` 
+            });
+        }
+
+        // Kiểm tra phương thức thanh toán
+        if (booking.payment_method !== 'cash') {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Chỉ có thể xác nhận thanh toán cho đặt chỗ thanh toán tiền mặt" 
+            });
+        }
+
+        // Kiểm tra deadline thanh toán tiền mặt
+        if (booking.cashPaymentDeadline && new Date() > new Date(booking.cashPaymentDeadline)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Đã quá hạn thanh toán tiền mặt (48 giờ)" 
+            });
+        }
+
+        // Cập nhật trạng thái thanh toán cọc
+        booking.payment_status = 'deposit_paid';
+        booking.isDeposit = true;
+        booking.depositPaidAt = new Date(); // Thời gian thanh toán cọc
+        booking.paymentConfirmedBy = adminId;
+        if (note) {
+            booking.paymentNote = note;
+        }
+        if (paymentImage) {
+            booking.paymentImage = paymentImage.filename; // Lưu tên file ảnh
+        }
+        
+        await booking.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Xác nhận thanh toán cọc thành công",
+            booking: {
+                _id: booking._id,
+                payment_status: booking.payment_status,
+                depositPaidAt: booking.depositPaidAt,
+                paymentConfirmedBy: booking.paymentConfirmedBy,
+                paymentNote: booking.paymentNote,
+                paymentImage: booking.paymentImage,
+                customerInfo: {
+                    name: booking.fullNameUser,
+                    email: booking.email,
+                    phone: booking.phone
+                },
+                tourInfo: {
+                    name: booking.slotId?.tour?.nameTour,
+                    date: booking.slotId?.dateTour,
+                    totalAmount: booking.totalPriceTour
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error("Lỗi xác nhận thanh toán cọc:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Lỗi server khi xác nhận thanh toán cọc", 
+            error: error.message 
+        });
+    }
+};
+
+// Admin: Xác nhận thanh toán toàn bộ
+const confirmFullPayment = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { adminId, note } = req.body;
+        const paymentImage = req.file; // File được upload từ middleware
+        
+        // Tìm booking cần xác nhận thanh toán toàn bộ
+        const booking = await TourBookingSchema.findById(id)
+            .populate('slotId')
+            .populate('userId', 'username email');
+        
+        if (!booking) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Không tìm thấy đặt chỗ cần xác nhận thanh toán" 
+            });
+        }
+
+        // Kiểm tra trạng thái hiện tại
+        if (booking.payment_status !== 'deposit_paid') {
+            return res.status(400).json({ 
+                success: false, 
+                message: `Chỉ có thể xác nhận thanh toán toàn bộ cho đặt chỗ đã thanh toán cọc. Trạng thái hiện tại: ${booking.payment_status}` 
+            });
+        }
+
+        // Cập nhật trạng thái thanh toán toàn bộ
+        booking.payment_status = 'completed';
+        booking.isFullyPaid = true;
+        booking.fullPaidAt = new Date(); // Thời gian thanh toán toàn bộ
+        booking.fullPaymentConfirmedBy = adminId;
+        if (note) {
+            booking.fullPaymentNote = note;
+        }
+        if (paymentImage) {
+            booking.fullPaymentImage = paymentImage.filename; // Lưu tên file ảnh thanh toán toàn bộ
+        }
+        
+        await booking.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Xác nhận thanh toán toàn bộ thành công",
+            booking: {
+                _id: booking._id,
+                payment_status: booking.payment_status,
+                isFullyPaid: booking.isFullyPaid,
+                fullPaidAt: booking.fullPaidAt,
+                fullPaymentConfirmedBy: booking.fullPaymentConfirmedBy,
+                fullPaymentNote: booking.fullPaymentNote,
+                fullPaymentImage: booking.fullPaymentImage,
+                customerInfo: {
+                    name: booking.fullNameUser,
+                    email: booking.email,
+                    phone: booking.phone
+                },
+                tourInfo: {
+                    name: booking.slotId?.tour?.nameTour,
+                    date: booking.slotId?.dateTour,
+                    totalAmount: booking.totalPriceTour
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error("Lỗi xác nhận thanh toán toàn bộ:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Lỗi server khi xác nhận thanh toán toàn bộ", 
+            error: error.message 
+        });
+    }
+};
+
+// Tính doanh thu chính xác (chỉ tính booking completed và trừ refund)
+const getAccurateRevenue = async (req, res) => {
+    try {
+        const { startDate, endDate, groupBy = 'month' } = req.query;
+        
+        let matchCondition = {
+            payment_status: 'completed'
+        };
+        
+        // Nếu có filter theo thời gian
+        if (startDate || endDate) {
+            matchCondition.createdAt = {};
+            if (startDate) {
+                matchCondition.createdAt.$gte = new Date(startDate);
+            }
+            if (endDate) {
+                matchCondition.createdAt.$lte = new Date(endDate);
+            }
+        }
+        
+        // Tính tổng doanh thu từ booking completed
+        const completedBookings = await TourBookingSchema.aggregate([
+            { $match: matchCondition },
+            {
+                $group: {
+                    _id: null,
+                    totalRevenue: { $sum: '$totalPriceTour' },
+                    totalBookings: { $sum: 1 }
+                }
+            }
+        ]);
+        
+        // Tính tổng số tiền hoàn lại từ booking cancelled
+        const refundAmount = await TourBookingSchema.aggregate([
+            {
+                $match: {
+                    payment_status: 'cancelled',
+                    refund_amount: { $exists: true, $ne: null }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalRefund: { $sum: '$refund_amount' },
+                    totalCancelledBookings: { $sum: 1 }
+                }
+            }
+        ]);
+        
+        const revenue = completedBookings[0] || { totalRevenue: 0, totalBookings: 0 };
+        const refund = refundAmount[0] || { totalRefund: 0, totalCancelledBookings: 0 };
+        
+        // Doanh thu thực tế = Doanh thu từ booking completed - Số tiền hoàn lại
+        const actualRevenue = revenue.totalRevenue - refund.totalRefund;
+        
+        // Nếu cần group theo tháng/tuần/ngày
+        let revenueByPeriod = [];
+        if (groupBy) {
+            let groupFormat;
+            switch (groupBy) {
+                case 'day':
+                    groupFormat = {
+                        year: { $year: '$createdAt' },
+                        month: { $month: '$createdAt' },
+                        day: { $dayOfMonth: '$createdAt' }
+                    };
+                    break;
+                case 'week':
+                    groupFormat = {
+                        year: { $year: '$createdAt' },
+                        week: { $week: '$createdAt' }
+                    };
+                    break;
+                case 'month':
+                default:
+                    groupFormat = {
+                        year: { $year: '$createdAt' },
+                        month: { $month: '$createdAt' }
+                    };
+                    break;
+            }
+            
+            revenueByPeriod = await TourBookingSchema.aggregate([
+                { $match: matchCondition },
+                {
+                    $group: {
+                        _id: groupFormat,
+                        revenue: { $sum: '$totalPriceTour' },
+                        bookings: { $sum: 1 }
+                    }
+                },
+                { $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1, '_id.week': 1 } }
+            ]);
+        }
+        
+        res.status(200).json({
+            success: true,
+            data: {
+                actualRevenue,
+                grossRevenue: revenue.totalRevenue,
+                totalRefund: refund.totalRefund,
+                completedBookings: revenue.totalBookings,
+                cancelledBookings: refund.totalCancelledBookings,
+                revenueByPeriod
+            }
+        });
+    } catch (error) {
+        console.error('Lỗi tính doanh thu:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi server khi tính doanh thu',
+            error: error.message
+        });
+    }
+};
+
+// API lấy danh sách các booking cần hoàn tiền
+const getRefundList = async (req, res) => {
+    try {
+        const { status } = req.query;
+        
+        // Tạo query
+        let query = {
+            refund_amount: { $gt: 0 }
+        };
+        
+        // Lọc theo trạng thái hoàn tiền
+        if (status && ['pending', 'processing', 'completed'].includes(status)) {
+            query.refund_status = status;
+        }
+        
+        // Lấy danh sách booking cần hoàn tiền
+        const refundBookings = await TourBookingSchema.find(query)
+            .populate({
+                path: 'userId',
+                select: 'name email phone'
+            })
+            .populate({
+                path: 'slotId',
+                select: 'dateTour',
+                populate: {
+                    path: 'tour',
+                    select: 'nameTour destination departure'
+                }
+            })
+            .sort({ createdAt: -1 });
+        
+        return res.status(200).json({
+            success: true,
+            count: refundBookings.length,
+            data: refundBookings
+        });
+    } catch (error) {
+        console.error('Lỗi lấy danh sách hoàn tiền:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Lỗi server khi lấy danh sách hoàn tiền'
+        });
+    }
+};
+
+// API cập nhật trạng thái hoàn tiền
+const updateRefundStatus = async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        const { refund_status, refund_method, refund_note } = req.body;
+        
+        // Kiểm tra trạng thái hợp lệ
+        if (!['pending', 'processing', 'completed'].includes(refund_status)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Trạng thái hoàn tiền không hợp lệ'
+            });
+        }
+        
+        // Tìm booking
+        const booking = await TourBookingSchema.findById(bookingId);
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy booking'
+            });
+        }
+        
+        // Kiểm tra booking có cần hoàn tiền không
+        if (booking.refund_amount <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Booking này không cần hoàn tiền'
+            });
+        }
+        
+        // Cập nhật trạng thái hoàn tiền
+        booking.refund_status = refund_status;
+        booking.refund_method = refund_method;
+        booking.refund_note = refund_note;
+        
+        // Nếu đã hoàn tiền xong, cập nhật ngày hoàn tiền
+        if (refund_status === 'completed') {
+            booking.refund_date = new Date();
+        }
+        
+        await booking.save();
+        
+        return res.status(200).json({
+            success: true,
+            message: 'Cập nhật trạng thái hoàn tiền thành công',
+            data: booking
+        });
+    } catch (error) {
+        console.error('Lỗi cập nhật trạng thái hoàn tiền:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Lỗi server khi cập nhật trạng thái hoàn tiền'
+        });
+    }
+};
+
+// API lấy thống kê hoàn tiền
+const getRefundStats = async (req, res) => {
+    try {
+        // Lấy thống kê hoàn tiền theo trạng thái
+        const stats = await TourBookingSchema.aggregate([
+            {
+                $match: {
+                    refund_amount: { $gt: 0 }
+                }
+            },
+            {
+                $group: {
+                    _id: "$refund_status",
+                    count: { $sum: 1 },
+                    totalAmount: { $sum: "$refund_amount" }
+                }
+            }
+        ]);
+        
+        // Tạo đối tượng kết quả
+        const result = {
+            total: 0,
+            pending: 0,
+            processing: 0,
+            completed: 0,
+            totalAmount: 0,
+            pendingAmount: 0,
+            processingAmount: 0,
+            completedAmount: 0
+        };
+        
+        // Điền dữ liệu từ kết quả aggregate
+        stats.forEach(stat => {
+            if (stat._id) {
+                result[stat._id] = stat.count;
+                result[`${stat._id}Amount`] = stat.totalAmount;
+            } else {
+                result.null = stat.count;
+            }
+            result.total += stat.count;
+            result.totalAmount += stat.totalAmount;
+        });
+        
+        return res.status(200).json({
+            success: true,
+            data: result
+        });
+    } catch (error) {
+        console.error('Lỗi lấy thống kê hoàn tiền:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Lỗi server khi lấy thống kê hoàn tiền'
+        });
+    }
+};
+
+// Xử lý yêu cầu hoàn tiền từ client
+const submitRefundRequest = async (req, res) => {
+    try {
+        const { bookingId, refundAmount, bankInfo } = req.body;
+        
+        // Tìm booking
+        const booking = await TourBookingSchema.findById(bookingId);
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy booking'
+            });
+        }
+        
+        // Kiểm tra trạng thái booking
+        if (booking.status !== 'confirmed') {
+            return res.status(400).json({
+                success: false,
+                message: 'Chỉ có thể yêu cầu hoàn tiền cho booking đã xác nhận'
+            });
+        }
+        
+        // Cập nhật thông tin hoàn tiền
+        booking.refundInfo = {
+            amount: refundAmount,
+            bankInfo: bankInfo,
+            requestedAt: new Date(),
+            status: 'pending'
+        };
+        
+        booking.cancelRequestedAt = new Date();
+        booking.status = 'cancel_requested';
+        
+        await booking.save();
+        
+        res.status(200).json({
+            success: true,
+            message: 'Yêu cầu hoàn tiền đã được gửi thành công',
+            data: booking
+        });
+        
+    } catch (error) {
+        console.error('Error submitting refund request:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi server khi gửi yêu cầu hoàn tiền'
+        });
+    }
+};
+
 module.exports = {
     getByIdBookingTour,
     BookingTour,
@@ -612,5 +1207,13 @@ module.exports = {
     getAllBookingsForAdmin,
     adminConfirmCancelBooking,
     requestCancelBooking,
-    getBookingStats
+
+    getBookingStats,
+    confirmCashPayment,
+    confirmFullPayment,
+    getAccurateRevenue,
+    getRefundList,
+    updateRefundStatus,
+    getRefundStats,
+    submitRefundRequest
 };

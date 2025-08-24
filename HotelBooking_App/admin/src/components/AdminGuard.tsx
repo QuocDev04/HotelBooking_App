@@ -33,11 +33,16 @@ const SyncUserToBackend: React.FC = () => {
                     lastName: user.lastName || "",
                 };
 
-                await instance.post("/syncUser", userData, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
 
-                console.log("User synced to backend successfully");
+                try {
+                    await instance.post("/syncUser", userData, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    console.log("User synced to backend successfully");
+                } catch (syncError) {
+                    console.warn("Could not sync user to backend, but continuing anyway:", syncError);
+                    // Không dừng luồng xử lý nếu đồng bộ thất bại
+                }
             } catch (error) {
                 console.error("Error syncing user to backend:", error);
             } finally {

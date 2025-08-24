@@ -1,18 +1,38 @@
+<<<<<<< HEAD
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import instanceClient from "../../configs/instance"
 import { useState } from "react"
 
 // Define bill type interface for the new data structure
+=======
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
+import instanceClient from "../../configs/instance"
+import { useState } from "react"
+import { Link, useNavigate } from "react-router-dom";
+import { Pagination } from "antd";
+
+// Define bill type interface
+>>>>>>> 8fe707d982c4fac94612094f9351851cfda17024
 interface Bill {
     _id: string;
     userId: {
         _id: string;
         username: string;
         email: string;
+<<<<<<< HEAD
     };
     slotId: {
         _id: string;
+=======
+    } | string;
+    
+    // Tour booking fields
+    slotId?: {
+        _id: string;
+        dateTour: string;
+        availableSeats: number;
+>>>>>>> 8fe707d982c4fac94612094f9351851cfda17024
         tour: {
             _id: string;
             nameTour: string;
@@ -22,6 +42,7 @@ interface Bill {
             finalPrice: number;
             imageTour: string[];
             tourType: string;
+<<<<<<< HEAD
         };
         dateTour: string;
         availableSeats: number;
@@ -35,18 +56,48 @@ interface Bill {
     toddlerTour: number;
     infantTour: number;
     adultPassengers: Array<{
+=======
+            description?: string;
+        };
+    };
+    fullNameUser?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    totalPriceTour?: number;
+    adultsTour?: number;
+    childrenTour?: number;
+    toddlerTour?: number;
+    infantTour?: number;
+    adultPassengers?: Array<{
+>>>>>>> 8fe707d982c4fac94612094f9351851cfda17024
         fullName: string;
         gender: string;
         birthDate: string;
         singleRoom: boolean;
     }>;
+<<<<<<< HEAD
     childPassengers: any[];
     toddlerPassengers: any[];
     infantPassengers: any[];
+=======
+    childPassengers?: any[];
+    toddlerPassengers?: any[];
+    infantPassengers?: any[];
+    
+    // Hotel booking fields
+    BookingTourId?: any;
+    
+    // Common fields
+    depositAmount?: number;
+    isDeposit?: boolean;
+    isFullyPaid?: boolean;
+>>>>>>> 8fe707d982c4fac94612094f9351851cfda17024
     payment_method: string;
     payment_status: string;
     createdAt: string;
     updatedAt: string;
+<<<<<<< HEAD
     __v: number;
 }
 
@@ -106,6 +157,82 @@ const InfoUser = () => {
     };
 
     const handleViewDetail = (bill: Bill) => {
+=======
+    cancelledAt?: string;
+    cancelReason?: string;
+    cancelRequestedAt?: string;
+    note?: string;
+}
+
+const InfoUser = () => {
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+    
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize] = useState(5);
+    
+    // Modal states
+    const [showDetailModal, setShowDetailModal] = useState(false);
+    const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [bookingToCancel, setBookingToCancel] = useState<Bill | null>(null);
+    const [cancelReason, setCancelReason] = useState('');
+
+    // Fetch user data
+    const { data: users } = useQuery({
+        queryKey: ['users'],
+        queryFn: async () => {
+            const response = await instanceClient.get('/users/profile');
+            return response.data;
+        }
+    });
+
+    // Fetch bills data
+    const { data: bills = [] } = useQuery({
+        queryKey: ['bills'],
+        queryFn: async () => {
+            const response = await instanceClient.get('/bills/user');
+            return response.data;
+        }
+    });
+
+    // Request cancel mutation
+    const requestCancelMutation = useMutation({
+        mutationFn: async ({ billId, reason }: { billId: string; reason: string }) => {
+            const response = await instanceClient.post(`/bills/${billId}/request-cancel`, {
+                cancelReason: reason
+            });
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['bills'] });
+            setShowCancelModal(false);
+            setBookingToCancel(null);
+            setCancelReason('');
+        },
+        onError: (error) => {
+            console.error('Error requesting cancellation:', error);
+        }
+    });
+
+    // Complete payment mutation
+    const completePaymentMutation = useMutation({
+        mutationFn: async (billId: string) => {
+            const response = await instanceClient.post(`/bills/${billId}/complete-payment`);
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['bills'] });
+        },
+        onError: (error) => {
+            console.error('Error completing payment:', error);
+        }
+    });
+
+    // Helper functions
+    const openDetailModal = (bill: Bill) => {
+>>>>>>> 8fe707d982c4fac94612094f9351851cfda17024
         setSelectedBill(bill);
         setShowDetailModal(true);
     };
@@ -115,6 +242,7 @@ const InfoUser = () => {
         setSelectedBill(null);
     };
 
+<<<<<<< HEAD
     // Hàm kiểm tra có thể hủy
     const canCancelBooking = (bill: Bill) => {
         const tourDate = new Date(bill.slotId.dateTour);
@@ -127,6 +255,9 @@ const InfoUser = () => {
     };
 
     const handleCancelBooking = (bill: Bill) => {
+=======
+    const openCancelModal = (bill: Bill) => {
+>>>>>>> 8fe707d982c4fac94612094f9351851cfda17024
         setBookingToCancel(bill);
         setShowCancelModal(true);
     };
@@ -137,6 +268,7 @@ const InfoUser = () => {
         setCancelReason('');
     };
 
+<<<<<<< HEAD
     const requestCancelMutation = useMutation({
         mutationFn: (bookingId: string) => 
             instanceClient.put(`/bookingTour/request-cancel/${bookingId}`, {
@@ -171,11 +303,86 @@ const InfoUser = () => {
                     </h1>
                     <p className="text-lg text-gray-600">
                         Quản lý và theo dõi các đặt phòng và tour du lịch của bạn
+=======
+    const confirmCancelBooking = () => {
+        if (bookingToCancel && cancelReason.trim()) {
+            requestCancelMutation.mutate({
+                billId: bookingToCancel._id,
+                reason: cancelReason.trim()
+            });
+        }
+    };
+
+    const handleCompletePayment = (bill: Bill) => {
+        completePaymentMutation.mutate(bill._id);
+    };
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'paid':
+            case 'completed':
+                return 'bg-green-100 text-green-800';
+            case 'deposit_paid':
+                return 'bg-yellow-100 text-yellow-800';
+            case 'pending':
+                return 'bg-blue-100 text-blue-800';
+            case 'cancelled':
+                return 'bg-red-100 text-red-800';
+            default:
+                return 'bg-gray-100 text-gray-800';
+        }
+    };
+
+    const getStatusText = (status: string) => {
+        switch (status) {
+            case 'paid':
+                return 'Đã thanh toán';
+            case 'deposit_paid':
+                return 'Đã đặt cọc';
+            case 'pending':
+                return 'Chờ thanh toán';
+            case 'cancelled':
+                return 'Đã hủy';
+            case 'completed':
+                return 'Hoàn thành';
+            default:
+                return status;
+        }
+    };
+
+    // Calculate pagination
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const currentBills = bills.slice(startIndex, endIndex);
+
+    // Calculate stats
+    const totalBookings = bills.length;
+    const paidBookings = bills.filter(bill => bill.payment_status === 'paid' || bill.isFullyPaid).length;
+    const depositBookings = bills.filter(bill => bill.payment_status === 'deposit_paid' || (bill.isDeposit && !bill.isFullyPaid)).length;
+    const pendingBookings = bills.filter(bill => bill.payment_status === 'pending').length;
+    const cancelledBookings = bills.filter(bill => bill.payment_status === 'cancelled').length;
+    const completedBookings = bills.filter(bill => bill.payment_status === 'completed').length;
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+            <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
+                {/* Header Section */}
+                <div className="text-center mb-16 pt-12">
+                    <h1 className="text-4xl font-bold text-gray-900 mb-6">
+                        Thông tin người dùng
+                    </h1>
+                    <p className="text-lg text-gray-600">
+                        Quản lý và theo dõi các tour du lịch của bạn
+>>>>>>> 8fe707d982c4fac94612094f9351851cfda17024
                     </p>
                 </div>
 
                 {/* User Profile Card */}
+<<<<<<< HEAD
                 <div className="bg-white rounded-2xl shadow-xl p-8 mb-12 border border-gray-100">
+=======
+                <div className="bg-white rounded-2xl shadow-xl p-10 mb-16 border border-gray-100 mx-2">
+>>>>>>> 8fe707d982c4fac94612094f9351851cfda17024
                     <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8">
                         <div className="relative">
                             <img
@@ -207,11 +414,15 @@ const InfoUser = () => {
                                 </div>
                             </div>
                         </div>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 8fe707d982c4fac94612094f9351851cfda17024
                     </div>
                 </div>
 
                 {/* Stats Section */}
+<<<<<<< HEAD
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
                         <div className="flex items-center">
@@ -470,10 +681,230 @@ const InfoUser = () => {
                         ))}
                     </div>
                 )}
+=======
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-12 mx-2">
+                    {/* Tổng đặt chỗ */}
+                    <div className="group bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-2xl p-6 shadow-lg hover:shadow-xl border border-blue-200 transition-all duration-300 transform hover:-translate-y-1">
+                        <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                                <div className="flex items-center mb-3">
+                                    <div className="p-3 rounded-xl bg-blue-500 text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p className="text-sm font-semibold text-blue-700 mb-1">Tổng đặt chỗ</p>
+                                <p className="text-3xl font-bold text-blue-900 group-hover:text-blue-800 transition-colors">{totalBookings}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Đã thanh toán đủ */}
+                    <div className="group bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 rounded-2xl p-6 shadow-lg hover:shadow-xl border border-green-200 transition-all duration-300 transform hover:-translate-y-1">
+                        <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                                <div className="flex items-center mb-3">
+                                    <div className="p-3 rounded-xl bg-green-500 text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p className="text-sm font-semibold text-green-700 mb-1">Đã thanh toán</p>
+                                <p className="text-3xl font-bold text-green-900 group-hover:text-green-800 transition-colors">{paidBookings}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Đã đặt cọc */}
+                    <div className="group bg-gradient-to-br from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 rounded-2xl p-6 shadow-lg hover:shadow-xl border border-yellow-200 transition-all duration-300 transform hover:-translate-y-1">
+                        <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                                <div className="flex items-center mb-3">
+                                    <div className="p-3 rounded-xl bg-yellow-500 text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p className="text-sm font-semibold text-yellow-700 mb-1">Đã đặt cọc</p>
+                                <p className="text-3xl font-bold text-yellow-900 group-hover:text-yellow-800 transition-colors">{depositBookings}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Chờ thanh toán */}
+                    <div className="group bg-gradient-to-br from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 rounded-2xl p-6 shadow-lg hover:shadow-xl border border-orange-200 transition-all duration-300 transform hover:-translate-y-1">
+                        <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                                <div className="flex items-center mb-3">
+                                    <div className="p-3 rounded-xl bg-orange-500 text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p className="text-sm font-semibold text-orange-700 mb-1">Chờ thanh toán</p>
+                                <p className="text-3xl font-bold text-orange-900 group-hover:text-orange-800 transition-colors">{pendingBookings}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Đã hủy */}
+                    <div className="group bg-gradient-to-br from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 rounded-2xl p-6 shadow-lg hover:shadow-xl border border-red-200 transition-all duration-300 transform hover:-translate-y-1">
+                        <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                                <div className="flex items-center mb-3">
+                                    <div className="p-3 rounded-xl bg-red-500 text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p className="text-sm font-semibold text-red-700 mb-1">Đã hủy</p>
+                                <p className="text-3xl font-bold text-red-900 group-hover:text-red-800 transition-colors">{cancelledBookings}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Hoàn thành */}
+                    <div className="group bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-2xl p-6 shadow-lg hover:shadow-xl border border-purple-200 transition-all duration-300 transform hover:-translate-y-1">
+                        <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                                <div className="flex items-center mb-3">
+                                    <div className="p-3 rounded-xl bg-purple-500 text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p className="text-sm font-semibold text-purple-700 mb-1">Hoàn thành</p>
+                                <p className="text-3xl font-bold text-purple-900 group-hover:text-purple-800 transition-colors">{completedBookings}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Booking History */}
+                <div className="bg-white rounded-2xl shadow-xl p-8 mx-2">
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="text-2xl font-bold text-gray-900">Lịch sử đặt tour</h2>
+                        <div className="flex items-center space-x-2 text-gray-600">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            <span className="text-sm font-medium">{bills.length} đặt chỗ</span>
+                        </div>
+                    </div>
+
+                    <div className="space-y-6 mx-2">
+                        {currentBills.length > 0 ? (
+                            currentBills.map((bill) => (
+                                <div key={bill._id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                                    <div className="p-8">
+                                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-6 lg:space-y-0">
+                                            {/* Tour Info */}
+                                            <div className="flex-1">
+                                                <div className="flex items-start space-x-4">
+                                                    <div className="flex-shrink-0">
+                                                        <img
+                                                            src={bill.slotId?.tour?.imageTour?.[0] || '/default-tour.jpg'}
+                                                            alt={bill.slotId?.tour?.nameTour || 'Tour'}
+                                                            className="w-20 h-20 rounded-xl object-cover border-2 border-gray-200"
+                                                        />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h3 className="text-xl font-bold text-gray-900 mb-2 truncate">
+                                                            {bill.slotId?.tour?.nameTour || 'Tour không xác định'}
+                                                        </h3>
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
+                                                            <div className="flex items-center space-x-2">
+                                                                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                                </svg>
+                                                                <span>Ngày khởi hành: {bill.slotId?.dateTour ? new Date(bill.slotId.dateTour).toLocaleDateString('vi-VN') : 'N/A'}</span>
+                                                            </div>
+                                                            <div className="flex items-center space-x-2">
+                                                                <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                                                                </svg>
+                                                                <span>Tổng tiền: {bill.totalPriceTour?.toLocaleString('vi-VN')} VND</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Status and Actions */}
+                                            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(bill.payment_status)}`}>
+                                                    {getStatusText(bill.payment_status)}
+                                                </span>
+                                                
+                                                <div className="flex space-x-2">
+                                                    <button
+                                                        onClick={() => openDetailModal(bill)}
+                                                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 text-sm font-medium"
+                                                    >
+                                                        Chi tiết
+                                                    </button>
+                                                    
+                                                    {(bill.payment_status === 'pending' || bill.payment_status === 'deposit_paid') && (
+                                                        <button
+                                                            onClick={() => openCancelModal(bill)}
+                                                            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 text-sm font-medium"
+                                                        >
+                                                            Hủy đặt chỗ
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center py-12">
+                                <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có đặt chỗ nào</h3>
+                                <p className="text-gray-600 mb-6">Bạn chưa có lịch sử đặt tour nào. Hãy khám phá các tour du lịch hấp dẫn!</p>
+                                <Link
+                                    to="/tours"
+                                    className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+                                >
+                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                    Khám phá tour
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Pagination */}
+                    {bills.length > pageSize && (
+                        <div className="flex justify-center mt-8">
+                            <Pagination
+                                current={currentPage}
+                                total={bills.length}
+                                pageSize={pageSize}
+                                onChange={(page) => setCurrentPage(page)}
+                                showSizeChanger={false}
+                                showQuickJumper={false}
+                                showTotal={(total, range) => `${range[0]}-${range[1]} của ${total} đặt chỗ`}
+                            />
+                        </div>
+                    )}
+                </div>
+>>>>>>> 8fe707d982c4fac94612094f9351851cfda17024
             </div>
 
             {/* Detail Modal */}
             {showDetailModal && selectedBill && (
+<<<<<<< HEAD
                 <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-200">
                         {/* Modal Header */}
@@ -589,10 +1020,106 @@ const InfoUser = () => {
                                                 <span className="font-bold text-lg text-green-600">
                                                     {selectedBill.totalPriceTour.toLocaleString()}₫
                                                 </span>
+=======
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full border border-gray-200 animate-pulse max-h-screen overflow-y-auto">
+                        {/* Modal Header */}
+                        <div className="relative bg-gradient-to-r from-blue-500 to-indigo-600 p-6 rounded-t-2xl">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white text-opacity-80">Chi tiết đặt tour</h3>
+                                        <p className="text-sm text-white text-opacity-80">Thông tin chi tiết về chuyến đi của bạn</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={closeDetailModal}
+                                    className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200 backdrop-blur-sm"
+                                >
+                                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Modal Content */}
+                        <div className="p-6 space-y-6">
+                            {/* Tour Information */}
+                            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-200">
+                                <div className="flex items-start space-x-4">
+                                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div className="flex-1">
+                                        <h3 className="font-bold text-2xl text-gray-900 mb-3">
+                                            {selectedBill?.slotId?.tour?.nameTour || 'Tour không xác định'}
+                                        </h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <div className="flex items-center space-x-2">
+                                                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    </svg>
+                                                    <span className="text-sm text-gray-600">Điểm đến:</span>
+                                                    <span className="text-sm font-semibold text-gray-900">{selectedBill?.slotId?.tour?.destination || 'N/A'}</span>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    </svg>
+                                                    <span className="text-sm text-gray-600">Điểm khởi hành:</span>
+                                                    <span className="text-sm font-semibold text-gray-900">{selectedBill?.slotId?.tour?.departure_location || 'N/A'}</span>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    <span className="text-sm text-gray-600">Thời gian:</span>
+                                                    <span className="text-sm font-semibold text-gray-900">{selectedBill?.slotId?.tour?.duration || 'N/A'}</span>
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <div className="flex items-center space-x-2">
+                                                    <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                    </svg>
+                                                    <span className="text-sm text-gray-600">Số người:</span>
+                                                    <span className="text-sm font-semibold text-gray-900">
+                                                        {(selectedBill?.adultsTour || 0) + (selectedBill?.childrenTour || 0) + (selectedBill?.toddlerTour || 0) + (selectedBill?.infantTour || 0)} người
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                                                    </svg>
+                                                    <span className="text-sm text-gray-600">Tổng tiền:</span>
+                                                    <span className="text-lg font-bold text-red-600">{selectedBill?.totalPriceTour?.toLocaleString('vi-VN')} VND</span>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                    <span className="text-sm text-gray-600">Ngày khởi hành:</span>
+                                                    <span className="text-sm font-semibold text-gray-900">
+                                                        {selectedBill?.slotId?.dateTour ? new Date(selectedBill.slotId.dateTour).toLocaleDateString('vi-VN') : 'N/A'}
+                                                    </span>
+                                                </div>
+>>>>>>> 8fe707d982c4fac94612094f9351851cfda17024
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+<<<<<<< HEAD
 
                                 {/* Passenger Information */}
                                 <div className="bg-gray-50 rounded-xl p-6">
@@ -676,10 +1203,38 @@ const InfoUser = () => {
                                                         </div>
                                                     ))}
                                                 </div>
+=======
+                            </div>
+
+                            {/* Tour Images */}
+                            {selectedBill.slotId?.tour?.imageTour && selectedBill.slotId.tour.imageTour.length > 0 && (
+                                <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                                    <h4 className="font-bold text-lg text-gray-900 mb-4 flex items-center">
+                                        <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        Hình ảnh tour
+                                    </h4>
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                        {selectedBill.slotId.tour.imageTour.slice(0, 6).map((image, index) => (
+                                            <img
+                                                key={index}
+                                                src={image}
+                                                alt={`Tour image ${index + 1}`}
+                                                className="w-full h-32 object-cover rounded-lg border border-gray-200 hover:scale-105 transition-transform duration-200"
+                                            />
+                                        ))}
+                                        {selectedBill.slotId.tour.imageTour.length > 6 && (
+                                            <div className="w-full h-32 bg-gray-200 rounded-lg border border-gray-200 flex items-center justify-center">
+                                                <span className="text-gray-600 font-medium">
+                                                    +{selectedBill.slotId.tour.imageTour.length - 6} ảnh khác
+                                                </span>
+>>>>>>> 8fe707d982c4fac94612094f9351851cfda17024
                                             </div>
                                         )}
                                     </div>
                                 </div>
+<<<<<<< HEAD
 
                                 {/* Payment Information */}
                                 <div className="bg-gray-50 rounded-xl p-6">
@@ -715,6 +1270,34 @@ const InfoUser = () => {
                                                 </span>
                                             </div>
                                         </div>
+=======
+                            )}
+
+                            {/* Customer Information */}
+                            <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                                <h4 className="font-bold text-lg text-gray-900 mb-4 flex items-center">
+                                    <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    Thông tin khách hàng
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-600">Họ và tên:</label>
+                                        <p className="text-sm font-semibold text-gray-900">{selectedBill?.fullNameUser || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-600">Email:</label>
+                                        <p className="text-sm font-semibold text-gray-900">{selectedBill?.email || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-600">Số điện thoại:</label>
+                                        <p className="text-sm font-semibold text-gray-900">{selectedBill?.phone || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-600">Địa chỉ:</label>
+                                        <p className="text-sm font-semibold text-gray-900">{selectedBill?.address || 'N/A'}</p>
+>>>>>>> 8fe707d982c4fac94612094f9351851cfda17024
                                     </div>
                                 </div>
                             </div>
@@ -724,6 +1307,7 @@ const InfoUser = () => {
                         <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200">
                             <button
                                 onClick={closeDetailModal}
+<<<<<<< HEAD
                                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-200"
                             >
                                 Đóng
@@ -731,6 +1315,21 @@ const InfoUser = () => {
                             {selectedBill?.payment_status === 'pending' && (
                                 <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
                                     Thanh toán ngay
+=======
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200"
+                            >
+                                Đóng
+                            </button>
+                            {(selectedBill?.payment_status === 'deposit_paid' || (selectedBill?.isDeposit && !selectedBill?.isFullyPaid)) && (
+                                <button
+                                    onClick={() => {
+                                        closeDetailModal();
+                                        handleCompletePayment(selectedBill);
+                                    }}
+                                    className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors duration-200"
+                                >
+                                    Hoàn tất thanh toán
+>>>>>>> 8fe707d982c4fac94612094f9351851cfda17024
                                 </button>
                             )}
                         </div>
@@ -738,6 +1337,7 @@ const InfoUser = () => {
                 </div>
             )}
 
+<<<<<<< HEAD
             {/* Modal xác nhận hủy booking */}
             {showCancelModal && bookingToCancel && (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
@@ -832,3 +1432,139 @@ const InfoUser = () => {
 }
 
 export default InfoUser
+=======
+            {/* Cancel Modal */}
+            {showCancelModal && bookingToCancel && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full border border-gray-200 animate-pulse max-h-screen overflow-y-auto">
+                        {/* Header */}
+                        <div className="relative bg-gradient-to-r from-red-500 to-red-600 p-6 rounded-t-2xl">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white text-opacity-80">Hủy đặt chỗ</h3>
+                                        <p className="text-sm text-white text-opacity-80">Yêu cầu hủy đặt chỗ tour du lịch</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={closeCancelModal}
+                                    className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200 backdrop-blur-sm"
+                                >
+                                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6">
+                            {/* Tour Info */}
+                            <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-xl p-5 border border-red-200 mb-6">
+                                <div className="flex items-start space-x-4">
+                                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div className="flex-1">
+                                        <h3 className="font-bold text-xl text-gray-900 mb-3">
+                                            {bookingToCancel?.slotId?.tour?.nameTour || 'Tour không xác định'}
+                                        </h3>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            <div className="flex items-center space-x-2">
+                                                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                                <span className="text-sm text-gray-600">Ngày khởi hành:</span>
+                                                <span className="text-sm font-semibold text-gray-900">
+                                                    {bookingToCancel?.slotId?.dateTour ? new Date(bookingToCancel.slotId.dateTour).toLocaleDateString('vi-VN') : 'N/A'}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                                                </svg>
+                                                <span className="text-sm text-gray-600">Tổng tiền:</span>
+                                                <span className="text-sm font-semibold text-gray-900">
+                                                    {bookingToCancel?.totalPriceTour?.toLocaleString('vi-VN')} VND
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Cancellation Policy */}
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                                <div className="flex items-start space-x-3">
+                                    <svg className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                    </svg>
+                                    <div>
+                                        <h4 className="font-semibold text-yellow-800 mb-2">Chính sách hoàn tiền</h4>
+                                        <ul className="text-sm text-yellow-700 space-y-1">
+                                            <li>• Hủy trước 7 ngày: Hoàn 80% tổng tiền</li>
+                                            <li>• Hủy trước 3 ngày: Hoàn 50% tổng tiền</li>
+                                            <li>• Hủy trong 3 ngày: Không hoàn tiền</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Reason Input */}
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Lý do hủy đặt chỗ *
+                                </label>
+                                <textarea
+                                    value={cancelReason}
+                                    onChange={(e) => setCancelReason(e.target.value)}
+                                    placeholder="Vui lòng cho biết lý do hủy đặt chỗ..."
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                                    rows={4}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200">
+                            <button
+                                onClick={closeCancelModal}
+                                className="px-6 py-2.5 bg-gray-500 text-white rounded-xl hover:bg-gray-600 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-all duration-200 font-semibold"
+                            >
+                                Hủy bỏ
+                            </button>
+                            <button
+                                onClick={confirmCancelBooking}
+                                className="px-6 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-4 focus:ring-red-200 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-lg"
+                                disabled={requestCancelMutation.isPending || !cancelReason.trim()}
+                            >
+                                {requestCancelMutation.isPending ? (
+                                    <div className="flex items-center">
+                                        <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                         </svg>
+                                         Đang gửi yêu cầu...
+                                     </div>
+                                 ) : (
+                                     'Gửi yêu cầu hủy'
+                                 )}
+                             </button>
+                         </div>
+                     </div>
+                 </div>
+             )}
+         </div>
+     )
+ }
+ 
+ export default InfoUser
+>>>>>>> 8fe707d982c4fac94612094f9351851cfda17024

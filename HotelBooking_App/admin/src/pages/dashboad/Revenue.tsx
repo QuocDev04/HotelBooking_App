@@ -19,11 +19,13 @@ const Revenue = () => {
     const { Text } = Typography;
 
     const { data: revenueChartData } = useQuery({
-        queryKey: ["checkOutBookingTour"],
-        queryFn: () => instance.get("/checkOutBookingTour"),
+
+        queryKey: ["accurateRevenue"],
+        queryFn: () => instance.get("/admin/bookings/revenue?groupBy=month"),
     });
 
-    const rawData = revenueChartData?.data?.getCheckOutUserTour || [];
+    const revenueData = revenueChartData?.data?.data || {};
+    const rawData = revenueData.revenueByPeriod || [];
 
     const getAllMonths = () => {
         return Array.from({ length: 12 }, (_, i) => `Tháng ${i + 1}`);
@@ -33,9 +35,10 @@ const Revenue = () => {
         const mapMonthToAmount: Record<string, number> = {};
 
         rawData.forEach((item: any) => {
-            const monthNumber = dayjs(item.payment_date || item.createdAt).month() + 1;
+
+            const monthNumber = item._id.month;
             const monthKey = `Tháng ${monthNumber}`;
-            mapMonthToAmount[monthKey] = (mapMonthToAmount[monthKey] || 0) + (item.amount || 0);
+            mapMonthToAmount[monthKey] = (mapMonthToAmount[monthKey] || 0) + (item.revenue || 0);
         });
 
         return getAllMonths().map((month) => ({
@@ -46,10 +49,10 @@ const Revenue = () => {
 
     const chartData = groupedData();
 
-    const totalRevenue = rawData.reduce(
-        (acc: number, cur: any) => acc + (cur.amount || 0),
-        0
-    );
+
+    const totalRevenue = revenueData.actualRevenue || 0;
+    const grossRevenue = revenueData.grossRevenue || 0;
+    const totalRefund = revenueData.totalRefund || 0;
     const customTicks = [10_000_000, 20_000_000, 30_000_000, 40_000_000, 50_000_000];
     return (
         <>
@@ -83,9 +86,18 @@ const Revenue = () => {
                                     📈 Doanh thu theo tháng
                                 </Text>
                             </Space>
-                            <Text style={{ fontSize: 16, color: "#333" }}>
-                                Tổng doanh thu: {(totalRevenue / 1_000_000).toFixed(1)}M VNĐ
-                            </Text>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <Text style={{ fontSize: 16, color: "#333", fontWeight: 'bold' }}>
+                                    Doanh thu thực tế: {(totalRevenue / 1_000_000).toFixed(1)}M VNĐ
+                                </Text>
+                                <Text style={{ fontSize: 14, color: "#666" }}>
+                                    Doanh thu gộp: {(grossRevenue / 1_000_000).toFixed(1)}M VNĐ
+                                </Text>
+                                <Text style={{ fontSize: 14, color: "#ff4d4f" }}>
+                                    Tiền hoàn lại: -{(totalRefund / 1_000_000).toFixed(1)}M VNĐ
+                                </Text>
+                            </div>
                         </Space>
                     }
                 >

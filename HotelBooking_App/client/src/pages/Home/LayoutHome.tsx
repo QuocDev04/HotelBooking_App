@@ -5,21 +5,22 @@ import FeaturedDestination from "./Main/FeaturedDestination"
 import Internatinal from "./Main/Internatinal"
 import News from "./Main/News"
 import TourIn from "./Main/TourIn"
-import TourOut from "./Main/TourOut"
-import TourPromotion from "./Main/TourPromotion"
+
+import HotelPromotion from "./Main/HotelPromotion"
 
 const LayoutHome = () => {
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [])
   return (
-    <div>
+
+    <div style={{ background: 'transparent' }}>
       <Banner/>
       <AboutUs/>
       <Internatinal/>
       <FeaturedDestination/>
-      <TourPromotion/>
-      <TourOut/>
+
+      <HotelPromotion/>
       <TourIn/>
       <News/>
     </div>

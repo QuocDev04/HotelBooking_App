@@ -1,20 +1,56 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+
+import { useParams, useLocation } from "react-router-dom";
 import instanceClient from "../../../configs/instance";
 import { Form, Input, message, type FormProps } from "antd";
 import type { AxiosError } from "axios";
+import { useState, useEffect } from "react";
 
-const BookingRoom = () => {
+const BookingTour = () => {
   const [form] = Form.useForm();
   const { id } = useParams();
-  const { data } = useQuery({
+  const location = useLocation();
+  
+  // Xử lý tham số URL khi quay lại từ VNPay
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const success = searchParams.get('success');
+    const status = searchParams.get('status');
+    const errorMessage = searchParams.get('message');
+    
+    if (success === 'true') {
+      if (status === 'completed') {
+        message.success('Thanh toán đầy đủ thành công!');
+      } else if (status === 'deposit_paid') {
+        message.success('Đặt cọc thành công!');
+      } else {
+        message.success('Thanh toán thành công!');
+      }
+    } else if (success === 'false') {
+      if (errorMessage === 'payment_failed') {
+        message.error('Thanh toán thất bại. Vui lòng thử lại sau.');
+      } else {
+        message.error(errorMessage || 'Đã xảy ra lỗi trong quá trình thanh toán.');
+      }
+    }
+  }, [location.search]);
+  
+  const { data, refetch } = useQuery({
     queryKey: ['bookingTour', id],
     queryFn: () => instanceClient.get(`/bookingTour/${id}`)
-  })
+  });
   
-  const bookingTour = data?.data?.booking
+  // Tự động tải lại dữ liệu khi quay lại từ VNPay
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    if (searchParams.has('success')) {
+      refetch();
+    }
+  }, [location.search, refetch]);
+  
+  const bookingTour = data?.data?.booking;
   console.log(bookingTour);
   
   const formatDateVN = (dateString:any) => {
@@ -27,7 +63,7 @@ const BookingRoom = () => {
       timeZone: 'Asia/Ho_Chi_Minh',
     }).format(date);
   };
-  const { mutate } = useMutation({
+  const { mutate, isLoading } = useMutation({
     mutationFn: async (data: any) => {
       try {
         const response = await instanceClient.post(`/checkOutBookingTour/${bookingTour._id}`, data)
@@ -44,6 +80,24 @@ const BookingRoom = () => {
       const paymentMethod = data?.payment?.payment_method;
       console.log('paymentMethod:', paymentMethod);
 
+
+      // Nếu thanh toán qua VNPay và có paymentUrl
+      if (data.paymentUrl) {
+        try {
+          // Chuyển hướng trực tiếp đến URL thanh toán VNPay
+          console.log("Chuyển trang tới VNPAY:", data.paymentUrl);
+          window.location.href = data.paymentUrl;
+          return;
+        } catch (error) {
+          console.error("Lỗi khi chuyển hướng đến VNPay:", error);
+          message.error("Đã xảy ra lỗi khi chuyển hướng đến VNPay");
+          // Chuyển về trang chủ nếu có lỗi
+          window.location.href = '/';
+          return;
+        }
+      }
+
+      // Nếu thanh toán qua VNPay nhưng không có paymentUrl sẵn
       if (paymentMethod === "bank_transfer") {
         try {
           const res = await instanceClient.post(`/vnpay/${bookingId}`, null, {
@@ -59,26 +113,99 @@ const BookingRoom = () => {
           } else {
             console.log("Không có paymentUrl hoặc success false");
             message.error("Không thể lấy liên kết thanh toán từ VNPay");
+
+            // Chuyển về trang chủ
+            window.location.href = '/';
           }
         } catch (error) {
           console.error("Lỗi khi kết nối VNPay:", error);
           message.error("Đã xảy ra lỗi khi kết nối VNPay");
+
+          // Chuyển về trang chủ nếu có lỗi
+          window.location.href = '/';
         }
       } else {
-        console.log("Không phải phương thức thanh toán bank_transfer");
+        // Với các phương thức thanh toán khác
+        message.success(data.message || "Thanh toán thành công");
+        
+        // Chuyển hướng đến trang chủ
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1500);
       }
     },
     
     onError: (error: any) => {
-      alert(error.message || 'Đặt tour thất bại');
+
+      message.error(error.message || 'Đặt tour thất bại');
     },
   })
+
+  // Hiển thị modal chọn phương thức thanh toán
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const handlePayRemainingAmount = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleModalCancel = () => {
+    setIsModalVisible(false);
+  };
+
+  const handlePaymentMethodSelect = (method: string) => {
+    onFinish({ payment_method: method });
+    setIsModalVisible(false);
+  };
+
   const onFinish: FormProps<any>["onFinish"] = (values) => {
     const newValues = {
       ...values,
       BookingTourId: bookingTour._id,
+
+      isFullPayment: true, // Thanh toán phần còn lại
     };
     mutate(newValues);
+  };
+
+  // Thêm hiển thị thông tin đặt cọc và số tiền còn lại
+  const renderPaymentStatus = () => {
+    if (!bookingTour) return null;
+    
+    if (bookingTour.isFullyPaid) {
+      return (
+        <div className="bg-green-100 text-green-800 p-3 rounded-md mb-4">
+          <p className="font-semibold">Đã thanh toán đầy đủ</p>
+          <p>Số tiền: {bookingTour.totalPriceTour?.toLocaleString()} VNĐ</p>
+        </div>
+      );
+    }
+    
+    if (bookingTour.isDeposit) {
+      const remainingAmount = bookingTour.totalPriceTour - bookingTour.depositAmount;
+      return (
+        <div className="bg-yellow-100 text-yellow-800 p-3 rounded-md mb-4">
+          <p className="font-semibold">Đã đặt cọc</p>
+          <p>Số tiền đã đặt cọc: {bookingTour.depositAmount?.toLocaleString()} VNĐ</p>
+          <p>Số tiền còn lại: {remainingAmount?.toLocaleString()} VNĐ</p>
+          {bookingTour.payment_status !== 'completed' && (
+            <button 
+              onClick={handlePayRemainingAmount}
+              className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:bg-blue-400"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Đang xử lý...' : 'Thanh toán phần còn lại'}
+            </button>
+          )}
+        </div>
+      );
+    }
+    
+    return (
+      <div className="bg-red-100 text-red-800 p-3 rounded-md mb-4">
+        <p className="font-semibold">Chưa thanh toán</p>
+        <p>Vui lòng thanh toán để xác nhận đặt tour</p>
+      </div>
+    );
   };
   return (
     <div className="max-w-screen-xl p-2 md:p-4 mx-auto font-sans">
@@ -127,6 +254,50 @@ const BookingRoom = () => {
         </div>
       </div>
 
+
+      {/* Hiển thị trạng thái thanh toán */}
+      {renderPaymentStatus()}
+
+      {/* Modal chọn phương thức thanh toán */}
+      {isModalVisible && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-xl font-bold mb-4">Chọn phương thức thanh toán</h3>
+            <div className="space-y-3">
+              <button 
+                onClick={() => handlePaymentMethodSelect('cash')}
+                className="w-full py-3 px-4 border border-gray-300 rounded-md flex items-center justify-between hover:bg-gray-100"
+                disabled={isLoading}
+              >
+                <span>Tiền mặt</span>
+                <span className="text-gray-500">→</span>
+              </button>
+              <button 
+                onClick={() => handlePaymentMethodSelect('bank_transfer')}
+                className="w-full py-3 px-4 border border-gray-300 rounded-md flex items-center justify-between hover:bg-gray-100"
+                disabled={isLoading}
+              >
+                <span>Thanh toán qua VNPay</span>
+                <span className="text-gray-500">→</span>
+              </button>
+            </div>
+            <button 
+              onClick={handleModalCancel}
+              className="mt-4 w-full py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+              disabled={isLoading}
+            >
+              Hủy
+            </button>
+            
+            {isLoading && (
+              <div className="mt-3 text-center text-blue-600">
+                <p>Đang xử lý thanh toán, vui lòng đợi...</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Dịch vụ - chuyển table thành card ở mobile */}
       <div className="mb-4 mt-20">
         <div className="bg-white rounded-xl shadow-md flex flex-col md:table w-full">
@@ -148,13 +319,8 @@ const BookingRoom = () => {
               </div>
               <div className="md:table-cell py-3 px-4 align-top">
                 <div className="font-bold mb-1">{bookingTour?.tourId?.nameTour}</div>
-                <div>
-                  {bookingTour?.itemRoom?.map((item: any, index: any) => (
-                    <div key={index} className="text-lg text-black mb-1">
-                      {item.roomId?.nameRoom}
-                    </div>
-                  ))}
-                </div>
+
+
                 <div className="text-green-700 text-xs font-medium mb-1">
                   Vị trí tuyệt vời – <span className="font-bold">8.8</span>
                 </div>
@@ -365,4 +531,5 @@ const BookingRoom = () => {
   );
 };
 
-export default BookingRoom;
+
+export default BookingTour;

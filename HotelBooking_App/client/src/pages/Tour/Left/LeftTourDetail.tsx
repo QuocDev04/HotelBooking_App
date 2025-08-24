@@ -9,6 +9,8 @@ import interactionPlugin from '@fullcalendar/interaction';
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 
+import { toast } from 'react-toastify';
+
 dayjs.extend(utc);
 interface TourData {
     dateTour: string;
@@ -54,29 +56,52 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
     const events = slots?.map((slot: any) => {
         const date = dayjs(slot.dateTour);
 
+
+        // Nếu có finalPrice thì lấy finalPrice, không thì lấy price
+        const priceToShow = tours?.finalPrice ?? tours?.price;
+
         return {
-            title: `Còn: ${slot.availableSeats} chỗ \nGiá: ${tours?.finalPrice?.toLocaleString('vi-VN')} đ`,
+            title: `Còn: ${slot.availableSeats} chỗ \nGiá: ${priceToShow?.toLocaleString('vi-VN')} đ`,
             date: date.format("YYYY-MM-DD")
         };
     });
+
+    
     function handleDateClick(info: any) {
         const clickedDate = dayjs(info.date).format("YYYY-MM-DD");
         const isDateAvailable = events.some((event: any) => event.date === clickedDate);
 
         if (isDateAvailable) {
             setSelectedDate(info.date);
+
+            // Tìm slot tương ứng để hiển thị thông tin
+            const slot = slots.find((s: any) => dayjs(s.dateTour).format("YYYY-MM-DD") === clickedDate);
+            if (slot) {
+                console.log("Selected slot:", slot);
+                toast.success(`Đã chọn ngày ${dayjs(info.date).format("DD/MM/YYYY")} - Còn ${slot.availableSeats} chỗ`);
+            }
         } else {
-            // Có thể hiện thông báo hoặc làm gì đó nếu muốn
+            // Hiển thị thông báo khi chọn ngày không có tour
+            toast.warning("Ngày này không có tour, vui lòng chọn ngày khác");
             console.log("Ngày này không có tour");
         }
     }
+
     function handleEventClick(clickInfo: any) {
         const clickedDate = dayjs(clickInfo.event.start).format("YYYY-MM-DD");
         const isDateAvailable = events.some((event: any) => event.date === clickedDate);
 
         if (isDateAvailable) {
             setSelectedDate(clickInfo.event.start);
+
+            // Tìm slot tương ứng để hiển thị thông tin
+            const slot = slots.find((s: any) => dayjs(s.dateTour).format("YYYY-MM-DD") === clickedDate);
+            if (slot) {
+                console.log("Selected slot:", slot);
+                toast.success(`Đã chọn ngày ${dayjs(clickInfo.event.start).format("DD/MM/YYYY")} - Còn ${slot.availableSeats} chỗ`);
+            }
         } else {
+            toast.warning("Ngày này không có tour, vui lòng chọn ngày khác");
             console.log("Ngày này không có tour");
         }
     }
@@ -148,13 +173,15 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                 </span>
                             </div>
 
-                            <div className="mb-4">
+
+                            {/* <div className="mb-4">
                                 <div className="text-center text-blue-700 text-2xl font-bold flex items-center justify-center gap-2 mb-6">
                                     Phương tiện di chuyển {selectedSlot?.tour?.itemTransport?.[0]?.TransportId?.transportType}
                                 </div>
 
                                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                                    {/* Ngày đi */}
+
+                                    
                                     <div className="flex-1 text-center">
                                         <div className="font-semibold text-gray-700">
                                             Ngày đi -{" "}
@@ -162,12 +189,7 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                                 {selectedDate ? dayjs(selectedDate).format("DD/MM/YYYY") : ""}
                                             </span>
                                         </div>
-                                        <div className="flex items-center justify-center gap-2 mt-1">
-                                            <span className="text-blue-600 font-bold">
-                                                {selectedSlot?.tour?.itemTransport?.[0]?.TransportId?.transportNumber}
-                                            </span>
-                                            <span className="text-gray-600">08:50 <span className="text-xl">→</span> 10:55</span>
-                                        </div>
+
                                         <div className="text-xs text-gray-500 mt-1">
                                             <span className="text-red-500 font-bold">
                                                 {selectedSlot?.tour?.itemTransport?.[0]?.TransportId?.transportName}
@@ -177,7 +199,8 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
 
                                     <div className="hidden md:block w-px h-16 bg-gray-200 mx-4"></div>
 
-                                    {/* Ngày về */}
+
+                                   
                                     <div className="flex-1 text-center">
                                         <div className="font-semibold text-gray-700">
                                             Ngày về - <span className="text-blue-600">13/07/2025</span>
@@ -195,7 +218,8 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+
+                            </div> */}
                             <div className="hidden md:block w-full h-px bg-gray-200 mx-4 my-6"></div>
                             {/* Giá */}
                             <div className="mb-4">
@@ -207,9 +231,11 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                         <div className="border mb-6 rounded-xl p-4">
                                             <div className="flex justify-between ">
                                                 <span>Người lớn</span>
-                                                <span className="text-red-600 font-bold">
-                                                    {selectedSlot?.tour?.finalPrice?.toLocaleString('vi-VN')} đ
-                                                </span>
+
+                                                    <span className="text-red-600 font-bold">
+                                                        {(selectedSlot?.tour?.finalPrice ?? selectedSlot?.tour?.price)?.toLocaleString('vi-VN')} đ
+                                                    </span>
+
                                             </div>
                                             <div className="text-xs text-gray-500 ">(Từ 12 tuổi trở lên)</div>
                                         </div>
@@ -255,5 +281,6 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
         </>
     );
 };
+
 
 export default LeftTourDetail;

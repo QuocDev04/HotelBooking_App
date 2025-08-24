@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import logo from '../assets/logo.png';
-import { useUser, UserButton } from "@clerk/clerk-react";
+
+import { useUser, UserButton, useAuth } from "@clerk/clerk-react";
 import { useQuery } from '@tanstack/react-query';
 import { instanceAdmin } from '../configs/axios';
 import { BellOutlined } from '@ant-design/icons';
@@ -8,13 +9,33 @@ import { BellOutlined } from '@ant-design/icons';
 const Navbar = () => {
     const { isSignedIn, user } = useUser();
 
+    const { getToken } = useAuth();
+
     // Lấy thống kê booking để hiển thị thông báo
     const { data: bookingStats, refetch } = useQuery({
         queryKey: ['booking-stats'],
-        queryFn: () => instanceAdmin.get('/admin/bookings/stats'),
+
+        queryFn: async () => {
+            try {
+                const token = await getToken();
+                if (!token) {
+                    console.warn("No auth token available");
+                    return { data: { stats: { pendingCancel: 0 } } };
+                }
+                
+                const response = await instanceAdmin.get('/admin/bookings/stats', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                return response;
+            } catch (error) {
+                console.error('Error fetching booking stats:', error);
+                return { data: { stats: { pendingCancel: 0 } } };
+            }
+        },
         refetchInterval: 30000, // Cập nhật mỗi 30 giây
         staleTime: 0, // Luôn coi data là stale để cập nhật ngay
-        refetchOnWindowFocus: true // Refetch khi focus lại window
+        refetchOnWindowFocus: true, // Refetch khi focus lại window
+        retry: false // Không retry nếu lỗi
     });
 
     const pendingCancelCount = bookingStats?.data?.stats?.pendingCancel || 0;

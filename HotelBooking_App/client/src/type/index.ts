@@ -24,21 +24,8 @@ export interface Tour {
     total_sold: number;
   }
 
-export interface Room {
-    room_id: number;
-    room_name: string;
-    hotel_id: number;
-    price: number;
-    amenities: string[];
-}
 
-export interface Review {
-    review_id: number;
-    user_id: number;
-    room_id: number;
-    rating: number;
-    comment: string;
-}
+
 
 export interface User {
     user_id: number;
@@ -53,4 +40,5 @@ export interface Hotel {
     address: string;
     rating: number;
     image: string;
+
 }

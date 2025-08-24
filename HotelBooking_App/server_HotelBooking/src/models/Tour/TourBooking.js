@@ -27,6 +27,12 @@ const TourBookingSchema = new mongoose.Schema({
     // Tổng giá tour
     totalPriceTour: { type: Number, default: 0 },
 
+    
+    // Thông tin đặt cọc
+    isDeposit: { type: Boolean, default: false }, // Đã đặt cọc hay chưa
+    depositAmount: { type: Number, default: 0 }, // Số tiền đã đặt cọc
+    isFullyPaid: { type: Boolean, default: false }, // Đã thanh toán đầy đủ chưa
+
     // Số lượng từng nhóm khách
     adultsTour: { type: Number, required: true },      // Người lớn (>= 12 tuổi)
     childrenTour: { type: Number },    // Trẻ em (5-11 tuổi)
@@ -44,11 +50,32 @@ const TourBookingSchema = new mongoose.Schema({
         required: true,
         enum: ['cash', 'bank_transfer'],
     },
+
+    paymentType: {
+        type: String,
+        enum: ['deposit', 'full', 'remaining'],
+        default: 'full'
+    },
     payment_status: {
         type: String,
-        enum: ['pending', 'confirmed', 'completed', 'cancelled', 'pending_cancel'],
+        enum: ['pending', 'confirmed', 'completed', 'cancelled', 'pending_cancel', 'deposit_paid'],
         default: 'pending',
     },
+    // Thời hạn thanh toán tiền mặt (48h từ khi đặt)
+    cashPaymentDeadline: { type: Date },
+    
+    // Thông tin xác nhận thanh toán cọc
+    depositPaidAt: { type: Date }, // Thời gian admin xác nhận thanh toán cọc
+    paymentConfirmedBy: { type: String }, // ID admin xác nhận thanh toán cọc
+    paymentNote: { type: String }, // Ghi chú khi xác nhận thanh toán cọc
+    paymentImage: { type: String }, // Ảnh xác nhận thanh toán cọc
+    
+    // Thông tin xác nhận thanh toán toàn bộ
+    fullPaidAt: { type: Date }, // Thời gian admin xác nhận thanh toán toàn bộ
+    fullPaymentConfirmedBy: { type: String }, // ID admin xác nhận thanh toán toàn bộ
+    fullPaymentNote: { type: String }, // Ghi chú khi xác nhận thanh toán toàn bộ
+    fullPaymentImage: { type: String }, // Ảnh xác nhận thanh toán toàn bộ
+    
     cancelledAt: { type: Date }, // Thời gian hủy đặt chỗ
     cancelledBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' }, // Admin xác nhận hủy
     cancelReason: { type: String }, // Lý do hủy
@@ -58,6 +85,55 @@ const TourBookingSchema = new mongoose.Schema({
     cancel_status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
     refund_amount: { type: Number, default: 0 },
     cancel_policy_note: { type: String },
+
+    // Trạng thái hoàn tiền: pending (đang chờ), processing (đang xử lý), completed (đã hoàn tiền)
+    refund_status: {
+        type: String,
+        enum: ['pending', 'processing', 'completed', null],
+        default: null
+    },
+    // Ngày hoàn tiền
+    refund_date: {
+        type: Date,
+        default: null
+    },
+    // Phương thức hoàn tiền
+    refund_method: {
+        type: String,
+        enum: ['cash', 'bank_transfer', null],
+        default: null
+    },
+    // Ghi chú hoàn tiền
+    refund_note: {
+        type: String,
+        default: null
+    },
+    // Trạng thái không tham gia tour
+    no_show_status: {
+        type: String,
+        enum: ['participated', 'no_show', null],
+        default: null
+    },
+    // Thời gian đánh dấu không tham gia
+    no_show_marked_at: {
+        type: Date,
+        default: null
+    },
+    // Tiền cọc chuyển thành doanh thu
+    deposit_converted_to_revenue: {
+        type: Boolean,
+        default: false
+    },
+    // Email thông báo đã gửi
+    no_show_email_sent: {
+        type: Boolean,
+        default: false
+    },
+    // Thời gian gửi email thông báo
+    no_show_email_sent_at: {
+        type: Date,
+        default: null
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model('BookingTour', TourBookingSchema);

@@ -9,20 +9,26 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import instanceClient from '../../../../configs/instance';
 
+import bannerImage from '../../../assets/banner.png';
+
 const Banner = () => {
-  const { data } = useQuery({
+  const { data, isLoading: isLoadingLocations } = useQuery({
     queryKey: ['location'],
     queryFn: () => instanceClient.get('/location'),
   });
 
   const locations = data?.data?.location || [];
   console.log(locations);
-  const {data:tour} = useQuery({
+
+  const {data:tour, isLoading: isLoadingTours} = useQuery({
     queryKey:['tour'],
     queryFn: () => instanceClient.get('/tour')
   })
   const tours = tour?.data?.tours
   console.log(tours);
+  
+
+  const isLoading = isLoadingLocations || isLoadingTours;
   
   const [departure, setDeparture] = useState("");
   const [destination, setDestination] = useState("");
@@ -31,15 +37,43 @@ const Banner = () => {
 
   const handleSubmit = (e:any) => {
     e.preventDefault();
-    const foundTour = tours.find(
+
+    
+    // Kiểm tra nếu đang loading
+    if (isLoading) {
+      alert("Đang tải dữ liệu, vui lòng đợi!");
+      return;
+    }
+    
+    // Kiểm tra nếu tours chưa được load
+    if (!tours || tours.length === 0) {
+      alert("Không có dữ liệu tour, vui lòng thử lại!");
+      return;
+    }
+    
+    // Lọc những tour có destination hợp lệ
+    const validTours = tours.filter((tour:any) => tour.destination && tour.destination._id);
+    
+    const foundTour = validTours.find(
       (tour:any) =>
         tour.departure_location === departure &&
         tour.destination._id === destination
     );
+
+    
     if (foundTour) {
       navigate(`/detailtour/${foundTour._id}`);
     } else {
-      alert("Không tìm thấy tour phù hợp!");
+      const availableDestinations = validTours
+        .filter((tour:any) => tour.departure_location === departure)
+        .map((tour:any) => tour.destination.locationName)
+        .join(', ');
+      
+      if (availableDestinations) {
+        alert(`Không tìm thấy tour từ ${departure} đến điểm đến đã chọn.\nCác điểm đến có sẵn từ ${departure}: ${availableDestinations}`);
+      } else {
+        alert(`Hiện tại chưa có tour khởi hành từ ${departure}. Vui lòng chọn điểm khởi hành khác!`);
+      }
     }
   };
 
@@ -47,28 +81,32 @@ const Banner = () => {
     <div className="relative">
       {/* Banner Image */}
       <div className="relative">
+        
+         <div className="w-full h-[400px] sm:h-[400px] md:h-[500px] lg:h-[600px] 
+            bg-gradient-to-r from-[#00CFFF] to-[#001BFF]" />
         <img
-          src="https://i.pinimg.com/736x/68/ab/ee/68abee6113e0fdbe28c3b6be1906a426.jpg"
+          src={bannerImage}
           alt="banner"
-          className="w-full h-[400px] sm:h-[400px] md:h-[500px] lg:h-[600px] object-cover"
+          className="absolute top-1/2 right-16 -translate-y-1/2 max-h-[60%] object-contain"
         />
 
         {/* Overlay text */}
-        <div className="absolute inset-0 bg-black/30 items-center px-4 sm:px-8 md:px-20 py-10 hidden md:flex">
-          <div className="text-white max-w-3xl text-left">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-4 animate-fadeInUp">
-              Du lịch cùng Elite Travel
-            </h1>
-            <p className="text-sm sm:text-base md:text-lg text-blue-100 mb-6 animate-fadeInUp delay-100">
-              Với nguồn lực dồi dào, kinh nghiệm và uy tín trong lĩnh vực dịch vụ
-              du lịch, Lữ hành Elite Travel luôn mang đến cho khách hàng những
-              dịch vụ du lịch giá trị nhất.
-            </p>
-            <button className="hidden md:inline-block bg-white text-blue-900 px-6 py-3 rounded-full font-semibold hover:bg-blue-50 transition-all duration-300 animate-fadeInUp delay-200">
-              Tìm hiểu ngay
-            </button>
-          </div>
-        </div>
+        <div className="absolute inset-0 flex items-center px-4 sm:px-8 md:px-20 py-10">
+  <div className=" p-6 rounded-lg max-w-3xl text-left">
+    <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-4 text-white">
+      Du lịch cùng Elite Travel
+    </h1>
+    <p className="text-sm sm:text-base md:text-lg text-blue-100 mb-6">
+      Với nguồn lực dồi dào, kinh nghiệm và uy tín trong lĩnh vực dịch vụ du lịch, 
+      Lữ hành Elite Travel luôn mang đến cho khách hàng những dịch vụ du lịch giá trị nhất.
+    </p>
+    <a href="">
+      <button className="hidden md:inline-block bg-white text-blue-900 px-6 py-3 rounded-full font-semibold hover:bg-blue-50 transition-all duration-300">
+        Tìm hiểu ngay
+      </button>
+    </a>
+  </div>
+</div>
 
         {/* Search Form */}
         <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-full px-4 mb-20 md:mb-0">
@@ -147,10 +185,16 @@ const Banner = () => {
               {/* Nút tìm kiếm */}
               <button
                 type="submit"
-                className="bg-blue-600 text-white rounded-lg py-3 px-6 hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+
+                disabled={isLoading}
+                className={`rounded-lg py-3 px-6 transition-colors flex items-center justify-center gap-2 ${
+                  isLoading 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-blue-600 hover:bg-blue-700'
+                } text-white`}
               >
                 <MagnifyingGlassIcon className="w-5 h-5" />
-                <span>Tìm kiếm</span>
+                <span>{isLoading ? 'Đang tải...' : 'Tìm kiếm'}</span>
               </button>
             </form>
           </div>

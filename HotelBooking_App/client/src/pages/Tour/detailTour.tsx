@@ -37,14 +37,44 @@ const TourPage = () => {
   })
   const tours = tour?.data?.tour
 
+
+  // Thêm useEffect để log các giá trị quan trọng
+  useEffect(() => {
+    console.log("Selected date:", selectedDate);
+    console.log("Available slots:", slots);
+    
+    // Tìm slot phù hợp với ngày đã chọn
+    if (selectedDate && slots.length > 0) {
+      const matchingSlot = slots.find(slot => 
+        new Date(slot.dateTour).toDateString() === selectedDate.toDateString()
+      );
+      console.log("Matching slot:", matchingSlot);
+    }
+  }, [selectedDate, slots]);
+
   // Hàm vừa reset ngày vừa cuộn xuống lịch
   const handleChooseOtherDate = () => {
     setSelectedDate(null);
     scrollToCalendar();
   };
+
+
+  // Cập nhật hàm setSelectedDate để log thêm thông tin
+  const handleDateSelect = (date: Date | null) => {
+    console.log("Date selected:", date);
+    setSelectedDate(date);
+    
+    // Kiểm tra xem có slot nào cho ngày này không
+    if (date && slots.length > 0) {
+      const matchingSlot = slots.find(slot => 
+        new Date(slot.dateTour).toDateString() === date.toDateString()
+      );
+      console.log("Matching slot after selection:", matchingSlot);
+    }
+  };
   return (
     <>
-      <div className="max-w-screen-xl p-4 mx-auto font-sans mt-20">
+      <div className="max-w-screen-xl p-4 mx-auto font-sans ">
         {/* Title */}
         <h1 className="mb-2 text-2xl font-semibold">
           {tours?.nameTour}
@@ -96,7 +126,8 @@ const TourPage = () => {
             <LeftTourDetail
               refDiv={calendarRef}
               selectedDate={selectedDate}
-              setSelectedDate={setSelectedDate}
+
+              setSelectedDate={handleDateSelect}
             />
             <div className="mt-8">
               <div className="flex border-b">

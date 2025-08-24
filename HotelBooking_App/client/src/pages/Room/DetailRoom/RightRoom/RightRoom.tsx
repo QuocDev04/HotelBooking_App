@@ -2,58 +2,18 @@
 import { useState } from "react";
 import DatePicker from "react-datepicker";
 import { useRoom } from "../../UseRoom/useRoom";
-import { useNavigate } from "react-router-dom";
+
 import "react-datepicker/dist/react-datepicker.css";
 
 const RightRoom = () => {
     const { room } = useRoom();
-    const navigate = useNavigate();
+
 
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [adultCount, setAdultCount] = useState(1);
     const [childCount, setChildCount] = useState(0);
 
-    // Hàm kiểm tra ngày đi không được là quá khứ
-    const isPastDate = (date: Date) => {
-        const today = new Date();
-        // reset giờ, phút, giây, ms để so sánh chỉ ngày
-        today.setHours(0, 0, 0, 0);
-        return date < today;
-    };
-
-    const handleBooking = () => {
-        if (!startDate || !endDate) {
-            alert("Vui lòng chọn ngày đi và ngày về!");
-            return;
-        }
-
-        if (isPastDate(startDate)) {
-            alert("Ngày đi không được chọn ngày quá khứ!");
-            return;
-        }
-
-        if (startDate >= endDate) {
-            alert("Ngày về phải lớn hơn ngày đi!");
-            return;
-        }
-
-        const totalGuests = adultCount + childCount;
-        if (room?.capacityRoom && totalGuests > room.capacityRoom) {
-            alert(`Phòng chỉ chứa tối đa ${room.capacityRoom} khách, bạn đang đặt ${totalGuests} khách.`);
-            return;
-        }
-
-        localStorage.setItem("bookingData", JSON.stringify({
-            roomId: room?._id || "",
-            check_in_date: startDate.toISOString(),
-            check_out_date: endDate.toISOString(),
-            adults: adultCount,
-            children: childCount,
-          }));
-
-        navigate(`/bookingroom/${room?._id}`);
-    };
 
     return (
         <div className="max-w-[460px] w-full bg-blue-100/90 p-5 max-md:mt-16 border rounded-4xl border-gray-300/70">
@@ -151,12 +111,7 @@ const RightRoom = () => {
             </div>
 
             <div className="flex flex-col gap-2 my-4">
-                <button
-                    onClick={handleBooking}
-                    className="w-full py-2 text-white bg-blue-500 rounded-xl hover:bg-blue-600"
-                >
-                    Đặt ngay
-                </button>
+
                 <button className="w-full py-2 text-blue-500 border border-blue-500 rounded-xl hover:bg-blue-50">
                     Liên hệ tư vấn
                 </button>

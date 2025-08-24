@@ -1,3 +1,5 @@
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -45,19 +47,42 @@ const RightTourDetail = ({
           );
     const navigate = useNavigate();
     const handleBooking = () => {
-        if (!selectedSlot || selectedSlot.availableSeats === 0) {
-            toast.error("Ngày này đã hết chỗ, không thể đặt tour!, vui lòng chọn ngày khác");
+
+        // Kiểm tra xem người dùng đã chọn ngày chưa
+        if (!selectedDate) {
+            toast.error("Vui lòng chọn ngày khởi hành!");
             return;
-          }
-        if (selectedSlot?._id) {
-            navigate(`/date/slot/${selectedSlot._id}`);
-        } else {
-            toast.error("Vui lòng chọn ngày hợp lệ!");
         }
-      };
+
+        // Kiểm tra xem có slot nào cho ngày đã chọn không
+        if (!selectedSlot) {
+            toast.error("Không tìm thấy thông tin ngày khởi hành, vui lòng chọn ngày khác!");
+            return;
+        }
+
+        // Kiểm tra số chỗ còn trống
+        if (selectedSlot.availableSeats === 0) {
+            toast.error("Ngày này đã hết chỗ, không thể đặt tour! Vui lòng chọn ngày khác");
+            return;
+        }
+
+        // Kiểm tra ID của slot
+        if (!selectedSlot._id) {
+            toast.error("Lỗi thông tin ngày khởi hành, vui lòng chọn ngày khác!");
+            console.error("Selected slot has no ID:", selectedSlot);
+            return;
+        }
+
+        // Nếu mọi thứ đều hợp lệ, chuyển hướng đến trang đặt tour
+        console.log("Navigating to booking page with slot ID:", selectedSlot._id);
+        navigate(`/date/slot/${selectedSlot._id}`);
+    };
       console.log(selectedSlot);
       console.log(tour);
-      
+    const getTourPrice = (tour: any) => {
+        return tour?.finalPrice ?? tour?.price ?? 0;
+    };
+
     return (
         <div className="max-w-[460px] w-full bg-white p-3 md:p-5 max-md:mt-4 border rounded-2xl md:rounded-4xl border-gray-300/70 fixed right-8 top-48 z-50">
             {!selectedDate || !tour ? (
@@ -66,7 +91,8 @@ const RightTourDetail = ({
                         <span className="text-black text-xl">Giá từ:</span>
                     </div>
                     <div className="text-3xl font-bold text-red-600 mb-2">
-                        {tour?.price?.toLocaleString("vi-VN") || "..."}{" "}
+
+                        {getTourPrice(tour).toLocaleString("vi-VN")}{" "}
                         <span className="text-xl font-medium">đ</span>{" "}
                         <span className="text-base text-gray-500 font-normal">/ Khách</span>
                     </div>
@@ -84,7 +110,8 @@ const RightTourDetail = ({
                         <span className="text-black text-xl">Giá:</span>
                     </div>
                     <div className="text-3xl font-bold text-red-600 mb-2">
-                            {tour?.price?.toLocaleString("vi-VN")}{" "}
+
+                            {getTourPrice(tour).toLocaleString("vi-VN")}{" "}
                         <span className="text-xl font-medium">đ</span>{" "}
                         <span className="text-base text-gray-500 font-normal">/ Khách</span>
                     </div>

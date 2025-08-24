@@ -18,6 +18,8 @@ const TourModel = new mongoose.Schema({
     finalPrice: { type: Number },                    // Giá cuối cùng sau áp dụng phiếu giảm giá
     discountExpiryDate: { type: Date },                    // Thời hạn phiếu giảm giá
     imageTour: [{ type: String, required: true }],
+
+    maxPeople:{type:Number,required:true},
     tourType: { type: String, required: true },
     status: { type: Boolean, default: true },
     descriptionTour: { type: String },
@@ -26,6 +28,8 @@ const TourModel = new mongoose.Schema({
     priceLittleBaby: { type: Number, required: true },
     pricebaby: { type: Number, default: 0 },
     singleRoom: { type: Boolean },
-    priceSingleRoom: { type: Number, required: true }
+
+    priceSingleRoom: { type: Number, required: true },
+    assignedEmployee: { type: mongoose.Schema.Types.ObjectId, ref: "Admin", default: null }
 }, { timestamps: true })
 module.exports = mongoose.model("Tour", TourModel)

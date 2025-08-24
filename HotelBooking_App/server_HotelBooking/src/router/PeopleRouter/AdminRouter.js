@@ -1,6 +1,7 @@
 const express = require("express");
 const { StatusCodes } = require("http-status-codes");
-const { verifyClerkToken } = require("../../Middleware/Middleware.js");
+
+const { verifyClerkToken, verifyClerkTokenAndAdmin } = require("../../Middleware/Middleware.js");
 const Admin = require('./../../models/People/AdminModel.js');
 
 const AdminRouter = express.Router();
@@ -59,5 +60,46 @@ AdminRouter.post("/syncUser", verifyClerkToken, async (req, res) => {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
     }
   });
+
+
+// API để lấy danh sách tất cả admin
+AdminRouter.get("/admins", verifyClerkTokenAndAdmin, async (req, res) => {
+    try {
+        const admins = await Admin.find().select('-password_hash');
+        res.status(StatusCodes.OK).json({
+            success: true,
+            message: "Get all admins successfully",
+            admins: admins
+        });
+    } catch (error) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// API để lấy thông tin admin theo ID
+AdminRouter.get("/admin/profile/:id", verifyClerkTokenAndAdmin, async (req, res) => {
+    try {
+        const admin = await Admin.findById(req.params.id).select('-password_hash');
+        if (!admin) {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                success: false,
+                message: "Admin not found"
+            });
+        }
+        res.status(StatusCodes.OK).json({
+            success: true,
+            message: "Get admin by id successfully",
+            admin: admin
+        });
+    } catch (error) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
   
 module.exports = AdminRouter;
