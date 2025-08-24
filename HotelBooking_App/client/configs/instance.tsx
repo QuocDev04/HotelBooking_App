@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const base = import.meta.env.DEV
-    ? 'http://localhost:8081/api/'
+    ? 'http://localhost:8080/api/'
     : 'https://hotel-booking-app-server-eight.vercel.app/api/';
 
 const instanceClient = axios.create({

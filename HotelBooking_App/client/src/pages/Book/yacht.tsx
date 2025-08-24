@@ -182,6 +182,7 @@ const YachtDetailPage = () => {
                     {yacht.amenities.map((amenity, index) => (
                       <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
                         <span className="text-xl mr-2">{amenity.icon}</span>
+
                         <span>{typeof amenity === 'string' ? amenity : (typeof amenity.name === 'string' ? amenity.name : (amenity.name?.name || amenity || 'Tiện ích'))}</span>
                       </div>
                     ))}

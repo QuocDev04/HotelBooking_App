@@ -35,7 +35,7 @@ const { Step } = Steps;
 
 interface HotelBooking {
   _id: string;
-  hotel: {
+  hotelId: {
     _id: string;
     hotelName: string;
     location: {
@@ -51,32 +51,39 @@ interface HotelBooking {
   checkInDate: string;
   checkOutDate: string;
   numberOfNights: number;
-  contactInfo: {
-    fullName: string;
-    phone: string;
-    email: string;
-  };
-  roomDetails: Array<{
-    roomType: string;
-    quantity: number;
+  fullNameUser: string;
+  email: string;
+  phone: string;
+  address?: string;
+  roomBookings: Array<{
+    roomTypeIndex: number;
+    roomTypeName: string;
+    numberOfRooms: number;
     pricePerNight: number;
+    totalPrice: number;
+    guests: Array<{
+      fullName: string;
+      gender: string;
+      birthDate: string;
+    }>;
+    specialRequests?: string;
   }>;
-  totalAmount: number;
-  paymentStatus: 'pending' | 'partial' | 'completed';
-  bookingStatus: 'confirmed' | 'cancelled' | 'completed';
-  paymentMethod: string;
+  totalGuests: number;
+  subtotal: number;
+  taxAmount: number;
+  serviceCharge: number;
+  totalPrice: number;
+  payment_status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'pending_cancel' | 'deposit_paid';
+  booking_status?: string;
+  payment_method: 'cash' | 'bank_transfer';
+  paymentType: 'deposit' | 'full' | 'remaining';
+  note?: string;
   specialRequests?: string;
   createdAt: string;
-  paymentDetails?: {
-    paidAmount: number;
-    remainingAmount: number;
-    paymentHistory: Array<{
-      amount: number;
-      method: string;
-      date: string;
-      status: string;
-    }>;
-  };
+  cashPaymentDeadline?: string;
+  isDeposit: boolean;
+  depositAmount: number;
+  isFullyPaid: boolean;
 }
 
 const HotelBookingConfirmation: React.FC = () => {
@@ -120,7 +127,7 @@ const HotelBookingConfirmation: React.FC = () => {
       
       if (response.data.success) {
         message.success('Hủy đặt phòng thành công');
-        setBooking({ ...booking, bookingStatus: 'cancelled' });
+        setBooking({ ...booking, booking_status: 'cancelled', payment_status: 'cancelled' });
         setCancelModalVisible(false);
       } else {
         message.error(response.data.message || 'Không thể hủy đặt phòng');
@@ -156,9 +163,14 @@ const HotelBookingConfirmation: React.FC = () => {
     switch (status) {
       case 'completed':
         return 'green';
-      case 'partial':
+      case 'confirmed':
+        return 'blue';
+      case 'deposit_paid':
         return 'orange';
       case 'pending':
+        return 'gold';
+      case 'cancelled':
+      case 'pending_cancel':
         return 'red';
       default:
         return 'default';
@@ -182,10 +194,16 @@ const HotelBookingConfirmation: React.FC = () => {
     switch (status) {
       case 'completed':
         return 'Đã thanh toán';
-      case 'partial':
-        return 'Thanh toán một phần';
+      case 'confirmed':
+        return 'Đã xác nhận';
+      case 'deposit_paid':
+        return 'Đã cọc';
       case 'pending':
         return 'Chờ thanh toán';
+      case 'cancelled':
+        return 'Đã hủy';
+      case 'pending_cancel':
+        return 'Chờ hủy';
       default:
         return 'Chưa thanh toán';
     }
@@ -194,10 +212,10 @@ const HotelBookingConfirmation: React.FC = () => {
   const getCurrentStep = () => {
     if (!booking) return 0;
     
-    if (booking.bookingStatus === 'cancelled') return -1;
-    if (booking.bookingStatus === 'completed') return 3;
-    if (booking.paymentStatus === 'completed') return 2;
-    if (booking.paymentStatus === 'partial') return 1;
+    if (booking.booking_status === 'cancelled' || booking.payment_status === 'cancelled') return -1;
+    if (booking.booking_status === 'completed') return 3;
+    if (booking.payment_status === 'completed') return 2;
+    if (booking.payment_status === 'deposit_paid') return 1;
     return 0;
   };
 
@@ -258,18 +276,18 @@ const HotelBookingConfirmation: React.FC = () => {
             <Card title="Thông tin khách sạn" style={{ marginBottom: 24 }}>
               <Row gutter={16}>
                 <Col span={24}>
-                  <Title level={4}>{booking.hotel.hotelName}</Title>
+                  <Title level={4}>{booking.hotelId?.hotelName}</Title>
                   <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
                     <EnvironmentOutlined style={{ marginRight: 8 }} />
-                    <Text>{booking.hotel.location.locationName}</Text>
+                    <Text>{booking.hotelId?.location?.locationName}</Text>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
                     <PhoneOutlined style={{ marginRight: 8 }} />
-                    <Text>{booking.hotel.contactInfo.phone}</Text>
+                    <Text>{booking.hotelId?.contactInfo?.phone}</Text>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <MailOutlined style={{ marginRight: 8 }} />
-                    <Text>{booking.hotel.contactInfo.email}</Text>
+                    <Text>{booking.hotelId?.contactInfo?.email}</Text>
                   </div>
                 </Col>
               </Row>
@@ -311,21 +329,21 @@ const HotelBookingConfirmation: React.FC = () => {
               <Divider />
 
               <Title level={5}>Chi tiết phòng</Title>
-              {booking.roomDetails.map((room, index) => (
+              {booking.roomBookings?.map((room, index) => (
                 <div key={index} style={{ marginBottom: 12, padding: 12, backgroundColor: '#f9f9f9', borderRadius: 6 }}>
                   <Row gutter={16}>
                     <Col span={12}>
-                      <Text strong>{room.roomType}</Text>
+                      <Text strong>{room.roomTypeName}</Text>
                     </Col>
                     <Col span={6}>
-                      <Text>Số lượng: {room.quantity}</Text>
+                      <Text>Số lượng: {room.numberOfRooms}</Text>
                     </Col>
                     <Col span={6}>
                       <Text>{room.pricePerNight.toLocaleString('vi-VN')} VNĐ/đêm</Text>
                     </Col>
                   </Row>
                 </div>
-              ))}
+              )) || []}
 
               {booking.specialRequests && (
                 <>
@@ -344,21 +362,21 @@ const HotelBookingConfirmation: React.FC = () => {
                     <UserOutlined style={{ marginRight: 8 }} />
                     <Text strong>Họ và tên:</Text>
                   </div>
-                  <Text style={{ fontSize: '1.1rem' }}>{booking.contactInfo.fullName}</Text>
+                  <Text style={{ fontSize: '1.1rem' }}>{booking.fullNameUser}</Text>
                 </Col>
                 <Col xs={24} sm={8}>
                   <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
                     <PhoneOutlined style={{ marginRight: 8 }} />
                     <Text strong>Số điện thoại:</Text>
                   </div>
-                  <Text style={{ fontSize: '1.1rem' }}>{booking.contactInfo.phone}</Text>
+                  <Text style={{ fontSize: '1.1rem' }}>{booking.phone}</Text>
                 </Col>
                 <Col xs={24} sm={8}>
                   <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
                     <MailOutlined style={{ marginRight: 8 }} />
                     <Text strong>Email:</Text>
                   </div>
-                  <Text style={{ fontSize: '1.1rem' }}>{booking.contactInfo.email}</Text>
+                  <Text style={{ fontSize: '1.1rem' }}>{booking.email}</Text>
                 </Col>
               </Row>
             </Card>
@@ -370,19 +388,19 @@ const HotelBookingConfirmation: React.FC = () => {
               <div style={{ marginBottom: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                   <Text>Trạng thái đặt phòng:</Text>
-                  <Tag color={getStatusColor(booking.bookingStatus)}>
-                    {getStatusText(booking.bookingStatus)}
+                  <Tag color={getStatusColor(booking.booking_status)}>
+                    {getStatusText(booking.booking_status)}
                   </Tag>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                   <Text>Trạng thái thanh toán:</Text>
-                  <Tag color={getPaymentStatusColor(booking.paymentStatus)}>
-                    {getPaymentStatusText(booking.paymentStatus)}
+                  <Tag color={getPaymentStatusColor(booking.payment_status)}>
+                    {getPaymentStatusText(booking.payment_status)}
                   </Tag>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                   <Text>Phương thức thanh toán:</Text>
-                  <Text>{booking.paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản'}</Text>
+                  <Text>{booking.payment_method === 'cash' ? 'Tiền mặt' : 'Chuyển khoản'}</Text>
                 </div>
               </div>
 
@@ -392,22 +410,22 @@ const HotelBookingConfirmation: React.FC = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                   <Text>Tổng tiền:</Text>
                   <Text strong style={{ fontSize: '1.1rem', color: '#1890ff' }}>
-                    {booking.totalAmount.toLocaleString('vi-VN')} VNĐ
+                    {booking.totalPrice.toLocaleString('vi-VN')} VNĐ
                   </Text>
                 </div>
                 
-                {booking.paymentDetails && (
+                {booking.isDeposit && booking.depositAmount > 0 && (
                   <>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                      <Text>Đã thanh toán:</Text>
+                      <Text>Tiền cọc:</Text>
                       <Text style={{ color: '#52c41a' }}>
-                        {booking.paymentDetails.paidAmount.toLocaleString('vi-VN')} VNĐ
+                        {booking.depositAmount.toLocaleString('vi-VN')} VNĐ
                       </Text>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                       <Text>Còn lại:</Text>
                       <Text style={{ color: '#fa8c16' }}>
-                        {booking.paymentDetails.remainingAmount.toLocaleString('vi-VN')} VNĐ
+                        {(booking.totalPrice - booking.depositAmount).toLocaleString('vi-VN')} VNĐ
                       </Text>
                     </div>
                   </>
@@ -416,13 +434,13 @@ const HotelBookingConfirmation: React.FC = () => {
 
               {/* Action Buttons */}
               <Space direction="vertical" style={{ width: '100%' }}>
-                {booking.bookingStatus !== 'cancelled' && booking.paymentStatus !== 'completed' && (
+                {booking.booking_status !== 'cancelled' && booking.payment_status !== 'completed' && booking.payment_status !== 'cancelled' && (
                   <Button type="primary" block onClick={handlePayment}>
                     <CreditCardOutlined /> Thanh toán
                   </Button>
                 )}
                 
-                {booking.bookingStatus === 'confirmed' && (
+                {booking.booking_status === 'confirmed' && booking.payment_status !== 'cancelled' && (
                   <Button 
                     danger 
                     block 
@@ -442,24 +460,7 @@ const HotelBookingConfirmation: React.FC = () => {
               </Space>
             </Card>
 
-            {/* Payment History */}
-            {booking.paymentDetails?.paymentHistory && booking.paymentDetails.paymentHistory.length > 0 && (
-              <Card title="Lịch sử thanh toán">
-                {booking.paymentDetails.paymentHistory.map((payment, index) => (
-                  <div key={index} style={{ marginBottom: 12, padding: 12, backgroundColor: '#f9f9f9', borderRadius: 6 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <Text strong>{payment.amount.toLocaleString('vi-VN')} VNĐ</Text>
-                      <Tag color={payment.status === 'completed' ? 'green' : 'orange'}>
-                        {payment.status === 'completed' ? 'Thành công' : 'Đang xử lý'}
-                      </Tag>
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#666' }}>
-                      {payment.method === 'cash' ? 'Tiền mặt' : 'Chuyển khoản'} • {moment(payment.date).format('DD/MM/YYYY HH:mm')}
-                    </div>
-                  </div>
-                ))}
-              </Card>
-            )}
+
           </Col>
         </Row>
       </div>

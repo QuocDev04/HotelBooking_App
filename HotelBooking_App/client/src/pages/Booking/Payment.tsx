@@ -6,25 +6,24 @@ function PaymentResult() {
     const navigate = useNavigate();
     const location = useLocation();
     const [paymentStatus, setPaymentStatus] = useState<'processing' | 'success' | 'failed'>('processing');
+    const [messageText, setMessageText] = useState<string>('');
     const [countdown, setCountdown] = useState(5);
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const responseCode = params.get("vnp_ResponseCode");
-        const txnRef = params.get("vnp_TxnRef");
-        const amount = params.get("vnp_Amount");
-        const orderInfo = params.get("vnp_OrderInfo");
+        const success = params.get("success");
+        const messageParam = params.get("message");
 
-        // VNPay response codes:
-        // 00: Thành công
-        // Các mã khác: Thất bại
-        if (responseCode === "00") {
+        if (success === "true" || responseCode === "00") {
             setPaymentStatus('success');
+            setMessageText(messageParam || "Thanh toán thành công!");
         } else {
             setPaymentStatus('failed');
+            setMessageText(messageParam || "Đã có lỗi xảy ra trong quá trình thanh toán.");
         }
 
-        // Đếm ngược và chuyển hướng
+        // Đếm ngược và chuyển hướng về trang chủ
         const timer = setInterval(() => {
             setCountdown(prev => {
                 if (prev <= 1) {
@@ -62,20 +61,16 @@ function PaymentResult() {
                     <>
                         <CheckCircleIcon className="h-16 w-16 text-green-500 mx-auto mb-4" />
                         <h2 className="text-2xl font-bold text-green-600 mb-2">Thanh toán thành công!</h2>
-                        <p className="text-gray-600 mb-6">
-                            Cảm ơn bạn đã thanh toán. Đơn hàng của bạn đã được xác nhận.
-                        </p>
+                        <p className="text-gray-600 mb-6">{messageText}</p>
                     </>
                 ) : (
                     <>
                         <XCircleIcon className="h-16 w-16 text-red-500 mx-auto mb-4" />
                         <h2 className="text-2xl font-bold text-red-600 mb-2">Thanh toán thất bại!</h2>
-                        <p className="text-gray-600 mb-6">
-                            Đã có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.
-                        </p>
+                        <p className="text-gray-600 mb-6">{messageText}</p>
                     </>
                 )}
-                
+
                 <div className="space-y-3">
                     <button
                         onClick={handleGoHome}
@@ -83,7 +78,7 @@ function PaymentResult() {
                     >
                         Về trang chủ
                     </button>
-                    
+
                     <p className="text-sm text-gray-500">
                         Tự động chuyển về trang chủ sau {countdown} giây
                     </p>

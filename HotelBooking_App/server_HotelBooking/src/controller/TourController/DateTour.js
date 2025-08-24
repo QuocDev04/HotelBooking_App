@@ -1,3 +1,4 @@
+
 const DateTour = require("../../models/Tour/DateTour");
 const TourBooking = require("../../models/Tour/TourBooking.js");
 const nodemailer = require('nodemailer');
@@ -304,6 +305,7 @@ const GetAllSlotsByTourId = async (req, res) => {
         });
       }
 };
+
 
 const UpdateDateSlot = async (req, res) => {
     try {

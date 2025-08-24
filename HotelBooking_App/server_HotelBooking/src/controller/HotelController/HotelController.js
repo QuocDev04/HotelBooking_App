@@ -515,19 +515,20 @@ const addRoomType = async (req, res) => {
 // Cập nhật loại phòng
 const updateRoomType = async (req, res) => {
     try {
-        const { id, roomTypeId } = req.params;
+        const { hotelId, roomTypeId } = req.params; 
         const roomTypeData = req.body;
-        
+
         // Tính finalPrice
-        if (roomTypeData.discountPercent && roomTypeData.discountPercent > 0) {
-            roomTypeData.finalPrice = roomTypeData.basePrice * (1 - roomTypeData.discountPercent / 100);
-        } else {
-            roomTypeData.finalPrice = roomTypeData.basePrice;
-        }
-        
+        roomTypeData.finalPrice = roomTypeData.discountPercent
+            ? roomTypeData.basePrice * (1 - roomTypeData.discountPercent / 100)
+            : roomTypeData.basePrice;
+
+        console.log("Hotel ID from params:", hotelId);
+        console.log("RoomType ID from params:", roomTypeId);
+
         const hotel = await Hotel.findOneAndUpdate(
-            { _id: id, "roomTypes._id": roomTypeId },
-            { 
+            { _id: hotelId, "roomTypes._id": roomTypeId },
+            {
                 $set: {
                     "roomTypes.$.typeName": roomTypeData.typeName,
                     "roomTypes.$.basePrice": roomTypeData.basePrice,
@@ -541,60 +542,68 @@ const updateRoomType = async (req, res) => {
                 }
             },
             { new: true, runValidators: true }
-        ).populate('location', 'locationName country');
-        
+        ).populate("location", "locationName country");
+
         if (!hotel) {
-            return res.status(404).json({ 
-                success: false, 
-                message: "Không tìm thấy khách sạn hoặc loại phòng" 
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy khách sạn hoặc loại phòng"
             });
         }
-        
+
         res.status(200).json({
             success: true,
             message: "Cập nhật loại phòng thành công",
             data: hotel
         });
+
     } catch (error) {
-        res.status(500).json({ 
-            success: false, 
-            message: "Lỗi server", 
-            error: error.message 
+        res.status(500).json({
+            success: false,
+            message: "Lỗi server",
+            error: error.message
         });
     }
 };
 
+
+
+
 // Xóa loại phòng
 const deleteRoomType = async (req, res) => {
     try {
-        const { id, roomTypeId } = req.params;
-        
+        const { hotelId, roomTypeId } = req.params; 
+
+        console.log("Hotel ID from params:", hotelId);
+        console.log("RoomType ID from params:", roomTypeId);
+
         const hotel = await Hotel.findByIdAndUpdate(
-            id,
+            hotelId,
             { $pull: { roomTypes: { _id: roomTypeId } } },
             { new: true }
-        ).populate('location', 'locationName country');
-        
+        ).populate("location", "locationName country");
+
         if (!hotel) {
-            return res.status(404).json({ 
-                success: false, 
-                message: "Không tìm thấy khách sạn" 
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy khách sạn",
             });
         }
-        
+
         res.status(200).json({
             success: true,
             message: "Xóa loại phòng thành công",
-            data: hotel
+            data: hotel,
         });
     } catch (error) {
-        res.status(500).json({ 
-            success: false, 
-            message: "Lỗi server", 
-            error: error.message 
+        res.status(500).json({
+            success: false,
+            message: "Lỗi server",
+            error: error.message,
         });
     }
 };
+
 
 // Lấy tình trạng phòng theo khoảng thời gian
 const getRoomAvailability = async (req, res) => {

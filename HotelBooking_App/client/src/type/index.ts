@@ -26,16 +26,19 @@ export interface Tour {
 
 
 
+
 export interface User {
     user_id: number;
     name: string;
     email: string;
     phone: string;
 }
+
 export interface Hotel {
     hotel_id: number;
     name: string;
     address: string;
     rating: number;
     image: string;
+
 }

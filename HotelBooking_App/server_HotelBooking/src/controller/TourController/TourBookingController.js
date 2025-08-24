@@ -21,6 +21,7 @@ const getByIdBookingTour = async (req, res) => {
             return res.status(404).json({ message: "Không tìm thấy booking" });
         }
 
+
         // Thêm thông tin về deadline thanh toán tiền mặt
         let paymentInfo = {};
         if (booking.payment_method === 'cash' && booking.cashPaymentDeadline) {
@@ -52,6 +53,7 @@ const getByIdBookingTour = async (req, res) => {
 // Admin: Lấy tất cả booking để quản lý
 const getAllBookingsForAdmin = async (req, res) => {
     try {
+
         const { status, page = 1, limit = 10, search, slotId } = req.query;
         
         let query = {};
@@ -61,6 +63,7 @@ const getAllBookingsForAdmin = async (req, res) => {
             query.payment_status = status;
         }
         
+
         // Filter theo slotId (cho trang danh sách người tham gia tour)
         if (slotId) {
             query.slotId = slotId;
@@ -111,6 +114,7 @@ const getAllBookingsForAdmin = async (req, res) => {
 const adminConfirmCancelBooking = async (req, res) => {
     try {
         const { id } = req.params;
+
         const { adminId, reason, refund_amount, refund_policy } = req.body;
         
         // Tìm booking cần hủy
@@ -131,6 +135,7 @@ const adminConfirmCancelBooking = async (req, res) => {
                 message: "Đặt chỗ đã được hủy trước đó" 
             });
         }
+
 
         // Tính số tiền hoàn trả dựa trên chính sách
         let calculatedRefundAmount = 0;
@@ -155,6 +160,7 @@ const adminConfirmCancelBooking = async (req, res) => {
         booking.cancelledAt = new Date();
         booking.cancelledBy = adminId;
         booking.cancelReason = reason || 'Admin xác nhận hủy';
+
         
         // Nếu có hoàn tiền, cập nhật thông tin hoàn tiền
         if (calculatedRefundAmount > 0) {
@@ -179,6 +185,7 @@ const adminConfirmCancelBooking = async (req, res) => {
                 cancelledAt: booking.cancelledAt,
                 cancelledBy: booking.cancelledBy,
                 cancelReason: booking.cancelReason,
+
                 refundInfo: calculatedRefundAmount > 0 ? {
                     amount: calculatedRefundAmount,
                     policy: refund_policy,
@@ -441,6 +448,7 @@ const BookingTour = async (req, res) => {
             infantPassengers,
             payment_method,
             note,
+
             isFullPayment, // Thêm trường này để xác định thanh toán đầy đủ hay đặt cọc
         } = req.body;
 
@@ -483,6 +491,7 @@ const BookingTour = async (req, res) => {
             Number(infantTour || 0) * priceInfant +
             singleRoomCount * priceSingleRoom;
 
+
         // Tính toán số tiền đặt cọc (50% tổng giá)
         const depositAmount = Math.round(totalFinalPriceTour * 0.5);
 
@@ -518,6 +527,7 @@ const BookingTour = async (req, res) => {
             toddlerPassengers,
             infantPassengers,
             payment_method,
+
             payment_status: paymentStatus,
             note,
             isDeposit: isDeposit,
@@ -547,6 +557,7 @@ const BookingTour = async (req, res) => {
             const tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
 
+
             // Xác định số tiền thanh toán (đặt cọc hoặc toàn bộ)
             const paymentAmount = isFullPayment ? totalFinalPriceTour : depositAmount;
 
@@ -570,6 +581,7 @@ const BookingTour = async (req, res) => {
                 message: "Đặt tour thành công - chuyển đến VNPay",
                 booking,
                 paymentUrl,
+
                 depositAmount: isFullPayment ? null : depositAmount,
                 totalAmount: totalFinalPriceTour
             });
@@ -580,6 +592,7 @@ const BookingTour = async (req, res) => {
             success: true,
             message: "Đặt tour thành công",
             booking,
+
             depositAmount: isFullPayment ? null : depositAmount,
             totalAmount: totalFinalPriceTour
         });
@@ -689,6 +702,7 @@ exports.approveCancel = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
 
 
 // Admin: Xác nhận thanh toán cọc tiền mặt
@@ -1193,6 +1207,7 @@ module.exports = {
     getAllBookingsForAdmin,
     adminConfirmCancelBooking,
     requestCancelBooking,
+
     getBookingStats,
     confirmCashPayment,
     confirmFullPayment,

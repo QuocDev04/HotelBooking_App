@@ -105,7 +105,9 @@ export default function HotelPaymentPage() {
                   <div className="bg-white p-4 rounded-lg border-2 border-green-200">
                     <p className="text-gray-600 mb-1">Số tiền cần thanh toán:</p>
                     <p className="text-2xl font-bold text-green-600">
-                      {(booking.paymentDetails?.remainingAmount || booking.totalAmount)?.toLocaleString()} VND
+                      {booking.isDeposit && booking.payment_status === 'deposit_paid' 
+                        ? (booking.totalPrice - booking.depositAmount)?.toLocaleString()
+                        : booking.totalPrice?.toLocaleString()} VND
                     </p>
                   </div>
                   
@@ -211,7 +213,7 @@ export default function HotelPaymentPage() {
             <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg border">
               <div className="flex justify-between items-center">
                 <span className="text-lg font-semibold text-gray-700">Tổng tiền:</span>
-                <span className="text-2xl font-bold text-green-600">{booking.totalAmount?.toLocaleString()} VND</span>
+                <span className="text-2xl font-bold text-green-600">{booking.totalPrice?.toLocaleString()} VND</span>
               </div>
             </div>
           </div>

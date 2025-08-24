@@ -6,19 +6,19 @@ const AmenitySchema = new mongoose.Schema({
 }, { _id: false });
 
 const RoomTypeSchema = new mongoose.Schema({
-    typeName: { type: String, required: true }, // Standard, Deluxe, Suite, etc.
+    typeName: { type: String, required: true },
     description: { type: String },
-    basePrice: { type: Number, required: true }, // Giá cơ bản
-    maxOccupancy: { type: Number, required: true }, // Số người tối đa
-    bedType: { type: String, required: true }, // Single, Double, Twin, King, Queen
-    roomSize: { type: Number }, // Diện tích phòng (m2)
+    basePrice: { type: Number, required: true },
+    maxOccupancy: { type: Number, required: true },
+    bedType: { type: String, required: true },
+    roomSize: { type: Number },
     amenities: [AmenitySchema],
     images: [{ type: String }],
-    totalRooms: { type: Number, required: true }, // Tổng số phòng loại này
-    discountPercent: { type: Number, default: 0 }, // Phần trăm giảm giá
-    finalPrice: { type: Number }, // Giá cuối cùng sau giảm giá
-    discountExpiryDate: { type: Date } // Hạn giảm giá
-}, { _id: false });
+    totalRooms: { type: Number, required: true },
+    discountPercent: { type: Number, default: 0 },
+    finalPrice: { type: Number },
+    discountExpiryDate: { type: Date }
+});
 
 const HotelSchema = new mongoose.Schema({
     hotelName: { type: String, required: true },

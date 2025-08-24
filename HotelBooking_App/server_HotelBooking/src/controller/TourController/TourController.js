@@ -9,6 +9,7 @@ const getAllTours = async (req, res) => {
         const tour = await TourModel.find()
         .populate("itemTransport.TransportId", "transportName transportNumber transportType")
             .populate("destination", "locationName country")
+
             .populate("assignedEmployee", "name email firstName lastName full_name")
         return res.status(StatusCodes.OK).json({
             success: true,
@@ -171,6 +172,7 @@ const TourTopSelling = async (req, res) => {
         })
     }
 }
+
 
 const assignEmployeeToTour = async (req, res) => {
     try {

@@ -1,4 +1,5 @@
 const { verifyToken } = require("@clerk/clerk-sdk-node");
+
 const Admin = require('../models/People/AdminModel.js');
 
 const verifyClerkToken = async (req, res, next) => {
@@ -21,6 +22,7 @@ const verifyClerkToken = async (req, res, next) => {
         return res.status(401).json({ message: "Unauthorized: Failed to verify token." });
     }
 };
+
 
 const verifyClerkTokenAndAdmin = async (req, res, next) => {
     try {

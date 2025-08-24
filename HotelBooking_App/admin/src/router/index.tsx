@@ -2,19 +2,7 @@ import { Route, Routes } from "react-router-dom"
 import Layout from "../pages/Layout"
 import ListDashboad from "../pages/dashboad/ListDashboad"
 
-import ListTour from "../pages/Tour/ListTour"
-import AddTour from "../pages/Tour/AddTour"
-import EditTour from "../pages/Tour/EditTour"
-import ListTransport from "../pages/Transport/ListTransport"
-import AddTransport from "../pages/Transport/AddTransport"
-import EditTransport from "../pages/Transport/EditTransport"
-import ListTSchedule from "../pages/TransportSchedule/ListTSchedule"
-import AddTSchedule from "../pages/TransportSchedule/AddTSchedule"
-import EditTSchedule from "../pages/TransportSchedule/EditTSchedule"
-import AddTourSchedule from "../pages/TourSchedule/AddTourSchedule"
-import ListTourSchedule from "../pages/TourSchedule/ListTourSchedule"
-import EditTourSchedule from "../pages/TourSchedule/EditTourSchedule"
-import ListBooking from "../pages/Tour/ListBooking"
+
 import ListBlog from "../pages/Blog/ListBlog"
 import AddBlog from "../pages/Blog/AddBlog"
 import EditBlog from "../pages/Blog/EditBlog"
@@ -37,6 +25,20 @@ import EditHotel from "../pages/Hotel/EditHotel"
 import HotelDetail from "../pages/Hotel/HotelDetail"
 import ListHotelBooking from "../pages/Hotel/ListHotelBooking"
 import RoomManagement from "../pages/Hotel/RoomManagement"
+import ListTour from "../pages/Tour/ListTour"
+import AddTour from "../pages/Tour/AddTour"
+import EditTour from "../pages/Tour/EditTour"
+import ListBooking from "../pages/Tour/ListBooking"
+import ListTransport from "../pages/Transport/ListTransport"
+import AddTransport from "../pages/Transport/AddTransport"
+import EditTransport from "../pages/Transport/EditTransport"
+import ListTSchedule from "../pages/TransportSchedule/ListTSchedule"
+import AddTSchedule from "../pages/TransportSchedule/AddTSchedule"
+import EditTSchedule from "../pages/TransportSchedule/EditTSchedule"
+import ListTourSchedule from "../pages/TourSchedule/ListTourSchedule"
+import AddTourSchedule from "../pages/TourSchedule/AddTourSchedule"
+import EditTourSchedule from "../pages/TourSchedule/EditTourSchedule"
+import Detail from "../pages/Blog/Detail"
 
 
 
@@ -64,6 +66,7 @@ const Router = () => {
 
                     <Route path="/admin/dashboad" element={<ListDashboad />} />
 
+
                      <Route path="/admin/list-tour" element={<ListTour />} />
                     <Route path="/admin/add-tour" element={<AddTour />} />
                     <Route path="/admin/edit-tour/:id" element={<EditTour />} />
@@ -89,6 +92,7 @@ const Router = () => {
                     <Route path="/admin/list-blog" element={<ListBlog />} />
                     <Route path="/admin/add-blog" element={<AddBlog />} />
                     <Route path="/admin/edit-blog/:id" element={<EditBlog />} />
+                    <Route path="/admin/detail-blog/:id" element={<Detail />} />
 
                     <Route path="/admin/list-time" element={<ListTime />} />
                     <Route path="/admin/add-timetour" element={<AddTimeTour />} />
