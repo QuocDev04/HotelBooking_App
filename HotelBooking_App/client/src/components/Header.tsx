@@ -9,31 +9,21 @@ import { Link } from 'react-router-dom';
 
 const Header = () => {
     const navLinks = [
-<<<<<<< HEAD
-        { name: 'Phòng', path: '/rooms' },
-        { name: 'Các địa điểm du lịch', path: '/destinations' },
-=======
+
 
         { name: 'Các địa điểm du lịch', path: '/destinations' },
         { name: 'Khách sạn', path: '/hotels' },
->>>>>>> 8fe707d982c4fac94612094f9351851cfda17024
         { name: 'Giới Thiệu', path: '/introduce' },
         { name: 'Blog', path: '/blog' },
         { name: 'Các câu hỏi thường gặp', path: '/hotelPolicy' },
     ];
-<<<<<<< HEAD
 
-=======
->>>>>>> 8fe707d982c4fac94612094f9351851cfda17024
     const [userId, setUserId] = useState<string | null>(null);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [showLogin, setShowLogin] = useState(false);
     const [showRegister, setShowRegister] = useState(false);
-<<<<<<< HEAD
 
-=======
->>>>>>> 8fe707d982c4fac94612094f9351851cfda17024
     useEffect(() => {
         setUserId(localStorage.getItem("userId"));
 
@@ -43,10 +33,7 @@ const Header = () => {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
-<<<<<<< HEAD
 
-=======
->>>>>>> 8fe707d982c4fac94612094f9351851cfda17024
     const handleLogout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");

@@ -4,10 +4,9 @@ const { DeleteUser, GetAllUser, GetByIdUser, LoginUser, PutUser, RegisterUser } 
 const UserRouter = express.Router();
 UserRouter.post('/register', RegisterUser)
 UserRouter.post('/login', LoginUser)
-
-UserRouter.get('/user', verifyClerkTokenAndAdmin, GetAllUser)
-UserRouter.put('/user/:id', verifyClerkTokenAndAdmin, PutUser)
-UserRouter.delete('/user/:id', verifyClerkTokenAndAdmin, DeleteUser)
-UserRouter.get('/user/:id', verifyClerkTokenAndAdmin, GetByIdUser)
+UserRouter.get('/user' , GetAllUser)
+UserRouter.put('/user/:id', PutUser)
+UserRouter.delete('/user/:id', DeleteUser)
+UserRouter.get('/user/:id', GetByIdUser)
 
 module.exports = UserRouter
