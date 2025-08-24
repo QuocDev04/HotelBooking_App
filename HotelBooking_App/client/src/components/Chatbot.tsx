@@ -21,7 +21,7 @@ function ChatBot({
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const scrollRef = useRef<HTMLDivElement>(null);
+    const scrollRef = useRef<HTMLDivElement>(null); setMessages
 
     useEffect(() => {
         localStorage.setItem("tour_chat_messages", JSON.stringify(messages));
@@ -53,17 +53,31 @@ function ChatBot({
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             const reply = data.reply ?? "Xin lỗi, hiện chưa có phản hồi.";
-            setMessages(prev => { const updated = [...prev, { id: crypto.randomUUID(), role: "assistant", content: reply, ts: Date.now() }]; setTimeout(scrollToBottom, 50); return updated; });
+            setMessages(prev => {
+                const updated = [
+                    ...prev,
+                    { id: crypto.randomUUID(), role: "assistant" as "assistant", content: reply, ts: Date.now() }
+                ];
+                setTimeout(scrollToBottom, 50);
+                return updated;
+            });
         } catch (e) {
             setError("Không thể kết nối máy chủ. Vui lòng kiểm tra endpoint hoặc thử lại sau.");
-            setMessages(prev => { const updated = [...prev, { id: crypto.randomUUID(), role: "assistant", content: "Mình đang gặp chút trục trặc kết nối. Bạn có thể thử lại hoặc để lại thông tin liên hệ nhé!", ts: Date.now() }]; setTimeout(scrollToBottom, 50); return updated; });
+            setMessages(prev => {
+                const updated = [
+                    ...prev,
+                    { id: crypto.randomUUID(), role: "assistant" as const, content: "Mình đang gặp chút trục trặc kết nối. Bạn có thể thử lại hoặc để lại thông tin liên hệ nhé!", ts: Date.now() }
+                ];
+                setTimeout(scrollToBottom, 50);
+                return updated;
+            });
         } finally {
             setLoading(false);
         }
     };
 
     const resetChat = () => {
-        setMessages([{ id: crypto.randomUUID(), role: "assistant", content: welcomeMessage, ts: Date.now() }]);
+        setMessages([{ id: crypto.randomUUID(), role: "assistant" as const, content: welcomeMessage, ts: Date.now() }]);
     };
 
     const Bubble = ({ role, content }: { role: "user" | "assistant"; content: string }) => (
@@ -115,22 +129,22 @@ function ChatBot({
                     </div>
 
                     {/* Body */}
-                    <div className="flex-1 flex flex-col">
+                    <div className="flex-1 flex flex-col min-h-0">
                         {/* Suggestions */}
-                        <div className="px-6 py-3 border-b border-sky-100 bg-white/80 backdrop-blur-sm">
+                        <div className="px-6 py-3 border-b border-sky-100 bg-white/80 backdrop-blur-sm flex-shrink-0">
                             <div className="text-xs text-sky-600 mb-2 font-semibold">Gợi ý nhanh</div>
                             <div className="flex flex-wrap gap-2">
                                 <button onClick={() => sendMessage("Chính sách hủy tour")} className="text-xs rounded-full border border-sky-200 bg-sky-50 px-4 py-1 hover:bg-sky-100 font-medium text-sky-700 transition-all duration-150">Chính sách hủy tour</button>
                                 <button onClick={() => sendMessage("Điều khoản đặt tour")} className="text-xs rounded-full border border-sky-200 bg-sky-50 px-4 py-1 hover:bg-sky-100 font-medium text-sky-700 transition-all duration-150">Điều khoản đặt tour</button>
                                 <button onClick={() => sendMessage("Chính sách hoàn tiền")} className="text-xs rounded-full border border-sky-200 bg-sky-50 px-4 py-1 hover:bg-sky-100 font-medium text-sky-700 transition-all duration-150">Chính sách hoàn tiền</button>
+                                <button onClick={() => sendMessage("Quy định đặt phòng")} className="text-xs rounded-full border border-sky-200 bg-sky-50 px-4 py-1 hover:bg-sky-100 font-medium text-sky-700 transition-all duration-150">Quy định đặt phòng</button>
+                                <button onClick={() => sendMessage("Chính sách hủy phòng và hoàn tiền")} className="text-xs rounded-full border border-sky-200 bg-sky-50 px-4 py-1 hover:bg-sky-100 font-medium text-sky-700 transition-all duration-150">Chính sách hủy phòng và hoàn tiền</button>
                             </div>
                         </div>
-
                         {/* Messages */}
                         <div
                             ref={scrollRef}
-                            className="flex-1 px-4 py-4 space-y-3 bg-transparent scrollbar-thin scrollbar-thumb-sky-400 scrollbar-track-sky-100 hover:scrollbar-thumb-sky-500 transition-all duration-200"
-                            style={{ maxHeight: 400, minHeight: 0, overflowY: 'auto', scrollbarWidth: 'thin', scrollbarColor: '#38bdf8 #e0f2fe', overscrollBehavior: 'contain' }}
+                            className="flex-1 px-4 py-4 space-y-3 bg-transparent overflow-y-auto scrollbar-thin scrollbar-thumb-sky-400 scrollbar-track-sky-100 hover:scrollbar-thumb-sky-500 transition-all duration-200 min-h-0"
                         >
                             {messages.map(m => <Bubble key={m.id} role={m.role} content={m.content} />)}
                             {loading && (
@@ -144,9 +158,8 @@ function ChatBot({
                                 </div>
                             )}
                         </div>
-
                         {/* Input area */}
-                        <div className="p-4 pt-2 border-t border-sky-100 bg-white/90 backdrop-blur-sm sticky bottom-0 z-10">
+                        <div className="p-4 pt-2 border-t border-sky-100 bg-white/90 backdrop-blur-sm flex-shrink-0 w-full">
                             {error && <div className="text-[12px] text-red-500 mb-2 font-semibold">{error}</div>}
                             <div className="flex items-end gap-3">
                                 <textarea
@@ -173,7 +186,7 @@ function ChatBot({
                                     Gửi
                                 </button>
                             </div>
-                            <div className="text-[11px] text-sky-500 mt-2 font-medium">Chỉ hỗ trợ thông tin về chính sách, điều khoản, hủy/hoàn tour.</div>
+                            <div className="text-[11px] text-sky-500 mt-2 font-medium">Chỉ hỗ trợ thông tin về chính sách, điều khoản, hủy/hoàn tour và phòng.</div>
                         </div>
                     </div>
                 </div>

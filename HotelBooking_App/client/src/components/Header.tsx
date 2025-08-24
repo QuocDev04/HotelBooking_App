@@ -9,8 +9,6 @@ import { Link } from 'react-router-dom';
 
 const Header = () => {
     const navLinks = [
-
-
         { name: 'Các địa điểm du lịch', path: '/destinations' },
         { name: 'Khách sạn', path: '/hotels' },
         { name: 'Giới Thiệu', path: '/introduce' },
