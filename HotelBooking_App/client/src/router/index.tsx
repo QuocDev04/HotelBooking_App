@@ -25,6 +25,7 @@ import RefundInfo from "../pages/Booking/RefundInfo"
 import HotelList from "../pages/Hotel/HotelList"
 import HotelDetail from "../pages/Hotel/HotelDetail"
 import HotelBookingConfirmation from "../pages/Hotel/HotelBookingConfirmation"
+import News from "../pages/Home/Main/News"
 
 const Router = () => {
     return (
@@ -50,6 +51,7 @@ const Router = () => {
                 <Route path="/date/slot/:id/" element={<Checkout />} />
                 <Route path="/booking/:id" element={<CheckOutTour />} />
 
+                <Route path="/news" element={<News />} />
 
                 <Route path="/clause" element={<Clause />} />
                 <Route path="/refund/:bookingId" element={<RefundInfo />} />

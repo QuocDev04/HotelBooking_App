@@ -1,66 +1,101 @@
+import { useQuery } from "@tanstack/react-query";
+import instanceClient from "../../../../configs/instance";
+import { Pagination, Spin } from "antd";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+type Post = {
+    _id: string;
+    title: string;
+    content: string;
+    image_url: string;
+    author_name: string;
+    createdAt: string;
+    slug: string;
+};
+
 const News = () => {
-    const news = [
-        {
-            title: "Du hành ngược thời gian tại làng dân gian Naganeupseong Hàn Quốc",
-            date: "02/07/2023",
-            author: "Nguyễn Thị Kim Anh",
-            excerpt:
-                "Với lịch sử gần 700 năm, ngôi làng pháo đài Naganeupseong của Hàn Quốc khiến người ta ngỡ ngàng bởi thời gian dường như ngừng lại ở nơi đây...",
-            image:
-                "https://bizweb.dktcdn.net/100/489/447/articles/6-1.jpg?v=1688305324900",
+    const [page, setPage] = useState(1);
+    const pageSize = 6;
+    const navigate = useNavigate();
+
+    const { data, isLoading } = useQuery({
+        queryKey: ["blogs"],
+        queryFn: async () => {
+            const res = await instanceClient.get("/blog");
+            return res.data;
         },
-        {
-            title: "Cắm trại ở Chư Nâm ngắm thiên đường mây ở độ cao",
-            date: "02/07/2023",
-            author: "Nguyễn Thị Kim Anh",
-            excerpt:
-                "Đỉnh Chư Nam Gia Lai là địa điểm dừng chân hấp dẫn thu hút những người đam mê trekking, khám phá thiên nhiên và cắm trại...",
-            image:
-                "https://bizweb.dktcdn.net/100/489/447/articles/5.jpg?v=1688305387470",
-        },
-        {
-            title: "Kinh nghiệm cắm trại trên núi Bà Đen Tây Ninh cuối tuần siêu trải nghiệm",
-            date: "02/07/2023",
-            author: "Nguyễn Thị Kim Anh",
-            excerpt:
-                "Cắm trại núi Bà Đen đang là một trong những hoạt động hấp dẫn được nhiều bạn trẻ quan tâm. Cảnh quan hoang sơ tuyệt đẹp...",
-            image:
-                "https://bizweb.dktcdn.net/100/489/447/articles/4.jpg?v=1688305102097",
-        },
-    ];
+    });
+    const stripHTML = (html: string) => html.replace(/<[^>]+>/g, '');
+
+    const posts: Post[] = data?.posts || [];
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    const currentPosts = posts.slice(start, end);
 
     return (
-        <div className="">
-            <div className="max-w-screen-lg mx-auto py-16 px-4 md:px-8">
-            
+        <div className="max-w-screen-lg mx-auto py-16 px-4 md:px-8">
             <div className="text-center mb-12">
                 <h2 className="text-4xl font-extrabold text-blue-600 mb-3">
                     Tin tức mới nhất
                 </h2>
                 <p className="text-blue-400 max-w-xl mx-auto text-lg">
-                    Tour du lịch <strong>Trong nước</strong> với <strong>Elite Travel</strong>. Hành hương đầu xuân - Tận hưởng bản sắc Việt.
+                    Tour du lịch <strong>Trong nước</strong> với{" "}
+                    <strong>Elite Travel</strong>. Hành hương đầu xuân - Tận hưởng bản sắc
+                    Việt.
                 </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {news.map((item, index) => (
-                    <div key={index} className="bg-white border rounded-lg shadow-sm overflow-hidden">
-                        <img src={item.image} alt={item.title} className="w-full h-48 object-cover" />
-                        <div className="p-4">
-                            <h3 className="text-lg font-semibold text-blue-700 hover:underline cursor-pointer">
-                                {item.title}
-                            </h3>
-                            <p className="text-sm text-gray-500 mt-1">
-                                {item.date} &nbsp; | &nbsp; {item.author}
-                            </p>
-                            <p className="text-gray-700 mt-2 text-sm">{item.excerpt}</p>
-                        </div>
+
+            {isLoading ? (
+                <div className="flex justify-center py-10">
+                    <Spin size="large" />
+                </div>
+            ) : (
+                <>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {currentPosts.map((item) => (
+                            <div
+                                key={item._id}
+                                className="bg-white border rounded-lg shadow-sm overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-lg hover:-translate-y-1"
+                                onClick={() => navigate(`/blog/${item.slug}`)}
+                            >
+                                <div className="overflow-hidden">
+                                    <img
+                                        src={item.image_url}
+                                        alt={item.title}
+                                        className="w-full h-48 object-cover transition-transform duration-500 hover:scale-110"
+                                    />
+                                </div>
+                                <div className="p-4">
+                                    <h3 className="text-lg font-semibold text-blue-700 hover:underline">
+                                        {item.title}
+                                    </h3>
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        {new Date(item.createdAt).toLocaleDateString()} &nbsp; | &nbsp;{" "}
+                                        {item.author_name}
+                                    </p>
+                                    <span className="text-gray-700 mt-2 text-sm">
+                                        {stripHTML(item.content || '')?.length > 100
+                                            ? stripHTML(item.content || '').slice(0, 100) + "..."
+                                            : stripHTML(item.content || '')}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                ))}
-            </div>
-        </div></div>
-        
+
+                    <div className="flex justify-center mt-8">
+                        <Pagination
+                            current={page}
+                            pageSize={pageSize}
+                            total={posts.length}
+                            onChange={(p) => setPage(p)}
+                        />
+                    </div>
+                </>
+            )}
+        </div>
     );
 };
 
 export default News;
-  
