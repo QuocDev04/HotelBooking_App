@@ -2,8 +2,7 @@ const HotelBooking = require("../../models/Hotel/HotelBooking.js");
 const Hotel = require("../../models/Hotel/HotelModel.js");
 const DateHotel = require("../../models/Hotel/DateHotel.js");
 const { checkHotelAvailability } = require('./HotelController.js');
-const { createVNPayPaymentUrl } = require('../VNPayController/vnpayController.js');
-
+const { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } = require('vnpay');
 // Lấy thông tin booking theo ID
 const getByIdHotelBooking = async (req, res) => {
     try {
@@ -30,7 +29,7 @@ const getByIdHotelBooking = async (req, res) => {
             const timeRemaining = deadline - now;
             const hoursRemaining = Math.max(0, Math.floor(timeRemaining / (1000 * 60 * 60)));
             const minutesRemaining = Math.max(0, Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)));
-            
+
             paymentInfo = {
                 deadline: booking.cashPaymentDeadline,
                 isExpired: timeRemaining <= 0,
@@ -62,7 +61,7 @@ const bookHotel = async (req, res) => {
             email,
             phone,
             address,
-            roomBookings, // Array of { roomTypeIndex, numberOfRooms, guests }
+            roomBookings,
             payment_method,
             paymentType = 'full',
             note,
@@ -75,49 +74,20 @@ const bookHotel = async (req, res) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        if (checkIn < today) {
-            return res.status(400).json({
-                success: false,
-                message: "Ngày check-in không thể là ngày trong quá khứ"
-            });
-        }
-
-        if (checkOut <= checkIn) {
-            return res.status(400).json({
-                success: false,
-                message: "Ngày check-out phải sau ngày check-in"
-            });
-        }
+        if (checkIn < today) return res.status(400).json({ success: false, message: "Ngày check-in không thể là ngày trong quá khứ" });
+        if (checkOut <= checkIn) return res.status(400).json({ success: false, message: "Ngày check-out phải sau ngày check-in" });
 
         const numberOfNights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
 
         // Lấy thông tin khách sạn
         const hotel = await Hotel.findById(hotelId);
-        if (!hotel) {
-            return res.status(404).json({
-                success: false,
-                message: "Không tìm thấy khách sạn"
-            });
-        }
+        if (!hotel) return res.status(404).json({ success: false, message: "Không tìm thấy khách sạn" });
 
-        // Kiểm tra tình trạng phòng trống
-        const totalRoomsNeeded = roomBookings.reduce((sum, room) => sum + room.numberOfRooms, 0);
-        const totalGuests = roomBookings.reduce((sum, room) => sum + room.guests.length, 0);
-        
-        const availability = await checkHotelAvailability(
-            hotelId,
-            checkIn,
-            checkOut,
-            totalRoomsNeeded,
-            totalGuests
-        );
-
-        if (!availability.available) {
-            return res.status(400).json({
-                success: false,
-                message: "Không có đủ phòng trống trong thời gian này"
-            });
-        }
+        // Kiểm tra tình trạng phòng
+        const totalRoomsNeeded = roomBookings.reduce((sum, r) => sum + r.numberOfRooms, 0);
+        const totalGuests = roomBookings.reduce((sum, r) => sum + r.guests.length, 0);
+        const availability = await checkHotelAvailability(hotelId, checkIn, checkOut, totalRoomsNeeded, totalGuests);
+        if (!availability.available) return res.status(400).json({ success: false, message: "Không có đủ phòng trống" });
 
         // Tính toán giá
         let subtotal = 0;
@@ -125,12 +95,7 @@ const bookHotel = async (req, res) => {
 
         for (const roomBooking of roomBookings) {
             const roomType = hotel.roomTypes[roomBooking.roomTypeIndex];
-            if (!roomType) {
-                return res.status(400).json({
-                    success: false,
-                    message: `Loại phòng không tồn tại: ${roomBooking.roomTypeIndex}`
-                });
-            }
+            if (!roomType) return res.status(400).json({ success: false, message: `Loại phòng không tồn tại: ${roomBooking.roomTypeIndex}` });
 
             const pricePerNight = roomType.finalPrice || roomType.basePrice;
             const totalPrice = pricePerNight * roomBooking.numberOfRooms * numberOfNights;
@@ -140,33 +105,28 @@ const bookHotel = async (req, res) => {
                 roomTypeIndex: roomBooking.roomTypeIndex,
                 roomTypeName: roomType.typeName,
                 numberOfRooms: roomBooking.numberOfRooms,
-                pricePerNight: pricePerNight,
-                totalPrice: totalPrice,
+                pricePerNight,
+                totalPrice,
                 guests: roomBooking.guests || [],
                 specialRequests: roomBooking.specialRequests || ''
             });
         }
 
-        // Tính thuế và phí dịch vụ (có thể tùy chỉnh)
-        const taxRate = 0.1; // 10% thuế
-        const serviceChargeRate = 0.05; // 5% phí dịch vụ
-        const taxAmount = subtotal * taxRate;
-        const serviceCharge = subtotal * serviceChargeRate;
+        const taxAmount = subtotal * 0.1;
+        const serviceCharge = subtotal * 0.05;
         const totalPrice = subtotal + taxAmount + serviceCharge;
 
-        // Tính tiền cọc nếu cần
+        // Deposit
         let depositAmount = 0;
         let isDeposit = false;
         if (paymentType === 'deposit') {
-            depositAmount = totalPrice * 0.3; // 30% tiền cọc
+            depositAmount = totalPrice * 0.3;
             isDeposit = true;
         }
 
-        // Xử lý userId cho guest booking
         const mongoose = require('mongoose');
         const finalUserId = userId && userId !== '000000000000000000000000' ? userId : new mongoose.Types.ObjectId();
 
-        // Tạo booking
         const newBooking = new HotelBooking({
             userId: finalUserId,
             hotelId,
@@ -191,69 +151,86 @@ const bookHotel = async (req, res) => {
             specialRequests
         });
 
-        // Set deadline cho thanh toán tiền mặt
         if (payment_method === 'cash') {
             const deadline = new Date();
-            deadline.setHours(deadline.getHours() + 24); // 24 giờ để thanh toán
+            deadline.setHours(deadline.getHours() + 24);
             newBooking.cashPaymentDeadline = deadline;
         }
 
         await newBooking.save();
-
-        // Cập nhật tình trạng phòng
         await updateRoomAvailability(hotelId, checkIn, checkOut, roomBookings, 'book');
 
-        // Xử lý VNPay nếu payment_method là bank_transfer
+        // VNPay xử lý
         let vnpayUrl = null;
         if (payment_method === 'bank_transfer') {
             try {
                 const paymentAmount = isDeposit ? depositAmount : totalPrice;
-                const vnpayData = {
-                    bookingId: newBooking._id,
-                    amount: paymentAmount,
-                    orderInfo: `Thanh toán đặt phòng khách sạn ${hotel.hotelName}`,
-                    orderType: 'hotel_booking',
-                    locale: 'vn',
-                    returnUrl: `${process.env.CLIENT_URL}/booking-success`,
-                    ipAddr: req.ip || '127.0.0.1'
-                };
-                vnpayUrl = await createVNPayPaymentUrl(vnpayData);
-            } catch (vnpayError) {
-                console.error('VNPay error:', vnpayError);
-                // Không throw error, chỉ log và tiếp tục
+                const vnpay = new VNPay({
+                    tmnCode: 'LH54Z11C',
+                    secureSecret: 'PO0WDG07TJOGP1P8SO6Z9PHVPIBUWBGQ',
+                    vnpayHost: 'https://sandbox.vnpayment.vn',
+                    testMode: true,
+                    hashAlgorithm: 'SHA512',
+                    loggerFn: ignoreLogger,
+                });
+
+                vnpayUrl = await vnpay.buildPaymentUrl({
+                    vnp_Amount: paymentAmount,
+                    vnp_IpAddr: req.ip || '127.0.0.1',
+                    vnp_TxnRef: `${newBooking._id}-${Date.now()}`,
+                    vnp_OrderInfo: `Thanh toán đặt phòng khách sạn ${hotel.hotelName}`,
+                    vnp_OrderType: ProductCode.Other,
+                    vnp_ReturnUrl: `http://localhost:8080/api/vnpay/payment-callback`,
+                    vnp_Locale: VnpLocale.VN,
+                    vnp_CreateDate: dateFormat(new Date()),
+                    vnp_ExpireDate: dateFormat(new Date(Date.now() + 24 * 60 * 60 * 1000))
+                });
+
+                console.log('Generated VNPay URL:', vnpayUrl);
+                return res.status(201).json({
+                    success: true,
+                    message: "Đặt tour thành công - chuyển đến VNPay",
+                    newBooking,
+                    vnpayUrl,
+                    bookingId: newBooking._id
+                });
+            } catch (err) {
+                console.error("Lỗi tạo VNPay URL:", err);
+                return res.status(500).json({
+                    success: false,
+                    message: "Lỗi server khi tạo VNPay URL",
+                    error: err.message
+                });
             }
         }
 
-        // Populate thông tin để trả về
         const populatedBooking = await HotelBooking.findById(newBooking._id)
             .populate('userId', 'username email')
             .populate({
                 path: 'hotelId',
                 select: 'hotelName location address starRating',
-                populate: {
-                    path: 'location',
-                    select: 'locationName country'
-                }
+                populate: { path: 'location', select: 'locationName country' }
             });
 
-        res.status(201).json({
+        return res.status(201).json({
             success: true,
-            message: "Đặt phòng thành công",
+            message: payment_method === 'bank_transfer' ? "Đặt phòng thành công - chuyển đến VNPay" : "Đặt phòng thành công",
             booking: populatedBooking,
             bookingId: newBooking._id,
-            vnpayUrl: vnpayUrl
+            paymentUrl: vnpayUrl
         });
 
-    } catch (error) {
-        console.error('Lỗi trong bookHotel:', error);
-        console.error('Stack trace:', error.stack);
+    } catch (err) {
+        console.error("Lỗi tạo booking:", err);
         res.status(500).json({
             success: false,
-            message: "Lỗi server",
-            error: error.message
+            message: "Lỗi server khi tạo booking",
+            error: err.message,
         });
     }
 };
+
+
 
 // Cập nhật tình trạng phòng
 const updateRoomAvailability = async (hotelId, checkInDate, checkOutDate, roomBookings, action = 'book') => {
@@ -381,7 +358,7 @@ const cancelHotelBooking = async (req, res) => {
         booking.cancelledAt = new Date();
         booking.cancelReason = cancelReason;
         booking.refund_amount = refundAmount;
-        
+
         if (refundAmount > 0) {
             booking.refund_status = 'pending';
         }
@@ -416,9 +393,9 @@ const calculateHotelRefund = (booking) => {
     const now = new Date();
     const checkInDate = new Date(booking.checkInDate);
     const daysBefore = Math.ceil((checkInDate - now) / (1000 * 60 * 60 * 24));
-    
+
     let refundPercent = 0;
-    
+
     if (daysBefore >= 7) {
         refundPercent = 90; // Hoàn 90% nếu hủy trước 7 ngày
     } else if (daysBefore >= 3) {
@@ -428,7 +405,7 @@ const calculateHotelRefund = (booking) => {
     } else {
         refundPercent = 0; // Không hoàn tiền nếu hủy trong ngày
     }
-    
+
     const totalPaid = booking.isFullyPaid ? booking.totalPrice : booking.depositAmount;
     return Math.floor(totalPaid * refundPercent / 100);
 };
@@ -436,33 +413,33 @@ const calculateHotelRefund = (booking) => {
 // Lấy tất cả booking cho admin
 const getAllHotelBookingsForAdmin = async (req, res) => {
     try {
-        const { 
-            page = 1, 
-            limit = 10, 
-            status, 
-            hotelId, 
-            checkInDate, 
+        const {
+            page = 1,
+            limit = 10,
+            status,
+            hotelId,
+            checkInDate,
             checkOutDate,
-            search 
+            search
         } = req.query;
 
         let filter = {};
-        
+
         if (status) {
             filter.payment_status = status;
         }
-        
+
         if (hotelId) {
             filter.hotelId = hotelId;
         }
-        
+
         if (checkInDate && checkOutDate) {
             filter.checkInDate = {
                 $gte: new Date(checkInDate),
                 $lte: new Date(checkOutDate)
             };
         }
-        
+
         if (search) {
             filter.$or = [
                 { fullNameUser: { $regex: search, $options: 'i' } },
@@ -510,45 +487,45 @@ const confirmHotelCashPayment = async (req, res) => {
         const { id } = req.params;
         const { adminId, note } = req.body;
         const paymentImage = req.file; // File được upload từ middleware
-        
+
         console.log('🔍 Debug confirmHotelCashPayment:');
         console.log('- adminId:', adminId);
         console.log('- note:', note);
         console.log('- paymentImage:', paymentImage ? paymentImage.filename : 'No file uploaded');
-        
+
         // Tìm booking cần xác nhận thanh toán
         const booking = await HotelBooking.findById(id)
             .populate('hotelId', 'hotelName location')
             .populate('userId', 'username email');
-        
+
         if (!booking) {
-            return res.status(404).json({ 
-                success: false, 
-                message: "Không tìm thấy đặt phòng cần xác nhận thanh toán" 
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy đặt phòng cần xác nhận thanh toán"
             });
         }
 
         // Kiểm tra trạng thái hiện tại
         if (booking.payment_status !== 'pending') {
-            return res.status(400).json({ 
-                success: false, 
-                message: `Không thể xác nhận thanh toán cho đặt phòng có trạng thái: ${booking.payment_status}` 
+            return res.status(400).json({
+                success: false,
+                message: `Không thể xác nhận thanh toán cho đặt phòng có trạng thái: ${booking.payment_status}`
             });
         }
 
         // Kiểm tra phương thức thanh toán
         if (booking.payment_method !== 'cash') {
-            return res.status(400).json({ 
-                success: false, 
-                message: "Chỉ có thể xác nhận thanh toán cho đặt phòng thanh toán tiền mặt" 
+            return res.status(400).json({
+                success: false,
+                message: "Chỉ có thể xác nhận thanh toán cho đặt phòng thanh toán tiền mặt"
             });
         }
 
         // Kiểm tra deadline thanh toán tiền mặt
         if (booking.cashPaymentDeadline && new Date() > new Date(booking.cashPaymentDeadline)) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "Đã quá hạn thanh toán tiền mặt (24 giờ)" 
+            return res.status(400).json({
+                success: false,
+                message: "Đã quá hạn thanh toán tiền mặt (24 giờ)"
             });
         }
 
@@ -578,7 +555,7 @@ const confirmHotelCashPayment = async (req, res) => {
                 booking.paymentImage = paymentImage.filename;
             }
         }
-        
+
         await booking.save();
 
         res.status(200).json({
@@ -608,10 +585,10 @@ const confirmHotelCashPayment = async (req, res) => {
 
     } catch (error) {
         console.error("Lỗi xác nhận thanh toán cọc:", error);
-        res.status(500).json({ 
-            success: false, 
-            message: "Lỗi server khi xác nhận thanh toán cọc", 
-            error: error.message 
+        res.status(500).json({
+            success: false,
+            message: "Lỗi server khi xác nhận thanh toán cọc",
+            error: error.message
         });
     }
 };
@@ -622,24 +599,24 @@ const confirmHotelFullPayment = async (req, res) => {
         const { id } = req.params;
         const { adminId, note } = req.body;
         const paymentImage = req.file; // File được upload từ middleware
-        
+
         // Tìm booking cần xác nhận thanh toán toàn bộ
         const booking = await HotelBooking.findById(id)
             .populate('hotelId', 'hotelName location')
             .populate('userId', 'username email');
-        
+
         if (!booking) {
-            return res.status(404).json({ 
-                success: false, 
-                message: "Không tìm thấy đặt phòng cần xác nhận thanh toán" 
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy đặt phòng cần xác nhận thanh toán"
             });
         }
 
         // Kiểm tra trạng thái hiện tại
         if (booking.payment_status !== 'deposit_paid') {
-            return res.status(400).json({ 
-                success: false, 
-                message: `Chỉ có thể xác nhận thanh toán toàn bộ cho đặt phòng đã thanh toán cọc. Trạng thái hiện tại: ${booking.payment_status}` 
+            return res.status(400).json({
+                success: false,
+                message: `Chỉ có thể xác nhận thanh toán toàn bộ cho đặt phòng đã thanh toán cọc. Trạng thái hiện tại: ${booking.payment_status}`
             });
         }
 
@@ -654,7 +631,7 @@ const confirmHotelFullPayment = async (req, res) => {
         if (paymentImage) {
             booking.fullPaymentImage = paymentImage.filename; // Lưu tên file ảnh thanh toán toàn bộ
         }
-        
+
         await booking.save();
 
         res.status(200).json({
@@ -684,10 +661,10 @@ const confirmHotelFullPayment = async (req, res) => {
 
     } catch (error) {
         console.error("Lỗi xác nhận thanh toán toàn bộ:", error);
-        res.status(500).json({ 
-            success: false, 
-            message: "Lỗi server khi xác nhận thanh toán toàn bộ", 
-            error: error.message 
+        res.status(500).json({
+            success: false,
+            message: "Lỗi server khi xác nhận thanh toán toàn bộ",
+            error: error.message
         });
     }
 };
@@ -696,16 +673,16 @@ const confirmHotelFullPayment = async (req, res) => {
 const getHotelBookingStats = async (req, res) => {
     try {
         const { startDate, endDate, hotelId } = req.query;
-        
+
         let matchFilter = {};
-        
+
         if (startDate && endDate) {
             matchFilter.createdAt = {
                 $gte: new Date(startDate),
                 $lte: new Date(endDate)
             };
         }
-        
+
         if (hotelId) {
             matchFilter.hotelId = mongoose.Types.ObjectId(hotelId);
         }
@@ -777,7 +754,7 @@ const getHotelBookingStats = async (req, res) => {
 const confirmHotelPayment = async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         const booking = await HotelBooking.findById(id);
         if (!booking) {
             return res.status(404).json({
