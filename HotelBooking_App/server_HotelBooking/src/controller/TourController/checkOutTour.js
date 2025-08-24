@@ -1,5 +1,5 @@
-const BookingTour = require("../../models/Tour/TourBooking.js")
 const CheckOutTour = require("../../models/Tour/checkOutTour.js")
+const BookingTour = require("../../models/Tour/TourBooking.js")
 
 const checkOutBookingTour = async (req, res) => {
     try {
@@ -66,45 +66,39 @@ const getCheckOutUserTour = async (req, res) => {
     }
 };
   
-const getCheckOutUserTourByUserId = async (req, res) => {
+const getAllBookingTourByUserId = async (req, res) => {
     try {
         const userId = req.params.userId;
 
-        const checkOuts = await CheckOutTour.find()
+        const bookings = await BookingTour.find({ userId })
+            .populate("userId")          
             .populate({
-                path: "BookingTourId",
-                match: { userId: userId }, // chỉ populate BookingTour có userId trùng
-                populate: [
-                    {
-                        path: "userId",
-                        model: "User",
-                    },
-                    {
-                        path: "tourId",
-                        model: "Tour",
-                    },
-                    {
-                        path: "itemRoom.roomId",
-                        model: "Room",
-                    },
-                ],
-            });
-
-        // Lọc ra các bản ghi có BookingTourId tồn tại (không bị null do không match)
-        const filtered = checkOuts.filter(item => item.BookingTourId !== null);
+                path: "slotId",        
+                populate: {
+                    path: "tour",       
+                    model: "Tour"
+                }
+            })
+            .populate("cancelledBy")     
+            .lean();                  
 
         return res.status(200).json({
             success: true,
-            message: "Lấy thông tin booking theo user thành công",
-            data: filtered,
+            message: "Lấy thông tin booking tour đầy đủ thành công",
+            data: bookings
         });
+
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: error.message,
+            message: error.message
         });
     }
 };
 
-module.exports = { checkOutBookingTour, getCheckOutUserTour, getCheckOutUserTourByUserId };
+
+
+
+
+module.exports = { checkOutBookingTour, getCheckOutUserTour, getAllBookingTourByUserId };
   
