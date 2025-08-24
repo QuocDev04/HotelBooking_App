@@ -38,7 +38,7 @@ export default function Blog() {
   if (isError) return <p className="text-center text-red-500">Lỗi khi tải dữ liệu</p>;
 
   return (
-    <div className="min-h-screen py-8 my-32">
+    <div className="min-h-screen py-8 my-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">

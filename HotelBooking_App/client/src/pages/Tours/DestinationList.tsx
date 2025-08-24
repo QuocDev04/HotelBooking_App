@@ -28,7 +28,7 @@ const DestinationList = () => {
 
   return (
 
-    <main className="flex flex-col gap-6 px-4 md:px-8 py-6 max-w-screen-2xl mx-auto mt-20">
+    <main className="flex flex-col gap-6 px-4 md:px-8 py-6 max-w-screen-2xl mx-auto mt-8">
       <section className="flex-1">
         <div className="bg-white rounded-xl shadow p-6 mb-8">
           <h2 className="text-xl font-bold text-center mb-2">Bạn lựa chọn địa điểm du lịch nào?</h2>

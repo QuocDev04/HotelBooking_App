@@ -1,26 +1,27 @@
-// models/Post.js
-const mongoose = require("mongoose");
-const slugify = require("slugify");
+// routes/blogRoutes.js (CommonJS)
+const express = require("express");
+const router = express.Router();
 
-const PostSchema = new mongoose.Schema(
-  {
-    title: { type: String, required: true },
-    content: { type: String, required: true },
-    image_url: String,
-    status: { type: String, enum: ["draft", "published"], default: "draft" },
-    slug: { type: String, unique: true },
-    author_name: { type: String, default: "Admin" },
-    likes: { type: Number, default: 0 }, // 👈 thêm dấu phẩy trước dòng này
-  },
-  { timestamps: true }
-);
+const {
+  listPublished,
+  show,
+  showById,
+  create,
+  update,
+  destroy,
+  likePost
+} = require("../../controller/Blog/Blog.js");
 
-// Tạo slug từ title
-PostSchema.pre("validate", function (next) {
-  if (this.title && !this.slug) {
-    this.slug = slugify(this.title, { lower: true, strict: true });
-  }
-  next();
-});
+// Public (User)
+router.get("/blog", listPublished);        // GET danh sách bài viết published
+router.get("/blog/:slug", show);           // GET chi tiết bài viết theo slug
 
-module.exports = mongoose.model("Post", PostSchema);
+// Admin (CRUD)
+router.get("/posts/:id", showById);
+router.post("/posts", create);             // POST tạo bài viết
+router.put("/posts/:id", update);          // PUT cập nhật
+router.delete("/posts/:id", destroy);      // DELETE xóa
+
+router.post("/posts/:id/like", likePost);
+
+module.exports = router;

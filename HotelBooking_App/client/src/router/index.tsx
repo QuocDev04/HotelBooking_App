@@ -42,7 +42,7 @@ const Router = () => {
                 <Route path="/checkout-hotel/:bookingId" element={<CheckOutHotel />} />
                 <Route path="/payment-result" element={<PaymentResult />} />
                 <Route path="/blog" element={<Blog />} />
-                <Route path="/hotelPolicy" element={<BlogDetail />} />
+                <Route path="/blog/:slug" element={<BlogDetail />} />
                 <Route path="/detailtour/:id" element={<JapanTourPage />} />
 
                 <Route path="/bookingall/:id" element={<BookingAll />} />
