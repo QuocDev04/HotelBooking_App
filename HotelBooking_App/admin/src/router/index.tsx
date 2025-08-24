@@ -38,6 +38,7 @@ import EditTSchedule from "../pages/TransportSchedule/EditTSchedule"
 import ListTourSchedule from "../pages/TourSchedule/ListTourSchedule"
 import AddTourSchedule from "../pages/TourSchedule/AddTourSchedule"
 import EditTourSchedule from "../pages/TourSchedule/EditTourSchedule"
+import Detail from "../pages/Blog/Detail"
 
 
 
@@ -91,6 +92,7 @@ const Router = () => {
                     <Route path="/admin/list-blog" element={<ListBlog />} />
                     <Route path="/admin/add-blog" element={<AddBlog />} />
                     <Route path="/admin/edit-blog/:id" element={<EditBlog />} />
+                    <Route path="/admin/detail-blog/:id" element={<Detail />} />
 
                     <Route path="/admin/list-time" element={<ListTime />} />
                     <Route path="/admin/add-timetour" element={<AddTimeTour />} />

@@ -23,7 +23,7 @@ const autoCancelRouter = require("./router/autoCancel/autoCancelRouter");
 const RouterHotel = require('./router/HotelRouter/HotelRouter');
 const RouterHotelBooking = require('./router/HotelRouter/HotelBookingRouter');
 const { startAutoCancelJob } = require("./jobs/autoCancelJob");
-
+const BlogRouter = require('./router/Blog/Blog');
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -56,6 +56,7 @@ app.use('/api/', dateRouter);
 app.use('/api/auto-cancel', autoCancelRouter);
 app.use('/api/', RouterHotel);
 app.use('/api/', RouterHotelBooking);
+app.use('/api/', BlogRouter);
 
 // Error handler
 app.use((err, req, res, next) => {

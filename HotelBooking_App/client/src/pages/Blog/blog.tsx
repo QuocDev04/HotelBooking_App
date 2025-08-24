@@ -1,8 +1,45 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import instanceClient from "../../../configs/instance";
+import { Link } from "react-router-dom";
+
+interface Blog {
+  _id: string;
+  title: string;
+  content: string;
+  image_url: string;
+  author_name: string;
+  createdAt: string;
+  slug: string;
+}
+
 export default function Blog() {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["blogs"],
+    queryFn: async () => {
+      const res = await instanceClient.get("/blog");
+      return res.data;
+    },
+  });
+
+  const blogs: Blog[] = data?.posts || [];
+
+  // 📌 State phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const blogsPerPage = 4; // số blog mỗi trang
+
+  const totalPages = Math.ceil(blogs.length / blogsPerPage);
+
+  // Tính index
+  const startIndex = (currentPage - 1) * blogsPerPage;
+  const currentBlogs = blogs.slice(startIndex, startIndex + blogsPerPage);
+
+  if (isLoading) return <p className="text-center">Đang tải...</p>;
+  if (isError) return <p className="text-center text-red-500">Lỗi khi tải dữ liệu</p>;
+
   return (
     <div className="min-h-screen py-8 my-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Tiêu đề blog */}
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
             Khám Phá Blog Du Lịch
@@ -15,81 +52,96 @@ export default function Blog() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           {/* Sidebar */}
           <aside className="md:col-span-1 space-y-6">
-            {/* Danh mục tour */}
-            <div className="bg-white border border-blue-500 shadow-lg rounded-2xl overflow-hidden">
-              <div className="px-5 py-3 text-lg font-bold text-white bg-blue-500">
-                Danh mục tour
-              </div>
-              <div className="px-5 py-4 space-y-3">
-                <button className="block w-full text-left text-gray-800 hover:text-blue-600 transition">
-                  Tour trong nước
-                </button>
-                <button className="block w-full text-left text-gray-800 hover:text-blue-600 transition">
-                  Tour nước ngoài
-                </button>
-              </div>
-            </div>
-
-            {/* Cẩm nang du lịch */}
             <div className="bg-white border border-gray-200 shadow-lg rounded-2xl overflow-hidden">
               <div className="px-5 py-3 font-bold text-gray-800 bg-gray-100">
                 Cẩm nang du lịch
               </div>
               <ul className="divide-y divide-gray-100">
-                {[1, 2, 3, 4, 5].map((_, idx) => (
+                {blogs.slice(0, 5).map((blog) => (
                   <li
-                    key={idx}
+                    key={blog._id}
                     className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition"
                   >
-                    <img
-                      src="https://via.placeholder.com/60"
-                      alt="Ảnh minh họa"
-                      className="w-16 h-12 rounded object-cover"
-                    />
-                    <p className="text-sm font-medium text-gray-700 line-clamp-2">
-                      Du lịch Đà Lạt – Cẩm nang từ A đến Z (update thông tin 2024)
-                    </p>
+                    <Link to={`/blog/${blog.slug}`} className="flex items-center gap-4">
+                      <img
+                        src={blog.image_url || "https://via.placeholder.com/60"}
+                        alt={blog.title}
+                        className="w-16 h-12 rounded object-cover"
+                      />
+                      <p className="text-sm font-medium text-gray-700 line-clamp-2">
+                        {blog.title}
+                      </p>
+                    </Link>
                   </li>
                 ))}
               </ul>
             </div>
           </aside>
 
-          {/* Nội dung chính */}
+          {/* Main */}
           <main className="md:col-span-3 space-y-8">
             <div className="grid gap-8 sm:grid-cols-2">
-              {[1, 2, 3, 4].map((_, idx) => (
+              {currentBlogs.map((blog) => (
                 <div
-                  key={idx}
+                  key={blog._id}
                   className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow transition transform hover:scale-[1.01] hover:shadow-md"
                 >
-                  <img
-                    src="https://via.placeholder.com/600x300"
-                    alt="Blog Thumbnail"
-                    className="object-cover w-full h-48"
-                  />
+                  <Link to={`/blog/${blog.slug}`}>
+                    <img
+                      src={blog.image_url || "https://via.placeholder.com/600x300"}
+                      alt={blog.title}
+                      className="object-cover w-full h-48"
+                    />
+                  </Link>
                   <div className="p-5">
                     <p className="text-sm text-gray-400 mb-1">
-                      Thứ Hai, 25/12/2023 - Nguyễn Anh Dũng
+                      {new Date(blog.createdAt).toLocaleDateString("vi-VN")} -{" "}
+                      {blog.author_name}
                     </p>
-                    <h3 className="text-lg font-semibold text-gray-800 hover:text-blue-600 cursor-pointer transition">
-                      Tiêu đề bài viết blog hấp dẫn
-                    </h3>
+                    <Link
+                      to={`/blog/${blog.slug}`}
+                      className="block text-lg font-semibold text-gray-800 hover:text-blue-600 cursor-pointer transition"
+                    >
+                      {blog.title}
+                    </Link>
                     <p className="mt-3 text-sm text-gray-600 line-clamp-2">
-                      Mô tả ngắn gọn nội dung bài viết để người dùng hiểu nhanh nội dung chính.
+                      {blog.content.replace(/<[^>]+>/g, "").slice(0, 120)}...
                     </p>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Phân trang */}
-            <div className="flex justify-center gap-2 pt-4">
-              <button className="w-9 h-9 font-semibold text-white bg-blue-600 rounded-full shadow hover:bg-blue-700 transition">
-                1
+            {/* Pagination */}
+            <div className="flex justify-center items-center gap-2 mt-6">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+                className="px-4 py-2 border rounded-lg disabled:opacity-50"
+              >
+                Trước
               </button>
-              <button className="w-9 h-9 text-gray-600 bg-white border rounded-full hover:bg-gray-100 transition">
-                2
+
+              {Array.from({ length: totalPages }).map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentPage(idx + 1)}
+                  className={`px-4 py-2 border rounded-lg ${
+                    currentPage === idx + 1
+                      ? "bg-blue-600 text-white"
+                      : "bg-white text-gray-700"
+                  }`}
+                >
+                  {idx + 1}
+                </button>
+              ))}
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+                className="px-4 py-2 border rounded-lg disabled:opacity-50"
+              >
+                Sau
               </button>
             </div>
           </main>

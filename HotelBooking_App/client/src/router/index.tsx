@@ -12,7 +12,7 @@ import HotelPaymentPage from "../pages/Payment/HotelPayment"
 import CheckOutHotel from "../pages/Hotel/CheckOutHotel"
 import PaymentResult from "../pages/Booking/Payment"
 import Blog from "../pages/Blog/blog"
-import { HotelPolicy } from "../pages/Blog/hotelPolicy"
+import BlogDetail from "../pages/Blog/hotelPolicy"
 import JapanTourPage from "../pages/Tour/detailTour"
 import BookingAll from "../pages/Booking/BookingAll"
 import InfoUser from "../components/InfoUser"
@@ -42,7 +42,7 @@ const Router = () => {
                 <Route path="/checkout-hotel/:bookingId" element={<CheckOutHotel />} />
                 <Route path="/payment-result" element={<PaymentResult />} />
                 <Route path="/blog" element={<Blog />} />
-                <Route path="/hotelPolicy" element={<HotelPolicy />} />
+                <Route path="/hotelPolicy" element={<BlogDetail />} />
                 <Route path="/detailtour/:id" element={<JapanTourPage />} />
 
                 <Route path="/bookingall/:id" element={<BookingAll />} />
