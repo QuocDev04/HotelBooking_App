@@ -385,7 +385,7 @@ const Checkout = () => {
   };
 
   return (
-    <div className="min-h-screen px-2 py-8 mt-20 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 md:px-8">
+    <div className="min-h-screen px-2 py-8 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 md:px-8">
       <div className="mx-auto max-w-7xl">
         {/* Header Section */}
         <div className="mb-8 text-center">
