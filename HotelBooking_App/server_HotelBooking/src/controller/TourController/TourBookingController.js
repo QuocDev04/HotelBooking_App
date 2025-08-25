@@ -1217,3 +1217,83 @@ module.exports = {
     getRefundStats,
     submitRefundRequest
 };
+
+// Lấy bookings theo date slot ID cho trang chi tiết slot
+const getBookingsBySlotId = async (req, res) => {
+    try {
+        const { slotId } = req.params;
+        
+        if (!slotId) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Thiếu slotId" 
+            });
+        }
+
+        const bookings = await TourBookingSchema.find({ slotId })
+            .populate({
+                path: 'userId',
+                select: 'username email name'
+            })
+            .populate({
+                path: 'slotId',
+                select: 'dateTour availableSeats tour',
+                populate: {
+                    path: 'tour',
+                    select: 'nameTour destination departure_location duration price imageTour tourType maxPeople',
+                    populate: {
+                        path: 'destination',
+                        model: 'Location',
+                        select: 'locationName country'
+                    }
+                }
+            })
+            .sort({ createdAt: -1 });
+            
+        console.log(`Found ${bookings.length} bookings for slot ${slotId}`);
+        bookings.forEach((booking, index) => {
+            console.log(`Booking ${index + 1}:`, {
+                id: booking._id,
+                payment_status: booking.payment_status,
+                totalPriceTour: booking.totalPriceTour,
+                adultsTour: booking.adultsTour,
+                childrenTour: booking.childrenTour,
+                toddlerTour: booking.toddlerTour,
+                infantTour: booking.infantTour
+            });
+        });
+
+        res.status(200).json({
+            success: true,
+            message: `Lấy thành công ${bookings.length} booking cho slot ${slotId}`,
+            data: bookings
+        });
+
+    } catch (error) {
+        console.error('Lỗi lấy bookings theo slotId:', error);
+        res.status(500).json({ 
+            success: false,
+            message: "Lỗi server", 
+            error: error.message 
+        });
+    }
+};
+
+module.exports = {
+    getByIdBookingTour,
+    BookingTour,
+    getBookingToursByUser,
+    cancelBookingTour,
+    getAllBookingsForAdmin,
+    adminConfirmCancelBooking,
+    requestCancelBooking,
+    getBookingStats,
+    confirmCashPayment,
+    confirmFullPayment,
+    getAccurateRevenue,
+    getRefundList,
+    updateRefundStatus,
+    getRefundStats,
+    submitRefundRequest,
+    getBookingsBySlotId
+};

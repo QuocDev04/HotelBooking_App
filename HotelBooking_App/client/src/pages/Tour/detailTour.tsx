@@ -11,7 +11,7 @@ import Evaluate from './Content/Evaluate';
 import { useEffect, useRef, useState } from 'react';
 
 const TourPage = () => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'schedule' | 'reviews'>('overview');
+  const [activeTab, setActiveTab] = useState('overview');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
   const { id } = useParams<{ id: string }>();
@@ -37,6 +37,7 @@ const TourPage = () => {
   })
   const tours = tour?.data?.tour
 
+
   // Thêm useEffect để log các giá trị quan trọng
   useEffect(() => {
     console.log("Selected date:", selectedDate);
@@ -57,6 +58,7 @@ const TourPage = () => {
     scrollToCalendar();
   };
 
+
   // Cập nhật hàm setSelectedDate để log thêm thông tin
   const handleDateSelect = (date: Date | null) => {
     console.log("Date selected:", date);
@@ -72,194 +74,92 @@ const TourPage = () => {
   };
   return (
     <>
-      {/* Hero Section với gradient background */}
-      <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          {/* Breadcrumb */}
-          <nav className="mb-6">
-            <div className="flex items-center space-x-2 text-blue-100">
-              <span>Trang chủ</span>
-              <span>/</span>
-              <span>Tours</span>
-              <span>/</span>
-              <span className="text-white font-medium">{tours?.nameTour}</span>
+      <div className="max-w-screen-xl p-4 mx-auto font-sans ">
+        {/* Title */}
+        <h1 className="mb-2 text-2xl font-semibold">
+          {tours?.nameTour}
+        </h1>
+        <div className="flex flex-wrap gap-4 mb-4">
+          <div className="flex items-center">
+            <div className=" rounded-2xl p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="24" viewBox="0 0 18 24" fill="none">
+                <path d="M9.01107 1.625C13.103 1.625 16.9043 4.90179 16.9043 9.03571C16.9043 11.7682 15.9811 13.7001 14.434 15.9524C12.707 18.4667 10.5018 20.8338 9.51601 21.8515C9.23162 22.1451 8.76735 22.1451 8.48296 21.8515C7.4972 20.8338 5.29202 18.4667 3.56496 15.9524C2.01787 13.7001 1.09473 11.7682 1.09473 9.03571C1.09473 4.90179 4.89588 1.625 8.98782 1.625" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" />
+                <path d="M11.9637 9.47235C11.9637 11.1256 10.6409 12.4928 9.00411 12.4928C7.36733 12.4928 6.03516 11.1256 6.03516 9.47235C6.03516 7.81912 7.36733 6.56542 9.00411 6.56542C10.6409 6.56542 11.9637 7.81912 11.9637 9.47235Z" stroke="#3B82F6" strokeWidth="2" />
+              </svg>
             </div>
-          </nav>
 
-          {/* Tour Title & Basic Info */}
-          <div className="mb-8">
-            <h1 className="text-4xl lg:text-5xl font-bold mb-4 leading-tight">
-              {tours?.nameTour}
-            </h1>
-
-            {/* Tour Highlights */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-                <div className="flex items-center mb-3">
-                  <div className="bg-blue-500/30 rounded-full p-3 mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                      <circle cx="12" cy="10" r="3" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-blue-100 text-sm">Khởi hành từ</div>
-                    <div className="text-white font-bold text-lg">{tours?.departure_location}</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-                <div className="flex items-center mb-3">
-                  <div className="bg-purple-500/30 rounded-full p-3 mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                      <circle cx="12" cy="10" r="3" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-blue-100 text-sm">Điểm đến</div>
-                    <div className="text-white font-bold text-lg">{tours?.destination?.locationName}</div>
-                    <div className="text-blue-200 text-sm">{tours?.destination?.country}</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-                <div className="flex items-center mb-3">
-                  <div className="bg-indigo-500/30 rounded-full p-3 mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10" />
-                      <polyline points="12,6 12,12 16,14" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-blue-100 text-sm">Thời gian</div>
-                    <div className="text-white font-bold text-lg">{tours?.duration}</div>
-                  </div>
-                </div>
-              </div>
+            <div className="ml-2">
+              <div className="text-sm text-gray-500">Khởi hành từ</div>
+              <div className="text-sm font-semibold text-blue-500">{tours?.departure_location}</div>
+            </div>
+          </div>
+          <div className="flex items-center">
+            <div className=" rounded-2xl p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="24" viewBox="0 0 18 24" fill="none">
+                <path d="M9.01107 1.625C13.103 1.625 16.9043 4.90179 16.9043 9.03571C16.9043 11.7682 15.9811 13.7001 14.434 15.9524C12.707 18.4667 10.5018 20.8338 9.51601 21.8515C9.23162 22.1451 8.76735 22.1451 8.48296 21.8515C7.4972 20.8338 5.29202 18.4667 3.56496 15.9524C2.01787 13.7001 1.09473 11.7682 1.09473 9.03571C1.09473 4.90179 4.89588 1.625 8.98782 1.625" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" />
+                <path d="M11.9637 9.47235C11.9637 11.1256 10.6409 12.4928 9.00411 12.4928C7.36733 12.4928 6.03516 11.1256 6.03516 9.47235C6.03516 7.81912 7.36733 6.56542 9.00411 6.56542C10.6409 6.56542 11.9637 7.81912 11.9637 9.47235Z" stroke="#3B82F6" strokeWidth="2" />
+              </svg>
+            </div>
+            <div className="ml-2">
+              <div className="text-sm text-gray-500">Điểm đến</div>
+              <div className="text-sm font-semibold text-blue-500">{tours?.destination?.locationName} - {tours?.destination?.country}</div>
+            </div>
+          </div>
+          <div className="flex items-center">
+            <div className=" rounded-2xl p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="21" height="22" viewBox="0 0 21 22" fill="none">
+                <path d="M19 13.5V5C19 3.89543 18.1046 3 17 3H3C1.89543 3 0.999998 3.89543 0.999998 5V17C0.999998 18.1046 1.89543 19 3 19H10.5" stroke="#3B82F6" stroke-width="2"></path>
+                <path d="M15 1V5" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"></path>
+                <path d="M5 1V5" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"></path>
+                <path d="M20 16C20 13.2386 17.7614 11 15 11C12.2386 11 10 13.2386 10 16C10 18.7614 12.2386 21 15 21C17.7614 21 20 18.7614 20 16Z" stroke="#3B82F6" stroke-width="2"></path>
+                <path d="M15 13.5676V16.0001L16.6216 17.6217" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </div>
+            <div className="ml-2">
+              <div className="text-sm text-gray-500">Thời gian</div>
+              <div className="text-sm font-semibold text-blue-500">{tours?.duration}</div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="bg-gray-50 min-h-screen">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Content - 2/3 width */}
-            <div className="lg:col-span-2 space-y-8">
-              {/* Image Gallery */}
-              <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-                <LeftTourDetail
-                  refDiv={calendarRef}
-                  selectedDate={selectedDate}
-                  setSelectedDate={handleDateSelect}
-                />
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+          <div className="w-full lg:w-2/3">
+            <LeftTourDetail
+              refDiv={calendarRef}
+              selectedDate={selectedDate}
+
+              setSelectedDate={handleDateSelect}
+            />
+            <div className="mt-8">
+              <div className="flex border-b">
+                <button
+                  className={`px-4 py-2 font-medium ${activeTab === 'overview' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+                  onClick={() => setActiveTab('overview')}
+                >
+                  Tổng quan
+                </button>
               </div>
 
-              {/* Content Tabs */}
-              <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-                {/* Tab Headers */}
-                <div className="border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
-                  <div className="flex">
-                    <button
-                      className={`px-8 py-4 font-semibold text-lg transition-all duration-300 relative ${activeTab === 'overview'
-                          ? 'text-blue-600 bg-white border-b-3 border-blue-600'
-                          : 'text-gray-600 hover:text-blue-500 hover:bg-blue-50'
-                        }`}
-                      onClick={() => setActiveTab('overview')}
-                    >
-                      📋 Tổng quan chi tiết
-                      {activeTab === 'overview' && (
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-t-full"></div>
-                      )}
-                    </button>
-                    <button
-                      className={`px-8 py-4 font-semibold text-lg transition-all duration-300 relative ${activeTab === 'schedule'
-                          ? 'text-blue-600 bg-white border-b-3 border-blue-600'
-                          : 'text-gray-600 hover:text-blue-500 hover:bg-blue-50'
-                        }`}
-                      onClick={() => setActiveTab('schedule')}
-                    >
-                      🗓️ Lịch trình
-                      {activeTab === 'schedule' && (
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-t-full"></div>
-                      )}
-                    </button>
-                    <button
-                      className={`px-8 py-4 font-semibold text-lg transition-all duration-300 relative ${activeTab === 'reviews'
-                          ? 'text-blue-600 bg-white border-b-3 border-blue-600'
-                          : 'text-gray-600 hover:text-blue-500 hover:bg-blue-50'
-                        }`}
-                      onClick={() => setActiveTab('reviews')}
-                    >
-                      ⭐ Đánh giá
-                      {activeTab === 'reviews' && (
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-t-full"></div>
-                      )}
-                    </button>
-                  </div>
+              {activeTab === 'overview' && (
+                <div className="mt-6">
+                  <Content />
+                  <Schedule />
+                  <Evaluate />
                 </div>
-
-                {/* Tab Content */}
-                <div className="p-8">
-                  {activeTab === 'overview' && (
-                    <div className="space-y-8 animate-fade-in">
-                      <Content />
-                    </div>
-                  )}
-                  {activeTab === 'schedule' && (
-                    <div className="animate-fade-in">
-                      <Schedule />
-                    </div>
-                  )}
-                  {activeTab === 'reviews' && (
-                    <div className="animate-fade-in">
-                      <Evaluate />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Right Sidebar - Booking Card */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-24">
-                <RightTourDetail
-                  onChooseDate={selectedDate ? handleChooseOtherDate : scrollToCalendar}
-                  selectedDate={selectedDate}
-                  tour={tours}
-                  slots={slots}
-                />
-              </div>
+              )}
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Custom CSS for animations */}
-      <style jsx>{`
-        .animate-fade-in {
-          animation: fadeIn 0.5s ease-in-out;
-        }
-        
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .border-b-3 {
-          border-bottom-width: 3px;
-        }
-      `}</style>
+          <div className="w-full lg:w-1/3">
+            <RightTourDetail
+              onChooseDate={selectedDate ? handleChooseOtherDate : scrollToCalendar}
+              selectedDate={selectedDate}
+              tour={tours}
+              slots={slots} 
+            />
+          </div>
+        </div>
+      </div >
     </>
   );
 };

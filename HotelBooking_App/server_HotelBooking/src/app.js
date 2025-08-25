@@ -8,6 +8,7 @@ const connectDB = require("./config/mongodb");
 const Vnpay = require("./router/vnpay/vnpayRouter");
 const RouterBookingTour = require('./router/TourRouter/BookingTour');
 const AdminRouter = require('./router/PeopleRouter/AdminRouter');
+const EmployeeRouter = require('./router/PeopleRouter/EmployeeRouter');
 const TourSchedule = require('./router/TourRouter/TourScheduleRouter');
 const TransportScheduleRouter = require('./router/TransportRouter/TransportScheduleModel');
 const TransportRouter = require('./router/TransportRouter/TransportRouter');
@@ -46,6 +47,8 @@ app.use('/api/', TransportRouter);
 app.use('/api/', TransportScheduleRouter);
 app.use('/api/', TourSchedule);
 app.use('/api/', AdminRouter);
+
+app.use('/api/employee', EmployeeRouter);
 
 app.use('/api/vnpay', Vnpay);
 app.use('/api/', RouterBookingTour);

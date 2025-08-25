@@ -1,13 +1,16 @@
 import React, { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+
+import { Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import TourDuocGiao from "./pages/TourDuocGiao";
 import Thongbao from "./pages/Thongbao";
 import Hoso from "./pages/Hoso";
-import ChamSoc from "./pages/Chamsoc";
 
-const App = () => {
+
+const MainApp = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -34,14 +37,26 @@ const App = () => {
         <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
         <main className="flex-1 p-4 overflow-y-auto">
           <Routes>
+
+            <Route path="/" element={<Navigate to="/tour" replace />} />
             <Route path="/tour" element={<TourDuocGiao />} />
-            <Route path="/chamsoc" element={<ChamSoc />} />
             <Route path="/thongbao" element={<Thongbao />} />
             <Route path="/hoso" element={<Hoso />} />
           </Routes>
         </main>
       </div>
     </div>
+  );
+};
+
+
+const App = () => {
+  return (
+    <AuthProvider>
+      <ProtectedRoute>
+        <MainApp />
+      </ProtectedRoute>
+    </AuthProvider>
   );
 };
 

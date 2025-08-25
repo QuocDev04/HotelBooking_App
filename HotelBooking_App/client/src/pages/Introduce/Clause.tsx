@@ -149,7 +149,7 @@ const Clause = () => {
               </div>
               
               <p className="mt-8">
-                Để biết thêm thông tin chi tiết hoặc có thắc mắc về chính sách hoàn tiền, vui lòng liên hệ với chúng tôi qua email <a href="mailto:elitebooking.tour@gmail.com" className="text-blue-600 hover:text-blue-800">elitebooking.tour@gmail.com</a> hoặc hotline <a href="tel:0922222016" className="text-blue-600 hover:text-blue-800">0922222016</a>.
+                Để biết thêm thông tin chi tiết hoặc có thắc mắc về chính sách hoàn tiền, vui lòng liên hệ với chúng tôi qua email <a href="mailto:support@travelbooking.com" className="text-blue-600 hover:text-blue-800">support@travelbooking.com</a> hoặc hotline <a href="tel:1900123456" className="text-blue-600 hover:text-blue-800">1900 123 456</a>.
               </p>
             </div>
           </div>

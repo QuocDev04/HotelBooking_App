@@ -12,12 +12,13 @@ import AdminRoute from "../components/AdminRouter"
 import AddTimeTour from "../pages/TimeTour/AddTimeTour"
 import ListTime from "../pages/TimeTour/ListTime"
 import EditTimeTour from "../pages/TimeTour/EditTimeTour"
+import SlotDetail from "../pages/TimeTour/SlotDetail"
 // import TourStats from "../pages/dashboad/TourStats" // Đã bỏ trang thống kê tổng quan
 import TourStatusList from "../pages/Tour/TourStatusList"
 import RefundManagement from "../pages/Tour/RefundManagement"
 import TourParticipants from "../pages/Tour/TourParticipants"
 import CustomerAccounts from "../pages/Account/CustomerAccounts"
-import EmployeeAccounts from "../pages/Account/EmployeeAccounts"
+import HdvAccounts from "../pages/Account/HdvAccounts"
 import EmployeeAssignment from "../pages/Account/EmployeeAssignment"
 import ListHotel from "../pages/Hotel/ListHotel"
 import AddHotel from "../pages/Hotel/AddHotel"
@@ -28,6 +29,7 @@ import RoomManagement from "../pages/Hotel/RoomManagement"
 import ListTour from "../pages/Tour/ListTour"
 import AddTour from "../pages/Tour/AddTour"
 import EditTour from "../pages/Tour/EditTour"
+import TourDetail from "../pages/Tour/TourDetail"
 import ListBooking from "../pages/Tour/ListBooking"
 import ListTransport from "../pages/Transport/ListTransport"
 import AddTransport from "../pages/Transport/AddTransport"
@@ -70,6 +72,7 @@ const Router = () => {
                      <Route path="/admin/list-tour" element={<ListTour />} />
                     <Route path="/admin/add-tour" element={<AddTour />} />
                     <Route path="/admin/edit-tour/:id" element={<EditTour />} />
+                    <Route path="/admin/tour-detail/:id" element={<TourDetail />} />
                     <Route path="/admin/list-booking" element={<ListBooking />} />
                     {/* <Route path="/admin/tour-stats" element={<TourStats />} /> */} {/* Đã bỏ trang thống kê tổng quan */}
                     <Route path="/admin/tour-status/:status" element={<TourStatusList />} />
@@ -97,9 +100,10 @@ const Router = () => {
                     <Route path="/admin/list-time" element={<ListTime />} />
                     <Route path="/admin/add-timetour" element={<AddTimeTour />} />
                     <Route path="/admin/edit-time-tour/:id" element={<EditTimeTour />} />
+                    <Route path="/admin/slot-detail/:id" element={<SlotDetail />} />
 
                     <Route path="/admin/customer-accounts" element={<CustomerAccounts />} />
-                    <Route path="/admin/employee-accounts" element={<EmployeeAccounts />} />
+                    <Route path="/admin/hdv-accounts" element={<HdvAccounts />} />
                     <Route path="/admin/employee-assignment" element={<EmployeeAssignment />} />
 
                     <Route path="/admin/hotels" element={<ListHotel />} />

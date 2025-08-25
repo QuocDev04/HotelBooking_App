@@ -48,7 +48,7 @@ const Use = () => {
           <li>Thanh toán bằng mã QR cùng số tiền hiển thị trên màn hình.</li>
           <li>
             Vé xuất sẽ được gửi về địa chỉ email của quý khách hàng và email
-            elitebooking.tour@gmail.com của website.
+            info@elitetravel.com của website.
           </li>
           <li>
             Nhân viên tư vấn sẽ kiểm tra lại vé đã được gửi đến quý khách hàng
@@ -70,7 +70,7 @@ const Use = () => {
           </li>
           <ul className="list-[circle] list-inside pl-6">
             <li>Gửi yêu cầu theo form “liên hệ” trên website</li>
-            <li>Gửi thông tin tới địa chỉ email: elitebooking.tour@gmail.com</li>
+            <li>Gửi thông tin tới địa chỉ email: info@elitetravel.com</li>
             <li>Gọi điện thoại tới số điện thoại: 0922 222 016</li>
           </ul>
           <li>Liên hệ với nhân viên phụ trách đơn hàng của quý khách.</li>
@@ -96,7 +96,7 @@ const Use = () => {
           </li>
           <li>
             Nếu có tranh chấp xảy ra, quý khách hàng liên hệ ngay số hotline:
-            0922222016 hoặc gửi email đến: elitebooking.tour@gmail.com. Chúng tôi sẽ
+            0922 222 016 hoặc gửi email đến: info@elitetravel.com. Chúng tôi sẽ
             liên hệ lại ngay và cập nhật nhanh để giải quyết các phát sinh.
           </li>
           <li>

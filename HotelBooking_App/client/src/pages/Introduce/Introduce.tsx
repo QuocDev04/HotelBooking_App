@@ -248,7 +248,7 @@ const Introduce = () => {
                   Địa chỉ: Số 25 - Ngõ 38 Phố Yên Lãng – Quận Đống Đa – Hà Nội
                 </p>
                 <p>Điện thoại: 0922222016</p>
-                <p>Email: elitebooking.tour@gmail.com</p>
+                <p>Email: info@elitetravel.com</p>
               </div>
             </div>
           </div>

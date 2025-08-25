@@ -259,7 +259,38 @@ const EditTour = () => {
                                         </Form.Item>
                                     </Col>
 
+                                </Row>
 
+                                <Row gutter={24}>
+                                    <Col span={12}>
+                                        <Form.Item
+                                            label="Thời gian khởi hành"
+                                            name="departure_time"
+                                            rules={[
+                                                {
+                                                    pattern: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
+                                                    message: "Định dạng thời gian không hợp lệ. VD: 06:00",
+                                                },
+                                            ]}
+                                        >
+                                            <Input placeholder="VD: 06:00" size="large" />
+                                        </Form.Item>
+                                    </Col>
+
+                                    <Col span={12}>
+                                        <Form.Item
+                                            label="Thời gian kết thúc"
+                                            name="return_time"
+                                            rules={[
+                                                {
+                                                    pattern: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
+                                                    message: "Định dạng thời gian không hợp lệ. VD: 18:00",
+                                                },
+                                            ]}
+                                        >
+                                            <Input placeholder="VD: 18:00" size="large" />
+                                        </Form.Item>
+                                    </Col>
                                 </Row>
 
                                 <Row gutter={24}>
