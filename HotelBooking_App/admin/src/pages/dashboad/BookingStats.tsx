@@ -1,4 +1,5 @@
-import { Card, Row, Col, Statistic, Progress, Typography } from 'antd';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Card, Row, Col, Statistic, Progress, Typography, Spin } from 'antd';
 import { useQuery } from '@tanstack/react-query';
 import { instanceAdmin } from '../../configs/axios';
 import {
@@ -11,46 +12,33 @@ import {
 
 const { Title } = Typography;
 
-interface BookingStats {
-  total: number;
-  pending: number;
-  completed: number;
-  cancelled: number;
-  pendingCancel: number;
-}
-
 const BookingStats = () => {
-  const { data: stats, isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['admin/bookings'],
     queryFn: () => instanceAdmin.get('admin/bookings'),
     refetchInterval: 10000, // Cập nhật mỗi 10 giây
-    staleTime: 0, // Luôn coi data là stale để cập nhật ngay
-    refetchOnWindowFocus: true // Refetch khi focus lại window
+    staleTime: 0,
+    refetchOnWindowFocus: true
   });
-  
-  const bookingStats: BookingStats = stats?.data || {
-    total: 0,
-    pending: 0,
-    completed: 0,
-    cancelled: 0,
-    pendingCancel: 0
-  };
 
-  const getCompletionRate = () => {
-    if (bookingStats.total === 0) return 0;
-    return Math.round((bookingStats.completed / bookingStats.total) * 100);
-  };
+  const bookings = data?.data?.bookings || [];
 
-  const getCancellationRate = () => {
-    if (bookingStats.total === 0) return 0;
-    return Math.round((bookingStats.cancelled / bookingStats.total) * 100);
-  };
+  // Tính số lượng
+  const total = bookings.length;
+  const pending = bookings.filter((b:any) => !b.isFullyPaid).length;
+  const completed = bookings.filter((b: any) => b.isFullyPaid).length;
+  const cancelled = bookings.filter((b: any) => b.cancel_status === 'cancelled').length;
+
+  const pendingCancel = bookings.filter((b: any) => b.cancel_status === 'pending').length;
+
+  const getCompletionRate = () => total ? Math.round((completed / total) * 100) : 0;
+  const getCancellationRate = () => total ? Math.round((cancelled / total) * 100) : 0;
 
   if (isLoading) {
     return (
       <Card style={{ marginBottom: 24, borderRadius: 16 }}>
         <div style={{ textAlign: 'center', padding: '20px' }}>
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <Spin size="large" />
         </div>
       </Card>
     );
@@ -61,86 +49,36 @@ const BookingStats = () => {
       style={{
         marginBottom: 24,
         borderRadius: 16,
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
         border: 'none',
-        background: 'rgba(255, 255, 255, 0.95)',
+        background: 'rgba(255,255,255,0.95)',
         backdropFilter: 'blur(10px)'
       }}
     >
-      <Title level={3} style={{ marginBottom: 24, color: '#1f2937' }}>
-        📊 Thống kê đặt chỗ
-      </Title>
+      <Title level={3} style={{ marginBottom: 24 }}>📊 Thống kê đặt chỗ</Title>
 
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} md={6}>
-          <Card
-            size="small"
-            style={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              borderRadius: 12
-            }}
-          >
-            <Statistic
-              title="Tổng đặt chỗ"
-              value={bookingStats.total}
-              prefix={<UserOutlined />}
-              valueStyle={{ color: 'white' }}
-            />
+          <Card size="small" style={{ borderRadius: 12, background: '#667eea', color: 'white' }}>
+            <Statistic title="Tổng đặt chỗ" value={total} prefix={<UserOutlined />} valueStyle={{ color: 'white' }} />
           </Card>
         </Col>
 
         <Col xs={24} sm={12} md={6}>
-          <Card
-            size="small"
-            style={{
-              background: 'linear-gradient(135deg, #faad14 0%, #ff7a45 100%)',
-              color: 'white',
-              borderRadius: 12
-            }}
-          >
-            <Statistic
-              title="Chờ thanh toán"
-              value={bookingStats.pending}
-              prefix={<ClockCircleOutlined />}
-              valueStyle={{ color: 'white' }}
-            />
+          <Card size="small" style={{ borderRadius: 12, background: '#faad14', color: 'white' }}>
+            <Statistic title="Chờ thanh toán" value={pending} prefix={<ClockCircleOutlined />} valueStyle={{ color: 'white' }} />
           </Card>
         </Col>
 
         <Col xs={24} sm={12} md={6}>
-          <Card
-            size="small"
-            style={{
-              background: 'linear-gradient(135deg, #52c41a 0%, #73d13d 100%)',
-              color: 'white',
-              borderRadius: 12
-            }}
-          >
-            <Statistic
-              title="Đã thanh toán"
-              value={bookingStats.completed}
-              prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: 'white' }}
-            />
+          <Card size="small" style={{ borderRadius: 12, background: '#52c41a', color: 'white' }}>
+            <Statistic title="Đã thanh toán" value={completed} prefix={<CheckCircleOutlined />} valueStyle={{ color: 'white' }} />
           </Card>
         </Col>
 
         <Col xs={24} sm={12} md={6}>
-          <Card
-            size="small"
-            style={{
-              background: 'linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%)',
-              color: 'white',
-              borderRadius: 12
-            }}
-          >
-            <Statistic
-              title="Đã hủy"
-              value={bookingStats.cancelled}
-              prefix={<CloseCircleOutlined />}
-              valueStyle={{ color: 'white' }}
-            />
+          <Card size="small" style={{ borderRadius: 12, background: '#ff4d4f', color: 'white' }}>
+            <Statistic title="Đã hủy" value={cancelled} prefix={<CloseCircleOutlined />} valueStyle={{ color: 'white' }} />
           </Card>
         </Col>
       </Row>
@@ -148,68 +86,35 @@ const BookingStats = () => {
       <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
         <Col xs={24} md={12}>
           <Card size="small" style={{ borderRadius: 12 }}>
-            <div style={{ marginBottom: 16 }}>
-              <Title level={5} style={{ margin: 0, color: '#52c41a' }}>
-                Tỷ lệ hoàn thành
-              </Title>
-            </div>
-            <Progress
-              percent={getCompletionRate()}
-              strokeColor={{
-                '0%': '#52c41a',
-                '100%': '#73d13d',
-              }}
-              format={(percent) => `${percent}%`}
-            />
+            <Title level={5} style={{ margin: 0, color: '#52c41a' }}>Tỷ lệ hoàn thành</Title>
+            <Progress percent={getCompletionRate()} strokeColor={{ '0%': '#52c41a', '100%': '#73d13d' }} format={p => `${p}%`} />
             <div style={{ marginTop: 8, fontSize: '12px', color: '#666' }}>
-              {bookingStats.completed} / {bookingStats.total} đặt chỗ đã hoàn thành
+              {completed} / {total} đặt chỗ đã hoàn thành
             </div>
           </Card>
         </Col>
 
         <Col xs={24} md={12}>
           <Card size="small" style={{ borderRadius: 12 }}>
-            <div style={{ marginBottom: 16 }}>
-              <Title level={5} style={{ margin: 0, color: '#ff4d4f' }}>
-                Tỷ lệ hủy
-              </Title>
-            </div>
-            <Progress
-              percent={getCancellationRate()}
-              strokeColor={{
-                '0%': '#ff4d4f',
-                '100%': '#ff7875',
-              }}
-              format={(percent) => `${percent}%`}
-            />
+            <Title level={5} style={{ margin: 0, color: '#ff4d4f' }}>Tỷ lệ hủy</Title>
+            <Progress percent={getCancellationRate()} strokeColor={{ '0%': '#ff4d4f', '100%': '#ff7875' }} format={p => `${p}%`} />
             <div style={{ marginTop: 8, fontSize: '12px', color: '#666' }}>
-              {bookingStats.cancelled} / {bookingStats.total} đặt chỗ đã hủy
+              {cancelled} / {total} đặt chỗ đã hủy
             </div>
           </Card>
         </Col>
       </Row>
 
-      {bookingStats.pendingCancel > 0 && (
+      {pendingCancel > 0 && (
         <Row style={{ marginTop: 16 }}>
           <Col span={24}>
-            <Card
-              size="small"
-              style={{
-                background: 'linear-gradient(135deg, #faad14 0%, #ff7a45 100%)',
-                color: 'white',
-                borderRadius: 12
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Card size="small" style={{ borderRadius: 12, background: '#faad14', color: 'white' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <Title level={5} style={{ margin: 0, color: 'white' }}>
-                    ⚠️ Cần xử lý
-                  </Title>
-                  <div style={{ fontSize: '14px', marginTop: 4 }}>
-                    {bookingStats.pendingCancel} đặt chỗ đang chờ xác nhận hủy
-                  </div>
+                  <Title level={5} style={{ margin: 0, color: 'white' }}>⚠️ Cần xử lý</Title>
+                  <div style={{ fontSize: 14, marginTop: 4 }}>{pendingCancel} đặt chỗ đang chờ xác nhận hủy</div>
                 </div>
-                <ExclamationCircleOutlined style={{ fontSize: '24px', color: 'white' }} />
+                <ExclamationCircleOutlined style={{ fontSize: 24, color: 'white' }} />
               </div>
             </Card>
           </Col>
@@ -219,4 +124,4 @@ const BookingStats = () => {
   );
 };
 
-export default BookingStats; 
+export default BookingStats;

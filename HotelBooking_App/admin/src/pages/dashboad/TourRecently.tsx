@@ -12,8 +12,6 @@ const TourRecently = () => {
         queryKey: ["checkOutBookingTour"],
         queryFn: () => instance.get("/checkOutBookingTour"),
     });
-console.log('ganday',data?.data);
-
     const bookingColumns: ColumnsType<any> = [
         {
             title: 'Mã đặt tour',
