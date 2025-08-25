@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DollarOutlined } from "@ant-design/icons";
-import { Card, Col, Space, Typography } from "antd";
+import { Card, Col,  Space, Typography } from "antd";
 import {
     CartesianGrid,
     Legend,
@@ -11,52 +11,43 @@ import {
     XAxis,
     YAxis,
 } from "recharts";
-import instance from "../../configs/axios";
 import { useQuery } from "@tanstack/react-query";
+import instance from "../../configs/axios";
 import dayjs from "dayjs";
 
-const Revenue = () => {
+const RevenueMonthly = () => {
     const { Text } = Typography;
 
-    const { data: revenueChartData } = useQuery({
-
-        queryKey: ["accurateRevenue"],
-        queryFn: () => instance.get("/admin/bookings/revenue?groupBy=month"),
+    const { data } = useQuery({
+        queryKey: ["checkOutBookingTour"],
+        queryFn: () => instance.get("/checkOutBookingTour"),
     });
 
-    const revenueData = revenueChartData?.data?.data || {};
-    const rawData = revenueData.revenueByPeriod || [];
+    const bookings: any[] = data?.data?.data || [];
 
-    const getAllMonths = () => {
-        return Array.from({ length: 12 }, (_, i) => `Tháng ${i + 1}`);
-    };
+    // Tạo danh sách 12 tháng
+    const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
-    const groupedData = () => {
-        const mapMonthToAmount: Record<string, number> = {};
+    // Nhóm dữ liệu theo tháng
+    const chartData = months.map(month => {
+        const monthBookings = bookings.filter(b =>
+            b.slotId?.dateTour && dayjs(b.slotId.dateTour).month() + 1 === month
+        );
+        const totalRevenue = monthBookings.reduce((sum, b) => sum + (b.totalPriceTour || 0), 0);
+        return {
+            month: `Tháng ${month}`,
+            revenue: totalRevenue,
+            bookings: monthBookings.length,
+        };
+    });
 
-        rawData.forEach((item: any) => {
+    // Tổng doanh thu và tổng tour
+    const totalRevenue = chartData.reduce((sum, d) => sum + d.revenue, 0);
+    const totalBookings = chartData.reduce((sum, d) => sum + d.bookings, 0);
 
-            const monthNumber = item._id.month;
-            const monthKey = `Tháng ${monthNumber}`;
-            mapMonthToAmount[monthKey] = (mapMonthToAmount[monthKey] || 0) + (item.revenue || 0);
-        });
-
-        return getAllMonths().map((month) => ({
-            month,
-            "Số Tiền": mapMonthToAmount[month] || 0,
-        }));
-    };
-
-    const chartData = groupedData();
-
-
-    const totalRevenue = revenueData.actualRevenue || 0;
-    const grossRevenue = revenueData.grossRevenue || 0;
-    const totalRefund = revenueData.totalRefund || 0;
     const customTicks = [10_000_000, 20_000_000, 30_000_000, 40_000_000, 50_000_000];
-    return (
-        <>
 
+    return (
             <Col xs={24} lg={12}>
                 <Card
                     style={{
@@ -67,7 +58,7 @@ const Revenue = () => {
                         backdropFilter: "blur(10px)",
                     }}
                     title={
-                        <Space >
+                        <Space direction="vertical" size={4}>
                             <Space>
                                 <div
                                     style={{
@@ -83,83 +74,51 @@ const Revenue = () => {
                                     <DollarOutlined style={{ fontSize: 20, color: "white" }} />
                                 </div>
                                 <Text strong style={{ fontSize: 18 }}>
-                                    📈 Doanh thu theo tháng
+                                    📈 Doanh thu & số tour theo tháng
                                 </Text>
                             </Space>
-
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <Text style={{ fontSize: 16, color: "#333", fontWeight: 'bold' }}>
-                                    Doanh thu thực tế: {(totalRevenue / 1_000_000).toFixed(1)}M VNĐ
-                                </Text>
-                                <Text style={{ fontSize: 14, color: "#666" }}>
-                                    Doanh thu gộp: {(grossRevenue / 1_000_000).toFixed(1)}M VNĐ
-                                </Text>
-                                <Text style={{ fontSize: 14, color: "#ff4d4f" }}>
-                                    Tiền hoàn lại: -{(totalRefund / 1_000_000).toFixed(1)}M VNĐ
-                                </Text>
-                            </div>
+                            <Text>Tổng số tour: {totalBookings}</Text>
+                            <Text>Tổng doanh thu: {(totalRevenue / 1_000_000).toFixed(1)}M VNĐ</Text>
                         </Space>
                     }
                 >
                     <ResponsiveContainer width="100%" height={320}>
                         <LineChart data={chartData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                            <XAxis
-                                dataKey="month"
+                            <XAxis dataKey="month" tick={{ fill: "#666", fontSize: 12 }} axisLine={{ stroke: "#d9d9d9" }} />
+                            <YAxis
+                                yAxisId="left"
                                 tick={{ fill: "#666", fontSize: 12 }}
                                 axisLine={{ stroke: "#d9d9d9" }}
+                                label={{ value: "Số tour", angle: -90, position: "insideLeft", style: { textAnchor: "middle" } }}
                             />
                             <YAxis
+                                yAxisId="right"
                                 ticks={customTicks}
                                 tickFormatter={(value) => `${(value / 1_000_000).toFixed(0)}M`}
                                 tick={{ fill: "#666", fontSize: 12 }}
                                 axisLine={{ stroke: "#d9d9d9" }}
-                                domain={[0, 50_000_000]} 
+                                domain={[0, 50_000_000]}
+                                label={{ value: "Doanh thu (VNĐ)", angle: 90, position: "insideRight", style: { textAnchor: "middle" } }}
                             />
                             <Tooltip
-                                formatter={(value: any) => [
-                                    `${(value / 1_000_000).toFixed(1)}M VNĐ`,
-                                    "Doanh thu",
+                                formatter={(value: any, name: string) => [
+                                    name === "bookings"
+                                        ? `${value} tour`
+                                        : `${(value / 1_000_000).toFixed(1)}M VNĐ`,
+                                    name === "bookings" ? "Số tour" : "Doanh thu",
                                 ]}
-                                labelFormatter={(label) => label}
-                                contentStyle={{
-                                    borderRadius: 8,
-                                    border: "none",
-                                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-                                    background: "rgba(255, 255, 255, 0.95)",
-                                    backdropFilter: "blur(10px)",
-                                }}
                             />
                             <Legend />
-                            <Line
-                                type="monotone"
-                                dataKey="Số Tiền"
-                                stroke="url(#gradient)"
-                                strokeWidth={4}
-                                dot={{
-                                    fill: "#f093fb",
-                                    strokeWidth: 3,
-                                    r: 6,
-                                    stroke: "#fff",
-                                }}
-                                activeDot={{
-                                    r: 8,
-                                    stroke: "#fff",
-                                    strokeWidth: 3,
-                                }}
-                            />
-                            <defs>
-                                <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#f093fb" stopOpacity={0.8} />
-                                    <stop offset="95%" stopColor="#f5576c" stopOpacity={0.8} />
-                                </linearGradient>
-                            </defs>
+                            <Line yAxisId="left" type="monotone" dataKey="bookings" stroke="#43e97b" strokeWidth={3} dot={{ r: 5 }} />
+                            <Line yAxisId="right" type="monotone" dataKey="revenue" stroke="#f093fb" strokeWidth={3} dot={{ r: 5 }} />
                         </LineChart>
                     </ResponsiveContainer>
                 </Card>
             </Col>
-        </>
+
+
     );
 };
 
-export default Revenue;
+export default RevenueMonthly;

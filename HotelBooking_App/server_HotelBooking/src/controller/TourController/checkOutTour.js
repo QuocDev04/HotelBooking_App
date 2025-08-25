@@ -32,39 +32,35 @@ const checkOutBookingTour = async (req, res) => {
     }
 };
 
-const getCheckOutUserTour = async (req, res) => {
+const getRecentBookingTours = async (req, res) => {
     try {
-        const getCheckOutUserTour = await CheckOutTour.find()
+        const recentBookings = await BookingTour.find()
+            .populate("userId")
             .populate({
-                path: "BookingTourId",
-                populate: [
-                    {
-                        path: "userId", 
-                        model: "User",
-                    },
-                    {
-                        path: "tourId",
-                        model: "Tour",
-                    },
-                    {
-                        path: "itemRoom.roomId", 
-                        model: "Room",
-                    },
-                ],
-            });
+                path: "slotId",
+                populate: {
+                    path: "tour",
+                    model: "Tour"
+                }
+            })
+            .populate("cancelledBy")
+            .sort({ createdAt: -1 }) 
+            .limit(10)               
+            .lean();
 
         return res.status(200).json({
             success: true,
-            message: "Lấy thông tin booking thành công",
-            getCheckOutUserTour,
+            message: "Lấy booking tour gần đây nhất của tất cả user thành công",
+            data: recentBookings
         });
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: error.message,
+            message: error.message
         });
     }
 };
+
   
 const getAllBookingTourByUserId = async (req, res) => {
     try {
@@ -100,5 +96,5 @@ const getAllBookingTourByUserId = async (req, res) => {
 
 
 
-module.exports = { checkOutBookingTour, getCheckOutUserTour, getAllBookingTourByUserId };
+module.exports = { checkOutBookingTour, getRecentBookingTours, getAllBookingTourByUserId };
   
