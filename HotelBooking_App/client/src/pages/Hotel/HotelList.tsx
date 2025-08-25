@@ -139,7 +139,6 @@ const HotelList: React.FC = () => {
       {/* Hero Section */}
       <div style={{
         background: 'linear-gradient(135deg, rgba(161, 196, 253, 0.9) 0%, rgba(194, 233, 251, 0.9) 50%, rgba(251, 194, 235, 0.9) 100%)',
-        padding: '60px 24px',
         textAlign: 'center',
         color: 'white'
       }}>

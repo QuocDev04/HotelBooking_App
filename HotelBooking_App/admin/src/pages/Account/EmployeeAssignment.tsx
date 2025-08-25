@@ -14,17 +14,20 @@ interface Tour {
   finalPrice: number;
   tourType: string;
   status: boolean;
-  assignedEmployee?: Admin;
+  assignedEmployee?: Employee;
 }
 
-interface Admin {
+interface Employee {
   _id: string;
-  clerkId: string;
   email: string;
-  firstName?: string;
-  lastName?: string;
-  full_name?: string;
+  firstName: string;
+  lastName: string;
+  full_name: string;
   phone_number?: string;
+  employee_id: string;
+  position: 'tour_guide' | 'customer_service' | 'manager' | 'other';
+  department: 'tour' | 'hotel' | 'transport' | 'general';
+  status: 'active' | 'inactive' | 'suspended';
 }
 
 interface DateSlot {
@@ -39,7 +42,7 @@ interface DateSlot {
 
 const EmployeeAssignment: React.FC = () => {
   const [tours, setTours] = useState<Tour[]>([]);
-  const [admins, setAdmins] = useState<Admin[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [dateSlots, setDateSlots] = useState<DateSlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -66,8 +69,8 @@ const EmployeeAssignment: React.FC = () => {
         },
       });
       
-      // Fetch admins
-      const adminsResponse = await fetch('http://localhost:8080/api/admins', {
+      // Fetch employees (HDV)
+      const employeesResponse = await fetch('http://localhost:8080/api/employee/admin/list', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -82,19 +85,27 @@ const EmployeeAssignment: React.FC = () => {
         },
       });
 
-      if (!toursResponse.ok || !adminsResponse.ok) {
+      if (!toursResponse.ok || !employeesResponse.ok) {
         throw new Error('Failed to fetch data');
       }
 
       const toursData = await toursResponse.json();
-      const adminsData = await adminsResponse.json();
+      const employeesData = await employeesResponse.json();
       
+      console.log("Tours data:", toursData);
       setTours(toursData.tours || toursData.tour || []);
-      setAdmins(adminsData.admins || []);
+      // Filter only active employees for assignment
+      const activeEmployees = (employeesData.employees || []).filter((emp: Employee) => emp.status === 'active');
+      setEmployees(activeEmployees);
       
       if (dateSlotsResponse.ok) {
         const dateSlotsData = await dateSlotsResponse.json();
+        console.log("DateSlots data:", dateSlotsData);
         setDateSlots(dateSlotsData.dateSlots || dateSlotsData.data || []);
+      } else {
+        console.warn("DateSlots API failed:", dateSlotsResponse.status);
+        // Tạm thời set empty array để tránh lỗi
+        setDateSlots([]);
       }
       
     } catch (err) {
@@ -104,17 +115,17 @@ const EmployeeAssignment: React.FC = () => {
     }
   };
 
-  const handleAssignment = (tourId: string, adminId: string) => {
+  const handleAssignment = (tourId: string, employeeId: string) => {
     setAssignments(prev => ({
       ...prev,
-      [tourId]: adminId
+      [tourId]: employeeId
     }));
   };
 
   const saveAssignment = async (tourId: string) => {
     try {
-      const adminId = assignments[tourId];
-      if (!adminId) return;
+      const employeeId = assignments[tourId];
+      if (!employeeId) return;
       
       const token = await getToken();
       
@@ -125,7 +136,7 @@ const EmployeeAssignment: React.FC = () => {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ employeeId: adminId })
+        body: JSON.stringify({ employeeId })
       });
       
       if (!response.ok) {
@@ -137,7 +148,7 @@ const EmployeeAssignment: React.FC = () => {
       // Cập nhật local state với dữ liệu từ server
       setTours(prev => prev.map(tour => 
         tour._id === tourId 
-          ? { ...tour, assignedEmployee: admins.find(admin => admin._id === adminId) }
+          ? { ...tour, assignedEmployee: employees.find(emp => emp._id === employeeId) }
           : tour
       ));
       
@@ -156,20 +167,50 @@ const EmployeeAssignment: React.FC = () => {
   };
 
   const getUpcomingToursForTour = (tourId: string) => {
-    return dateSlots.filter(slot => 
-      slot.tour === tourId && 
-      slot.status === 'upcoming'
-    ).length;
+    return dateSlots.filter(slot => {
+      const slotTourId = typeof slot.tour === 'string' ? slot.tour : slot.tour?._id;
+      return slotTourId === tourId && slot.status === 'upcoming';
+    }).length;
   };
 
   const getOngoingToursForTour = (tourId: string) => {
-    return dateSlots.filter(slot => 
-      slot.tour === tourId && 
-      slot.status === 'ongoing'
-    ).length;
+    return dateSlots.filter(slot => {
+      const slotTourId = typeof slot.tour === 'string' ? slot.tour : slot.tour?._id;
+      return slotTourId === tourId && slot.status === 'ongoing';
+    }).length;
+  };
+
+  // Kiểm tra tour có date slots trong 7 ngày tới không
+  const hasUpcomingDatesIn7Days = (tourId: string) => {
+    const now = new Date();
+    const sevenDaysLater = new Date();
+    sevenDaysLater.setDate(now.getDate() + 7);
+    
+    console.log(`Checking tour ${tourId} for dates between ${now.toISOString()} and ${sevenDaysLater.toISOString()}`);
+    
+    const relevantSlots = dateSlots.filter(slot => {
+      // Kiểm tra tour ID (có thể là string hoặc object)
+      const slotTourId = typeof slot.tour === 'string' ? slot.tour : slot.tour?._id;
+      if (slotTourId !== tourId) return false;
+      
+      const slotDate = new Date(slot.dateTour);
+      const isInRange = slotDate >= now && slotDate <= sevenDaysLater;
+      const isUpcoming = slot.status === 'upcoming';
+      
+      console.log(`  Slot ${slot._id}: date=${slotDate.toISOString()}, status=${slot.status}, inRange=${isInRange}, isUpcoming=${isUpcoming}`);
+      
+      return isInRange && isUpcoming;
+    });
+    
+    console.log(`  Found ${relevantSlots.length} relevant slots for tour ${tourId}`);
+    return relevantSlots.length > 0;
   };
 
   const filteredTours = tours.filter(tour => {
+    // Chỉ hiển thị tour có lịch trình trong 7 ngày tới
+    const hasUpcomingDates = hasUpcomingDatesIn7Days(tour._id);
+    if (!hasUpcomingDates) return false;
+
     const matchesSearch = tour.nameTour.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          tour.departure_location.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = selectedTourType === 'all' || tour.tourType === selectedTourType;
@@ -207,8 +248,8 @@ const EmployeeAssignment: React.FC = () => {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Phân công Nhân viên cho Tour</h1>
-        <p className="text-gray-600">Quản lý và phân công nhân viên phụ trách các tour du lịch</p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Phân công HDV cho Tour</h1>
+        <p className="text-gray-600">Quản lý và phân công hướng dẫn viên cho các tour diễn ra trong 7 ngày tới</p>
       </div>
 
       {/* Filters */}
@@ -253,24 +294,27 @@ const EmployeeAssignment: React.FC = () => {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-blue-800">Tổng số tour</h3>
-          <p className="text-2xl font-bold text-blue-600">{tours.length}</p>
+          <h3 className="text-lg font-semibold text-blue-800">Tour 7 ngày tới</h3>
+          <p className="text-2xl font-bold text-blue-600">{filteredTours.length}</p>
+          <p className="text-xs text-blue-600 mt-1">Cần phân công HDV</p>
         </div>
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-green-800">Tour đã phân công</h3>
+          <h3 className="text-lg font-semibold text-green-800">Đã phân công</h3>
           <p className="text-2xl font-bold text-green-600">
-            {tours.filter(tour => tour.assignedEmployee).length}
+            {filteredTours.filter(tour => tour.assignedEmployee).length}
           </p>
+          <p className="text-xs text-green-600 mt-1">Trong 7 ngày tới</p>
         </div>
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-yellow-800">Tour chưa phân công</h3>
+          <h3 className="text-lg font-semibold text-yellow-800">Chưa phân công</h3>
           <p className="text-2xl font-bold text-yellow-600">
-            {tours.filter(tour => !tour.assignedEmployee).length}
+            {filteredTours.filter(tour => !tour.assignedEmployee).length}
           </p>
+          <p className="text-xs text-yellow-600 mt-1">Cần HDV</p>
         </div>
         <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-purple-800">Nhân viên có sẵn</h3>
-          <p className="text-2xl font-bold text-purple-600">{admins.length}</p>
+          <h3 className="text-lg font-semibold text-purple-800">HDV có sẵn</h3>
+          <p className="text-2xl font-bold text-purple-600">{employees.length}</p>
         </div>
       </div>
 
@@ -287,10 +331,10 @@ const EmployeeAssignment: React.FC = () => {
                   Loại & Giá
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Lịch trình
+                  Thời gian diễn ra
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Nhân viên phụ trách
+                  HDV phụ trách
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Hành động
@@ -326,16 +370,49 @@ const EmployeeAssignment: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      <div className="flex items-center space-x-4">
-                        <div className="text-center">
-                          <div className="text-blue-600 font-semibold">{getUpcomingToursForTour(tour._id)}</div>
-                          <div className="text-xs text-gray-500">Sắp diễn ra</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-green-600 font-semibold">{getOngoingToursForTour(tour._id)}</div>
-                          <div className="text-xs text-gray-500">Đang diễn ra</div>
-                        </div>
-                      </div>
+                      {/* Hiển thị thông tin thời gian tour gần nhất trong 7 ngày tới */}
+                      {(() => {
+                        const now = new Date();
+                        const sevenDaysLater = new Date();
+                        sevenDaysLater.setDate(now.getDate() + 7);
+                        
+                        const upcomingSlot = dateSlots
+                          .filter(slot => {
+                            const slotTourId = typeof slot.tour === 'string' ? slot.tour : slot.tour?._id;
+                            if (slotTourId !== tour._id) return false;
+                            const slotDate = new Date(slot.dateTour);
+                            return slotDate >= now && slotDate <= sevenDaysLater && slot.status === 'upcoming';
+                          })
+                          .sort((a, b) => new Date(a.dateTour).getTime() - new Date(b.dateTour).getTime())[0];
+                        
+                        if (upcomingSlot) {
+                          const departureTime = tour.departure_time || "06:00";
+                          const returnTime = tour.return_time || "18:00";
+                          const tourDate = new Date(upcomingSlot.dateTour);
+                          
+                          return (
+                            <div className="space-y-1">
+                              <div className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
+                                🚀 Bắt đầu: {tourDate.toLocaleDateString('vi-VN')} - {departureTime}
+                              </div>
+                              <div className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
+                                🏁 Kết thúc: {tour.duration === "1 ngày" ? 
+                                  tourDate.toLocaleDateString('vi-VN') : 
+                                  "Tính theo duration"} - {returnTime}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                ⏱️ Thời lượng: {tour.duration}
+                              </div>
+                            </div>
+                          );
+                        } else {
+                          return (
+                            <div className="text-xs text-gray-500 italic">
+                              Không có lịch trình trong 7 ngày tới
+                            </div>
+                          );
+                        }
+                      })()}
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -368,10 +445,10 @@ const EmployeeAssignment: React.FC = () => {
                         onChange={(e) => handleAssignment(tour._id, e.target.value)}
                         className="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
-                        <option value="">Chọn nhân viên</option>
-                        {admins.map(admin => (
-                          <option key={admin._id} value={admin._id}>
-                            {admin.full_name || `${admin.firstName || ''} ${admin.lastName || ''}`.trim() || admin.email}
+                        <option value="">Chọn HDV</option>
+                        {employees.map(employee => (
+                          <option key={employee._id} value={employee._id}>
+                            {employee.full_name} - {employee.position === 'tour_guide' ? 'HDV' : employee.position} ({employee.employee_id})
                           </option>
                         ))}
                       </select>
@@ -396,9 +473,9 @@ const EmployeeAssignment: React.FC = () => {
             <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
             </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">Không tìm thấy tour</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">Không có tour trong 7 ngày tới</h3>
             <p className="mt-1 text-sm text-gray-500">
-              {searchTerm ? 'Không có tour nào phù hợp với từ khóa tìm kiếm.' : 'Chưa có tour nào trong hệ thống.'}
+              {searchTerm ? 'Không có tour nào phù hợp với từ khóa tìm kiếm trong 7 ngày tới.' : 'Không có tour nào diễn ra trong 7 ngày tới.'}
             </p>
           </div>
         )}
@@ -415,9 +492,10 @@ const EmployeeAssignment: React.FC = () => {
           <div className="ml-3">
             <h3 className="text-sm font-medium text-blue-800">Hướng dẫn phân công</h3>
             <div className="mt-2 text-sm text-blue-700">
-              <p>• Chọn nhân viên từ dropdown và nhấn "Lưu" để phân công</p>
-              <p>• Mỗi tour có thể được phân công cho một nhân viên</p>
-              <p>• Nhân viên được phân công sẽ chịu trách nhiệm quản lý tour đó</p>
+              <p>• Chọn HDV từ dropdown và nhấn "Lưu" để phân công</p>
+              <p>• Mỗi tour có thể được phân công cho một HDV</p>
+              <p>• HDV được phân công sẽ chịu trách nhiệm hướng dẫn tour đó</p>
+              <p>• Chỉ HDV có trạng thái "Hoạt động" mới xuất hiện trong danh sách</p>
               <p>• Có thể thay đổi phân công bất cứ lúc nào</p>
             </div>
           </div>

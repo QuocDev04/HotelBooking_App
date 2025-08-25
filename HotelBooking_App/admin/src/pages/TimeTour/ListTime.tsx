@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import instance from "../../configs/axios";
 import dayjs from "dayjs";
-import { EditOutlined, DeleteOutlined, FilterOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined, FilterOutlined, EyeOutlined } from "@ant-design/icons";
 
 const { RangePicker } = DatePicker;
 const { Text } = Typography;
@@ -89,11 +89,28 @@ const ListTime = () => {
         {
             title: "Điểm đến",
             key: "destination",
-            render: (_: any, record: any) => (
-                <span>
-                    {record.tour?.destination?.locationName || "N/A"} - {record.tour?.destination?.country || "N/A"}
-                </span>
-            ),
+            render: (_: any, record: any) => {
+                console.log("Record data:", record);
+                console.log("Tour data:", record.tour);
+                console.log("Destination data:", record.tour?.destination);
+                
+                // Kiểm tra xem destination có được populate không
+                const destination = record.tour?.destination;
+                
+                if (destination && typeof destination === 'object') {
+                    // Destination được populate đầy đủ
+                    return (
+                        <span>
+                            {destination.locationName || "N/A"} - {destination.country || "N/A"}
+                        </span>
+                    );
+                } else if (destination && typeof destination === 'string') {
+                    // Destination chỉ là ObjectId string
+                    return <span>ID: {destination}</span>;
+                } else {
+                    return <span>N/A - N/A</span>;
+                }
+            },
         },
         {
             title: "Ngày diễn ra",
@@ -103,7 +120,7 @@ const ListTime = () => {
             render: (date: string) => dayjs(date).format("YYYY-MM-DD"),
         },
         {
-            title: "Trạng thái",
+            title: "Trạng thái Slot",
             dataIndex: "status",
             key: "status",
             render: (status: string) => {
@@ -132,6 +149,56 @@ const ListTime = () => {
             },
         },
         {
+            title: "Trạng thái HDV",
+            key: "tourStatus",
+            render: (_: any, record: any) => {
+                const tourStatus = record.tour?.tourStatus || 'preparing';
+                const statusNote = record.tour?.statusNote;
+                const updatedBy = record.tour?.statusUpdatedBy;
+                const updatedAt = record.tour?.statusUpdatedAt;
+                let color = "";
+                let text = "";
+                
+                switch (tourStatus) {
+                    case "preparing":
+                        color = "blue";
+                        text = "Chuẩn bị diễn ra";
+                        break;
+                    case "ongoing":
+                        color = "orange";
+                        text = "Đang diễn ra";
+                        break;
+                    case "completed":
+                        color = "green";
+                        text = "Hoàn thành";
+                        break;
+                    case "postponed":
+                        color = "red";
+                        text = "Hoãn tour";
+                        break;
+                    default:
+                        color = "default";
+                        text = "Chưa xác định";
+                }
+                
+                return (
+                    <div className="space-y-1">
+                        <Tag color={color}>{text}</Tag>
+                        {statusNote && (
+                            <div className="text-xs text-gray-500" title={statusNote}>
+                                📝 {statusNote.length > 30 ? statusNote.substring(0, 30) + '...' : statusNote}
+                            </div>
+                        )}
+                        {updatedAt && (
+                            <div className="text-xs text-gray-400">
+                                {updatedBy} • {dayjs(updatedAt).format('DD/MM/YYYY HH:mm')}
+                            </div>
+                        )}
+                    </div>
+                );
+            },
+        },
+        {
             title: "Số chỗ còn lại",
             dataIndex: "availableSeats",
             key: "availableSeats",
@@ -143,10 +210,19 @@ const ListTime = () => {
             render: (_: any, record: any) => (
                 <div className="flex gap-2">
                     <Button
+                        icon={<EyeOutlined />}
+                        onClick={() => navigate(`/admin/slot-detail/${record._id}`)}
+                        size="small"
+                        title="Xem chi tiết"
+                    >
+                        Chi tiết
+                    </Button>
+                    <Button
                         icon={<EditOutlined />}
                         onClick={() => navigate(`/admin/edit-time-tour/${record._id}`)}
                         type="primary"
                         size="small"
+                        title="Chỉnh sửa"
                     >
                         Sửa
                     </Button>
@@ -162,6 +238,7 @@ const ListTime = () => {
                             icon={<DeleteOutlined />} 
                             danger 
                             size="small"
+                            title="Xóa"
                         >
                             Xóa
                         </Button>

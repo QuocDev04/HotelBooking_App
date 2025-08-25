@@ -15,7 +15,8 @@ const {
     getRefundList,
     updateRefundStatus,
     getRefundStats,
-    submitRefundRequest
+    submitRefundRequest,
+    getBookingsBySlotId
 } = require('./../../controller/TourController/TourBookingController.js');
 const { uploadPaymentImage, uploadRefundImage } = require('../../Middleware/uploadMiddleware');
 const RouterBookingTour = express.Router();
@@ -32,6 +33,8 @@ RouterBookingTour.post('/refund/request', submitRefundRequest)
 // Admin routes
 RouterBookingTour.get('/admin/bookings', getAllBookingsForAdmin)
 RouterBookingTour.get('/admin/bookings/stats', getBookingStats)
+
+RouterBookingTour.get('/booking/tour/date/:slotId', getBookingsBySlotId)
 
 RouterBookingTour.get('/admin/bookings/revenue', getAccurateRevenue)
 RouterBookingTour.put('/admin/bookings/cancel/:id', adminConfirmCancelBooking)

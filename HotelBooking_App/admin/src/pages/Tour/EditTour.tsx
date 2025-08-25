@@ -151,17 +151,24 @@ const EditTour = () => {
     const onFinish: FormProps<any>["onFinish"] = (values) => {
         const imageUrls = fileList
             .filter((file) => file.status === "done")
-            .map((file) => file.response?.secure_url);
+            .map((file) => {
+                // Nếu file đã có URL sẵn (ảnh cũ), giữ nguyên
+                if (file.url) return file.url;
+                // Nếu là ảnh mới upload, lấy từ response
+                return file.response?.secure_url;
+            });
 
         const newValues = {
             ...values,
             imageTour: imageUrls,
             itemTransport: values.itemTransport.map((id: any) => ({ TransportId: id })),
+            descriptionTour: value, // đảm bảo mô tả cũng được cập nhật
         };
 
         console.log("Data being sent:", newValues);
         mutate(newValues);
     };
+
 
 
 
@@ -259,7 +266,38 @@ const EditTour = () => {
                                         </Form.Item>
                                     </Col>
 
+                                </Row>
 
+                                <Row gutter={24}>
+                                    <Col span={12}>
+                                        <Form.Item
+                                            label="Thời gian khởi hành"
+                                            name="departure_time"
+                                            rules={[
+                                                {
+                                                    pattern: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
+                                                    message: "Định dạng thời gian không hợp lệ. VD: 06:00",
+                                                },
+                                            ]}
+                                        >
+                                            <Input placeholder="VD: 06:00" size="large" />
+                                        </Form.Item>
+                                    </Col>
+
+                                    <Col span={12}>
+                                        <Form.Item
+                                            label="Thời gian kết thúc"
+                                            name="return_time"
+                                            rules={[
+                                                {
+                                                    pattern: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
+                                                    message: "Định dạng thời gian không hợp lệ. VD: 18:00",
+                                                },
+                                            ]}
+                                        >
+                                            <Input placeholder="VD: 18:00" size="large" />
+                                        </Form.Item>
+                                    </Col>
                                 </Row>
 
                                 <Row gutter={24}>
@@ -471,39 +509,6 @@ const EditTour = () => {
                                             />
                                         </Form.Item>
                                     </Col>
-                                    {/* <Col span={6}>
-                    <Form.Item
-                      required={false}
-                      label={requiredLabel("Ngày Diễn Ra Tour")}
-                      name="dateTour"
-                    >
-                      <DatePicker
-                        showTime={{ format: "HH:mm" }}
-                        format="YYYY-MM-DD HH:mm"
-                        size="large"
-                        style={{ width: "100%" }}
-                        placeholder="Chọn ngày giờ diễn ra"
-                        disabledDate={(current) => current && current < dayjs().startOf("day")}
-                        disabledTime={(current) => {
-                          const now = dayjs();
-                          if (current && current.isSame(now, "day")) {
-                            const hour = now.hour();
-                            const minute = now.minute();
-
-                            return {
-                              disabledHours: () =>
-                                Array.from({ length: hour }, (_, i) => i),
-                              disabledMinutes: (selectedHour) =>
-                                selectedHour === hour
-                                  ? Array.from({ length: minute }, (_, i) => i)
-                                  : [],
-                            };
-                          }
-                          return {};
-                        }}
-                      />
-                    </Form.Item>
-                  </Col> */}
                                     <Col span={6}>
                                         <Form.Item
                                             required={false}

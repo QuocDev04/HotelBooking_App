@@ -162,7 +162,6 @@ const HotelListEnhanced: React.FC = () => {
       background: 'transparent',
       minHeight: '100vh',
       padding: '0',
-      marginTop: '80px'
     }}>
       {/* Hero Section */}
       <div style={{

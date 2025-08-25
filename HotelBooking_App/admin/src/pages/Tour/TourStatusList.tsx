@@ -179,13 +179,8 @@ const TourStatusList: React.FC = () => {
         return (
           <Space size="middle">
             <Tooltip title="Xem chi tiết tour">
-              <Link to={`/tour/${record.tour._id}`}>
+              <Link to={`/admin/tour-detail/${record.tour._id}`}>
                 <Button type="primary" icon={<EyeOutlined />} size="small" />
-              </Link>
-            </Tooltip>
-            <Tooltip title="Xem danh sách đặt chỗ">
-              <Link to={`/admin/list-booking?slotId=${record._id}`}>
-                <Button type="default" icon={<TeamOutlined />} size="small" />
               </Link>
             </Tooltip>
             <Tooltip title="Xem danh sách người tham gia">

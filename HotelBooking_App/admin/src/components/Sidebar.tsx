@@ -54,15 +54,6 @@ const Sidebar = () => {
             ],
         },
         {
-            name: 'Lịch trình vận chuyển',
-            icon: '🛣️',
-            children: [
-                { name: 'Danh sách Lịch trình', path: '/admin/list-Transport_Schedule', icon: '📝' },
-                { name: 'Thêm Lịch trình', path: '/admin/add-Transport_Schedule', icon: '🆕' },
-            ],
-        },
-
-        {
             name: 'Quản lý Blog',
             icon: '📝',
             children: [
@@ -95,8 +86,8 @@ const Sidebar = () => {
             icon: '👥',
             children: [
                 { name: 'Tài khoản Khách hàng', path: '/admin/customer-accounts', icon: '👤' },
-                { name: 'Tài khoản Nhân viên', path: '/admin/employee-accounts', icon: '👨‍💼' },
-                { name: 'Phân công Nhân viên', path: '/admin/employee-assignment', icon: '📋' },
+                { name: 'Tài khoản HDV', path: '/admin/hdv-accounts', icon: '🧑‍🏫' },
+                { name: 'Phân công HDV', path: '/admin/employee-assignment', icon: '📋' },
             ],
         },
     ];

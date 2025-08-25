@@ -26,7 +26,8 @@ import HotelDetailRefactored from "../pages/Hotel/HotelDetailRefactored"
 import HotelBookingConfirmation from "../pages/Hotel/HotelBookingConfirmation"
 import TestDateSelection from "../components/DateSelection/TestDateSelection"
 import TestCashDepositModal from "../components/Payment/TestCashDepositModal"
-import BlogDetail from "../pages/Blog/hotelPolicy"
+import { HotelPolicy } from "../pages/Blog/hotelPolicy"
+// import BlogDetail, { HotelPolicy } from "../pages/Blog/hotelPolicy"
 
 const Router = () => {
     return (
@@ -43,9 +44,9 @@ const Router = () => {
                 <Route path="/checkout-hotel/:bookingId" element={<CheckOutHotel />} />
                 <Route path="/payment-result" element={<PaymentResult />} />
                 <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:slug" element={<BlogDetail />} />
+                {/* <Route path="/blog/:slug" element={<BlogDetail />} /> */}
                 <Route path="/detailtour/:id" element={<JapanTourPage />} />
-
+                <Route path="/hotelPolicy" element={<HotelPolicy />} />
                 <Route path="/bookingall/:id" element={<BookingAll />} />
                 <Route path="/infouser" element={<InfoUser />} />
                 <Route path="/date/slot/:id/" element={<Checkout />} />

@@ -1,6 +1,7 @@
 const express = require('express');
 
-const { AddTour, DeleteTour, getAllTours, GetTourById, TourFeatured, TourTopSelling, UpdateTour, assignEmployeeToTour } = require('./../../controller/TourController/TourController.js');
+
+const { AddTour, DeleteTour, getAllTours, GetTourById, TourFeatured, TourTopSelling, UpdateTour, assignEmployeeToTour, updateTourStatus } = require('./../../controller/TourController/TourController.js');
 const { verifyClerkTokenAndAdmin } = require('../../Middleware/Middleware.js');
 
 const TourRouter = express.Router();
@@ -15,5 +16,8 @@ TourRouter.get('/tour/:id', GetTourById)
 
 // API phân công nhân viên cho tour
 TourRouter.put('/tour/:id/assign-employee', verifyClerkTokenAndAdmin, assignEmployeeToTour)
+
+// API cập nhật trạng thái tour bởi HDV
+TourRouter.put('/tour/status/:id', updateTourStatus)
 
 module.exports = TourRouter;
