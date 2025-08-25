@@ -371,138 +371,306 @@ const Checkout = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen py-8 px-2 md:px-8 mt-20">
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={onFinish}
-        initialValues={{
-          adultPassengers: [{ fullName: '', gender: '', birthDate: null }],
-          childPassengers: [{ fullName: '', gender: '', birthDate: null }],
-          toddlerPassengers: [{ fullName: '', gender: '', birthDate: null }],
-          infantPassengers: [{ fullName: '', gender: '', birthDate: null }]
-        }}
-      > <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left: Form */}
-          <div className="lg:col-span-2 bg-white rounded-xl shadow p-6 space-y-6">
+    <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen py-8 px-2 md:px-8 mt-20">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-4 shadow-lg">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Đặt Tour Du Lịch</h1>
+          <p className="text-lg text-gray-600">Điền thông tin để hoàn tất đặt tour của bạn</p>
+        </div>
 
-            {/* Thông tin liên lạc */}
-            <div className="font-bold text-lg mb-2">THÔNG TIN LIÊN LẠC</div>
-            <Row gutter={24}>
-              <Col span={12}>
-                <Form.Item
-                  required={false}
-                  label={requiredLabel("Họ tên")}
-                  name="fullNameUser"
-                  rules={[{ required: true, message: "Họ tên không được để trống" }]}
-                >
-                  <Input placeholder="Nhập họ tên của bạn" size="large" />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  required={false}
-                  label={requiredLabel("Điện thoại")}
-                  name="phone"
-                  rules={[
-                    { required: true, message: "Điện thoại không được để trống" },
-                    { pattern: /^[0-9]{10,11}$/, message: "Số điện thoại không hợp lệ" }
-                  ]}
-                >
-                  <Input placeholder="Nhập số điện thoại" size="large" />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={24}>
-              <Col span={12}>
-                <Form.Item
-                  required={false}
-                  label={requiredLabel("Email")}
-                  name="email"
-                  rules={[
-                    { required: true, message: "Email không được để trống" },
-                    { type: 'email', message: 'Email không hợp lệ' }
-                  ]}
-                >
-                  <Input placeholder="Nhập email của bạn" size="large" />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label="Địa chỉ"
-                  name="address"
-                >
-                  <Input placeholder="Nhập địa chỉ (không bắt buộc)" size="large" />
-                </Form.Item>
-              </Col>
-            </Row>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={onFinish}
+          initialValues={{
+            adultPassengers: [{ fullName: '', gender: '', birthDate: null }],
+            childPassengers: [{ fullName: '', gender: '', birthDate: null }],
+            toddlerPassengers: [{ fullName: '', gender: '', birthDate: null }],
+            infantPassengers: [{ fullName: '', gender: '', birthDate: null }]
+          }}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left: Form */}
+            <div className="lg:col-span-2 space-y-8">
 
-            {/* Hành khách */}
-            <div>
-              <div className="font-bold text-lg mb-2">HÀNH KHÁCH</div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Người lớn */}
-                <div className={`border rounded-xl p-4 flex flex-col justify-between ${adultCount > 0 ? 'border-black' : 'border-gray-300'} transition`}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-bold text-base">Người lớn</span>
+              {/* Thông tin liên lạc */}
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full p-3 shadow-lg">
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                    </svg>
                   </div>
-                  <div className="flex items-center text-xs text-gray-600 mb-4">
-                    Từ 12 trở lên
-                    <span className="ml-1 text-gray-400" title="Từ 12 tuổi trở lên">ℹ️</span>
-                  </div>
-                  <div className="flex items-center justify-center space-x-4">
-                    <button type="button" className="text-2xl px-2" onClick={() => handleAdultCountChange(Math.max(1, adultCount - 1))}>-</button>
-                    <span className="text-xl font-semibold w-6 text-center">{adultCount}</span>
-                    <button type="button" className="text-2xl px-2" onClick={() => handleAdultCountChange(adultCount + 1)}>+</button>
+                  <div>
+                    <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                      Thông tin liên lạc
+                    </h2>
+                    <p className="text-gray-500 text-sm">Vui lòng điền đầy đủ thông tin để chúng tôi có thể liên hệ với bạn</p>
                   </div>
                 </div>
-                {/* Trẻ nhỏ */}
-                <div className={`border rounded-xl p-4 flex flex-col justify-between ${childCount > 0 ? 'border-black' : 'border-gray-300'} transition`}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-bold text-base">Trẻ nhỏ</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Form.Item
+                      label={
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                          </svg>
+                          <span className="font-medium text-gray-700">Họ tên <span className="text-red-500">*</span></span>
+                        </div>
+                      }
+                      name="fullNameUser"
+                      rules={[{ required: true, message: "Vui lòng nhập họ tên của bạn" }]}
+                    >
+                      <Input 
+                        placeholder="Nguyễn Văn A" 
+                        size="large" 
+                        className="border-2 border-gray-200 hover:border-blue-400 focus:border-blue-500 rounded-xl transition-colors duration-200"
+                        prefix={<svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" /></svg>}
+                      />
+                    </Form.Item>
                   </div>
-                  <div className="flex items-center text-xs text-gray-600 mb-4">
-                    Từ 2 - 4 tuổi
-                    <span className="ml-1 text-gray-400" title="Từ 2 - 4 tuổi">ℹ️</span>
+
+                  <div className="space-y-2">
+                    <Form.Item
+                      label={
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                          </svg>
+                          <span className="font-medium text-gray-700">Điện thoại <span className="text-red-500">*</span></span>
+                        </div>
+                      }
+                      name="phone"
+                      rules={[
+                        { required: true, message: "Vui lòng nhập số điện thoại" },
+                        { pattern: /^[0-9]{10,11}$/, message: "Số điện thoại phải có 10-11 chữ số" }
+                      ]}
+                    >
+                      <Input 
+                        placeholder="0922222016" 
+                        size="large" 
+                        className="border-2 border-gray-200 hover:border-green-400 focus:border-green-500 rounded-xl transition-colors duration-200"
+                        prefix={<svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" /></svg>}
+                      />
+                    </Form.Item>
                   </div>
-                  <div className="flex items-center justify-center space-x-4">
-                    <button type="button" className="text-2xl px-2" onClick={() => setChildCount(Math.max(0, childCount - 1))}>-</button>
-                    <span className="text-xl font-semibold w-6 text-center">{childCount}</span>
-                    <button type="button" className="text-2xl px-2" onClick={() => setChildCount(childCount + 1)}>+</button>
+
+                  <div className="space-y-2">
+                    <Form.Item
+                      label={
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                          </svg>
+                          <span className="font-medium text-gray-700">Email <span className="text-red-500">*</span></span>
+                        </div>
+                      }
+                      name="email"
+                      rules={[
+                        { required: true, message: "Vui lòng nhập email" },
+                        { type: 'email', message: 'Email không hợp lệ' }
+                      ]}
+                    >
+                      <Input 
+                        placeholder="example@gmail.com" 
+                        size="large" 
+                        className="border-2 border-gray-200 hover:border-purple-400 focus:border-purple-500 rounded-xl transition-colors duration-200"
+                        prefix={<svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" /><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" /></svg>}
+                      />
+                    </Form.Item>
                   </div>
-                </div>
-                {/* Trẻ em */}
-                <div className={`border rounded-xl p-4 flex flex-col justify-between ${kidCount > 0 ? 'border-black' : 'border-gray-300'} transition`}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-bold text-base">Trẻ em</span>
-                  </div>
-                  <div className="flex items-center text-xs text-gray-600 mb-4">
-                    Từ 5 - 11 tuổi
-                    <span className="ml-1 text-gray-400" title="Từ 5 - 11 tuổi">ℹ️</span>
-                  </div>
-                  <div className="flex items-center justify-center space-x-4">
-                    <button type="button" className="text-2xl px-2" onClick={() => setKidCount(Math.max(0, kidCount - 1))}>-</button>
-                    <span className="text-xl font-semibold w-6 text-center">{kidCount}</span>
-                    <button type="button" className="text-2xl px-2" onClick={() => setKidCount(kidCount + 1)}>+</button>
-                  </div>
-                </div>
-                {/* Em bé */}
-                <div className={`border rounded-xl p-4 flex flex-col justify-between ${babyCount > 0 ? 'border-black' : 'border-gray-300'} transition`}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-bold text-base">Em bé</span>
-                  </div>
-                  <div className="flex items-center text-xs text-gray-600 mb-4">
-                    Dưới 2 tuổi
-                    <span className="ml-1 text-gray-400" title="Dưới 2 tuổi">ℹ️</span>
-                  </div>
-                  <div className="flex items-center justify-center space-x-4">
-                    <button type="button" className="text-2xl px-2" onClick={() => setBabyCount(Math.max(0, babyCount - 1))}>-</button>
-                    <span className="text-xl font-semibold w-6 text-center">{babyCount}</span>
-                    <button type="button" className="text-2xl px-2" onClick={() => setBabyCount(babyCount + 1)}>+</button>
+
+                  <div className="space-y-2">
+                    <Form.Item
+                      label={
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                          </svg>
+                          <span className="font-medium text-gray-700">Địa chỉ</span>
+                        </div>
+                      }
+                      name="address"
+                    >
+                      <Input 
+                        placeholder="Số nhà, đường, quận/huyện, tỉnh/thành phố" 
+                        size="large" 
+                        className="border-2 border-gray-200 hover:border-orange-400 focus:border-orange-500 rounded-xl transition-colors duration-200"
+                        prefix={<svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" /></svg>}
+                      />
+                    </Form.Item>
                   </div>
                 </div>
               </div>
-            </div>
+
+              {/* Hành khách */}
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-full p-3 shadow-lg">
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
+                      Số lượng hành khách
+                    </h2>
+                    <p className="text-gray-500 text-sm">Chọn số lượng hành khách cho chuyến đi</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Người lớn */}
+                  <div className={`relative overflow-hidden rounded-2xl border-2 p-6 transition-all duration-300 hover:shadow-lg ${
+                    adultCount > 0 
+                      ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-md' 
+                      : 'border-gray-200 bg-white hover:border-gray-300'
+                  }`}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="bg-blue-500 text-white rounded-full p-2 shadow-sm">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg text-gray-900">Người lớn</h3>
+                        <p className="text-sm text-gray-600">Từ 12 tuổi trở lên</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-center space-x-4">
+                      <button 
+                        type="button" 
+                        className="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center font-bold text-gray-700 transition-colors duration-200" 
+                        onClick={() => handleAdultCountChange(Math.max(1, adultCount - 1))}
+                      >
+                        -
+                      </button>
+                      <span className="text-2xl font-bold text-blue-600 min-w-[40px] text-center">{adultCount}</span>
+                      <button 
+                        type="button" 
+                        className="w-10 h-10 rounded-full bg-blue-500 hover:bg-blue-600 flex items-center justify-center font-bold text-white transition-colors duration-200" 
+                        onClick={() => handleAdultCountChange(adultCount + 1)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                  {/* Trẻ nhỏ */}
+                  <div className={`relative overflow-hidden rounded-2xl border-2 p-6 transition-all duration-300 hover:shadow-lg ${
+                    childCount > 0 
+                      ? 'border-purple-500 bg-gradient-to-br from-purple-50 to-purple-100 shadow-md' 
+                      : 'border-gray-200 bg-white hover:border-gray-300'
+                  }`}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="bg-purple-500 text-white rounded-full p-2 shadow-sm">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M10 2L3 7v11c0 1.1.9 2 2 2h4v-6h2v6h4c1.1 0 2-.9 2-2V7l-7-5z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg text-gray-900">Trẻ nhỏ</h3>
+                        <p className="text-sm text-gray-600">Từ 2 - 4 tuổi</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-center space-x-4">
+                      <button 
+                        type="button" 
+                        className="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center font-bold text-gray-700 transition-colors duration-200" 
+                        onClick={() => setChildCount(Math.max(0, childCount - 1))}
+                      >
+                        -
+                      </button>
+                      <span className="text-2xl font-bold text-purple-600 min-w-[40px] text-center">{childCount}</span>
+                      <button 
+                        type="button" 
+                        className="w-10 h-10 rounded-full bg-purple-500 hover:bg-purple-600 flex items-center justify-center font-bold text-white transition-colors duration-200" 
+                        onClick={() => setChildCount(childCount + 1)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Trẻ em */}
+                  <div className={`relative overflow-hidden rounded-2xl border-2 p-6 transition-all duration-300 hover:shadow-lg ${
+                    kidCount > 0 
+                      ? 'border-green-500 bg-gradient-to-br from-green-50 to-green-100 shadow-md' 
+                      : 'border-gray-200 bg-white hover:border-gray-300'
+                  }`}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="bg-green-500 text-white rounded-full p-2 shadow-sm">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg text-gray-900">Trẻ em</h3>
+                        <p className="text-sm text-gray-600">Từ 5 - 11 tuổi</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-center space-x-4">
+                      <button 
+                        type="button" 
+                        className="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center font-bold text-gray-700 transition-colors duration-200" 
+                        onClick={() => setKidCount(Math.max(0, kidCount - 1))}
+                      >
+                        -
+                      </button>
+                      <span className="text-2xl font-bold text-green-600 min-w-[40px] text-center">{kidCount}</span>
+                      <button 
+                        type="button" 
+                        className="w-10 h-10 rounded-full bg-green-500 hover:bg-green-600 flex items-center justify-center font-bold text-white transition-colors duration-200" 
+                        onClick={() => setKidCount(kidCount + 1)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Em bé */}
+                  <div className={`relative overflow-hidden rounded-2xl border-2 p-6 transition-all duration-300 hover:shadow-lg ${
+                    babyCount > 0 
+                      ? 'border-pink-500 bg-gradient-to-br from-pink-50 to-pink-100 shadow-md' 
+                      : 'border-gray-200 bg-white hover:border-gray-300'
+                  }`}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="bg-pink-500 text-white rounded-full p-2 shadow-sm">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg text-gray-900">Em bé</h3>
+                        <p className="text-sm text-gray-600">Dưới 2 tuổi</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-center space-x-4">
+                      <button 
+                        type="button" 
+                        className="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center font-bold text-gray-700 transition-colors duration-200" 
+                        onClick={() => setBabyCount(Math.max(0, babyCount - 1))}
+                      >
+                        -
+                      </button>
+                      <span className="text-2xl font-bold text-pink-600 min-w-[40px] text-center">{babyCount}</span>
+                      <button 
+                        type="button" 
+                        className="w-10 h-10 rounded-full bg-pink-500 hover:bg-pink-600 flex items-center justify-center font-bold text-white transition-colors duration-200" 
+                        onClick={() => setBabyCount(babyCount + 1)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
             {/* Thông tin hành khách - Người lớn */}
             {adultCount > 0 && (
@@ -842,101 +1010,186 @@ const Checkout = () => {
                 {totalPrice.toLocaleString()} ₫
               </span>
             </div>
-            <div className="bg-gray-100 border border-gray-300 rounded-md shadow-sm p-4 flex flex-col items-start">
-              <h4 className="text-gray-900 text-lg font-semibold mb-4">
-                Phương thức thanh toán
-              </h4>
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-full p-3 shadow-lg">
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                    Phương thức thanh toán
+                  </h2>
+                  <p className="text-gray-500 text-sm">Chọn cách thức thanh toán phù hợp với bạn</p>
+                </div>
+              </div>
 
               <Form.Item name="payment_method" rules={[{ required: true, message: "Vui lòng chọn phương thức thanh toán" }]}>
-                <div className="text-gray-900 text-sm w-full flex flex-col gap-2">
-                  {[
-                    { id: "cash", label: "Tiền mặt" },
-                    { id: "bank_transfer", label: "Thanh toán qua VNPay" },
-                  ].map(({ id, label }) => (
-                    <label key={id} htmlFor={id} className="inline-flex items-center cursor-pointer gap-2 p-2 rounded hover:bg-gray-200">
-                      <input
-                        type="radio"
-                        id={id}
-                        value={id}
-                        name="payment_method"
-                        className="h-4 w-4 rounded-full accent-blue-600 border"
-                      />
-                      {label}
-                    </label>
-                  ))}
+                <div className="grid grid-cols-1 gap-4 mb-8">
+                  <label className="relative cursor-pointer group">
+                    <input
+                      type="radio"
+                      value="cash"
+                      name="payment_method"
+                      className="peer sr-only"
+                    />
+                    <div className="bg-white border-2 border-gray-200 peer-checked:border-green-500 peer-checked:shadow-lg peer-checked:shadow-green-100 rounded-3xl p-8 transition-all duration-300 hover:shadow-xl hover:border-green-300 group-hover:-translate-y-1">
+                      <div className="text-center space-y-4">
+                        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg peer-checked:scale-110 transition-transform duration-300">
+                          <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zM14 6a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h8zM6 8a2 2 0 012 2v2H6V8zm8 0v4h-2v-2a2 2 0 012-2z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-xl text-gray-900 mb-2">Tiền mặt</h3>
+                          <p className="text-gray-600 text-sm leading-relaxed">Thanh toán trực tiếp tại văn phòng công ty</p>
+                        </div>
+                      </div>
+                      <div className="absolute top-6 right-6 w-6 h-6 border-2 border-gray-300 peer-checked:border-green-500 peer-checked:bg-green-500 rounded-full flex items-center justify-center transition-all duration-200">
+                        <svg className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    </div>
+                  </label>
+
+                  <label className="relative cursor-pointer group">
+                    <input
+                      type="radio"
+                      value="bank_transfer"
+                      name="payment_method"
+                      className="peer sr-only"
+                    />
+                    <div className="bg-white border-2 border-gray-200 peer-checked:border-blue-500 peer-checked:shadow-lg peer-checked:shadow-blue-100 rounded-3xl p-8 transition-all duration-300 hover:shadow-xl hover:border-blue-300 group-hover:-translate-y-1">
+                      <div className="text-center space-y-4">
+                        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center shadow-lg peer-checked:scale-110 transition-transform duration-300">
+                          <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-xl text-gray-900 mb-2">VNPay</h3>
+                          <p className="text-gray-600 text-sm leading-relaxed">Thanh toán trực tuyến an toàn & nhanh chóng</p>
+                        </div>
+                      </div>
+                      <div className="absolute top-6 right-6 w-6 h-6 border-2 border-gray-300 peer-checked:border-blue-500 peer-checked:bg-blue-500 rounded-full flex items-center justify-center transition-all duration-200">
+                        <svg className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    </div>
+                  </label>
                 </div>
               </Form.Item>
 
-              <div className="w-full border-t border-gray-300 my-4"></div>
+              <div className="border-t border-gray-200 pt-6 mt-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                  </svg>
+                  Tùy chọn thanh toán
+                </h3>
 
-              <h4 className="text-gray-900 text-lg font-semibold mb-2">
-                Tùy chọn thanh toán
-              </h4>
-
-              <Form.Item name="isFullPayment" initialValue={false}>
-                <div className="text-gray-900 text-sm w-full flex flex-col gap-2">
-                  {[
-                    { 
-                      id: "deposit", 
-                      label: `Đặt cọc 50%`, 
-                      description: `${Math.round(totalPrice * 0.5).toLocaleString()} ₫`,
-                      note: "Thanh toán phần còn lại trước khi khởi hành tour"
-                    },
-                    { 
-                      id: "full", 
-                      label: `Thanh toán đầy đủ`, 
-                      description: `${totalPrice.toLocaleString()} ₫`,
-                      note: "Thanh toán toàn bộ chi phí ngay bây giờ"
-                    },
-                  ].map(({ id, label, description, note }) => (
-                    <label key={id} htmlFor={id} className="inline-flex items-start cursor-pointer gap-2 p-3 rounded hover:bg-gray-200 border border-gray-300">
+                <Form.Item name="isFullPayment" initialValue={false}>
+                  <div className="space-y-4">
+                    <label className="relative cursor-pointer group block">
                       <input
                         type="radio"
-                        id={id}
-                        value={id === "full" ? "true" : "false"}
+                        value="false"
                         name="isFullPayment"
-                        defaultChecked={id === "deposit"}
-                        className="h-4 w-4 rounded-full accent-blue-600 border mt-1"
+                        defaultChecked
+                        className="peer sr-only"
                       />
-                      <div>
-                        <div className="font-medium">{label}</div>
-                        <div className="text-red-600 font-semibold">{description}</div>
-                        <div className="text-xs text-gray-500">{note}</div>
+                      <div className="bg-gradient-to-br from-orange-50 to-red-50 border-2 border-gray-200 peer-checked:border-orange-500 peer-checked:bg-gradient-to-br peer-checked:from-orange-100 peer-checked:to-red-100 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg group-hover:border-orange-300">
+                        <div className="flex items-start gap-4">
+                          <div className="bg-orange-500 text-white rounded-full p-2 shadow-sm mt-1">
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zM14 6a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h8zM6 8a2 2 0 012 2v2H6V8zm8 0v4h-2v-2a2 2 0 012-2z" />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-bold text-lg text-gray-900">Đặt cọc 50%</h4>
+                            <p className="text-2xl font-bold text-orange-600 mb-1">{Math.round(totalPrice * 0.5).toLocaleString()} ₫</p>
+                            <p className="text-sm text-gray-600">Thanh toán phần còn lại trước khi khởi hành tour</p>
+                          </div>
+                          <div className="w-6 h-6 border-2 border-gray-300 peer-checked:border-orange-500 peer-checked:bg-orange-500 rounded-full flex items-center justify-center transition-all duration-200">
+                            <svg className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        </div>
                       </div>
                     </label>
-                  ))}
-                </div>
-              </Form.Item>
 
-              <div className="flex items-center mt-4">
-                <img
-                  src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/paymentCard/amexLogo.svg"
-                  alt="amexLogo"
-                  className="h-6"
-                />
-                <img
-                  src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/paymentCard/visaLogoColored.svg"
-                  alt="visaLogoColored"
-                  className="h-6"
-                />
-                <img
-                  src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/paymentCard/masterCardLogo.svg"
-                  alt="masterCardLogo"
-                  className="h-6"
-                />
+                    <label className="relative cursor-pointer group block">
+                      <input
+                        type="radio"
+                        value="true"
+                        name="isFullPayment"
+                        className="peer sr-only"
+                      />
+                      <div className="bg-gradient-to-br from-emerald-50 to-green-50 border-2 border-gray-200 peer-checked:border-emerald-500 peer-checked:bg-gradient-to-br peer-checked:from-emerald-100 peer-checked:to-green-100 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg group-hover:border-emerald-300">
+                        <div className="flex items-start gap-4">
+                          <div className="bg-emerald-500 text-white rounded-full p-2 shadow-sm mt-1">
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-bold text-lg text-gray-900">Thanh toán đầy đủ</h4>
+                            <p className="text-2xl font-bold text-emerald-600 mb-1">{totalPrice.toLocaleString()} ₫</p>
+                            <p className="text-sm text-gray-600">Thanh toán toàn bộ chi phí ngay bây giờ</p>
+                          </div>
+                          <div className="w-6 h-6 border-2 border-gray-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-500 rounded-full flex items-center justify-center transition-all duration-200">
+                            <svg className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                </Form.Item>
+
+                <div className="flex items-center justify-center gap-4 mt-6 pt-4 border-t border-gray-100">
+                  <span className="text-sm text-gray-500">Chấp nhận thanh toán qua:</span>
+                  <div className="flex items-center gap-2">
+                    <img src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/paymentCard/visaLogoColored.svg" alt="Visa" className="h-6 opacity-70 hover:opacity-100 transition-opacity" />
+                    <img src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/paymentCard/masterCardLogo.svg" alt="MasterCard" className="h-6 opacity-70 hover:opacity-100 transition-opacity" />
+                    <img src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/paymentCard/amexLogo.svg" alt="American Express" className="h-6 opacity-70 hover:opacity-100 transition-opacity" />
+                  </div>
+                </div>
               </div>
             </div>
             <Button
               type="primary"
               htmlType="submit"
-              className="w-full py-3 bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-md transition"
+              className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold text-lg rounded-2xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl border-0"
               loading={isLoading}
               disabled={isLoading}
+              size="large"
             >
-              {isLoading ? "Đang xử lý..." : "Hoàn tất đặt tour"}
+              <div className="flex items-center justify-center gap-3">
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span>Đang xử lý...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span>Hoàn tất đặt tour</span>
+                  </>
+                )}
+              </div>
             </Button>
+            </div>
           </div>
-        </div></Form>
+        </Form>
+      </div>
 
       {/* Modal thông báo khi chọn thanh toán cọc nhưng không chọn VNPay */}
       <Modal

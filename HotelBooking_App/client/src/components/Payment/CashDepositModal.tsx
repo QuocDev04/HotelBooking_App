@@ -181,7 +181,7 @@ export const CashDepositModal: React.FC<CashDepositModalProps> = ({
                 <EnvironmentOutlined /> Văn phòng công ty
               </Title>
               <Paragraph style={{ margin: 0, paddingLeft: 24 }}>
-                <Text strong>Địa chỉ:</Text> Số 123 Đường ABC, Quận 1, TP.HCM
+                <Text strong>Địa chỉ:</Text> Số 25 - Ngõ 38 Phố Yên Lãng – Quận Đống Đa – Hà Nội
                 <br />
                 <Text strong>Giờ làm việc:</Text> 8:00 - 17:30 (Thứ 2 - Thứ 6)
                 <br />
@@ -196,11 +196,11 @@ export const CashDepositModal: React.FC<CashDepositModalProps> = ({
                 <PhoneOutlined /> Liên hệ hỗ trợ
               </Title>
               <Paragraph style={{ margin: 0, paddingLeft: 24 }}>
-                <Text strong>Hotline:</Text> 1900 1234 (24/7)
+                <Text strong>Hotline:</Text> 0922222016 (24/7)
                 <br />
-                <Text strong>Email:</Text> support@hotelbooking.vn
+                <Text strong>Email:</Text> elitebooking.tour@gmail.com
                 <br />
-                <Text strong>Zalo:</Text> 0901 234 567
+                <Text strong>Zalo:</Text> 0922222016
               </Paragraph>
             </div>
           </Space>

@@ -87,8 +87,8 @@ export const PaymentBill: React.FC<PaymentBillProps> = ({
           <div class="header">
             <div class="company-name">HOTEL BOOKING COMPANY</div>
             <div class="company-info">
-              Địa chỉ: Số 123 Đường ABC, Quận 1, TP.HCM<br>
-              Hotline: 1900 1234 | Email: support@hotelbooking.vn
+              Địa chỉ: Số 25 - Ngõ 38 Phố Yên Lãng – Quận Đống Đa – Hà Nội<br>
+              Hotline: 0922222016 | Email: elitebooking.tour@gmail.com
             </div>
           </div>
 
@@ -206,8 +206,8 @@ export const PaymentBill: React.FC<PaymentBillProps> = ({
         <div class="header">
           <div class="company-name">HOTEL BOOKING COMPANY</div>
           <div class="company-info">
-            Địa chỉ: Số 123 Đường ABC, Quận 1, TP.HCM<br>
-            Hotline: 1900 1234 | Email: support@hotelbooking.vn
+            Địa chỉ: Số 25 - Ngõ 38 Phố Yên Lãng – Quận Đống Đa – Hà Nội<br>
+            Hotline: 0922222016 | Email: elitebooking.tour@gmail.com
           </div>
         </div>
 
