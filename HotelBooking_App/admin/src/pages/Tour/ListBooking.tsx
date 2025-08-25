@@ -269,7 +269,6 @@ const ListBooking = () => {
         switch (status) {
             case 'completed':
                 return 'bg-green-100 text-green-800 border-green-200';
-
             case 'deposit_paid':
                 return 'bg-blue-100 text-blue-800 border-blue-200';
             case 'pending':
@@ -278,6 +277,12 @@ const ListBooking = () => {
                 return 'bg-orange-100 text-orange-800 border-orange-200';
             case 'cancelled':
                 return 'bg-red-100 text-red-800 border-red-200';
+            case 'refund_pending':
+                return 'bg-purple-100 text-purple-800 border-purple-200';
+            case 'refund_processing':
+                return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+            case 'refund_completed':
+                return 'bg-emerald-100 text-emerald-800 border-emerald-200';
             default:
                 return 'bg-gray-100 text-gray-800 border-gray-200';
         }
@@ -286,7 +291,6 @@ const ListBooking = () => {
     const getStatusText = (status: string) => {
         switch (status) {
             case 'completed':
-
                 return 'Thanh toán toàn bộ';
             case 'deposit_paid':
                 return 'Đã thanh toán cọc';
@@ -296,6 +300,12 @@ const ListBooking = () => {
                 return 'Chờ xác nhận hủy';
             case 'cancelled':
                 return 'Đã hủy';
+            case 'refund_pending':
+                return 'Chờ hoàn tiền';
+            case 'refund_processing':
+                return 'Đang xử lý hoàn tiền';
+            case 'refund_completed':
+                return 'Hoàn tiền thành công';
             default:
                 return 'Không xác định';
         }
@@ -1196,8 +1206,8 @@ const ListBooking = () => {
 
             {/* Payment Confirmation Modal */}
             {showPaymentModal && selectedBooking && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-gray-200">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+                    <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-gray-200 my-8 max-h-[90vh] overflow-y-auto">
                         {/* Modal Header */}
                         <div className="flex items-center justify-between p-6 border-b border-gray-200">
                             <h2 className="text-xl font-bold text-gray-900">
@@ -1224,11 +1234,41 @@ const ListBooking = () => {
                                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                                     Xác nhận đã nhận thanh toán cọc?
                                 </h3>
-                                <p className="text-gray-600 mb-6">
-                                    Tour: <span className="font-medium">{selectedBooking.slotId.tour.nameTour}</span>
-                                </p>
-                                <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                                    <div className="text-sm text-gray-600 space-y-2">
+                                <div className="text-center mb-6">
+                                    <p className="text-lg font-semibold text-gray-800 mb-2">
+                                        {selectedBooking.slotId.tour.nameTour}
+                                    </p>
+                                    <p className="text-sm text-gray-600">
+                                        {selectedBooking.slotId.tour.departure_location} → {selectedBooking.slotId.tour.destination?.locationName || selectedBooking.slotId.tour.destination}
+                                    </p>
+                                </div>
+                                {/* Thông tin đặt tour */}
+                                <div className="bg-green-50 rounded-lg p-4 mb-4 border border-green-200">
+                                    <div className="flex items-center mb-3">
+                                        <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-3">
+                                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </div>
+                                        <h4 className="text-green-800 font-semibold">Thông tin đặt tour</h4>
+                                    </div>
+                                    <div className="text-sm text-gray-700 space-y-2">
+                                        <div className="flex justify-between">
+                                            <span>Tour:</span>
+                                            <span className="font-medium">{selectedBooking.slotId.tour.nameTour}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Tuyến đường:</span>
+                                            <span className="font-medium">
+                                                {selectedBooking.slotId.tour.departure_location || 'N/A'} → {selectedBooking.slotId.tour.destination?.locationName || selectedBooking.slotId.tour.destination || 'N/A'}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Ngày khởi hành:</span>
+                                            <span className="font-medium">
+                                                {new Date(selectedBooking.slotId.dateTour).toLocaleDateString('vi-VN')}
+                                            </span>
+                                        </div>
                                         <div className="flex justify-between">
                                             <span>Khách hàng:</span>
                                             <span className="font-medium">{selectedBooking.fullNameUser}</span>
@@ -1238,24 +1278,38 @@ const ListBooking = () => {
                                             <span className="font-medium">{selectedBooking.email}</span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span>Số điện thoại:</span>
+                                            <span>Điện thoại:</span>
                                             <span className="font-medium">{selectedBooking.phone}</span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span>Ngày khởi hành:</span>
-                                            <span className="font-medium">
-                                                {new Date(selectedBooking.slotId.dateTour).toLocaleDateString('vi-VN')}
+                                            <span>Tổng tiền tour:</span>
+                                            <span className="font-medium">{selectedBooking.totalPriceTour.toLocaleString()} VND</span>
+                                        </div>
+                                        <div className="flex justify-between border-t pt-2 mt-2 bg-green-100 px-2 py-2 rounded">
+                                            <span className="text-green-700 font-semibold">Tiền cọc cần thu:</span>
+                                            <span className="font-bold text-green-600 text-lg">
+                                                {Math.floor(selectedBooking.totalPriceTour * 0.5).toLocaleString()} VND
                                             </span>
                                         </div>
-                                        <div className="flex justify-between">
-                                            <span>Tổng tiền:</span>
-                                            <span className="font-medium text-green-600">
-                                                {selectedBooking.totalPriceTour.toLocaleString()}₫
-                                            </span>
+                                    </div>
+                                </div>
+
+                                {/* Lưu ý quan trọng */}
+                                <div className="bg-yellow-50 rounded-lg p-4 mb-4 border border-yellow-200">
+                                    <div className="flex items-start">
+                                        <div className="w-5 h-5 text-yellow-600 mr-2 mt-0.5">
+                                            <svg fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                            </svg>
                                         </div>
-                                        <div className="flex justify-between">
-                                            <span>Phương thức:</span>
-                                            <span className="font-medium">Tiền mặt</span>
+                                        <div className="text-sm text-yellow-800">
+                                            <p className="font-semibold mb-1">Lưu ý quan trọng</p>
+                                            <ul className="list-disc list-inside space-y-1">
+                                                <li>Bắt buộc phải có hình ảnh chứng minh đã nhận tiền cọc</li>
+                                                <li>Hình ảnh có thể là biên lai, ảnh chụp tiền mặt, ảnh chuyển khoản</li>
+                                                <li>Chỉ upload 1 hình ảnh rõ nét, không quá 10MB</li>
+                                                <li>Thông tin này sẽ được lưu trữ làm bằng chứng pháp lý</li>
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>
@@ -1271,8 +1325,15 @@ const ListBooking = () => {
                                         required
                                     />
                                     {paymentImage && (
-                                        <div className="mt-2 text-sm text-green-600">
+                                        <div className="mt-3 flex items-center space-x-2">
+                                            <div className="flex-shrink-0">
+                                                <svg className="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                </svg>
+                                            </div>
+                                            <span className="text-sm text-green-600 font-medium">
                                             Đã chọn: {paymentImage.name}
+                                            </span>
                                         </div>
                                     )}
                                 </div>

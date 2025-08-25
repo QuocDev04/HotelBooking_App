@@ -76,6 +76,7 @@ const getAllBookingTourByUserId = async (req, res) => {
                 }
             })
             .populate("cancelledBy")     
+            .sort({ createdAt: -1 })  // Tour mới nhất ở đầu
             .lean();                  
 
         return res.status(200).json({

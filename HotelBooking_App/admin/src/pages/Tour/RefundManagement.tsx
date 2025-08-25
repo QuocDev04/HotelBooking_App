@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Card, Table, Tag, Space, Button, Modal, Form, Select, Input, message, Row, Col, Statistic, Typography } from 'antd';
+import { Card, Table, Tag, Space, Button, Modal, Form, Select, Input, message, Row, Col, Statistic, Typography, Upload } from 'antd';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from '../../configs/axios';
 import dayjs from 'dayjs';
-import { DollarOutlined, CheckCircleOutlined, ClockCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { DollarOutlined, CheckCircleOutlined, ClockCircleOutlined, ExclamationCircleOutlined, UploadOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -19,7 +19,9 @@ interface User {
 interface TourInfo {
   nameTour: string;
   destination: string;
-  departure: string;
+  departure_location: string;
+  duration: string;
+  tourType: string;
 }
 
 interface SlotInfo {
@@ -43,6 +45,7 @@ interface Booking {
   refund_method: string | null;
   refund_date: string | null;
   refund_note: string | null;
+  refund_image: string | null;
   // Thêm các trường mới từ dữ liệu hủy tour
   cancelledAt?: string;
   cancelReason?: string;
@@ -51,6 +54,22 @@ interface Booking {
   isFullyPaid?: boolean;
   createdAt: string;
   updatedAt: string;
+  // Thêm thông tin hoàn tiền từ client
+  refundInfo?: {
+    amount: number;
+    bankInfo: {
+      bankName: string;
+      accountNumber: string;
+      accountHolderName: string;
+    };
+    contactInfo: {
+      phoneNumber: string;
+      email: string;
+    };
+    refundReason: string;
+    requestedAt: string;
+    status: string;
+  };
 }
 
 interface RefundStats {
@@ -64,7 +83,7 @@ interface RefundStats {
   completedAmount: number;
 }
 
-// Hàm tính toán chính sách hoàn tiền dựa trên ngày hủy và ngày khởi hành
+// Hàm tính toán chính sách hoàn tiền dựa trên ngày hủy và ngày khởi hành (theo Điều khoản & Chính sách)
 const calculateRefundPolicy = (cancelDate: string, departureDate: string, depositAmount: number) => {
   const cancelDay = dayjs(cancelDate);
   const departureDay = dayjs(departureDate);
@@ -73,21 +92,21 @@ const calculateRefundPolicy = (cancelDate: string, departureDate: string, deposi
   let refundPercentage = 0;
   let policyText = '';
   
-  if (daysUntilDeparture > 30) {
+  if (daysUntilDeparture >= 30) {
     refundPercentage = 100;
-    policyText = 'Hoàn 100% tiền cọc (hủy trước >30 ngày)';
+    policyText = 'Hoàn 100% tiền cọc (≥30 ngày)';
   } else if (daysUntilDeparture >= 15) {
     refundPercentage = 70;
-    policyText = 'Hoàn 70% tiền cọc (hủy trước 15-30 ngày)';
+    policyText = 'Hoàn 70% tiền cọc (15-29 ngày)';
   } else if (daysUntilDeparture >= 7) {
     refundPercentage = 50;
-    policyText = 'Hoàn 50% tiền cọc (hủy trước 7-14 ngày)';
+    policyText = 'Hoàn 50% tiền cọc (7-14 ngày)';
   } else if (daysUntilDeparture >= 4) {
     refundPercentage = 30;
-    policyText = 'Hoàn 30% tiền cọc (hủy trước 4-6 ngày)';
+    policyText = 'Hoàn 30% tiền cọc (4-6 ngày)';
   } else {
     refundPercentage = 0;
-    policyText = 'Không hoàn tiền (hủy trước <4 ngày)';
+    policyText = 'Không hoàn tiền (<3 ngày)';
   }
   
   const calculatedRefund = Math.round(depositAmount * refundPercentage / 100);
@@ -105,6 +124,7 @@ const RefundManagement: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [form] = Form.useForm();
+  const [refundImage, setRefundImage] = useState<File | null>(null);
   const queryClient = useQueryClient();
 
   // Lấy danh sách hoàn tiền
@@ -129,7 +149,23 @@ const RefundManagement: React.FC = () => {
   // Mutation để cập nhật trạng thái hoàn tiền
   const updateRefundMutation = useMutation({
     mutationFn: async ({ bookingId, data }: { bookingId: string; data: any }) => {
-      return axios.put(`/admin/refunds/${bookingId}`, data);
+      const formData = new FormData();
+      
+      // Thêm các field thông thường
+      Object.keys(data).forEach(key => {
+        formData.append(key, data[key]);
+      });
+      
+      // Thêm file nếu có
+      if (refundImage) {
+        formData.append('refund_image', refundImage);
+      }
+      
+      return axios.put(`/admin/refunds/${bookingId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
     },
     onSuccess: () => {
       message.success('Cập nhật trạng thái hoàn tiền thành công');
@@ -137,6 +173,7 @@ const RefundManagement: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['refundStats'] });
         setIsModalVisible(false);
         form.resetFields();
+        setRefundImage(null);
       },
       onError: (error: any) => {
         message.error(`Lỗi: ${error.response?.data?.message || 'Không thể cập nhật trạng thái hoàn tiền'}`);
@@ -154,6 +191,7 @@ const RefundManagement: React.FC = () => {
       refund_status: booking.refund_status || 'pending',
       refund_method: booking.refund_method || '',
       refund_note: booking.refund_note || '',
+      refund_image: booking.refund_image || '',
     });
     setIsModalVisible(true);
   };
@@ -167,6 +205,12 @@ const RefundManagement: React.FC = () => {
   const handleSubmit = () => {
     form.validateFields().then((values) => {
       if (selectedBooking) {
+        // Kiểm tra file upload bắt buộc
+        if (!refundImage) {
+          message.error('Vui lòng chọn hình ảnh xác nhận hoàn tiền!');
+          return;
+        }
+        
         updateRefundMutation.mutate({
           bookingId: selectedBooking._id,
           data: values,
@@ -188,7 +232,7 @@ const RefundManagement: React.FC = () => {
     }
   };
 
-  // Hàm tính chính sách hoàn tiền dựa trên ngày hủy
+  // Hàm tính chính sách hoàn tiền dựa trên ngày hủy (theo Điều khoản & Chính sách)
   const calculateRefundPolicy = (cancelDate: string, tourDate: string, depositAmount: number) => {
     const cancelDateTime = new Date(cancelDate);
     const tourDateTime = new Date(tourDate);
@@ -197,12 +241,12 @@ const RefundManagement: React.FC = () => {
     let refundPercentage = 0;
     let policyText = "";
     
-    if (daysUntilDeparture > 30) {
+    if (daysUntilDeparture >= 30) {
       refundPercentage = 100;
-      policyText = "Hoàn 100% (>30 ngày)";
+      policyText = "Hoàn 100% (≥30 ngày)";
     } else if (daysUntilDeparture >= 15) {
       refundPercentage = 70;
-      policyText = "Hoàn 70% (15-30 ngày)";
+      policyText = "Hoàn 70% (15-29 ngày)";
     } else if (daysUntilDeparture >= 7) {
       refundPercentage = 50;
       policyText = "Hoàn 50% (7-14 ngày)";
@@ -211,7 +255,7 @@ const RefundManagement: React.FC = () => {
       policyText = "Hoàn 30% (4-6 ngày)";
     } else {
       refundPercentage = 0;
-      policyText = "Không hoàn tiền (<4 ngày)";
+      policyText = "Không hoàn tiền (<3 ngày)";
     }
     
     const calculatedRefund = (depositAmount * refundPercentage) / 100;
@@ -243,15 +287,18 @@ const RefundManagement: React.FC = () => {
       key: 'tourName',
       render: (text: string, record: Booking) => (
         <div>
-          <div style={{ fontWeight: 'bold' }}>{record.slotId.tour.nameTour}</div>
+          <div style={{ fontWeight: 'bold' }}>{record.slotId?.tour?.nameTour || 'Tour không xác định'}</div>
           <div style={{ fontSize: '12px', color: '#888' }}>
-            {record.slotId.tour.departure} → {record.slotId.tour.destination}
+            {record.slotId?.tour?.departure_location || 'N/A'} → {record.slotId?.tour?.destination || 'N/A'}
           </div>
           <div style={{ fontSize: '12px', color: '#888' }}>
-            Ngày khởi hành: {dayjs(record.slotId.dateTour).format('DD/MM/YYYY')}
+            Ngày khởi hành: {record.slotId?.dateTour ? dayjs(record.slotId.dateTour).format('DD/MM/YYYY') : 'N/A'}
           </div>
-          <div style={{ fontSize: '12px', color: record.isDeposit ? '#1890ff' : '#888' }}>
-            {record.isDeposit ? `Đã đặt cọc: ${record.depositAmount?.toLocaleString()} VNĐ` : 'Chưa thanh toán'}
+          <div style={{ fontSize: '12px', color: ['deposit_paid', 'confirmed', 'completed'].includes(record.payment_status) ? '#1890ff' : '#888' }}>
+            {record.payment_status === 'completed' ? `Đã thanh toán đủ: ${record.totalPriceTour?.toLocaleString()} VNĐ` : 
+             (record.payment_status === 'deposit_paid' || record.payment_status === 'confirmed') && record.depositAmount > 0 ? 
+             `Đã đặt cọc: ${record.depositAmount?.toLocaleString()} VNĐ` : 
+             record.payment_status === 'pending' ? 'Chờ thanh toán' : ''}
           </div>
         </div>
       ),
@@ -278,13 +325,13 @@ const RefundManagement: React.FC = () => {
       key: 'refundPolicy',
       render: (text: string, record: Booking) => {
         const cancelDate = record.cancelledAt || record.cancellation_date;
-        const depositAmount = record.depositAmount || 0;
+        const baseAmount = record.payment_status === 'completed' ? record.totalPriceTour : (record.depositAmount || 0);
         
-        if (!cancelDate || !record.slotId.dateTour || !depositAmount) {
+        if (!cancelDate || !record.slotId.dateTour || !baseAmount) {
           return <span style={{ color: '#999' }}>Không đủ thông tin</span>;
         }
         
-        const policy = calculateRefundPolicy(cancelDate, record.slotId.dateTour, depositAmount);
+        const policy = calculateRefundPolicy(cancelDate, record.slotId.dateTour, baseAmount);
         
         return (
           <div>
@@ -307,15 +354,18 @@ const RefundManagement: React.FC = () => {
       key: 'refundAmount',
       render: (amount: number, record: Booking) => {
         const cancelDate = record.cancelledAt || record.cancellation_date;
-        const depositAmount = record.depositAmount || 0;
+        const baseAmount = record.payment_status === 'completed' ? record.totalPriceTour : (record.depositAmount || 0);
         
         let calculatedAmount = 0;
-        if (cancelDate && record.slotId.dateTour && depositAmount) {
-          const policy = calculateRefundPolicy(cancelDate, record.slotId.dateTour, depositAmount);
+        if (cancelDate && record.slotId.dateTour && baseAmount) {
+          const policy = calculateRefundPolicy(cancelDate, record.slotId.dateTour, baseAmount);
           calculatedAmount = policy.calculatedRefund;
         }
         
         const isDifferent = Math.abs(amount - calculatedAmount) > 1000; // Chênh lệch > 1000 VNĐ
+        
+        // Hiển thị số tiền thực tế, nếu bằng 0 thì hiển thị số tiền tính toán
+        const displayAmount = amount > 0 ? amount : calculatedAmount;
         
         return (
           <div>
@@ -324,15 +374,35 @@ const RefundManagement: React.FC = () => {
               fontWeight: 'bold',
               fontSize: '14px'
             }}>
-              {amount.toLocaleString()} VNĐ
+              {displayAmount.toLocaleString()} VNĐ
+              {amount === 0 && calculatedAmount > 0 && (
+                <span style={{ fontSize: '10px', color: '#999', fontWeight: 'normal' }}> (tính toán)</span>
+              )}
             </div>
-            {isDifferent && (
+            {isDifferent && amount > 0 && (
               <div style={{ fontSize: '10px', color: '#ff4d4f' }}>
                 ⚠️ Khác với chính sách
               </div>
             )}
           </div>
         );
+      },
+    },
+    {
+      title: 'Thông tin tài khoản',
+      key: 'bankInfo',
+      render: (text: string, record: Booking) => {
+        if (record.refundInfo?.bankInfo) {
+          const { bankName, accountNumber, accountHolderName } = record.refundInfo.bankInfo;
+          return (
+            <div>
+              <div style={{ fontSize: '12px', fontWeight: 'bold' }}>{bankName}</div>
+              <div style={{ fontSize: '12px', color: '#666' }}>STK: {accountNumber}</div>
+              <div style={{ fontSize: '12px', color: '#666' }}>Tên: {accountHolderName}</div>
+            </div>
+          );
+        }
+        return <span style={{ color: '#999' }}>Chưa có thông tin</span>;
       },
     },
     {
@@ -346,6 +416,25 @@ const RefundManagement: React.FC = () => {
       dataIndex: 'refund_method',
       key: 'refundMethod',
       render: (method: string | null) => method || 'Chưa xác định',
+    },
+    {
+      title: 'Hình ảnh',
+      dataIndex: 'refund_image',
+      key: 'refundImage',
+      render: (image: string | null) => {
+        if (image) {
+          return (
+            <a href={image} target="_blank" rel="noopener noreferrer">
+              <img 
+                src={image} 
+                alt="Xác nhận hoàn tiền" 
+                style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
+              />
+            </a>
+          );
+        }
+        return <span style={{ color: '#999' }}>Chưa có</span>;
+      },
     },
     {
       title: 'Thao tác',
@@ -447,7 +536,7 @@ const RefundManagement: React.FC = () => {
         visible={isModalVisible}
         onOk={handleSubmit}
         onCancel={handleCancel}
-        confirmLoading={updateRefundMutation.isLoading}
+        confirmLoading={updateRefundMutation.isPending}
         width={800}
       >
         {selectedBooking && (
@@ -484,6 +573,35 @@ const RefundManagement: React.FC = () => {
               <Form.Item name="refund_note" label="Ghi chú">
                 <TextArea rows={3} placeholder="Nhập ghi chú về việc hoàn tiền..." />
               </Form.Item>
+
+              <Form.Item 
+                label="Hình ảnh xác nhận hoàn tiền"
+                required
+              >
+                <Upload
+                  accept="image/*"
+                  maxCount={1}
+                  beforeUpload={(file) => {
+                    setRefundImage(file);
+                    return false; // Prevent auto upload
+                  }}
+                  onRemove={() => {
+                    setRefundImage(null);
+                  }}
+                  fileList={refundImage ? [{
+                    uid: '-1',
+                    name: refundImage.name,
+                    status: 'done' as const,
+                  }] : []}
+                >
+                  <Button icon={<UploadOutlined />}>
+                    Chọn hình ảnh từ máy
+                  </Button>
+                </Upload>
+                <div style={{ marginTop: 8, color: '#666', fontSize: '12px' }}>
+                  Chỉ hỗ trợ file ảnh (JPG, PNG, GIF) tối đa 10MB
+                </div>
+              </Form.Item>
             </Form>
 
             {/* Thông tin chi tiết */}
@@ -495,13 +613,33 @@ const RefundManagement: React.FC = () => {
                   <p><strong>Số điện thoại:</strong> {selectedBooking.userId.phone}</p>
                 </Card>
 
+                {selectedBooking.refundInfo?.bankInfo && (
+                  <Card size="small" title="Thông tin tài khoản nhận tiền" style={{ marginBottom: 16 }}>
+                    <p><strong>Ngân hàng:</strong> {selectedBooking.refundInfo.bankInfo.bankName}</p>
+                    <p><strong>Số tài khoản:</strong> {selectedBooking.refundInfo.bankInfo.accountNumber}</p>
+                    <p><strong>Tên chủ tài khoản:</strong> {selectedBooking.refundInfo.bankInfo.accountHolderName}</p>
+                    {selectedBooking.refundInfo.contactInfo && (
+                      <>
+                        <p><strong>SĐT liên hệ:</strong> {selectedBooking.refundInfo.contactInfo.phoneNumber}</p>
+                        <p><strong>Email liên hệ:</strong> {selectedBooking.refundInfo.contactInfo.email}</p>
+                      </>
+                    )}
+                    {selectedBooking.refundInfo.refundReason && (
+                      <p><strong>Lý do yêu cầu:</strong> {selectedBooking.refundInfo.refundReason}</p>
+                    )}
+                  </Card>
+                )}
+
                 <Card size="small" title="Thông tin tour">
-                  <p><strong>Tour:</strong> {selectedBooking.slotId.tour.nameTour}</p>
-                  <p><strong>Tuyến:</strong> {selectedBooking.slotId.tour.departure} → {selectedBooking.slotId.tour.destination}</p>
-                  <p><strong>Ngày khởi hành:</strong> {dayjs(selectedBooking.slotId.dateTour).format('DD/MM/YYYY')}</p>
+                  <p><strong>Tour:</strong> {selectedBooking.slotId?.tour?.nameTour || 'Tour không xác định'}</p>
+                  <p><strong>Tuyến:</strong> {selectedBooking.slotId?.tour?.departure_location || 'N/A'} → {selectedBooking.slotId?.tour?.destination || 'N/A'}</p>
+                  <p><strong>Ngày khởi hành:</strong> {selectedBooking.slotId?.dateTour ? dayjs(selectedBooking.slotId.dateTour).format('DD/MM/YYYY') : 'N/A'}</p>
                   <p><strong>Tổng giá tour:</strong> {selectedBooking.totalPriceTour.toLocaleString()} VNĐ</p>
-                  {selectedBooking.isDeposit && (
+                  {(selectedBooking.payment_status === 'deposit_paid' || selectedBooking.payment_status === 'confirmed') && selectedBooking.depositAmount > 0 && (
                     <p><strong>Số tiền đặt cọc:</strong> {selectedBooking.depositAmount?.toLocaleString()} VNĐ</p>
+                  )}
+                  {selectedBooking.payment_status === 'completed' && (
+                    <p><strong>Đã thanh toán đủ:</strong> {selectedBooking.totalPriceTour?.toLocaleString()} VNĐ</p>
                   )}
                 </Card>
               </Col>
@@ -514,9 +652,9 @@ const RefundManagement: React.FC = () => {
 
                 {(() => {
                   const cancelDate = selectedBooking.cancelledAt || selectedBooking.cancellation_date;
-                  const depositAmount = selectedBooking.depositAmount || 0;
+                  const baseAmount = selectedBooking.payment_status === 'completed' ? selectedBooking.totalPriceTour : (selectedBooking.depositAmount || 0);
                   
-                  if (!cancelDate || !selectedBooking.slotId.dateTour || !depositAmount) {
+                  if (!cancelDate || !selectedBooking.slotId.dateTour || !baseAmount) {
                     return (
                       <Card size="small" title="Chính sách hoàn tiền" style={{ marginTop: 16 }}>
                         <p style={{ color: '#999' }}>Không đủ thông tin để tính toán chính sách hoàn tiền</p>
@@ -524,7 +662,7 @@ const RefundManagement: React.FC = () => {
                     );
                   }
                   
-                  const policy = calculateRefundPolicy(cancelDate, selectedBooking.slotId.dateTour, depositAmount);
+                  const policy = calculateRefundPolicy(cancelDate, selectedBooking.slotId.dateTour, baseAmount);
                   const isDifferent = Math.abs(selectedBooking.refund_amount - policy.calculatedRefund) > 1000;
                   
                   return (

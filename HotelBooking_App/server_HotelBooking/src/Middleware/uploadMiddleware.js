@@ -5,6 +5,7 @@ const fs = require('fs');
 // Tạo thư mục uploads nếu chưa tồn tại
 const paymentUploadsDir = path.join(__dirname, '../../uploads/payment-confirmations');
 const hotelUploadsDir = path.join(__dirname, '../../uploads/hotels');
+const refundUploadsDir = path.join(__dirname, '../../uploads/refund-confirmations');
 
 if (!fs.existsSync(paymentUploadsDir)) {
     fs.mkdirSync(paymentUploadsDir, { recursive: true });
@@ -12,6 +13,10 @@ if (!fs.existsSync(paymentUploadsDir)) {
 
 if (!fs.existsSync(hotelUploadsDir)) {
     fs.mkdirSync(hotelUploadsDir, { recursive: true });
+}
+
+if (!fs.existsSync(refundUploadsDir)) {
+    fs.mkdirSync(refundUploadsDir, { recursive: true });
 }
 
 // Cấu hình storage cho payment images
@@ -44,6 +49,21 @@ const hotelStorage = multer.diskStorage({
     }
 });
 
+// Cấu hình storage cho refund images
+const refundStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, refundUploadsDir);
+    },
+    filename: function (req, file, cb) {
+        // Tạo tên file unique với timestamp và booking ID
+        const bookingId = req.params.bookingId;
+        const timestamp = Date.now();
+        const ext = path.extname(file.originalname);
+        const filename = `refund-${bookingId}-${timestamp}${ext}`;
+        cb(null, filename);
+    }
+});
+
 // Kiểm tra file type
 const fileFilter = (req, file, cb) => {
     // Chỉ cho phép file ảnh
@@ -72,11 +92,23 @@ const hotelUpload = multer({
     }
 });
 
+// Cấu hình multer cho refund images
+const refundUpload = multer({
+    storage: refundStorage,
+    fileFilter: fileFilter,
+    limits: {
+        fileSize: 10 * 1024 * 1024 // Giới hạn 10MB cho hình ảnh hoàn tiền
+    }
+});
+
 // Middleware để xử lý upload single payment image
 const uploadPaymentImage = paymentUpload.single('paymentImage');
 
 // Middleware để xử lý upload multiple hotel images
 const uploadHotelImages = hotelUpload.array('images', 10); // Tối đa 10 ảnh
+
+// Middleware để xử lý upload single refund image
+const uploadRefundImage = refundUpload.single('refund_image');
 
 // Middleware wrapper để xử lý lỗi payment upload
 const handlePaymentUploadError = (req, res, next) => {
@@ -137,7 +169,33 @@ const handleHotelUploadError = (req, res, next) => {
     });
 };
 
+// Middleware wrapper để xử lý lỗi refund upload
+const handleRefundUploadError = (req, res, next) => {
+    uploadRefundImage(req, res, (err) => {
+        if (err instanceof multer.MulterError) {
+            if (err.code === 'LIMIT_FILE_SIZE') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'File quá lớn. Kích thước tối đa là 10MB.'
+                });
+            }
+            return res.status(400).json({
+                success: false,
+                message: 'Lỗi upload file: ' + err.message
+            });
+        } else if (err) {
+            return res.status(400).json({
+                success: false,
+                message: err.message
+            });
+        }
+        
+        next();
+    });
+};
+
 module.exports = {
     uploadPaymentImage: handlePaymentUploadError,
-    uploadHotelImages: handleHotelUploadError
+    uploadHotelImages: handleHotelUploadError,
+    uploadRefundImage: handleRefundUploadError
 };
