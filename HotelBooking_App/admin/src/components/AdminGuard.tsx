@@ -33,6 +33,7 @@ const SyncUserToBackend: React.FC = () => {
                     lastName: user.lastName || "",
                 };
 
+
                 try {
                     await instance.post("/syncUser", userData, {
                         headers: { Authorization: `Bearer ${token}` },

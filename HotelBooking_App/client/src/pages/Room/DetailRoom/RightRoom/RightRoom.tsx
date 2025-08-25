@@ -2,15 +2,18 @@
 import { useState } from "react";
 import DatePicker from "react-datepicker";
 import { useRoom } from "../../UseRoom/useRoom";
+
 import "react-datepicker/dist/react-datepicker.css";
 
 const RightRoom = () => {
     const { room } = useRoom();
 
+
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [adultCount, setAdultCount] = useState(1);
     const [childCount, setChildCount] = useState(0);
+
 
     return (
         <div className="max-w-[460px] w-full bg-blue-100/90 p-5 max-md:mt-16 border rounded-4xl border-gray-300/70">
@@ -108,6 +111,7 @@ const RightRoom = () => {
             </div>
 
             <div className="flex flex-col gap-2 my-4">
+
                 <button className="w-full py-2 text-blue-500 border border-blue-500 rounded-xl hover:bg-blue-50">
                     Liên hệ tư vấn
                 </button>

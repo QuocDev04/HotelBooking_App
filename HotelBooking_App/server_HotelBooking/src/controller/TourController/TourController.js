@@ -9,7 +9,8 @@ const getAllTours = async (req, res) => {
         const tour = await TourModel.find()
         .populate("itemTransport.TransportId", "transportName transportNumber transportType")
             .populate("destination", "locationName country")
-            .populate("assignedEmployee", "name email firstName lastName full_name")
+
+            .populate("assignedEmployee", "firstName lastName full_name email employee_id position")
         return res.status(StatusCodes.OK).json({
             success: true,
             message: "Get all tours successfully",
@@ -172,6 +173,7 @@ const TourTopSelling = async (req, res) => {
     }
 }
 
+
 const assignEmployeeToTour = async (req, res) => {
     try {
         const { id } = req.params;
@@ -191,7 +193,7 @@ const assignEmployeeToTour = async (req, res) => {
             id,
             { assignedEmployee: employeeId },
             { new: true }
-        ).populate('assignedEmployee', 'name email');
+        ).populate('assignedEmployee', 'firstName lastName full_name email employee_id position');
 
         return res.status(StatusCodes.OK).json({
             success: true,
@@ -206,4 +208,71 @@ const assignEmployeeToTour = async (req, res) => {
     }
 };
 
-module.exports = { getAllTours, AddTour, DeleteTour, UpdateTour, GetTourById, TourFeatured, TourTopSelling, assignEmployeeToTour };
+// Cập nhật trạng thái tour bởi HDV
+const updateTourStatus = async (req, res) => {
+    try {
+        const { id } = req.params; // Tour ID
+        const { status, note, updatedBy } = req.body;
+
+        // Validate status
+        const validStatuses = ['preparing', 'ongoing', 'completed', 'postponed'];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: "Trạng thái không hợp lệ"
+            });
+        }
+
+        // Validate required note for postponed status
+        if (status === 'postponed' && (!note || !note.trim())) {
+            return res.status(400).json({
+                success: false,
+                message: "Vui lòng nhập lý do hoãn tour"
+            });
+        }
+
+        // Find tour
+        const tour = await TourModel.findById(id);
+        if (!tour) {
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy tour"
+            });
+        }
+
+        // Update tour status
+        const updateData = {
+            tourStatus: status,
+            statusUpdatedAt: new Date(),
+            statusUpdatedBy: updatedBy
+        };
+
+        if (note && note.trim()) {
+            updateData.statusNote = note.trim();
+        }
+
+        const updatedTour = await TourModel.findByIdAndUpdate(
+            id,
+            updateData,
+            { new: true }
+        ).populate("destination", "locationName country")
+         .populate("assignedEmployee", "firstName lastName full_name email employee_id position");
+
+        console.log(`Tour ${id} status updated to ${status} by ${updatedBy}`);
+
+        return res.status(200).json({
+            success: true,
+            message: "Cập nhật trạng thái tour thành công",
+            tour: updatedTour
+        });
+
+    } catch (error) {
+        console.error("Error updating tour status:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi server: " + error.message
+        });
+    }
+};
+
+module.exports = { getAllTours, AddTour, DeleteTour, UpdateTour, GetTourById, TourFeatured, TourTopSelling, assignEmployeeToTour, updateTourStatus };

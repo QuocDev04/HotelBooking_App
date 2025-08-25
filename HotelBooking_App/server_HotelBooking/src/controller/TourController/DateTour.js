@@ -1,3 +1,4 @@
+
 const DateTour = require("../../models/Tour/DateTour");
 const TourBooking = require("../../models/Tour/TourBooking.js");
 const nodemailer = require('nodemailer');
@@ -305,6 +306,43 @@ const GetAllSlotsByTourId = async (req, res) => {
       }
 };
 
+// Lấy tất cả dateslots cho trang phân công
+const GetAllDateSlots = async (req, res) => {
+    try {
+        console.log("Getting all date slots...");
+        
+        const slots = await DateTour.find()
+            .populate({
+                path: 'tour',
+                select: 'nameTour departure_location destination tourStatus statusNote statusUpdatedAt statusUpdatedBy',
+                populate: {
+                    path: 'destination',
+                    model: 'Location',
+                    select: 'locationName country',
+                }
+            })
+            .sort({ dateTour: 1 }); // Sắp xếp theo ngày
+
+        console.log(`Found ${slots.length} date slots`);
+
+        res.status(200).json({
+            success: true,
+            message: "Lấy thành công tất cả date slots",
+            dateSlots: slots,
+            total: slots.length
+        });
+
+    } catch (error) {
+        console.error("GetAllDateSlots error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Lỗi server",
+            error: error.message
+        });
+    }
+};
+
+
 const UpdateDateSlot = async (req, res) => {
     try {
         const { id } = req.params;
@@ -449,7 +487,12 @@ const getToursByStatus = async (req, res) => {
         const tours = await DateTour.find(query)
             .populate({
                 path: 'tour',
-                select: 'nameTour destination departure imagesTour durationTour priceTour maxPeople tourType transport'
+                select: 'nameTour destination departure_location imageTour duration price maxPeople tourType itemTransport departure_time return_time tourStatus statusNote statusUpdatedAt statusUpdatedBy',
+                populate: {
+                    path: 'destination',
+                    model: 'Location',
+                    select: 'locationName country'
+                }
             })
             .sort({ dateTour: 1 });
         
@@ -578,6 +621,7 @@ module.exports = {
     PostdateTour,
     GetDateTour,
     GetAllSlotsByTourId,
+    GetAllDateSlots,
     UpdateDateSlot,
     DeleteDateSlot,
     getTourStats,
@@ -588,4 +632,68 @@ module.exports = {
     markCustomerNoShow,
     getNoShowCustomers,
     processNoShowCustomers
-}
+};
+
+// Lấy thông tin chi tiết của một slot
+const getSlotDetail = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        if (!id) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Thiếu slot ID" 
+            });
+        }
+
+        const slot = await DateTour.findById(id)
+            .populate({
+                path: 'tour',
+                select: 'nameTour destination departure_location duration price imageTour tourType maxPeople departure_time return_time tourStatus statusNote statusUpdatedAt statusUpdatedBy',
+                populate: {
+                    path: 'destination',
+                    model: 'Location',
+                    select: 'locationName country'
+                }
+            });
+
+        if (!slot) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Không tìm thấy slot" 
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Lấy thông tin slot thành công",
+            data: slot
+        });
+
+    } catch (error) {
+        console.error('Lỗi lấy chi tiết slot:', error);
+        res.status(500).json({ 
+            success: false,
+            message: "Lỗi server", 
+            error: error.message 
+        });
+    }
+};
+
+module.exports = {
+    PostdateTour,
+    GetDateTour,
+    GetAllSlotsByTourId,
+    GetAllDateSlots,
+    UpdateDateSlot,
+    DeleteDateSlot,
+    getTourStats,
+    getToursByStatus,
+    updateTourBookingStatsAPI,
+    updateTourStatus,
+    updateTourBookingStats,
+    markCustomerNoShow,
+    getNoShowCustomers,
+    processNoShowCustomers,
+    getSlotDetail
+};

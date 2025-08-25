@@ -1,5 +1,6 @@
 const express = require('express')
 const { DeleteTourSchedule, GetByIdTourSchedule, GetTourScheduleAll, PostTourSchedule, PutTourSchedule } = require('./../../controller/TourController/TourScheduleController.js');
+
 const { verifyToken, verifyTokenAndAdmin } = require("../../Middleware/verifyToken");
 
 const TourSchedule = express.Router();

@@ -40,6 +40,7 @@ const Sidebar = () => {
             icon: '📋',
             children: [
                 { name: 'Danh sách đặt chỗ', path: '/admin/list-booking', icon: '📊' },
+
                 { name: 'Quản lý hoàn tiền', path: '/admin/refund-management', icon: '💰' },
             ],
         },
@@ -60,6 +61,7 @@ const Sidebar = () => {
                 { name: 'Thêm Lịch trình', path: '/admin/add-Transport_Schedule', icon: '🆕' },
             ],
         },
+
         {
             name: 'Quản lý Blog',
             icon: '📝',
@@ -93,8 +95,8 @@ const Sidebar = () => {
             icon: '👥',
             children: [
                 { name: 'Tài khoản Khách hàng', path: '/admin/customer-accounts', icon: '👤' },
-                { name: 'Tài khoản Nhân viên', path: '/admin/employee-accounts', icon: '👨‍💼' },
-                { name: 'Phân công Nhân viên', path: '/admin/employee-assignment', icon: '📋' },
+                { name: 'Tài khoản HDV', path: '/admin/hdv-accounts', icon: '🧑‍🏫' },
+                { name: 'Phân công HDV', path: '/admin/employee-assignment', icon: '📋' },
             ],
         },
     ];
