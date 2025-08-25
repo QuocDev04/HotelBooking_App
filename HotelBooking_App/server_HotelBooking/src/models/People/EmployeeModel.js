@@ -68,6 +68,10 @@ const EmployeeSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Admin',
         required: true
+    },
+    refresh_token: {
+        type: String,
+        default: null
     }
 }, { 
     timestamps: true 

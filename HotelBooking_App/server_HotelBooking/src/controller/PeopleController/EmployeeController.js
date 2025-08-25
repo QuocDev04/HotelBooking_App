@@ -5,69 +5,77 @@ const Employee = require("../../models/People/EmployeeModel");
 const Admin = require("../../models/People/AdminModel");
 const TourModel = require("../../models/Tour/TourModel");
 
-// Đăng nhập cho nhân viên HDV
+// Tạo Access Token
+const generateAccessToken = (employee) => {
+    return jwt.sign(
+        {
+            employeeId: employee._id,
+            email: employee.email,
+            employee_id: employee.employee_id,
+            position: employee.position,
+            department: employee.department,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "15m" }
+    );
+};
+
+// Tạo Refresh Token
+const generateRefreshToken = (employee) => {
+    return jwt.sign(
+        { employeeId: employee._id },
+        process.env.JWT_REFRESH_SECRET,
+        { expiresIn: "7d" }
+    );
+};
+
+// Đăng nhập
 const loginEmployee = async (req, res) => {
     try {
         const { email, password } = req.body;
-
-        // Validation
         if (!email || !password) {
             return res.status(StatusCodes.BAD_REQUEST).json({
                 success: false,
-                message: "Email và mật khẩu là bắt buộc"
+                message: "Email và mật khẩu là bắt buộc",
             });
         }
 
-        // Tìm nhân viên theo email
-        const employee = await Employee.findOne({ 
-            email: email.toLowerCase().trim() 
-        });
-
+        const employee = await Employee.findOne({ email: email.toLowerCase().trim() });
         if (!employee) {
             return res.status(StatusCodes.UNAUTHORIZED).json({
                 success: false,
-                message: "Email không tồn tại trong hệ thống"
+                message: "Email không tồn tại trong hệ thống",
             });
         }
 
-        // Kiểm tra trạng thái tài khoản
-        if (employee.status !== 'active') {
+        if (employee.status !== "active") {
             return res.status(StatusCodes.UNAUTHORIZED).json({
                 success: false,
-                message: "Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên"
+                message: "Tài khoản đã bị vô hiệu hóa",
             });
         }
 
-        // So sánh mật khẩu
         const isMatch = await bcrypt.compare(password, employee.password_hash);
         if (!isMatch) {
             return res.status(StatusCodes.UNAUTHORIZED).json({
                 success: false,
-                message: "Mật khẩu không chính xác"
+                message: "Mật khẩu không chính xác",
             });
         }
 
-        // Cập nhật last_login
         employee.last_login = new Date();
-        await employee.save();
 
-        // Tạo JWT token
-        const token = jwt.sign(
-            { 
-                employeeId: employee._id, 
-                email: employee.email,
-                employee_id: employee.employee_id,
-                position: employee.position,
-                department: employee.department
-            },
-            process.env.JWT_SECRET || "hdv_secret_key",
-            { expiresIn: "24h" }
-        );
+        const accessToken = generateAccessToken(employee);
+        const refreshToken = generateRefreshToken(employee);
+
+        employee.refresh_token = refreshToken;
+        await employee.save();
 
         return res.status(StatusCodes.OK).json({
             success: true,
             message: "Đăng nhập thành công",
-            token,
+            accessToken,
+            refreshToken,
             employee: {
                 id: employee._id,
                 email: employee.email,
@@ -77,18 +85,88 @@ const loginEmployee = async (req, res) => {
                 lastName: employee.lastName,
                 position: employee.position,
                 department: employee.department,
-                profile_picture: employee.profile_picture
-            }
+                profile_picture: employee.profile_picture,
+            },
         });
-
     } catch (error) {
-        console.error("Login employee error:", error);
+        console.error("Login error:", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: "Lỗi server: " + error.message
+            message: "Lỗi server: " + error.message,
         });
     }
 };
+
+// Refresh Token
+const refreshToken = async (req, res) => {
+    try {
+        const { refreshToken } = req.body;
+        if (!refreshToken) {
+            return res.status(StatusCodes.UNAUTHORIZED).json({
+                success: false,
+                message: "Thiếu refresh token",
+            });
+        }
+
+        jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, async (err, decoded) => {
+            if (err) {
+                return res.status(StatusCodes.FORBIDDEN).json({
+                    success: false,
+                    message: "Refresh token không hợp lệ hoặc đã hết hạn",
+                });
+            }
+
+            const employee = await Employee.findById(decoded.employeeId);
+            if (!employee || employee.refresh_token !== refreshToken) {
+                return res.status(StatusCodes.UNAUTHORIZED).json({
+                    success: false,
+                    message: "Refresh token không khớp",
+                });
+            }
+
+            const newAccessToken = generateAccessToken(employee);
+            return res.status(StatusCodes.OK).json({
+                success: true,
+                accessToken: newAccessToken,
+            });
+        });
+    } catch (error) {
+        console.error("Refresh token error:", error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Lỗi server: " + error.message,
+        });
+    }
+};
+
+// Logout
+const logoutEmployee = async (req, res) => {
+    try {
+        const { employeeId } = req.body;
+        const employee = await Employee.findById(employeeId);
+        if (!employee) {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                success: false,
+                message: "Không tìm thấy nhân viên",
+            });
+        }
+
+        employee.refresh_token = null;
+        await employee.save();
+
+        return res.status(StatusCodes.OK).json({
+            success: true,
+            message: "Đăng xuất thành công",
+        });
+    } catch (error) {
+        console.error("Logout error:", error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Lỗi server: " + error.message,
+        });
+    }
+};
+
 
 // Lấy thông tin profile nhân viên
 const getEmployeeProfile = async (req, res) => {
@@ -514,7 +592,8 @@ module.exports = {
     updateEmployeeProfile,
     changePassword,
     getAssignedTours,
-    
+    refreshToken,
+    logoutEmployee,
     // Admin functions
     createEmployee,
     getAllEmployees,

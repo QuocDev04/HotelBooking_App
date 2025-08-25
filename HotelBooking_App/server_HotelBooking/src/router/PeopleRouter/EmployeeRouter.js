@@ -1,6 +1,8 @@
 const express = require("express");
-const { 
+const {
     loginEmployee,
+    logoutEmployee,
+    refreshToken,
     getEmployeeProfile,
     updateEmployeeProfile,
     changePassword,
@@ -19,6 +21,12 @@ const EmployeeRouter = express.Router();
 
 // Đăng nhập
 EmployeeRouter.post("/login", loginEmployee);
+
+// Logout (xóa refresh token)
+EmployeeRouter.post("/logout", verifyEmployeeToken, logoutEmployee);
+
+// Refresh token (lấy access token mới)
+EmployeeRouter.post("/refresh-token", refreshToken);
 
 // Routes yêu cầu xác thực nhân viên
 EmployeeRouter.get("/profile", verifyEmployeeToken, getEmployeeProfile);
