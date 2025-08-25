@@ -90,11 +90,11 @@ const Privacy = () => {
           6. Đơn vị thu thập thông tin:
         </h3>
         <p>Công ty TNHH Du lịch và Dịch vụ Elite Travel</p>
-        <p>Địa chỉ: Số 265 phố Xã Đàn, P. Nam Đồng, quận Đống Đa, Hà Nội</p>
+        <p>Địa chỉ: Số 25 - Ngõ 38 Phố Yên Lãng – Quận Đống Đa – Hà Nội</p>
         <p>
           Điện thoại: <span className="font-semibold">0922222016</span>
         </p>
-        <p>Email: info@elitetravel.com</p>
+        <p>Email: elitebooking.tour@gmail.com</p>
 
         <h3 className="text-lg font-semibold mt-4">
           7. Phương tiện và công cụ để người dùng tiếp cận, chỉnh sửa dữ liệu:
@@ -102,7 +102,7 @@ const Privacy = () => {
         <p>
           Khách hàng có thể liên lạc trực tiếp với bộ phận quản trị để chỉnh sửa
           thông tin cá nhân qua số: <strong>0922222016</strong> hoặc email:{" "}
-          <strong>info@elitetravel.com</strong>
+          <strong>elitebooking.tour@gmail.com</strong>
         </p>
       </section>
 

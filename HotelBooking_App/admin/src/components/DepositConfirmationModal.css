@@ -1,0 +1,244 @@
+/* Deposit Confirmation Modal Styles */
+
+.deposit-confirmation-modal .ant-modal-header {
+  background: linear-gradient(135deg, #f6ffed 0%, #f0f9ff 100%);
+  border-bottom: 1px solid #d9f7be;
+  border-radius: 8px 8px 0 0;
+}
+
+.deposit-confirmation-modal .ant-modal-title {
+  color: #389e0d;
+  font-weight: 600;
+}
+
+.deposit-confirmation-modal .ant-modal-body {
+  padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Upload area styling */
+.deposit-confirmation-modal .ant-upload-select {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
+  border: 2px dashed #1890ff;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.deposit-confirmation-modal .ant-upload-select:hover {
+  border-color: #40a9ff;
+  background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+}
+
+.deposit-confirmation-modal .ant-upload-list-picture-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.deposit-confirmation-modal .ant-upload-list-picture-card-container {
+  width: 104px;
+  height: 104px;
+  margin: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.deposit-confirmation-modal .ant-upload-list-item {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.deposit-confirmation-modal .ant-upload-list-item-thumbnail img {
+  border-radius: 6px;
+}
+
+/* Form styling */
+.deposit-confirmation-modal .ant-form-item-label > label {
+  font-weight: 600;
+  color: #262626;
+}
+
+.deposit-confirmation-modal .ant-input,
+.deposit-confirmation-modal .ant-input-number {
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+  transition: all 0.3s ease;
+}
+
+.deposit-confirmation-modal .ant-input:focus,
+.deposit-confirmation-modal .ant-input-focused,
+.deposit-confirmation-modal .ant-input-number:focus,
+.deposit-confirmation-modal .ant-input-number-focused {
+  border-color: #52c41a;
+  box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
+}
+
+.deposit-confirmation-modal .ant-input-number {
+  width: 100%;
+}
+
+/* Button styling */
+.deposit-confirmation-modal .ant-btn {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.deposit-confirmation-modal .ant-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.deposit-confirmation-modal .ant-btn-primary {
+  box-shadow: 0 2px 8px rgba(82, 196, 26, 0.3);
+}
+
+.deposit-confirmation-modal .ant-btn-primary:hover {
+  box-shadow: 0 4px 16px rgba(82, 196, 26, 0.4);
+}
+
+/* Card styling */
+.deposit-confirmation-modal .ant-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.deposit-confirmation-modal .ant-card-head {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.deposit-confirmation-modal .ant-card-body {
+  padding: 16px;
+}
+
+/* Alert styling */
+.deposit-confirmation-modal .ant-alert {
+  border-radius: 8px;
+}
+
+.deposit-confirmation-modal .ant-alert-warning {
+  background: linear-gradient(135deg, #fffbe6 0%, #fff7e6 100%);
+  border: 1px solid #ffd591;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .deposit-confirmation-modal {
+    margin: 0 16px;
+  }
+  
+  .deposit-confirmation-modal .ant-modal {
+    max-width: calc(100vw - 32px);
+  }
+  
+  .deposit-confirmation-modal .ant-modal-body {
+    padding: 16px;
+    max-height: 80vh;
+  }
+  
+  .deposit-confirmation-modal .ant-upload-select {
+    width: 100%;
+    height: 120px;
+  }
+  
+  .deposit-confirmation-modal .ant-upload-list-picture-card-container {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .deposit-confirmation-modal .ant-modal-body {
+    padding: 12px;
+  }
+  
+  .deposit-confirmation-modal .ant-card-body {
+    padding: 12px;
+  }
+  
+  .deposit-confirmation-modal .ant-btn {
+    height: 44px;
+  }
+}
+
+/* Loading state */
+.deposit-confirmation-modal .ant-btn-loading {
+  pointer-events: none;
+}
+
+/* Success state animation */
+.deposit-confirmation-modal .success-animation {
+  animation: successPulse 0.6s ease-out;
+}
+
+@keyframes successPulse {
+  0% {
+    transform: scale(1);
+    background-color: #52c41a;
+  }
+  50% {
+    transform: scale(1.05);
+    background-color: #73d13d;
+  }
+  100% {
+    transform: scale(1);
+    background-color: #52c41a;
+  }
+}
+
+/* Custom scrollbar */
+.deposit-confirmation-modal .ant-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.deposit-confirmation-modal .ant-modal-body::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 3px;
+}
+
+.deposit-confirmation-modal .ant-modal-body::-webkit-scrollbar-thumb {
+  background: #d9d9d9;
+  border-radius: 3px;
+}
+
+.deposit-confirmation-modal .ant-modal-body::-webkit-scrollbar-thumb:hover {
+  background: #bfbfbf;
+}
+
+/* Upload preview enhancements */
+.deposit-confirmation-modal .ant-upload-list-item-info {
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 6px;
+}
+
+.deposit-confirmation-modal .ant-upload-list-item-actions {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.deposit-confirmation-modal .ant-upload-list-item-actions .anticon {
+  color: white;
+}
+
+/* Form validation styling */
+.deposit-confirmation-modal .ant-form-item-has-error .ant-input,
+.deposit-confirmation-modal .ant-form-item-has-error .ant-input-number {
+  border-color: #ff4d4f;
+}
+
+.deposit-confirmation-modal .ant-form-item-has-error .ant-input:focus,
+.deposit-confirmation-modal .ant-form-item-has-error .ant-input-number:focus {
+  border-color: #ff4d4f;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
+}
+
+/* Typography enhancements */
+.deposit-confirmation-modal .ant-typography {
+  margin-bottom: 8px;
+}
+
+.deposit-confirmation-modal .ant-typography:last-child {
+  margin-bottom: 0;
+}

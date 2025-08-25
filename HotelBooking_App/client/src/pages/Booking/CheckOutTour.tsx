@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-
 import { useParams, useLocation } from "react-router-dom";
 import instanceClient from "../../../configs/instance";
 import dayjs from "dayjs";
@@ -19,7 +18,7 @@ const CheckOutTour = () => {
   console.log('Booking object structure:', JSON.stringify(data?.data?.booking, null, 2));
   const booking = data?.data?.booking;
   const paymentInfo = data?.data?.paymentInfo;
-  
+
   // Lay thong tin tu state duoc truyen tu InfoUser
   const bookingData = location.state?.bookingData;
   const isCompletePayment = location.state?.isCompletePayment;
@@ -29,10 +28,10 @@ const CheckOutTour = () => {
   const handleVNPayPayment = async (amount: number, paymentType: 'deposit' | 'full' | 'remaining') => {
     try {
       setIsProcessingPayment(true);
-      
+
       // Kiểm tra và lấy userId
       let userId = null;
-      
+
       // Thử lấy từ booking object trước
       if (booking?.userId?._id) {
         userId = booking.userId._id;
@@ -51,7 +50,7 @@ const CheckOutTour = () => {
         } catch (parseError) {
           console.error('Lỗi parse user từ localStorage:', parseError);
         }
-        
+
         // Thử lấy từ sessionStorage
         if (!userId) {
           try {
@@ -64,7 +63,7 @@ const CheckOutTour = () => {
             console.error('Lỗi parse user từ sessionStorage:', parseError);
           }
         }
-        
+
         // Thử lấy từ Clerk localStorage
         if (!userId) {
           const clerkUserId = localStorage.getItem('userId');
@@ -72,13 +71,13 @@ const CheckOutTour = () => {
             userId = clerkUserId;
           }
         }
-        
+
         // Thử lấy từ URL params
         if (!userId) {
           const urlParams = new URLSearchParams(window.location.search);
           userId = urlParams.get('userId');
         }
-        
+
         // Thử lấy từ auth token
         if (!userId) {
           try {
@@ -93,13 +92,13 @@ const CheckOutTour = () => {
           }
         }
       }
-      
+
       if (!userId) {
         throw new Error('Không tìm thấy userId. Vui lòng đăng nhập lại.');
       }
-      
+
       console.log('UserId được sử dụng:', userId);
-      
+
       // Sử dụng booking hiện tại thay vì tạo mới
       const existingBookingData = {
         bookingId: booking?._id, // ID của booking hiện tại
@@ -121,11 +120,11 @@ const CheckOutTour = () => {
         totalPriceTour: amount, // Sử dụng amount được truyền vào
         paymentType: paymentType // Thêm loại thanh toán
       };
-      
+
       console.log('Gửi dữ liệu thanh toán cho booking hiện tại:', existingBookingData);
-      
+
       const response = await instanceClient.post('/vnpay/process-payment', existingBookingData);
-      
+
       if (response.data.paymentUrl) {
         console.log('Chuyển hướng đến VNPay:', response.data.paymentUrl);
         // Chuyen huong den VNPay
@@ -162,18 +161,18 @@ const CheckOutTour = () => {
   const handleRefund = async (refundType: 'customer_cancellation' | 'company_cancellation' | 'technical_error', refundReason: string) => {
     try {
       setIsProcessingPayment(true);
-      
+
       const refundData = {
         bookingId: booking?._id,
         refundType,
         refundReason,
         refundAmount: null // Để backend tính toán theo chính sách
       };
-      
+
       console.log('Gửi yêu cầu hoàn tiền:', refundData);
-      
+
       const response = await instanceClient.post('/vnpay/process-refund', refundData);
-      
+
       if (response.data.refundUrl) {
         console.log('Chuyển hướng đến VNPay hoàn tiền:', response.data.refundUrl);
         window.location.href = response.data.refundUrl;
@@ -187,7 +186,7 @@ const CheckOutTour = () => {
       setIsProcessingPayment(false);
     }
   };
-  
+
   const getPaymentStatusLabel = (status: string) => {
     switch (status) {
       case 'pending':
@@ -202,7 +201,7 @@ const CheckOutTour = () => {
         return 'Khong ro';
     }
   };
-  
+
   return (
     <div className="bg-gradient-to-br min-h-screen py-8 px-2 md:px-8 mt-20">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -214,7 +213,6 @@ const CheckOutTour = () => {
               <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-full w-10 h-10 flex items-center justify-center text-white text-lg font-bold shadow">
                 <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.7 0 8 1.34 8 4v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-2c0-2.66 5.3-4 8-4Zm0-2a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" /></svg>
               </div>
-
               <div className="font-bold text-blue-700 text-base bg-gradient-to-r from-blue-100 to-transparent px-2 py-1 rounded">THONG TIN LIEN LAC</div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -227,7 +225,6 @@ const CheckOutTour = () => {
                 <div className="text-gray-900">{booking?.email}</div>
               </div>
               <div>
-
                 <div className="font-medium text-gray-600">Dien thoai</div>
                 <div className="text-gray-900">{booking?.phone}</div>
               </div>
@@ -242,7 +239,6 @@ const CheckOutTour = () => {
             </div>
           </div>
 
-          
           {/* Chi tiet booking */}
           <div className="bg-white rounded-2xl shadow-lg border border-blue-100 p-6 transition hover:shadow-2xl">
             <div className="font-bold text-blue-700 text-base mb-4 bg-gradient-to-r from-blue-100 to-transparent px-2 py-1 rounded">CHI TIET BOOKING</div>
@@ -254,7 +250,7 @@ const CheckOutTour = () => {
                 <div>Phuong thuc thanh toan: <span className="font-medium text-gray-900">{booking?.payment_method === 'cash' ? 'Tien mat' : 'Chuyen khoan'}</span></div>
               </div>
             </div>
-            
+
             {/* Thong tin deadline thanh toan tien mat */}
             {booking?.payment_method === 'cash' && paymentInfo && (
               <div className="mt-4 p-4 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg">
@@ -264,7 +260,7 @@ const CheckOutTour = () => {
                   </svg>
                   <span className="font-semibold text-orange-700">THONG TIN THANH TOAN TIEN MAT</span>
                 </div>
-                
+
                 {paymentInfo.isExpired ? (
                   <div className="text-red-600">
                     <p className="font-semibold">CANH BAO: DA QUA HAN THANH TOAN</p>
@@ -286,7 +282,7 @@ const CheckOutTour = () => {
               </div>
             )}
           </div>
-          
+
           {/* Danh sach hanh khach (accordion) */}
           <div className="bg-white rounded-2xl shadow-lg border border-blue-100 p-6 transition hover:shadow-2xl">
             <button
@@ -296,7 +292,6 @@ const CheckOutTour = () => {
               aria-controls="guest-list-table"
               type="button"
             >
-
               <span>DANH SACH HANH KHACH</span>
               <span className={`transition-transform duration-300 ${showGuestList ? '' : 'rotate-180'}`}>
                 <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M6 15l6-6 6 6" /></svg>
@@ -309,7 +304,6 @@ const CheckOutTour = () => {
               <table className="min-w-full text-sm border rounded-xl overflow-hidden">
                 <thead>
                   <tr className="bg-blue-50">
-
                     <th className="border px-3 py-2 font-semibold text-gray-700">Ho ten</th>
                     <th className="border px-3 py-2 font-semibold text-gray-700">Ngay sinh</th>
                     <th className="border px-3 py-2 font-semibold text-gray-700">Gioi tinh</th>
@@ -319,7 +313,6 @@ const CheckOutTour = () => {
                 </thead>
                 <tbody>
                   {[
-
                     ...(booking?.adultPassengers ?? []).map((p: any) => ({ ...p, group: 'Nguoi lon' })),
                     ...(booking?.childPassengers ?? []).map((p: any) => ({ ...p, group: 'Tre em' })),
                     ...(booking?.toddlerPassengers ?? []).map((p: any) => ({ ...p, group: 'Tre nho' })),
@@ -335,7 +328,6 @@ const CheckOutTour = () => {
                         </td>
                         <td className="border px-3 py-2">{passenger.gender}</td>
                         <td className="border px-3 py-2">
-
                           {passenger.group} ({age} tuoi)
                         </td>
                         <td className="border px-3 py-2">
@@ -345,7 +337,6 @@ const CheckOutTour = () => {
                     );
                   })}
                 </tbody>
-
                 <tfoot>
                   <tr>
                     <td className="border px-3 py-2 text-right font-semibold" colSpan={4}>Tong cong:</td>
@@ -357,7 +348,6 @@ const CheckOutTour = () => {
           </div>
         </div>
 
-        
         {/* Phieu xac nhan booking */}
         <div className="md:col-span-1">
           <div className="bg-white rounded-2xl shadow-lg border border-blue-100 p-6 flex flex-col gap-3 transition hover:shadow-2xl">
@@ -368,10 +358,9 @@ const CheckOutTour = () => {
                 {booking?.slotId?.tour?.nameTour}
               </div>
             </div>
-
-            <div className="text-sm">Ma tour: <span className="font-medium text-gray-700">{booking?.slotId?.tour?._id}</span></div>
+            <div className="text-sm">Mã tour: <span className="font-medium text-gray-700">{booking?.slotId?.tour?._id?.slice(0, 6).toUpperCase()}</span></div>
             <div className="font-semibold text-xs mt-3 text-blue-700">THONG TIN DI CHUYEN</div>
-            
+
             {/* Chuyen di */}
             <div className="flex items-center gap-2 text-xs mt-1">
               <span className="text-gray-700">Ngay di - {dayjs(booking?.slotId?.dateTour).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY")}</span>
@@ -380,27 +369,26 @@ const CheckOutTour = () => {
                 <span className="font-semibold text-blue-700">VU303</span>
               </span>
               <span className="text-gray-700">17:05</span>
-
               <span className="mx-1 text-gray-400">-</span>
               <span className="text-gray-700">18:10</span>
             </div>
-            
+
             <div className="flex items-center gap-1 text-xs text-blue-500 mt-1">
               <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1-3.29-2.5-4.03v8.06c1.5-.74 2.5-2.26 2.5-4.03z" /></svg>
               <span>Thong bao!</span>
             </div>
-            
+
             {/* Phan thanh toan */}
             <div className="mt-6 pt-4 border-t border-gray-200">
               <div className="font-bold text-blue-700 text-base mb-4 bg-gradient-to-r from-blue-100 to-transparent px-2 py-1 rounded">THANH TOAN</div>
-              
+
               {/* Hien thi nut thanh toan dua tren trang thai */}
               {booking?.payment_status === 'pending' && (
                 <div className="space-y-3">
                   <div className="text-sm text-gray-600 mb-3">
                     Chon hinh thuc thanh toan:
                   </div>
-                  
+
                   {/* Nut thanh toan dat coc */}
                   <button
                     onClick={handleDepositPayment}
@@ -418,7 +406,7 @@ const CheckOutTour = () => {
                       </>
                     )}
                   </button>
-                  
+
                   {/* Nut thanh toan toan bo */}
                   <button
                     onClick={handleFullPayment}
@@ -438,14 +426,14 @@ const CheckOutTour = () => {
                   </button>
                 </div>
               )}
-              
+
               {/* Nut hoan tat thanh toan cho truong hop da dat coc */}
               {(booking?.payment_status === 'confirmed' || isCompletePayment) && (
                 <div className="space-y-3">
                   <div className="text-sm text-gray-600 mb-3">
                     Hoan tat thanh toan so tien con lai:
                   </div>
-                  
+
                   <button
                     onClick={handleCompletePaymentAction}
                     disabled={isProcessingPayment}
@@ -464,7 +452,7 @@ const CheckOutTour = () => {
                   </button>
                 </div>
               )}
-              
+
               {/* Thong bao da thanh toan day du */}
               {booking?.payment_status === 'completed' && (
                 <div className="text-center py-4">
@@ -474,14 +462,14 @@ const CheckOutTour = () => {
                     </svg>
                     Da thanh toan day du
                   </div>
-                  
+
                   <div className="mt-4 text-sm text-gray-600">
                     <p>Tour đã được thanh toán hoàn tất.</p>
                     <p>Nếu cần hủy tour, vui lòng liên hệ admin.</p>
                   </div>
                 </div>
               )}
-              
+
               <div className="mt-4 text-xs text-gray-500 text-center">
                 Thanh toan an toan qua VNPay
               </div>
