@@ -15,54 +15,50 @@ const SumTour = () => {
         queryKey: ["checkOutBookingTour"],
         queryFn: () => instance.get("/checkOutBookingTour"),
     });
-    
-    const bookings = data?.data?.getCheckOutUserTour || [];
 
-    // Lấy ngày hiện tại
-    const today = dayjs();
-    const startOfWeek = dayjs().startOf("week");
-    const endOfWeek = dayjs().endOf("week");
-    const startOfMonth = dayjs().startOf("month");
-    const endOfMonth = dayjs().endOf("month");
+    const bookings = data?.data?.data || [];
 
-    // Lọc theo từng mốc thời gian
-    const todayCount = bookings.filter((item: any) =>
-        dayjs(item.BookingTourId?.createdAt).isSame(today, "day")
+    // Chỉ lấy các tour đã hoàn thành
+    const completedBookings = bookings.filter(
+        (b: any) => b.payment_status === "completed" && b.fullPaidAt
+    );
+
+    // Mốc thời gian
+    const today = dayjs().startOf("day");
+    const startOfWeek = dayjs().startOf("week").startOf("day");
+    const endOfWeek = dayjs().endOf("week").endOf("day");
+    const startOfMonth = dayjs().startOf("month").startOf("day");
+    const endOfMonth = dayjs().endOf("month").endOf("day");
+
+    // Count
+    const todayCount = completedBookings.filter((b: any) =>
+        dayjs(b.createdAt).isSame(today, "day")
     ).length;
 
-    const weekCount = bookings.filter((item: any) => {
-        const date = dayjs(item.BookingTourId?.createdAt);
-        return date.isBetween(startOfWeek, endOfWeek, null, "[]");
-    }).length;
+    const weekCount = completedBookings.filter((b: any) =>
+        dayjs(b.createdAt).isBetween(startOfWeek, endOfWeek, null, "[]")
+    ).length;
 
-    const monthCount = bookings.filter((item: any) => {
-        const date = dayjs(item.BookingTourId?.createdAt);
-        return date.isBetween(startOfMonth, endOfMonth, null, "[]");
-    }).length;
+    const monthCount = completedBookings.filter((b: any) =>
+        dayjs(b.createdAt).isBetween(startOfMonth, endOfMonth, null, "[]")
+    ).length;
 
-    // Tính tổng doanh thu
-    const totalRevenue = bookings.reduce((sum: number, item: any) => 
-        sum + (item.totalPriceTour || item.finalPrice || 0), 0
-    );
+    // Doanh thu
+    const todayRevenue = completedBookings
+        .filter((b:any) => dayjs(b.createdAt).isSame(today, "day"))
+        .reduce((sum:any, b:any) => sum + (b.totalPriceTour || 0), 0);
 
-    const todayRevenue = bookings.filter((item: any) =>
-        dayjs(item.BookingTourId?.createdAt).isSame(today, "day")
-    ).reduce((sum: number, item: any) => 
-        sum + (item.totalPriceTour || item.finalPrice || 0), 0
-    );
+    const weekRevenue = completedBookings
+        .filter((b: any) => dayjs(b.createdAt).isBetween(startOfWeek, endOfWeek, null, "[]"))
+        .reduce((sum:any, b:any) => sum + (b.totalPriceTour || 0), 0);
 
-    const weekRevenue = bookings.filter((item: any) => {
-        const date = dayjs(item.BookingTourId?.createdAt);
-        return date.isBetween(startOfWeek, endOfWeek, null, "[]");
-    }).reduce((sum: number, item: any) => 
-        sum + (item.totalPriceTour || item.finalPrice || 0), 0
-    );
+    const monthRevenue = completedBookings
+        .filter((b: any) => dayjs(b.createdAt).isBetween(startOfMonth, endOfMonth, null, "[]"))
+        .reduce((sum:any, b:any) => sum + (b.totalPriceTour || 0), 0);
 
-    const monthRevenue = bookings.filter((item: any) => {
-        const date = dayjs(item.BookingTourId?.createdAt);
-        return date.isBetween(startOfMonth, endOfMonth, null, "[]");
-    }).reduce((sum: number, item: any) => 
-        sum + (item.totalPriceTour || item.finalPrice || 0), 0
+    const totalRevenue = completedBookings.reduce(
+        (sum:any, b:any) => sum + (b.totalPriceTour || 0),
+        0
     );
 
     return (
@@ -129,11 +125,23 @@ const SumTour = () => {
                                     <CalendarOutlined style={{ fontSize: 36, color: "white" }} />
                                 </div>
 
-                                {/* Tổng quan */}
                                 <div style={{ marginBottom: 32 }}>
-                                    <Text style={{ fontSize: 18, color: "#666", marginBottom: 16, display: "block" }}>
-                                        Tổng cộng: <strong style={{ color: "#4facfe" }}>{bookings.length}</strong> tour - 
-                                        <strong style={{ color: "#00f2fe" }}> {(totalRevenue / 1000000).toFixed(1)}M VNĐ</strong>
+                                    <Text
+                                        style={{
+                                            fontSize: 18,
+                                            color: "#666",
+                                            marginBottom: 16,
+                                            display: "block",
+                                        }}
+                                    >
+                                        Tổng cộng:{" "}
+                                        <strong style={{ color: "#4facfe" }}>
+                                            {completedBookings.length}
+                                        </strong>{" "}
+                                        tour -{" "}
+                                        <strong style={{ color: "#00f2fe" }}>
+                                            {(totalRevenue / 1000000).toFixed(1)}M VNĐ
+                                        </strong>
                                     </Text>
                                 </div>
 
@@ -143,7 +151,7 @@ const SumTour = () => {
                                         justifyContent: "space-around",
                                         marginTop: 24,
                                         flexWrap: "wrap",
-                                        gap: "16px"
+                                        gap: "16px",
                                     }}
                                 >
                                     <div style={{ textAlign: "center", minWidth: "120px" }}>
@@ -158,7 +166,13 @@ const SumTour = () => {
                                             {todayCount}
                                         </div>
                                         <Text style={{ color: "#666", fontSize: 14 }}>Hôm nay</Text>
-                                        <div style={{ fontSize: 12, color: "#4facfe", marginTop: 4 }}>
+                                        <div
+                                            style={{
+                                                fontSize: 12,
+                                                color: "#4facfe",
+                                                marginTop: 4,
+                                            }}
+                                        >
                                             {(todayRevenue / 1000000).toFixed(1)}M VNĐ
                                         </div>
                                     </div>
@@ -173,10 +187,14 @@ const SumTour = () => {
                                         >
                                             {weekCount}
                                         </div>
-                                        <Text style={{ color: "#666", fontSize: 14 }}>
-                                            Tuần này
-                                        </Text>
-                                        <div style={{ fontSize: 12, color: "#00f2fe", marginTop: 4 }}>
+                                        <Text style={{ color: "#666", fontSize: 14 }}>Tuần này</Text>
+                                        <div
+                                            style={{
+                                                fontSize: 12,
+                                                color: "#00f2fe",
+                                                marginTop: 4,
+                                            }}
+                                        >
                                             {(weekRevenue / 1000000).toFixed(1)}M VNĐ
                                         </div>
                                     </div>
@@ -191,10 +209,14 @@ const SumTour = () => {
                                         >
                                             {monthCount}
                                         </div>
-                                        <Text style={{ color: "#666", fontSize: 14 }}>
-                                            Tháng này
-                                        </Text>
-                                        <div style={{ fontSize: 12, color: "#667eea", marginTop: 4 }}>
+                                        <Text style={{ color: "#666", fontSize: 14 }}>Tháng này</Text>
+                                        <div
+                                            style={{
+                                                fontSize: 12,
+                                                color: "#667eea",
+                                                marginTop: 4,
+                                            }}
+                                        >
                                             {(monthRevenue / 1000000).toFixed(1)}M VNĐ
                                         </div>
                                     </div>
