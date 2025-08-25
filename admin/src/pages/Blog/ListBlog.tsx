@@ -120,7 +120,7 @@ import {
           <Space>
             <Button
               icon={<EditOutlined />}
-              onClick={() => navigate(`/admin/blogs/edit/${record._id}`)}
+              onClick={() => navigate(`/admin/edit-blog/${record._id}`)}
             >
               Sửa
             </Button>
@@ -142,7 +142,7 @@ import {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => navigate("/admin/add-blogs")}
+            onClick={() => navigate("/admin/add-blog")}
           >
             Thêm mới
           </Button>

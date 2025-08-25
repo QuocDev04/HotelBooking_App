@@ -90,7 +90,7 @@ const EditBlog = () => {
     onSuccess: () => {
       message.success("Cập nhật blog thành công!");
       queryClient.invalidateQueries({ queryKey: ["blogs"] });
-      navigate("/admin/list-blogs");
+      navigate("/admin/list-blog");
     },
     onError: (error: any) => {
       message.error(error.response?.data?.message || "Có lỗi khi cập nhật!");
@@ -130,7 +130,7 @@ const EditBlog = () => {
       <Card
         title="Chỉnh sửa Blog"
         extra={
-          <Button onClick={() => navigate("/admin/list-blogs")}>Quay lại</Button>
+          <Button onClick={() => navigate("/admin/list-blog")}>Quay lại</Button>
         }
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
