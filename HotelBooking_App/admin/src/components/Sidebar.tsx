@@ -54,15 +54,6 @@ const Sidebar = () => {
             ],
         },
         {
-            name: 'Lịch trình vận chuyển',
-            icon: '🛣️',
-            children: [
-                { name: 'Danh sách Lịch trình', path: '/admin/list-Transport_Schedule', icon: '📝' },
-                { name: 'Thêm Lịch trình', path: '/admin/add-Transport_Schedule', icon: '🆕' },
-            ],
-        },
-
-        {
             name: 'Quản lý Blog',
             icon: '📝',
             children: [
