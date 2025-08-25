@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+
 import { useParams, useLocation } from "react-router-dom";
 import instanceClient from "../../../configs/instance";
 import dayjs from "dayjs";
@@ -213,6 +214,7 @@ const CheckOutTour = () => {
               <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-full w-10 h-10 flex items-center justify-center text-white text-lg font-bold shadow">
                 <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.7 0 8 1.34 8 4v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-2c0-2.66 5.3-4 8-4Zm0-2a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" /></svg>
               </div>
+
               <div className="font-bold text-blue-700 text-base bg-gradient-to-r from-blue-100 to-transparent px-2 py-1 rounded">THONG TIN LIEN LAC</div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -225,6 +227,7 @@ const CheckOutTour = () => {
                 <div className="text-gray-900">{booking?.email}</div>
               </div>
               <div>
+
                 <div className="font-medium text-gray-600">Dien thoai</div>
                 <div className="text-gray-900">{booking?.phone}</div>
               </div>
@@ -238,6 +241,7 @@ const CheckOutTour = () => {
               </div>
             </div>
           </div>
+
           
           {/* Chi tiet booking */}
           <div className="bg-white rounded-2xl shadow-lg border border-blue-100 p-6 transition hover:shadow-2xl">
@@ -292,6 +296,7 @@ const CheckOutTour = () => {
               aria-controls="guest-list-table"
               type="button"
             >
+
               <span>DANH SACH HANH KHACH</span>
               <span className={`transition-transform duration-300 ${showGuestList ? '' : 'rotate-180'}`}>
                 <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M6 15l6-6 6 6" /></svg>
@@ -304,6 +309,7 @@ const CheckOutTour = () => {
               <table className="min-w-full text-sm border rounded-xl overflow-hidden">
                 <thead>
                   <tr className="bg-blue-50">
+
                     <th className="border px-3 py-2 font-semibold text-gray-700">Ho ten</th>
                     <th className="border px-3 py-2 font-semibold text-gray-700">Ngay sinh</th>
                     <th className="border px-3 py-2 font-semibold text-gray-700">Gioi tinh</th>
@@ -313,6 +319,7 @@ const CheckOutTour = () => {
                 </thead>
                 <tbody>
                   {[
+
                     ...(booking?.adultPassengers ?? []).map((p: any) => ({ ...p, group: 'Nguoi lon' })),
                     ...(booking?.childPassengers ?? []).map((p: any) => ({ ...p, group: 'Tre em' })),
                     ...(booking?.toddlerPassengers ?? []).map((p: any) => ({ ...p, group: 'Tre nho' })),
@@ -328,6 +335,7 @@ const CheckOutTour = () => {
                         </td>
                         <td className="border px-3 py-2">{passenger.gender}</td>
                         <td className="border px-3 py-2">
+
                           {passenger.group} ({age} tuoi)
                         </td>
                         <td className="border px-3 py-2">
@@ -337,6 +345,7 @@ const CheckOutTour = () => {
                     );
                   })}
                 </tbody>
+
                 <tfoot>
                   <tr>
                     <td className="border px-3 py-2 text-right font-semibold" colSpan={4}>Tong cong:</td>
@@ -347,6 +356,7 @@ const CheckOutTour = () => {
             </div>
           </div>
         </div>
+
         
         {/* Phieu xac nhan booking */}
         <div className="md:col-span-1">
@@ -358,6 +368,7 @@ const CheckOutTour = () => {
                 {booking?.slotId?.tour?.nameTour}
               </div>
             </div>
+
             <div className="text-sm">Ma tour: <span className="font-medium text-gray-700">{booking?.slotId?.tour?._id}</span></div>
             <div className="font-semibold text-xs mt-3 text-blue-700">THONG TIN DI CHUYEN</div>
             
@@ -369,6 +380,7 @@ const CheckOutTour = () => {
                 <span className="font-semibold text-blue-700">VU303</span>
               </span>
               <span className="text-gray-700">17:05</span>
+
               <span className="mx-1 text-gray-400">-</span>
               <span className="text-gray-700">18:10</span>
             </div>

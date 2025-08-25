@@ -254,9 +254,6 @@ const HotelDetail: React.FC = () => {
         if (values.paymentMethod === 'bank_transfer' && response.data.vnpayUrl) {
           // Redirect to VNPay
           window.location.href = response.data.vnpayUrl;
-        } else if (values.paymentMethod === 'cash') {
-          // Navigate to hotel booking confirmation page
-          navigate(`/hotel-booking-confirmation/${response.data.bookingId}`);
         } else if (values.paymentMethod === 'bank_transfer') {
           // Navigate to checkout hotel page for VNPay payment options
           navigate(`/checkout-hotel/${response.data.bookingId}`);
@@ -264,6 +261,7 @@ const HotelDetail: React.FC = () => {
           // Navigate to hotel payment page
           navigate(`/payment/hotel-booking/${response.data.bookingId}`);
         }
+        // Note: Cash payment is now handled separately in handleCashPayment function
         
         checkAvailability();
       } else {
@@ -291,19 +289,98 @@ const HotelDetail: React.FC = () => {
     processBooking(formValues);
   };
 
-  const handleCashPayment = () => {
+  const handleCashPayment = async () => {
     if (bookingLoading) return;
     
     setDepositModalVisible(false);
+    setBookingLoading(true);
     
-    // Lấy tất cả giá trị form hiện tại
-    const formValues = form.getFieldsValue();
-    
-    // Đảm bảo phương thức thanh toán là tiền mặt
-    formValues.paymentMethod = "cash";
-    
-    // Gọi API với phương thức thanh toán tiền mặt
-    processBooking(formValues);
+    try {
+      // Lấy tất cả giá trị form hiện tại
+      const formValues = form.getFieldsValue();
+      
+      // Đảm bảo phương thức thanh toán là tiền mặt
+      formValues.paymentMethod = "cash";
+      
+      const bookingData = {
+        userId: '000000000000000000000000', // Default ObjectId for guest booking
+        hotelId: hotel?._id,
+        checkInDate,
+        checkOutDate,
+        fullNameUser: formValues.fullName,
+        email: formValues.email,
+        phone: formValues.phone,
+        address: formValues.address || '',
+        roomBookings: [{
+          roomTypeIndex: hotel?.roomTypes.findIndex(rt => rt._id === selectedRoomType._id),
+          numberOfRooms: formValues.numberOfRooms,
+          guests: Array.from({ length: guests }, (_, i) => ({
+            fullName: i === 0 ? formValues.fullName : `Guest ${i + 1}`,
+            gender: 'Nam', // Default gender, can be customized later
+            birthDate: new Date('1990-01-01') // Default birth date, can be customized later
+          }))
+        }],
+        payment_method: formValues.paymentMethod,
+        paymentType: formValues.paymentType,
+        note: formValues.note || '',
+        specialRequests: formValues.specialRequests || ''
+      };
+
+      const response = await axios.post('http://localhost:8080/api/hotel-booking', bookingData);
+      
+      if (response.data.success) {
+        setBookingModalVisible(false);
+        form.resetFields();
+        
+        // Tính toán deadline thanh toán (24 giờ)
+        const deadline = new Date();
+        deadline.setHours(deadline.getHours() + 24);
+        const deadlineStr = deadline.toLocaleString('vi-VN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        // Hiển thị modal thông báo thành công
+        Modal.success({
+          title: "Đặt phòng thành công!",
+          content: (
+            <div>
+              <p>Bạn đã chọn thanh toán tiền mặt tại văn phòng.</p>
+              <p className="font-semibold mt-2">Thông tin thanh toán:</p>
+              <ul className="list-disc pl-5 mt-1">
+                <li>Mã đặt phòng: {response.data.bookingId}</li>
+                <li>Số tiền cần thanh toán: {selectedRoomType ? Math.round(selectedRoomType.finalPrice * 0.3).toLocaleString() : '0'} ₫</li>
+                <li className="text-red-600 font-semibold">Hạn thanh toán: {deadlineStr}</li>
+                <li>Địa chỉ: Số 81A ngõ 295 - Phố Bằng Liệt - Phường Lĩnh Nam - Quận Hoàng Mai - Hà Nội</li>
+                <li>Thời gian: 9h00 - 17h30 từ thứ 2 - đến thứ 6 và 9h00 - 12h00 thứ 7</li>
+              </ul>
+              <div className="bg-red-50 border border-red-200 rounded p-3 mt-3">
+                <p className="text-red-600 font-semibold">⚠️ LƯU Ý QUAN TRỌNG:</p>
+                <ul className="text-red-600 text-sm mt-1">
+                  <li>• Bạn có 24 giờ để thanh toán đặt cọc kể từ thời điểm đặt phòng</li>
+                  <li>• Đặt phòng sẽ tự động bị hủy nếu quá thời hạn thanh toán</li>
+                  <li>• Vui lòng đến văn phòng trước thời hạn để hoàn tất thanh toán</li>
+                </ul>
+              </div>
+            </div>
+          ),
+          onOk: () => {
+            navigate(`/hotel-booking-confirmation/${response.data.bookingId}`);
+          },
+        });
+        
+        checkAvailability();
+      } else {
+        message.error(response.data.message || 'Đặt phòng thất bại');
+      }
+    } catch (error: any) {
+      message.error(error.response?.data?.message || 'Có lỗi xảy ra khi đặt phòng');
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   if (loading) {

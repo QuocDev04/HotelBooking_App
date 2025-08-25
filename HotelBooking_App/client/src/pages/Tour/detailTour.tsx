@@ -37,6 +37,7 @@ const TourPage = () => {
   })
   const tours = tour?.data?.tour
 
+
   // Thêm useEffect để log các giá trị quan trọng
   useEffect(() => {
     console.log("Selected date:", selectedDate);
@@ -57,6 +58,7 @@ const TourPage = () => {
     scrollToCalendar();
   };
 
+
   // Cập nhật hàm setSelectedDate để log thêm thông tin
   const handleDateSelect = (date: Date | null) => {
     console.log("Date selected:", date);
@@ -72,7 +74,7 @@ const TourPage = () => {
   };
   return (
     <>
-      <div className="max-w-screen-xl p-4 mx-auto font-sans mt-20">
+      <div className="max-w-screen-xl p-4 mx-auto font-sans ">
         {/* Title */}
         <h1 className="mb-2 text-2xl font-semibold">
           {tours?.nameTour}
@@ -124,6 +126,7 @@ const TourPage = () => {
             <LeftTourDetail
               refDiv={calendarRef}
               selectedDate={selectedDate}
+
               setSelectedDate={handleDateSelect}
             />
             <div className="mt-8">

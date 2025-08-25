@@ -12,7 +12,7 @@ interface Bill {
         username: string;
         email: string;
     } | string;
-    
+
     // Tour booking fields
     slotId?: {
         _id: string;
@@ -48,15 +48,16 @@ interface Bill {
     childPassengers?: any[];
     toddlerPassengers?: any[];
     infantPassengers?: any[];
-    
+
     // Hotel booking fields
     BookingTourId?: any;
-    
+
     // Common fields
     depositAmount?: number;
     isDeposit?: boolean;
     isFullyPaid?: boolean;
     payment_method: string;
+    paymentType?: string; // Added missing field
     payment_status: string;
     createdAt: string;
     updatedAt: string;
@@ -69,11 +70,11 @@ interface Bill {
 const InfoUser = () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    
+    const userId = localStorage.getItem("userId");
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize] = useState(5);
-    
+
     // Modal states
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
@@ -82,23 +83,21 @@ const InfoUser = () => {
     const [cancelReason, setCancelReason] = useState('');
 
     // Fetch user data
-    const { data: users } = useQuery({
-        queryKey: ['users'],
-        queryFn: async () => {
-            const response = await instanceClient.get('/users/profile');
-            return response.data;
-        }
-    });
+    const { data: user } = useQuery({
+        queryKey: ['user', userId],
+        queryFn: () => instanceClient.get(`user/${userId}`)
+    })
+    console.log('user', user?.data?.user);
+    const users = user?.data?.user || [];
 
     // Fetch bills data
-    const { data: bills = [] } = useQuery({
-        queryKey: ['bills'],
-        queryFn: async () => {
-            const response = await instanceClient.get('/bills/user');
-            return response.data;
-        }
-    });
+    const { data: bill } = useQuery({
+        queryKey: ['checkOutBookingTour', userId],
+        queryFn: () => instanceClient.get(`checkOutBookingTour/${userId}`)
+    })
 
+    const bills: Bill[] = bill?.data?.data || [];
+    console.log('bill', bills);
     // Request cancel mutation
     const requestCancelMutation = useMutation({
         mutationFn: async ({ billId, reason }: { billId: string; reason: string }) => {
@@ -217,18 +216,28 @@ const InfoUser = () => {
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
             <div className="px-6 py-8 mx-auto max-w-7xl sm:px-8 lg:px-12">
                 {/* Header Section */}
+<<<<<<< HEAD
                 <div className="pt-12 mb-16 text-center">
                     <h1 className="mb-6 text-4xl font-bold text-gray-900">
+=======
+                <div className="text-center mb-12 ">
+                    <h1 className="text-4xl font-bold text-gray-900 mb-4 my-20">
+>>>>>>> 6f2799cd82d68c2e2dd007db003c5de813d02bd1
                         Thông tin người dùng
                     </h1>
                     <p className="text-lg text-gray-600">
-                        Quản lý và theo dõi các tour du lịch của bạn
+                        Quản lý và theo dõi các đặt phòng và tour du lịch của bạn
                     </p>
                 </div>
 
                 {/* User Profile Card */}
+<<<<<<< HEAD
                 <div className="p-10 mx-2 mb-16 bg-white border border-gray-100 shadow-xl rounded-2xl">
                     <div className="flex flex-col items-center space-y-4 md:flex-row md:space-y-0 md:space-x-8">
+=======
+                <div className="bg-white rounded-2xl shadow-xl p-8 mb-12 border border-gray-100">
+                    <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8">
+>>>>>>> 6f2799cd82d68c2e2dd007db003c5de813d02bd1
                         <div className="relative">
                             <img
                                 src={users?.avatar || "https://png.pngtree.com/element_our/20200610/ourmid/pngtree-character-default-avatar-image_2237203.jpg"}
@@ -259,6 +268,7 @@ const InfoUser = () => {
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
 
@@ -396,15 +406,26 @@ const InfoUser = () => {
                                                         />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
+<<<<<<< HEAD
                                                         <h3 className="mb-2 text-xl font-bold text-gray-900 truncate">
                                                             {bill.slotId?.tour?.nameTour || 'Tour không xác định'}
+=======
+                                                        <h3 className="text-xl font-bold text-gray-900 mb-2 truncate">
+                                                            {bill.slotId?.tour?.nameTour
+                                                                ? bill.slotId.tour.nameTour.split(" ").length > 8
+                                                                    ? bill.slotId.tour.nameTour.split(" ").slice(0, 8).join(" ") + "..."
+                                                                    : bill.slotId.tour.nameTour
+                                                                : "Tour không xác định"}
+>>>>>>> 6f2799cd82d68c2e2dd007db003c5de813d02bd1
                                                         </h3>
                                                         <div className="grid grid-cols-1 gap-3 text-sm text-gray-600 sm:grid-cols-2">
                                                             <div className="flex items-center space-x-2">
                                                                 <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                                 </svg>
-                                                                <span>Ngày khởi hành: {bill.slotId?.dateTour ? new Date(bill.slotId.dateTour).toLocaleDateString('vi-VN') : 'N/A'}</span>
+                                                                <span>
+                                                                    Ngày khởi hành: {new Date(bill?.slotId?.dateTour).toLocaleDateString('vi-VN')}
+                                                                </span>
                                                             </div>
                                                             <div className="flex items-center space-x-2">
                                                                 <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -422,7 +443,7 @@ const InfoUser = () => {
                                                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(bill.payment_status)}`}>
                                                     {getStatusText(bill.payment_status)}
                                                 </span>
-                                                
+
                                                 <div className="flex space-x-2">
                                                     <button
                                                         onClick={() => openDetailModal(bill)}
@@ -430,7 +451,7 @@ const InfoUser = () => {
                                                     >
                                                         Chi tiết
                                                     </button>
-                                                    
+
                                                     {(bill.payment_status === 'pending' || bill.payment_status === 'deposit_paid') && (
                                                         <button
                                                             onClick={() => openCancelModal(bill)}
@@ -550,6 +571,13 @@ const InfoUser = () => {
                                                     <span className="text-sm text-gray-600">Thời gian:</span>
                                                     <span className="text-sm font-semibold text-gray-900">{selectedBill?.slotId?.tour?.duration || 'N/A'}</span>
                                                 </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                    </svg>
+                                                    <span className="text-sm text-gray-600">Loại tour:</span>
+                                                    <span className="text-sm font-semibold text-gray-900">{selectedBill?.slotId?.tour?.tourType || 'N/A'}</span>
+                                                </div>
                                             </div>
                                             <div className="space-y-2">
                                                 <div className="flex items-center space-x-2">
@@ -577,16 +605,211 @@ const InfoUser = () => {
                                                         {selectedBill?.slotId?.dateTour ? new Date(selectedBill.slotId.dateTour).toLocaleDateString('vi-VN') : 'N/A'}
                                                     </span>
                                                 </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    <span className="text-sm text-gray-600">Ngày đặt:</span>
+                                                    <span className="text-sm font-semibold text-gray-900">
+                                                        {selectedBill?.createdAt ? new Date(selectedBill.createdAt).toLocaleDateString('vi-VN') : 'N/A'}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
+                            {/* Booking Details */}
+                            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 border border-green-200">
+                                <h4 className="font-bold text-lg text-gray-900 mb-4 flex items-center">
+                                    <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Chi tiết đặt chỗ
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between">
+                                            <span className="text-sm text-gray-600">Trạng thái thanh toán:</span>
+                                            <span className={`text-sm font-semibold px-2 py-1 rounded-full ${getStatusColor(selectedBill?.payment_status || '')}`}>
+                                                {getStatusText(selectedBill?.payment_status || '')}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-sm text-gray-600">Phương thức thanh toán:</span>
+                                            <span className="text-sm font-semibold text-gray-900">
+                                                {selectedBill?.payment_method === 'bank_transfer' ? 'Chuyển khoản ngân hàng' :
+                                                    selectedBill?.payment_method === 'cash' ? 'Tiền mặt' :
+                                                        selectedBill?.payment_method === 'vnpay' ? 'VNPay' : selectedBill?.payment_method}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-sm text-gray-600">Loại thanh toán:</span>
+                                            <span className="text-sm font-semibold text-gray-900">
+                                                {selectedBill?.paymentType === 'full' ? 'Thanh toán toàn bộ' :
+                                                    selectedBill?.paymentType === 'deposit' ? 'Đặt cọc' :
+                                                        selectedBill?.paymentType === 'remaining' ? 'Thanh toán còn lại' : selectedBill?.paymentType}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-sm text-gray-600">Đã đặt cọc:</span>
+                                            <span className="text-sm font-semibold text-gray-900">
+                                                {selectedBill?.isDeposit ? 'Có' : 'Không'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between">
+                                            <span className="text-sm text-gray-600">Người lớn:</span>
+                                            <span className="text-sm font-semibold text-gray-900">{selectedBill?.adultsTour || 0} người</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-sm text-gray-600">Trẻ em:</span>
+                                            <span className="text-sm font-semibold text-gray-900">{selectedBill?.childrenTour || 0} người</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-sm text-gray-600">Trẻ nhỏ:</span>
+                                            <span className="text-sm font-semibold text-gray-900">{selectedBill?.toddlerTour || 0} người</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-sm text-gray-600">Em bé:</span>
+                                            <span className="text-sm font-semibold text-gray-900">{selectedBill?.infantTour || 0} người</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Passenger Information */}
+                            {(selectedBill?.adultPassengers && selectedBill.adultPassengers.length > 0) ||
+                                (selectedBill?.childPassengers && selectedBill.childPassengers.length > 0) ||
+                                (selectedBill?.toddlerPassengers && selectedBill.toddlerPassengers.length > 0) ||
+                                (selectedBill?.infantPassengers && selectedBill.infantPassengers.length > 0) ? (
+                                <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-5 border border-purple-200">
+                                    <h4 className="font-bold text-lg text-gray-900 mb-4 flex items-center">
+                                        <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                        Thông tin hành khách
+                                    </h4>
+
+                                    {/* Adult Passengers */}
+                                    {selectedBill?.adultPassengers && selectedBill.adultPassengers.length > 0 && (
+                                        <div className="mb-4">
+                                            <h5 className="font-semibold text-gray-800 mb-3 text-sm">Người lớn ({selectedBill.adultPassengers.length})</h5>
+                                            <div className="space-y-3">
+                                                {selectedBill.adultPassengers.map((passenger, index) => (
+                                                    <div key={index} className="bg-white rounded-lg p-4 border border-purple-200 shadow-sm">
+                                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                            <div>
+                                                                <span className="text-xs text-gray-500">Họ và tên:</span>
+                                                                <p className="text-sm font-semibold text-gray-900">{passenger.fullName}</p>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-xs text-gray-500">Giới tính:</span>
+                                                                <p className="text-sm font-semibold text-gray-900">{passenger.gender}</p>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-xs text-gray-500">Ngày sinh:</span>
+                                                                <p className="text-sm font-semibold text-gray-900">
+                                                                    {new Date(passenger.birthDate).toLocaleDateString('vi-VN')}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="mt-2">
+                                                            <span className="text-xs text-gray-500">Phòng đơn:</span>
+                                                            <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${passenger.singleRoom ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                                                                }`}>
+                                                                {passenger.singleRoom ? 'Có' : 'Không'}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Child Passengers */}
+                                    {selectedBill?.childPassengers && selectedBill.childPassengers.length > 0 && (
+                                        <div className="mb-4">
+                                            <h5 className="font-semibold text-gray-800 mb-3 text-sm">Trẻ em ({selectedBill.childPassengers.length})</h5>
+                                            <div className="space-y-3">
+                                                {selectedBill.childPassengers.map((passenger, index) => (
+                                                    <div key={index} className="bg-white rounded-lg p-4 border border-blue-200 shadow-sm">
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                            <div>
+                                                                <span className="text-xs text-gray-500">Họ và tên:</span>
+                                                                <p className="text-sm font-semibold text-gray-900">{passenger.fullName || 'N/A'}</p>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-xs text-gray-500">Giới tính:</span>
+                                                                <p className="text-sm font-semibold text-gray-900">{passenger.gender || 'N/A'}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Toddler Passengers */}
+                                    {selectedBill?.toddlerPassengers && selectedBill.toddlerPassengers.length > 0 && (
+                                        <div className="mb-4">
+                                            <h5 className="font-semibold text-gray-800 mb-3 text-sm">Trẻ nhỏ ({selectedBill.toddlerPassengers.length})</h5>
+                                            <div className="space-y-3">
+                                                {selectedBill.toddlerPassengers.map((passenger, index) => (
+                                                    <div key={index} className="bg-white rounded-lg p-4 border border-green-200 shadow-sm">
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                            <div>
+                                                                <span className="text-xs text-gray-500">Họ và tên:</span>
+                                                                <p className="text-sm font-semibold text-gray-900">{passenger.fullName || 'N/A'}</p>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-xs text-gray-500">Giới tính:</span>
+                                                                <p className="text-sm font-semibold text-gray-900">{passenger.gender || 'N/A'}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Infant Passengers */}
+                                    {selectedBill?.infantPassengers && selectedBill.infantPassengers.length > 0 && (
+                                        <div>
+                                            <h5 className="font-semibold text-gray-800 mb-3 text-sm">Em bé ({selectedBill.infantPassengers.length})</h5>
+                                            <div className="space-y-3">
+                                                {selectedBill.infantPassengers.map((passenger, index) => (
+                                                    <div key={index} className="bg-white rounded-lg p-4 border border-pink-200 shadow-sm">
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                            <div>
+                                                                <span className="text-xs text-gray-500">Họ và tên:</span>
+                                                                <p className="text-sm font-semibold text-gray-900">{passenger.fullName || 'N/A'}</p>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-xs text-gray-500">Giới tính:</span>
+                                                                <p className="text-sm font-semibold text-gray-900">{passenger.gender || 'N/A'}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : null}
+
                             {/* Tour Images */}
+<<<<<<< HEAD
                             {selectedBill.slotId?.tour?.imageTour && selectedBill.slotId.tour.imageTour.length > 0 && (
                                 <div className="p-5 border border-gray-200 bg-gray-50 rounded-xl">
                                     <h4 className="flex items-center mb-4 text-lg font-bold text-gray-900">
+=======
+                            {selectedBill?.slotId?.tour?.imageTour && selectedBill.slotId.tour.imageTour.length > 0 && (
+                                <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                                    <h4 className="font-bold text-lg text-gray-900 mb-4 flex items-center">
+>>>>>>> 6f2799cd82d68c2e2dd007db003c5de813d02bd1
                                         <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
@@ -780,6 +1003,7 @@ const InfoUser = () => {
                             >
                                 {requestCancelMutation.isPending ? (
                                     <div className="flex items-center">
+<<<<<<< HEAD
                                         <svg className="w-4 h-4 mr-3 -ml-1 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -799,3 +1023,24 @@ const InfoUser = () => {
  }
  
  export default InfoUser
+=======
+                                        <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Đang gửi yêu cầu...
+                                    </div>
+                                ) : (
+                                    'Gửi yêu cầu hủy'
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
+export default InfoUser
+>>>>>>> 6f2799cd82d68c2e2dd007db003c5de813d02bd1

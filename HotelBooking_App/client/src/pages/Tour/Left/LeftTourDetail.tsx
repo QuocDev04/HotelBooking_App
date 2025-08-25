@@ -8,6 +8,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+
 import { toast } from 'react-toastify';
 
 dayjs.extend(utc);
@@ -55,11 +56,16 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
     const events = slots?.map((slot: any) => {
         const date = dayjs(slot.dateTour);
 
+
+        // Nếu có finalPrice thì lấy finalPrice, không thì lấy price
+        const priceToShow = tours?.finalPrice ?? tours?.price;
+
         return {
-            title: `Còn: ${slot.availableSeats} chỗ \nGiá: ${tours?.finalPrice?.toLocaleString('vi-VN')} đ`,
+            title: `Còn: ${slot.availableSeats} chỗ \nGiá: ${priceToShow?.toLocaleString('vi-VN')} đ`,
             date: date.format("YYYY-MM-DD")
         };
     });
+
     
     function handleDateClick(info: any) {
         const clickedDate = dayjs(info.date).format("YYYY-MM-DD");
@@ -67,6 +73,7 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
 
         if (isDateAvailable) {
             setSelectedDate(info.date);
+
             // Tìm slot tương ứng để hiển thị thông tin
             const slot = slots.find((s: any) => dayjs(s.dateTour).format("YYYY-MM-DD") === clickedDate);
             if (slot) {
@@ -86,6 +93,7 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
 
         if (isDateAvailable) {
             setSelectedDate(clickInfo.event.start);
+
             // Tìm slot tương ứng để hiển thị thông tin
             const slot = slots.find((s: any) => dayjs(s.dateTour).format("YYYY-MM-DD") === clickedDate);
             if (slot) {
@@ -165,12 +173,14 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                 </span>
                             </div>
 
+
                             {/* <div className="mb-4">
                                 <div className="text-center text-blue-700 text-2xl font-bold flex items-center justify-center gap-2 mb-6">
                                     Phương tiện di chuyển {selectedSlot?.tour?.itemTransport?.[0]?.TransportId?.transportType}
                                 </div>
 
                                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+
                                     
                                     <div className="flex-1 text-center">
                                         <div className="font-semibold text-gray-700">
@@ -179,6 +189,7 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                                 {selectedDate ? dayjs(selectedDate).format("DD/MM/YYYY") : ""}
                                             </span>
                                         </div>
+
                                         <div className="text-xs text-gray-500 mt-1">
                                             <span className="text-red-500 font-bold">
                                                 {selectedSlot?.tour?.itemTransport?.[0]?.TransportId?.transportName}
@@ -187,6 +198,7 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                     </div>
 
                                     <div className="hidden md:block w-px h-16 bg-gray-200 mx-4"></div>
+
 
                                    
                                     <div className="flex-1 text-center">
@@ -206,6 +218,7 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                         </div>
                                     </div>
                                 </div>
+
                             </div> */}
                             <div className="hidden md:block w-full h-px bg-gray-200 mx-4 my-6"></div>
                             {/* Giá */}
@@ -218,9 +231,11 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                         <div className="border mb-6 rounded-xl p-4">
                                             <div className="flex justify-between ">
                                                 <span>Người lớn</span>
-                                                <span className="text-red-600 font-bold">
-                                                    {selectedSlot?.tour?.finalPrice?.toLocaleString('vi-VN')} đ
-                                                </span>
+
+                                                    <span className="text-red-600 font-bold">
+                                                        {(selectedSlot?.tour?.finalPrice ?? selectedSlot?.tour?.price)?.toLocaleString('vi-VN')} đ
+                                                    </span>
+
                                             </div>
                                             <div className="text-xs text-gray-500 ">(Từ 12 tuổi trở lên)</div>
                                         </div>
@@ -266,5 +281,6 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
         </>
     );
 };
+
 
 export default LeftTourDetail;

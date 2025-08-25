@@ -19,6 +19,7 @@ const Revenue = () => {
     const { Text } = Typography;
 
     const { data: revenueChartData } = useQuery({
+
         queryKey: ["accurateRevenue"],
         queryFn: () => instance.get("/admin/bookings/revenue?groupBy=month"),
     });
@@ -34,6 +35,7 @@ const Revenue = () => {
         const mapMonthToAmount: Record<string, number> = {};
 
         rawData.forEach((item: any) => {
+
             const monthNumber = item._id.month;
             const monthKey = `Tháng ${monthNumber}`;
             mapMonthToAmount[monthKey] = (mapMonthToAmount[monthKey] || 0) + (item.revenue || 0);
@@ -46,6 +48,7 @@ const Revenue = () => {
     };
 
     const chartData = groupedData();
+
 
     const totalRevenue = revenueData.actualRevenue || 0;
     const grossRevenue = revenueData.grossRevenue || 0;
@@ -83,6 +86,7 @@ const Revenue = () => {
                                     📈 Doanh thu theo tháng
                                 </Text>
                             </Space>
+
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                 <Text style={{ fontSize: 16, color: "#333", fontWeight: 'bold' }}>
                                     Doanh thu thực tế: {(totalRevenue / 1_000_000).toFixed(1)}M VNĐ

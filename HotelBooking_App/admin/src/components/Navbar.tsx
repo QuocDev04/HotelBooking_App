@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import logo from '../assets/logo.png';
+
 import { useUser, UserButton, useAuth } from "@clerk/clerk-react";
 import { useQuery } from '@tanstack/react-query';
 import { instanceAdmin } from '../configs/axios';
@@ -7,11 +8,13 @@ import { BellOutlined } from '@ant-design/icons';
 
 const Navbar = () => {
     const { isSignedIn, user } = useUser();
+
     const { getToken } = useAuth();
 
     // Lấy thống kê booking để hiển thị thông báo
     const { data: bookingStats, refetch } = useQuery({
         queryKey: ['booking-stats'],
+
         queryFn: async () => {
             try {
                 const token = await getToken();

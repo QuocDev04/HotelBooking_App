@@ -1,5 +1,6 @@
 const express = require("express");
 const { StatusCodes } = require("http-status-codes");
+
 const { verifyClerkToken, verifyClerkTokenAndAdmin } = require("../../Middleware/Middleware.js");
 const Admin = require('./../../models/People/AdminModel.js');
 
@@ -59,6 +60,7 @@ AdminRouter.post("/syncUser", verifyClerkToken, async (req, res) => {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
     }
   });
+
 
 // API để lấy danh sách tất cả admin
 AdminRouter.get("/admins", verifyClerkTokenAndAdmin, async (req, res) => {

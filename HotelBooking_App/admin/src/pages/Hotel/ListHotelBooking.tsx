@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Table, Button, Space, Modal, message, Input, Card, Tag, Select, DatePicker } from 'antd';
-import { EyeOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
+import { EyeOutlined, DeleteOutlined, SearchOutlined, CheckOutlined, DollarOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
+import { instanceAdmin } from "../../configs/axios";
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -12,21 +13,34 @@ interface HotelBooking {
   _id: string;
   hotelId: {
     _id: string;
-    name: string;
-    city: string;
+    hotelName: string;
+    location: {
+      locationName: string;
+      country: string;
+    };
+    address: string;
   };
   userId: {
     _id: string;
-    name: string;
+    username: string;
     email: string;
   };
-  roomType: string;
+  fullNameUser: string;
+  email: string;
+  phone: string;
   checkInDate: string;
   checkOutDate: string;
-  guests: number;
-  totalAmount: number;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  paymentStatus: 'pending' | 'paid' | 'refunded';
+  numberOfNights: number;
+  totalGuests: number;
+  totalPrice: number;
+  payment_status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'pending_cancel' | 'deposit_paid';
+  payment_method: 'cash' | 'bank_transfer';
+  roomBookings: Array<{
+    roomTypeName: string;
+    numberOfRooms: number;
+    pricePerNight: number;
+    totalPrice: number;
+  }>;
   createdAt: string;
   updatedAt: string;
 }
@@ -42,9 +56,10 @@ const ListHotelBooking: React.FC = () => {
   const { data: bookings = [], isLoading } = useQuery({
     queryKey: ['hotel-bookings'],
     queryFn: async () => {
-      const response = await fetch('/api/hotel-bookings');
+      const response = await fetch('http://localhost:8080/api/admin/hotel-bookings');
       if (!response.ok) throw new Error('Failed to fetch hotel bookings');
-      return response.json();
+      const data = await response.json();
+      return data.bookings || [];
     }
   });
 
@@ -66,6 +81,36 @@ const ListHotelBooking: React.FC = () => {
     }
   });
 
+  // Confirm deposit payment mutation
+  const confirmPaymentMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await instanceAdmin.put(`/admin/hotel-bookings/confirm-payment/${id}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['hotel-bookings'] });
+      message.success('Xác nhận đặt cọc thành công!');
+    },
+    onError: (error: any) => {
+      message.error(error.response?.data?.message || 'Có lỗi xảy ra khi xác nhận đặt cọc!');
+    }
+  });
+
+  // Confirm full payment mutation
+  const confirmFullPaymentMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await instanceAdmin.put(`/admin/hotel-bookings/confirm-full-payment/${id}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['hotel-bookings'] });
+      message.success('Xác nhận thanh toán đầy đủ thành công!');
+    },
+    onError: (error: any) => {
+      message.error(error.response?.data?.message || 'Có lỗi xảy ra khi xác nhận thanh toán!');
+    }
+  });
+
   const handleDelete = (id: string, hotelName: string) => {
     Modal.confirm({
       title: 'Xác nhận xóa',
@@ -79,13 +124,13 @@ const ListHotelBooking: React.FC = () => {
 
   const filteredBookings = bookings.filter((booking: HotelBooking) => {
     const matchesSearch = 
-      booking.hotelId?.name?.toLowerCase().includes(searchText.toLowerCase()) ||
-      booking.userId?.name?.toLowerCase().includes(searchText.toLowerCase()) ||
-      booking.userId?.email?.toLowerCase().includes(searchText.toLowerCase()) ||
-      booking.roomType?.toLowerCase().includes(searchText.toLowerCase());
+      booking.hotelId?.hotelName?.toLowerCase().includes(searchText.toLowerCase()) ||
+      booking.fullNameUser?.toLowerCase().includes(searchText.toLowerCase()) ||
+      booking.email?.toLowerCase().includes(searchText.toLowerCase()) ||
+      booking.phone?.toLowerCase().includes(searchText.toLowerCase());
     
-    const matchesStatus = !statusFilter || booking.status === statusFilter;
-    const matchesPayment = !paymentFilter || booking.paymentStatus === paymentFilter;
+    const matchesStatus = !statusFilter || booking.payment_status === statusFilter;
+    const matchesPayment = !paymentFilter || booking.payment_method === paymentFilter;
     
     const matchesDate = !dateRange || (
       dayjs(booking.checkInDate).isBetween(dateRange[0], dateRange[1], 'day', '[]') ||
@@ -101,15 +146,16 @@ const ListHotelBooking: React.FC = () => {
       case 'pending': return 'orange';
       case 'cancelled': return 'red';
       case 'completed': return 'blue';
+      case 'pending_cancel': return 'volcano';
+      case 'deposit_paid': return 'cyan';
       default: return 'default';
     }
   };
 
-  const getPaymentStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid': return 'green';
-      case 'pending': return 'orange';
-      case 'refunded': return 'red';
+  const getPaymentStatusColor = (method: string) => {
+    switch (method) {
+      case 'bank_transfer': return 'blue';
+      case 'cash': return 'green';
       default: return 'default';
     }
   };
@@ -120,16 +166,17 @@ const ListHotelBooking: React.FC = () => {
       case 'pending': return 'Chờ xác nhận';
       case 'cancelled': return 'Đã hủy';
       case 'completed': return 'Hoàn thành';
+      case 'pending_cancel': return 'Chờ hủy';
+      case 'deposit_paid': return 'Đã đặt cọc';
       default: return status;
     }
   };
 
-  const getPaymentStatusText = (status: string) => {
-    switch (status) {
-      case 'paid': return 'Đã thanh toán';
-      case 'pending': return 'Chờ thanh toán';
-      case 'refunded': return 'Đã hoàn tiền';
-      default: return status;
+  const getPaymentStatusText = (method: string) => {
+    switch (method) {
+      case 'bank_transfer': return 'Chuyển khoản';
+      case 'cash': return 'Tiền mặt';
+      default: return method;
     }
   };
 
@@ -139,8 +186,8 @@ const ListHotelBooking: React.FC = () => {
       key: 'hotel',
       render: (record: HotelBooking) => (
         <div>
-          <div className="font-medium">{record.hotelId?.name || 'N/A'}</div>
-          <div className="text-sm text-gray-500">{record.hotelId?.city || 'N/A'}</div>
+          <div className="font-medium">{record.hotelId?.hotelName || 'N/A'}</div>
+          <div className="text-sm text-gray-500">{record.hotelId?.location?.locationName || 'N/A'}</div>
         </div>
       )
     },
@@ -149,15 +196,23 @@ const ListHotelBooking: React.FC = () => {
       key: 'customer',
       render: (record: HotelBooking) => (
         <div>
-          <div className="font-medium">{record.userId?.name || 'N/A'}</div>
-          <div className="text-sm text-gray-500">{record.userId?.email || 'N/A'}</div>
+          <div className="font-medium">{record.fullNameUser || 'N/A'}</div>
+          <div className="text-sm text-gray-500">{record.email || 'N/A'}</div>
         </div>
       )
     },
     {
       title: 'Loại phòng',
-      dataIndex: 'roomType',
-      key: 'roomType'
+      key: 'roomType',
+      render: (record: HotelBooking) => (
+        <div>
+          {record.roomBookings?.map((room, index) => (
+            <div key={index} className="text-sm">
+              {room.roomTypeName} ({room.numberOfRooms} phòng)
+            </div>
+          ))}
+        </div>
+      )
     },
     {
       title: 'Check-in / Check-out',
@@ -175,14 +230,14 @@ const ListHotelBooking: React.FC = () => {
     },
     {
       title: 'Số khách',
-      dataIndex: 'guests',
-      key: 'guests',
+      dataIndex: 'totalGuests',
+      key: 'totalGuests',
       align: 'center' as const
     },
     {
       title: 'Tổng tiền',
-      dataIndex: 'totalAmount',
-      key: 'totalAmount',
+      dataIndex: 'totalPrice',
+      key: 'totalPrice',
       render: (amount: number) => (
         <span className="font-medium text-green-600">
           {amount?.toLocaleString('vi-VN')} VNĐ
@@ -191,8 +246,8 @@ const ListHotelBooking: React.FC = () => {
     },
     {
       title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
+      dataIndex: 'payment_status',
+      key: 'payment_status',
       render: (status: string) => (
         <Tag color={getStatusColor(status)}>
           {getStatusText(status)}
@@ -201,11 +256,11 @@ const ListHotelBooking: React.FC = () => {
     },
     {
       title: 'Thanh toán',
-      dataIndex: 'paymentStatus',
-      key: 'paymentStatus',
-      render: (status: string) => (
-        <Tag color={getPaymentStatusColor(status)}>
-          {getPaymentStatusText(status)}
+      dataIndex: 'payment_method',
+      key: 'payment_method',
+      render: (method: string) => (
+        <Tag color={getPaymentStatusColor(method)}>
+          {getPaymentStatusText(method)}
         </Tag>
       )
     },
@@ -219,7 +274,7 @@ const ListHotelBooking: React.FC = () => {
       title: 'Thao tác',
       key: 'action',
       render: (record: HotelBooking) => (
-        <Space size="middle">
+        <Space size="middle" wrap>
           <Button 
             type="primary" 
             icon={<EyeOutlined />} 
@@ -230,14 +285,22 @@ const ListHotelBooking: React.FC = () => {
                 content: (
                   <div className="space-y-2">
                     <p><strong>Mã đặt phòng:</strong> {record._id}</p>
-                    <p><strong>Khách sạn:</strong> {record.hotelId?.name}</p>
-                    <p><strong>Khách hàng:</strong> {record.userId?.name}</p>
-                    <p><strong>Email:</strong> {record.userId?.email}</p>
-                    <p><strong>Loại phòng:</strong> {record.roomType}</p>
-                    <p><strong>Số khách:</strong> {record.guests}</p>
-                    <p><strong>Tổng tiền:</strong> {record.totalAmount?.toLocaleString('vi-VN')} VNĐ</p>
-                    <p><strong>Trạng thái:</strong> {getStatusText(record.status)}</p>
-                    <p><strong>Thanh toán:</strong> {getPaymentStatusText(record.paymentStatus)}</p>
+                    <p><strong>Khách sạn:</strong> {record.hotelId?.hotelName}</p>
+                    <p><strong>Địa điểm:</strong> {record.hotelId?.location?.locationName}</p>
+                    <p><strong>Khách hàng:</strong> {record.fullNameUser}</p>
+                    <p><strong>Email:</strong> {record.email}</p>
+                    <p><strong>Điện thoại:</strong> {record.phone}</p>
+                    <p><strong>Loại phòng:</strong></p>
+                    {record.roomBookings?.map((room, index) => (
+                      <div key={index} className="ml-4">
+                        <p>- {room.roomTypeName}: {room.numberOfRooms} phòng × {room.pricePerNight?.toLocaleString('vi-VN')} VNĐ</p>
+                      </div>
+                    ))}
+                    <p><strong>Số khách:</strong> {record.totalGuests}</p>
+                    <p><strong>Số đêm:</strong> {record.numberOfNights}</p>
+                    <p><strong>Tổng tiền:</strong> {record.totalPrice?.toLocaleString('vi-VN')} VNĐ</p>
+                    <p><strong>Trạng thái:</strong> {getStatusText(record.payment_status)}</p>
+                    <p><strong>Phương thức thanh toán:</strong> {getPaymentStatusText(record.payment_method)}</p>
                   </div>
                 ),
                 width: 600
@@ -246,11 +309,49 @@ const ListHotelBooking: React.FC = () => {
           >
             Chi tiết
           </Button>
+          {record.payment_status === 'pending' && (
+            <Button 
+              type="default"
+              icon={<CheckOutlined />} 
+              size="small"
+              onClick={() => {
+                Modal.confirm({
+                  title: 'Xác nhận đặt cọc',
+                  content: `Bạn có chắc chắn muốn xác nhận đặt cọc cho đặt phòng tại "${record.hotelId?.hotelName}"?`,
+                  okText: 'Xác nhận',
+                  cancelText: 'Hủy',
+                  onOk: () => confirmPaymentMutation.mutate(record._id)
+                });
+              }}
+              loading={confirmPaymentMutation.isPending}
+            >
+              Xác nhận cọc
+            </Button>
+          )}
+          {record.payment_status === 'deposit_paid' && (
+            <Button 
+              type="default"
+              icon={<DollarOutlined />} 
+              size="small"
+              onClick={() => {
+                Modal.confirm({
+                  title: 'Xác nhận thanh toán đầy đủ',
+                  content: `Bạn có chắc chắn muốn xác nhận thanh toán đầy đủ cho đặt phòng tại "${record.hotelId?.hotelName}"?`,
+                  okText: 'Xác nhận',
+                  cancelText: 'Hủy',
+                  onOk: () => confirmFullPaymentMutation.mutate(record._id)
+                });
+              }}
+              loading={confirmFullPaymentMutation.isPending}
+            >
+              Xác nhận thanh toán
+            </Button>
+          )}
           <Button 
             danger 
             icon={<DeleteOutlined />} 
             size="small"
-            onClick={() => handleDelete(record._id, record.hotelId?.name || 'N/A')}
+            onClick={() => handleDelete(record._id, record.hotelId?.hotelName || 'N/A')}
             loading={deleteMutation.isPending}
           >
             Xóa
@@ -288,17 +389,18 @@ const ListHotelBooking: React.FC = () => {
             <Option value="confirmed">Đã xác nhận</Option>
             <Option value="cancelled">Đã hủy</Option>
             <Option value="completed">Hoàn thành</Option>
+            <Option value="pending_cancel">Chờ hủy</Option>
+            <Option value="deposit_paid">Đã đặt cọc</Option>
           </Select>
 
           <Select
-            placeholder="Lọc theo thanh toán"
+            placeholder="Lọc theo phương thức thanh toán"
             value={paymentFilter}
             onChange={setPaymentFilter}
             allowClear
           >
-            <Option value="pending">Chờ thanh toán</Option>
-            <Option value="paid">Đã thanh toán</Option>
-            <Option value="refunded">Đã hoàn tiền</Option>
+            <Option value="cash">Tiền mặt</Option>
+            <Option value="bank_transfer">Chuyển khoản</Option>
           </Select>
 
           <RangePicker

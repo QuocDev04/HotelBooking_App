@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMutation, useQuery } from "@tanstack/react-query";
+
 import { useParams, useNavigate } from "react-router-dom";
 import instanceClient from "../../../configs/instance";
 import { useState, useEffect } from "react";
@@ -25,6 +26,7 @@ const Checkout = () => {
   const [childCount, setChildCount] = useState(0);
   const [kidCount, setKidCount] = useState(0);
   const [babyCount, setBabyCount] = useState(0);
+
   const navigate = useNavigate();
 
   // Lấy id từ params và kiểm tra
@@ -106,6 +108,7 @@ const Checkout = () => {
   }, [adultCount, kidCount, childCount, babyCount, form]);
 
 
+
   const { data } = useQuery({
     queryKey: ['/date/slot', id],
     queryFn: () => instanceClient.get(`/date/slot/${id}`)
@@ -125,6 +128,7 @@ const Checkout = () => {
     </>
   );
 
+
   const { mutate, isLoading } = useMutation({
     mutationFn: async (data: any) => {
       try {
@@ -134,12 +138,14 @@ const Checkout = () => {
 
         const { userId: any, slotId: __, ...restData } = data;
 
+
         // Xử lý dữ liệu trước khi gửi
         const payload = {
           userId,
           slotId: id,
           ...restData,
         };
+
 
         console.log("Sending payload:", payload);
         const res = await instanceClient.post(`/bookingTour`, payload);
@@ -247,6 +253,7 @@ const Checkout = () => {
   });
 
   const onFinish = (values: any) => {
+
     // Chuyển đổi isFullPayment từ chuỗi sang boolean
     const isFullPayment = values.isFullPayment === "true";
 
@@ -300,6 +307,7 @@ const Checkout = () => {
 
     form.setFieldsValue({ adultPassengers: updated });
   };
+
 
   // Modal thông báo khi chọn thanh toán cọc nhưng không chọn VNPay
   const [depositModalVisible, setDepositModalVisible] = useState(false);
@@ -528,6 +536,7 @@ const Checkout = () => {
                           <Row gutter={24}>
                             <Col span={10}>
                               <Form.Item
+
                                 key={field.key + "_fullName"}
                                 name={[field.name, 'fullName']}
                                 fieldKey={[field.fieldKey, 'fullName']}
@@ -538,6 +547,7 @@ const Checkout = () => {
                             </Col>
                             <Col span={4}>
                               <Form.Item
+
                                 key={field.key + "_gender"}
                                 name={[field.name, 'gender']}
                                 fieldKey={[field.fieldKey, 'gender']}
@@ -555,6 +565,7 @@ const Checkout = () => {
                             </Col>
                             <Col span={6}>
                               <Form.Item
+
                                 key={field.key + "_birthDate"}
                                 name={[field.name, 'birthDate']}
                                 fieldKey={[field.fieldKey, 'birthDate']}
@@ -622,6 +633,7 @@ const Checkout = () => {
                           <Row gutter={24}>
                             <Col span={10}>
                               <Form.Item
+
                                 key={field.key + "_fullName"}
                                 name={[field.name, 'fullName']}
                                 fieldKey={[field.fieldKey, 'fullName']}
@@ -632,6 +644,7 @@ const Checkout = () => {
                             </Col>
                             <Col span={4}>
                               <Form.Item
+
                                 key={field.key + "_gender"}
                                 name={[field.name, 'gender']}
                                 fieldKey={[field.fieldKey, 'gender']}
@@ -649,6 +662,7 @@ const Checkout = () => {
                             </Col>
                             <Col span={6}>
                               <Form.Item
+
                                 key={field.key + "_birthDate"}
                                 name={[field.name, 'birthDate']}
                                 fieldKey={[field.fieldKey, 'birthDate']}
@@ -692,6 +706,7 @@ const Checkout = () => {
                           <Row gutter={24}>
                             <Col span={10}>
                               <Form.Item
+
                                 key={field.key + "_fullName"}
                                 name={[field.name, 'fullName']}
                                 fieldKey={[field.fieldKey, 'fullName']}
@@ -702,6 +717,7 @@ const Checkout = () => {
                             </Col>
                             <Col span={4}>
                               <Form.Item
+
                                 key={field.key + "_gender"}
                                 name={[field.name, 'gender']}
                                 fieldKey={[field.fieldKey, 'gender']}
@@ -719,6 +735,7 @@ const Checkout = () => {
                             </Col>
                             <Col span={6}>
                               <Form.Item
+
                                 key={field.key + "_birthDate"}
                                 name={[field.name, 'birthDate']}
                                 fieldKey={[field.fieldKey, 'birthDate']}
@@ -762,6 +779,7 @@ const Checkout = () => {
                           <Row gutter={24}>
                             <Col span={10}>
                               <Form.Item
+
                                 key={field.key + "_fullName"}
                                 name={[field.name, 'fullName']}
                                 fieldKey={[field.fieldKey, 'fullName']}
@@ -772,6 +790,7 @@ const Checkout = () => {
                             </Col>
                             <Col span={4}>
                               <Form.Item
+
                                 key={field.key + "_gender"}
                                 name={[field.name, 'gender']}
                                 fieldKey={[field.fieldKey, 'gender']}
@@ -789,6 +808,7 @@ const Checkout = () => {
                             </Col>
                             <Col span={6}>
                               <Form.Item
+
                                 key={field.key + "_birthDate"}
                                 name={[field.name, 'birthDate']}
                                 fieldKey={[field.fieldKey, 'birthDate']}
@@ -895,6 +915,7 @@ const Checkout = () => {
                 <div className="flex flex-col w-full gap-2 text-sm text-gray-900">
                   {[
                     { id: "cash", label: "Tiền mặt" },
+
                     { id: "bank_transfer", label: "Thanh toán qua VNPay" },
                   ].map(({ id, label }) => (
                     <label key={id} htmlFor={id} className="inline-flex items-center gap-2 p-2 rounded cursor-pointer hover:bg-gray-200">
@@ -911,7 +932,12 @@ const Checkout = () => {
                 </div>
               </Form.Item>
 
+<<<<<<< HEAD
               <div className="w-full my-4 border-t border-gray-300"></div>
+=======
+
+              <div className="w-full border-t border-gray-300 my-4"></div>
+>>>>>>> 6f2799cd82d68c2e2dd007db003c5de813d02bd1
 
               <h4 className="mb-2 text-lg font-semibold text-gray-900">
                 Tùy chọn thanh toán
@@ -972,6 +998,7 @@ const Checkout = () => {
             </div>
             <Button
               type="primary"
+
               htmlType="submit"
               className="w-full py-3 font-semibold text-white transition bg-blue-700 rounded-md hover:bg-blue-800"
               loading={isLoading}
@@ -981,6 +1008,7 @@ const Checkout = () => {
             </Button>
           </div>
         </div></Form>
+
 
       {/* Modal thông báo khi chọn thanh toán cọc nhưng không chọn VNPay */}
       <Modal
