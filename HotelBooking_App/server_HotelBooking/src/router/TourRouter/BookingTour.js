@@ -17,7 +17,7 @@ const {
     getRefundStats,
     submitRefundRequest
 } = require('./../../controller/TourController/TourBookingController.js');
-const { uploadPaymentImage } = require('../../Middleware/uploadMiddleware');
+const { uploadPaymentImage, uploadRefundImage } = require('../../Middleware/uploadMiddleware');
 const RouterBookingTour = express.Router();
 
 // User routes
@@ -40,7 +40,7 @@ RouterBookingTour.put('/admin/bookings/confirm-payment/:id', uploadPaymentImage,
 // Quản lý hoàn tiền
 RouterBookingTour.get('/admin/refunds', getRefundList)
 RouterBookingTour.get('/admin/refunds/stats', getRefundStats)
-RouterBookingTour.put('/admin/refunds/:bookingId', updateRefundStatus)
+RouterBookingTour.put('/admin/refunds/:bookingId', uploadRefundImage, updateRefundStatus)
 RouterBookingTour.put('/admin/bookings/confirm-full-payment/:id', uploadPaymentImage, confirmFullPayment)
 
 module.exports = RouterBookingTour

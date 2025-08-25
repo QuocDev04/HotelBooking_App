@@ -58,7 +58,7 @@ const TourBookingSchema = new mongoose.Schema({
     },
     payment_status: {
         type: String,
-        enum: ['pending', 'confirmed', 'completed', 'cancelled', 'pending_cancel', 'deposit_paid'],
+        enum: ['pending', 'confirmed', 'completed', 'cancelled', 'pending_cancel', 'deposit_paid', 'refund_pending', 'refund_processing', 'refund_completed'],
         default: 'pending',
     },
     // Thời hạn thanh toán tiền mặt (48h từ khi đặt)
@@ -107,6 +107,27 @@ const TourBookingSchema = new mongoose.Schema({
     refund_note: {
         type: String,
         default: null
+    },
+    // Hình ảnh xác nhận hoàn tiền
+    refund_image: {
+        type: String,
+        default: null
+    },
+    // Thông tin hoàn tiền từ client
+    refundInfo: {
+        amount: { type: Number },
+        bankInfo: {
+            bankName: { type: String },
+            accountNumber: { type: String },
+            accountHolderName: { type: String }
+        },
+        contactInfo: {
+            phoneNumber: { type: String },
+            email: { type: String }
+        },
+        refundReason: { type: String },
+        requestedAt: { type: Date },
+        status: { type: String, enum: ['pending', 'processing', 'completed'], default: 'pending' }
     },
     // Trạng thái không tham gia tour
     no_show_status: {

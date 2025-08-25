@@ -87,6 +87,10 @@ const getAllBookingsForAdmin = async (req, res) => {
                 populate: {
                     path: 'tour',
                     select: 'nameTour destination departure_location duration finalPrice imageTour tourType',
+                    populate: {
+                        path: 'destination',
+                        select: 'locationName country'
+                    }
                 }
             })
             .sort({ createdAt: -1 })
@@ -756,6 +760,10 @@ const confirmCashPayment = async (req, res) => {
         // Cập nhật trạng thái thanh toán cọc
         booking.payment_status = 'deposit_paid';
         booking.isDeposit = true;
+        // Tính và set depositAmount nếu chưa có
+        if (!booking.depositAmount || booking.depositAmount === 0) {
+            booking.depositAmount = Math.floor(booking.totalPriceTour * 0.5); // 50% của tổng tiền
+        }
         booking.depositPaidAt = new Date(); // Thời gian thanh toán cọc
         booking.paymentConfirmedBy = adminId;
         if (note) {
@@ -773,6 +781,7 @@ const confirmCashPayment = async (req, res) => {
             booking: {
                 _id: booking._id,
                 payment_status: booking.payment_status,
+                depositAmount: booking.depositAmount,
                 depositPaidAt: booking.depositPaidAt,
                 paymentConfirmedBy: booking.paymentConfirmedBy,
                 paymentNote: booking.paymentNote,
@@ -785,7 +794,8 @@ const confirmCashPayment = async (req, res) => {
                 tourInfo: {
                     name: booking.slotId?.tour?.nameTour,
                     date: booking.slotId?.dateTour,
-                    totalAmount: booking.totalPriceTour
+                    totalAmount: booking.totalPriceTour,
+                    depositAmount: booking.depositAmount
                 }
             }
         });
@@ -996,9 +1006,13 @@ const getRefundList = async (req, res) => {
     try {
         const { status } = req.query;
         
-        // Tạo query
+        // Tạo query - tìm kiếm tất cả booking có yêu cầu hoàn tiền
         let query = {
-            refund_amount: { $gt: 0 }
+            $or: [
+                { refund_amount: { $gt: 0 } },
+                { payment_status: { $in: ['refund_pending', 'refund_processing', 'refund_completed'] } },
+                { refund_status: { $exists: true, $ne: null } }
+            ]
         };
         
         // Lọc theo trạng thái hoàn tiền
@@ -1017,7 +1031,7 @@ const getRefundList = async (req, res) => {
                 select: 'dateTour',
                 populate: {
                     path: 'tour',
-                    select: 'nameTour destination departure'
+                    select: 'nameTour destination departure_location duration tourType'
                 }
             })
             .sort({ createdAt: -1 });
@@ -1042,6 +1056,9 @@ const updateRefundStatus = async (req, res) => {
         const { bookingId } = req.params;
         const { refund_status, refund_method, refund_note } = req.body;
         
+        // Lấy thông tin file upload nếu có
+        const refund_image = req.file ? `/uploads/refund-confirmations/${req.file.filename}` : null;
+        
         // Kiểm tra trạng thái hợp lệ
         if (!['pending', 'processing', 'completed'].includes(refund_status)) {
             return res.status(400).json({
@@ -1060,7 +1077,7 @@ const updateRefundStatus = async (req, res) => {
         }
         
         // Kiểm tra booking có cần hoàn tiền không
-        if (booking.refund_amount <= 0) {
+        if (!booking.refund_status && booking.refund_amount <= 0) {
             return res.status(400).json({
                 success: false,
                 message: 'Booking này không cần hoàn tiền'
@@ -1071,6 +1088,7 @@ const updateRefundStatus = async (req, res) => {
         booking.refund_status = refund_status;
         booking.refund_method = refund_method;
         booking.refund_note = refund_note;
+        booking.refund_image = refund_image;
         
         // Nếu đã hoàn tiền xong, cập nhật ngày hoàn tiền
         if (refund_status === 'completed') {
@@ -1152,10 +1170,10 @@ const getRefundStats = async (req, res) => {
 // Xử lý yêu cầu hoàn tiền từ client
 const submitRefundRequest = async (req, res) => {
     try {
-        const { bookingId, refundAmount, bankInfo } = req.body;
+        const { bookingId, bankInfo, contactInfo, refundReason, userId, shouldCancelBooking } = req.body;
         
         // Tìm booking
-        const booking = await TourBookingSchema.findById(bookingId);
+        const booking = await TourBookingSchema.findById(bookingId).populate('slotId');
         if (!booking) {
             return res.status(404).json({
                 success: false,
@@ -1163,31 +1181,130 @@ const submitRefundRequest = async (req, res) => {
             });
         }
         
-        // Kiểm tra trạng thái booking
-        if (booking.status !== 'confirmed') {
-            return res.status(400).json({
+        // Kiểm tra quyền sở hữu booking
+        if (booking.userId.toString() !== userId) {
+            return res.status(403).json({
                 success: false,
-                message: 'Chỉ có thể yêu cầu hoàn tiền cho booking đã xác nhận'
+                message: 'Bạn không có quyền yêu cầu hoàn tiền cho booking này'
             });
         }
         
+        // Nếu cần hủy booking trước
+        if (shouldCancelBooking) {
+            // Kiểm tra trạng thái booking có thể hủy
+            if (booking.payment_status === 'cancelled' || booking.payment_status === 'pending_cancel') {
+            return res.status(400).json({
+                success: false,
+                    message: 'Booking đã được hủy trước đó'
+                });
+            }
+            
+            // Kiểm tra trạng thái có thể hủy
+            const allowedStatuses = ['confirmed', 'completed', 'deposit_paid'];
+            if (!allowedStatuses.includes(booking.payment_status)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Chỉ có thể hủy booking đã được xác nhận hoặc đã thanh toán'
+                });
+            }
+
+            // Nếu là deposit_paid, phải có xác nhận từ admin
+            if (booking.payment_status === 'deposit_paid' && !booking.depositPaidAt) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Booking đặt cọc chưa được admin xác nhận, không thể hủy'
+                });
+            }
+            
+            // Kiểm tra thời gian hủy
+            const tourDate = new Date(booking.slotId.dateTour);
+            const currentDate = new Date();
+            const daysDifference = Math.ceil((tourDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
+
+            // Không cho phép hủy nếu đã đến ngày khởi hành
+            if (daysDifference <= 0) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: "Không thể hủy đặt chỗ khi tour đã khởi hành" 
+                });
+            }
+            
+            // Hủy booking
+            booking.payment_status = 'cancelled';
+            booking.cancelledAt = new Date();
+            booking.cancelReason = refundReason;
+        } else {
+            // Kiểm tra trạng thái booking (phải đã hủy hoặc đang chờ hủy)
+            if (booking.payment_status !== 'cancelled' && booking.payment_status !== 'pending_cancel') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Chỉ có thể yêu cầu hoàn tiền cho booking đã được hủy'
+                });
+            }
+        }
+        
+        // Tính toán số tiền hoàn trả theo chính sách
+        const tourDate = new Date(booking.slotId.dateTour);
+        const currentDate = new Date();
+        const daysDifference = Math.ceil((tourDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        // Chính sách hoàn tiền theo Điều khoản & Chính sách
+        let refundPercentage = 0;
+        if (daysDifference >= 30) {
+            refundPercentage = 100; // Trước 30 ngày: Hoàn 100%
+        } else if (daysDifference >= 15) {
+            refundPercentage = 70;  // Từ 15-29 ngày: Hoàn 70%
+        } else if (daysDifference >= 7) {
+            refundPercentage = 50;  // Từ 7-14 ngày: Hoàn 50%
+        } else if (daysDifference >= 4) {
+            refundPercentage = 30;  // Từ 4-6 ngày: Hoàn 30%
+        } else {
+            refundPercentage = 0;   // Dưới 3 ngày: Không hoàn tiền
+        }
+        
+        // Tính toán dựa trên số tiền đã thanh toán thực tế
+        let baseAmount = 0;
+        if (booking.payment_status === 'completed') {
+            baseAmount = booking.totalPriceTour || 0;
+        } else if (booking.payment_status === 'deposit_paid' || booking.isDeposit) {
+            baseAmount = booking.depositAmount || 0;
+        } else {
+            baseAmount = booking.totalPriceTour || 0;
+        }
+        
+        const calculatedRefundAmount = Math.round(baseAmount * refundPercentage / 100);
+        
         // Cập nhật thông tin hoàn tiền
         booking.refundInfo = {
-            amount: refundAmount,
+            amount: calculatedRefundAmount,
             bankInfo: bankInfo,
+            contactInfo: contactInfo,
+            refundReason: refundReason,
             requestedAt: new Date(),
             status: 'pending'
         };
         
-        booking.cancelRequestedAt = new Date();
-        booking.status = 'cancel_requested';
+        // Cập nhật trạng thái hoàn tiền
+        booking.refund_status = 'pending';
+        booking.refund_amount = calculatedRefundAmount;
+        booking.refund_method = 'bank_transfer';
+        
+        // Cập nhật trạng thái payment thành refund_pending để hiển thị đúng trên UI
+        booking.payment_status = 'refund_pending';
         
         await booking.save();
         
         res.status(200).json({
             success: true,
-            message: 'Yêu cầu hoàn tiền đã được gửi thành công',
-            data: booking
+            message: shouldCancelBooking ? 
+                'Tour đã được hủy và yêu cầu hoàn tiền đã được gửi thành công! Admin sẽ xử lý trong vòng 3-5 ngày làm việc.' :
+                'Yêu cầu hoàn tiền đã được gửi thành công! Admin sẽ xử lý trong vòng 3-5 ngày làm việc.',
+            data: {
+                bookingId: booking._id,
+                refundAmount: calculatedRefundAmount,
+                refundStatus: 'pending',
+                paymentStatus: 'refund_pending'
+            }
         });
         
     } catch (error) {
