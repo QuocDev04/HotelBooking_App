@@ -1,8 +1,8 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { generateTourCode } from "../../../utils/tourUtils";
 
 interface Slot {
     dateTour: string; // định dạng 'DD-MM-YYYY'
@@ -47,7 +47,6 @@ const RightTourDetail = ({
     );
     const navigate = useNavigate();
     const handleBooking = () => {
-
         // Kiểm tra xem người dùng đã chọn ngày chưa
         if (!selectedDate) {
             toast.error("Vui lòng chọn ngày khởi hành!");
@@ -84,84 +83,140 @@ const RightTourDetail = ({
     };
 
     return (
-        <div className="max-w-[460px] w-full bg-white p-3 md:p-5 max-md:mt-4 border rounded-2xl md:rounded-4xl border-gray-300/70 fixed right-8 top-48 z-50">
-            {!selectedDate || !tour ? (
-                <>
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className="text-black text-xl">Giá từ:</span>
-                    </div>
-                    <div className="text-3xl font-bold text-red-600 mb-2">
+        <div className="w-full bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
+            {/* Header với gradient */}
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
+                <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-bold">💰 Thông tin giá</h3>
+                    {selectedSlot?.availableSeats && (
+                        <div className="bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+                            <span className="text-sm font-medium">
+                                Còn {selectedSlot.availableSeats} chỗ
+                            </span>
+                        </div>
+                    )}
+                </div>
+            </div>
 
-                        {getTourPrice(tour).toLocaleString("vi-VN")}{" "}
-                        <span className="text-xl font-medium">đ</span>{" "}
-                        <span className="text-base text-gray-500 font-normal">/ Khách</span>
-                    </div>
-                    
-                    <button
-                        onClick={onChooseDate}
-                        className="w-full py-2 rounded-lg mt-4 border bg-blue-500 text-white font-semibold hover:bg-blue-600"
-                    >
-                        Chọn ngày khởi hành
-                    </button>
-                </>
-            ) : (
-                <>
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className="text-black text-xl">Giá:</span>
-                    </div>
-                    <div className="text-3xl font-bold text-red-600 mb-2">
+            <div className="p-6">
+                {!selectedDate || !tour ? (
+                    <>
+                        {/* Price Display */}
+                        <div className="text-center mb-6">
+                            <div className="text-gray-600 text-sm mb-2">Giá khởi điểm từ</div>
+                            <div className="text-4xl font-bold bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">
+                                {getTourPrice(tour).toLocaleString("vi-VN")}
+                                <span className="text-2xl">đ</span>
+                            </div>
+                            <div className="text-gray-500 text-sm mt-1">/ người</div>
+                        </div>
 
-                            {getTourPrice(tour).toLocaleString("vi-VN")}{" "}
-                        <span className="text-xl font-medium">đ</span>{" "}
-                        <span className="text-base text-gray-500 font-normal">/ Khách</span>
-                    </div>
-                    <ul className="space-y-2 text-[15px] mb-4">
-                        <li className="flex items-center gap-2">
-                            <span className="font-medium">Mã tour:</span>
-                            <span className="text-blue-700 font-semibold underline cursor-pointer">
-                                {tour?._id?.slice(0, 6) || "..."}
-                            </span>
+                        {/* Features */}
+                        <div className="space-y-3 mb-6">
+                            <div className="flex items-center text-sm text-gray-600">
+                                <svg className="w-4 h-4 mr-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                                Miễn phí hủy tour (theo điều kiện)
+                            </div>
+                            <div className="flex items-center text-sm text-gray-600">
+                                <svg className="w-4 h-4 mr-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                                Hướng dẫn viên chuyên nghiệp
+                            </div>
+                            <div className="flex items-center text-sm text-gray-600">
+                                <svg className="w-4 h-4 mr-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                                Bảo hiểm du lịch toàn diện
+                            </div>
+                        </div>
 
-                        </li>
-                        <li className="flex items-center gap-2">
-                            <span className="font-medium">Khởi hành:</span>
-                            <span className="text-blue-700 font-semibold">
-                                {tour?.departure_location || "..."}
-                            </span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                            <span className="font-medium">Ngày khởi hành:</span>
-                            <span className="font-semibold">
-                                {selectedDateFormatted || "..."}
-                            </span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                            <span className="font-medium">Thời gian:</span>
-                            <span className="font-semibold">{tour?.duration || "..."}</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                            <span className="font-medium">Số chỗ còn:</span>
-                            <span className="text-blue-700 font-semibold">
-                                    {selectedSlot?.availableSeats ?? "..."}
-                            </span>
-                        </li>
-                    </ul>
-                    <div className="flex gap-2 mb-3">
                         <button
                             onClick={onChooseDate}
-                            className="flex-1 py-2 rounded-lg border border-red-500 text-red-500 font-semibold hover:bg-red-50"
+                            className="w-full py-4 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
                         >
-                            Ngày khác
+                            🗓️ Chọn ngày khởi hành
                         </button>
+                    </>
+                ) : (
+                    <>
+                        {/* Selected Date Info */}
+                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-4 mb-6">
+                            <div className="text-center">
+                                <div className="text-gray-600 text-sm mb-1">Ngày đã chọn</div>
+                                <div className="text-2xl font-bold text-blue-600">
+                                    {selectedDateFormatted}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Price Display */}
+                        <div className="text-center mb-6">
+                            <div className="text-4xl font-bold bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">
+                                {getTourPrice(tour).toLocaleString("vi-VN")}
+                                <span className="text-2xl">đ</span>
+                            </div>
+                            <div className="text-gray-500 text-sm mt-1">/ người</div>
+                        </div>
+
+                        {/* Tour Details */}
+                        <div className="space-y-4 mb-6">
+                            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span className="text-gray-600 font-medium">🎫 Mã tour:</span>
+                                <span className="text-blue-600 font-bold">
+                                    {generateTourCode(tour?._id)}
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span className="text-gray-600 font-medium">🚀 Khởi hành:</span>
+                                <span className="font-semibold">
+                                    {tour?.departure_location || "..."}
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span className="text-gray-600 font-medium">⏰ Thời gian:</span>
+                                <span className="font-semibold">{tour?.duration || "..."}</span>
+                            </div>
+                            <div className="flex justify-between items-center py-2">
+                                <span className="text-gray-600 font-medium">👥 Chỗ còn:</span>
+                                <span className="text-green-600 font-bold">
+                                    {selectedSlot?.availableSeats ?? "..."}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="space-y-3">
                             <button
-                                className="flex-1 py-2 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600"
+                                className="w-full py-4 rounded-xl bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold text-lg hover:from-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
                                 onClick={handleBooking}
                             >
-                                Đặt ngay
+                                🎯 Đặt tour ngay
                             </button>
-                    </div>
-                </>
-            )}
+                            <button
+                                onClick={onChooseDate}
+                                className="w-full py-3 rounded-xl border-2 border-blue-500 text-blue-500 font-semibold hover:bg-blue-50 transition-all duration-300"
+                            >
+                                📅 Chọn ngày khác
+                            </button>
+                        </div>
+
+                        {/* Trust Badges */}
+                        <div className="mt-6 pt-6 border-t border-gray-100">
+                            <div className="text-center text-sm text-gray-500 mb-3">
+                                ✅ Đặt tour an toàn & tin cậy
+                            </div>
+                            <div className="flex justify-center space-x-4">
+                                <div className="text-xs text-gray-400">🔒 Bảo mật</div>
+                                <div className="text-xs text-gray-400">⚡ Xác nhận nhanh</div>
+                                <div className="text-xs text-gray-400">💯 Uy tín</div>
+                            </div>
+                        </div>
+                    </>
+                )}
+            </div>
         </div>
     );
 };

@@ -1,9 +1,9 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link } from "react-router-dom";
 import type { Tour } from "../type"
 import { motion } from 'framer-motion';
 import { CalendarIcon, TicketIcon } from "lucide-react";
+import { generateTourCode } from "../utils/tourUtils";
 
 type TourItemProps = {
     tour: Tour
@@ -38,6 +38,12 @@ const TourItem = ({ tour }: TourItemProps) => {
                 </Link>
 
 
+                {/* Mã tour */}
+                <div className="mb-2">
+                    <span className="text-sm text-gray-500">
+                        Mã tour: <span className="text-blue-600 font-semibold">{generateTourCode(tour._id)}</span>
+                    </span>
+                </div>
 
                 {/* Ngày khởi hành, Địa điểm, Đánh giá */}
                 <div className="space-y-2 mb-3">
