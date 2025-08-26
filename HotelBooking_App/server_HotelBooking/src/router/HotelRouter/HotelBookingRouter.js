@@ -11,6 +11,7 @@ const {
     getHotelBookingStats
 } = require('../../controller/HotelController/HotelBookingController.js');
 const { uploadPaymentImage } = require('../../Middleware/uploadMiddleware');
+const { getAllBookingHotelByUserId } = require('../../controller/HotelController/getCheckoutHotel.js');
 
 const RouterHotelBooking = express.Router();
 
@@ -27,4 +28,5 @@ RouterHotelBooking.get('/admin/hotel-bookings/stats', getHotelBookingStats);
 RouterHotelBooking.put('/admin/hotel-bookings/confirm-payment/:id', uploadPaymentImage, confirmHotelCashPayment);
 RouterHotelBooking.put('/admin/hotel-bookings/confirm-full-payment/:id', uploadPaymentImage, confirmHotelFullPayment);
 
+RouterHotelBooking.get('/hotel-bookings/user/:userId', getAllBookingHotelByUserId)
 module.exports = RouterHotelBooking;

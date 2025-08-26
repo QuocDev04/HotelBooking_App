@@ -219,8 +219,14 @@ const HotelDetail: React.FC = () => {
   const processBooking = async (values: any) => {
     setBookingLoading(true);
     try {
+      const storedUserId = localStorage.getItem('userId');
+      if (!storedUserId) {
+        message.error('Vui lòng đăng nhập để đặt phòng');
+        setBookingLoading(false);
+        return;
+      }
       const bookingData = {
-        userId: '000000000000000000000000', // Default ObjectId for guest booking
+        userId: storedUserId,
         hotelId: hotel?._id,
         checkInDate,
         checkOutDate,
@@ -302,8 +308,14 @@ const HotelDetail: React.FC = () => {
       // Đảm bảo phương thức thanh toán là tiền mặt
       formValues.paymentMethod = "cash";
       
+      const storedUserId = localStorage.getItem('userId');
+      if (!storedUserId) {
+        message.error('Vui lòng đăng nhập để đặt phòng');
+        setBookingLoading(false);
+        return;
+      }
       const bookingData = {
-        userId: '000000000000000000000000', // Default ObjectId for guest booking
+        userId: storedUserId,
         hotelId: hotel?._id,
         checkInDate,
         checkOutDate,

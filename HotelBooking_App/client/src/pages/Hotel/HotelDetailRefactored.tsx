@@ -202,7 +202,14 @@ const HotelDetailRefactored: React.FC = () => {
     setBookingLoading(true);
     try {
       const bookingData = {
-        userId: '000000000000000000000000', // Default ObjectId for guest booking
+        userId: (() => {
+          const uid = localStorage.getItem('userId');
+          if (!uid) {
+            message.error('Vui lòng đăng nhập để đặt phòng');
+            throw new Error('Missing userId');
+          }
+          return uid;
+        })(),
         hotelId: hotel?._id,
         checkInDate,
         checkOutDate,

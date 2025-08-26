@@ -106,9 +106,16 @@ const InfoUser = () => {
         queryKey: ['checkOutBookingTour', userId],
         queryFn: () => instanceClient.get(`checkOutBookingTour/${userId}`)
     })
+    const { data: hotelsResponse} = useQuery({
+        queryKey: ['checkOutBookingHotel', userId],
+        queryFn: () => instanceClient.get(`/hotel-bookings/user/${userId}`)
+    });
 
-    const bills: Bill[] = bill?.data?.data || [];
-    console.log('bill', bills);
+    const hotels = hotelsResponse?.data?.data || [];
+
+    console.log('bill', hotels);
+
+        const bills: Bill[] = bill?.data?.data || [];
     // Request cancel mutation
     const requestCancelMutation = useMutation({
         mutationFn: async ({ billId, reason }: { billId: string; reason: string }) => {
@@ -651,6 +658,95 @@ const InfoUser = () => {
                             />
                         </div>
                     )}
+                </div>
+
+                {/* Hotel Booking History */}
+                <div className="bg-white rounded-2xl shadow-xl p-8 mx-2 mt-10">
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="text-2xl font-bold text-gray-900">Lịch sử đặt khách sạn</h2>
+                        <div className="flex items-center space-x-2 text-gray-600">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            <span className="text-sm font-medium">{hotels.length} đặt phòng</span>
+                        </div>
+                    </div>
+
+                    <div className="space-y-6 mx-2">
+                        {hotels.length > 0 ? (
+                            hotels.map((hb: any) => (
+                                <div key={hb._id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                                    <div className="p-8">
+                                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-6 lg:space-y-0">
+                                            {/* Hotel Info */}
+                                            <div className="flex-1">
+                                                <div className="flex items-start space-x-4">
+                                                    <div className="flex-shrink-0">
+                                                        <img
+                                                            src={hb.hotelId?.hotelImages?.[0] || '/default-hotel.jpg'}
+                                                            alt={hb.hotelId?.hotelName || 'Hotel'}
+                                                            className="w-20 h-20 rounded-xl object-cover border-2 border-gray-200"
+                                                        />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h3 className="text-xl font-bold text-gray-900 mb-2 truncate">
+                                                            {hb.hotelId?.hotelName || 'Khách sạn'}
+                                                        </h3>
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
+                                                            <div className="flex items-center space-x-2">
+                                                                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                                </svg>
+                                                                <span>
+                                                                    Nhận: {hb.checkInDate ? new Date(hb.checkInDate).toLocaleDateString('vi-VN') : 'N/A'} - Trả: {hb.checkOutDate ? new Date(hb.checkOutDate).toLocaleDateString('vi-VN') : 'N/A'}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-center space-x-2">
+                                                                <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                                                                </svg>
+                                                                <span>Tổng tiền: {hb.totalPrice?.toLocaleString('vi-VN')} VND</span>
+                                                            </div>
+                                                            <div className="flex items-start space-x-2 sm:col-span-2">
+                                                                <svg className="w-4 h-4 text-gray-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
+                                                                </svg>
+                                                                <span className="truncate">{hb.hotelId?.address || ''}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Status */}
+                                            <div className="flex items-center space-x-4">
+                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(hb.payment_status)}`}>
+                                                    {getStatusText(hb.payment_status)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center py-12">
+                                <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có đặt phòng nào</h3>
+                                <p className="text-gray-600 mb-6">Bạn chưa có lịch sử đặt khách sạn nào. Hãy khám phá và đặt phòng ngay!</p>
+                                <Link
+                                    to="/hotels"
+                                    className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+                                >
+                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                    Xem khách sạn
+                                </Link>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
