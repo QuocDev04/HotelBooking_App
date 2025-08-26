@@ -160,13 +160,14 @@ const AddTour = () => {
                 </Form.Item>
 
                 <Row gutter={24}>
-                  <Col span={8}>
+                  <Col span={6}>
                     <Form.Item
                       required={false}
                       label={requiredLabel("Điểm Đến")}
                       name="destination"
                       rules={[
-                        { required: true, message: "Chọn điểm đến" },
+                        { required: true, message: "Nhập điểm đến" },
+                        { min: 2, max: 100, message: "Phải từ 2–100 ký tự" },
                       ]}
                     >
                       <Select placeholder="Chọn Địa Chỉ" disabled={isPending} style={{ width: "100%" }}
@@ -175,15 +176,15 @@ const AddTour = () => {
                           value: location._id
                         }))}
                         onChange={(value) => {
-                          // Cập nhật giá trị của trường category
                           form.setFieldsValue({
                             location: value,
                           });
-                        }} />
+                        }}
+                      />
                     </Form.Item>
                   </Col>
 
-                  <Col span={8}>
+                  <Col span={6}>
                     <Form.Item
                       required={false}
                       label={requiredLabel("Nơi Xuất Phát")}
@@ -196,8 +197,20 @@ const AddTour = () => {
                       <Input placeholder="VD: Hà Nội" size="large" />
                     </Form.Item>
                   </Col>
-
-                  <Col span={8}>
+                  <Col span={6}>
+                    <Form.Item
+                      required={false}
+                      label={requiredLabel("Địa điểm")}
+                      name="Address"
+                      rules={[
+                        { required: true, message: "Nhập Địa điểm" },
+                        { min: 2, max: 100, message: "Phải từ 2–100 ký tự" },
+                      ]}
+                    >
+                      <Input placeholder="VD: Hà Nội" size="large" />
+                    </Form.Item>
+                  </Col>
+                  <Col span={6}>
                     <Form.Item
                       required={false}
                       label={requiredLabel("Số Ngày")}

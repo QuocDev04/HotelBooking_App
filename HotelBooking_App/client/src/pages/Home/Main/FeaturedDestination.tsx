@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import instanceClient from "../../../../configs/instance";
@@ -110,7 +112,6 @@ const FeaturedDestination = () => {
         },
         staleTime: 1000 * 60 * 5,
     });
-
     const candidateList: any[] = data?.items ?? [];
 
     const featuredItems = useMemo(() => candidateList.filter(isFeaturedTour), [candidateList]);

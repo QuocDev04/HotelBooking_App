@@ -211,7 +211,7 @@ const EditTour = () => {
                                 </Form.Item>
 
                                 <Row gutter={24}>
-                                    <Col span={8}>
+                                    <Col span={6}>
                                         <Form.Item
                                             required={false}
                                             label={requiredLabel("Điểm Đến")}
@@ -235,7 +235,7 @@ const EditTour = () => {
                                         </Form.Item>
                                     </Col>
 
-                                    <Col span={8}>
+                                    <Col span={6}>
                                         <Form.Item
                                             required={false}
                                             label={requiredLabel("Nơi Xuất Phát")}
@@ -248,8 +248,20 @@ const EditTour = () => {
                                             <Input placeholder="VD: Hà Nội" size="large" />
                                         </Form.Item>
                                     </Col>
-
-                                    <Col span={8}>
+                                    <Col span={6}>
+                                        <Form.Item
+                                            required={false}
+                                            label={requiredLabel("Địa điểm")}
+                                            name="Address"
+                                            rules={[
+                                                { required: true, message: "Nhập Địa điểm" },
+                                                { min: 2, max: 100, message: "Phải từ 2–100 ký tự" },
+                                            ]}
+                                        >
+                                            <Input placeholder="VD: Hà Nội" size="large" />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={6}>
                                         <Form.Item
                                             required={false}
                                             label={requiredLabel("Số Ngày")}
