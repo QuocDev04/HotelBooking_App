@@ -381,7 +381,7 @@ const InfoUser = () => {
             <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
                 {/* Header Section */}
                 <div className="text-center mb-12 ">
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4 my-20">
+                    <h1 className="text-4xl font-bold text-gray-900 mb-4">
                         Thông tin người dùng
                     </h1>
                     <p className="text-lg text-gray-600">
