@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Table, Select, Tag, Button, Popconfirm, message, DatePicker, Space, Typography } from "antd";
+import { Table, Select, Tag, Button, Popconfirm, message, DatePicker, Typography } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import instance from "../../configs/axios";
@@ -13,7 +13,6 @@ const { Text } = Typography;
 const ListTime = () => {
     const [selectedTour, setSelectedTour] = useState<string | undefined>(undefined);
     const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null] | null>(null);
-    const [filteredSlots, setFilteredSlots] = useState<any[]>([]);
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const [messageApi, contextHolder] = message.useMessage();
@@ -152,10 +151,10 @@ const ListTime = () => {
             title: "Trạng thái HDV",
             key: "tourStatus",
             render: (_: any, record: any) => {
-                const tourStatus = record.tour?.tourStatus || 'preparing';
-                const statusNote = record.tour?.statusNote;
-                const updatedBy = record.tour?.statusUpdatedBy;
-                const updatedAt = record.tour?.statusUpdatedAt;
+                const tourStatus = record.tourStatus || 'preparing';
+                const statusNote = record.statusNote;
+                const updatedBy = record.statusUpdatedBy;
+                const updatedAt = record.statusUpdatedAt;
                 let color = "";
                 let text = "";
                 

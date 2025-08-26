@@ -2,6 +2,7 @@ const { StatusCodes } = require("http-status-codes");
 const TourModel = require("../../models/Tour/TourModel.js");
 const TourScheduleModel = require("../../models/Tour/TourScheduleModel.js");
 const TourBooking = require("../../models/Tour/TourBooking.js");
+const DateSlot = require("../../models/Tour/DateTour.js");
 
 
 const getAllTours = async (req, res) => {
@@ -213,10 +214,10 @@ const assignEmployeeToTour = async (req, res) => {
 // Cập nhật trạng thái tour bởi HDV
 const updateTourStatus = async (req, res) => {
     try {
-        const { id } = req.params; // Tour ID
+        const { id } = req.params; // ID của DateSlot
         const { status, note, updatedBy } = req.body;
 
-        // Validate status
+        // Validate trạng thái
         const validStatuses = ['preparing', 'ongoing', 'completed', 'postponed'];
         if (!validStatuses.includes(status)) {
             return res.status(400).json({
@@ -225,51 +226,44 @@ const updateTourStatus = async (req, res) => {
             });
         }
 
-        // Validate required note for postponed status
+        // Nếu postponed thì note bắt buộc
         if (status === 'postponed' && (!note || !note.trim())) {
             return res.status(400).json({
                 success: false,
-                message: "Vui lòng nhập lý do hoãn tour"
+                message: "Vui lòng nhập lý do hoãn ngày tour"
             });
         }
 
-        // Find tour
-        const tour = await TourModel.findById(id);
-        if (!tour) {
+        // Tìm DateSlot theo id
+        const dateSlot = await DateSlot.findById(id).populate("tour", "nameTour");
+        if (!dateSlot) {
             return res.status(404).json({
                 success: false,
-                message: "Không tìm thấy tour"
+                message: "Không tìm thấy ngày tour"
             });
         }
 
-        // Update tour status
-        const updateData = {
-            tourStatus: status,
-            statusUpdatedAt: new Date(),
-            statusUpdatedBy: updatedBy
-        };
+        // Cập nhật trạng thái
+        dateSlot.tourStatus = status;        // trạng thái HDV
+        dateSlot.statusUpdatedAt = new Date();
+        dateSlot.statusUpdatedBy = updatedBy;
 
         if (note && note.trim()) {
-            updateData.statusNote = note.trim();
+            dateSlot.statusNote = note.trim();
         }
 
-        const updatedTour = await TourModel.findByIdAndUpdate(
-            id,
-            updateData,
-            { new: true }
-        ).populate("destination", "locationName country")
-         .populate("assignedEmployee", "firstName lastName full_name email employee_id position");
+        await dateSlot.save();
 
-        console.log(`Tour ${id} status updated to ${status} by ${updatedBy}`);
+        console.log(`DateSlot ${id} status updated to ${status} by ${updatedBy}`);
 
         return res.status(200).json({
             success: true,
-            message: "Cập nhật trạng thái tour thành công",
-            tour: updatedTour
+            message: "Cập nhật trạng thái ngày tour thành công",
+            dateSlot
         });
 
     } catch (error) {
-        console.error("Error updating tour status:", error);
+        console.error("Error updating DateSlot status:", error);
         return res.status(500).json({
             success: false,
             message: "Lỗi server: " + error.message

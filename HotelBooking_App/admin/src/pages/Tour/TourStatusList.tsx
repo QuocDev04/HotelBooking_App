@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Card, Select, Tag, Button, Space, Typography, Image, Badge, Tooltip, Alert } from 'antd';
 import { useQuery } from '@tanstack/react-query';
-import axios, { instanceAdmin } from '../../configs/axios';
+import { instanceAdmin } from '../../configs/axios';
 import dayjs from 'dayjs';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { EditOutlined, DeleteOutlined, EyeOutlined, TeamOutlined, DollarOutlined } from '@ant-design/icons';
+import { EyeOutlined, TeamOutlined, DollarOutlined } from '@ant-design/icons';
 import { useAuth } from '@clerk/clerk-react';
 
 const { Title } = Typography;
@@ -47,7 +47,7 @@ const TourStatusList: React.FC = () => {
     }
   }, [urlStatus]);
 
-  const { data, isLoading, refetch } = useQuery<{ success: boolean; data: Tour[] }>({  
+  const { data, isLoading } = useQuery<{ success: boolean; data: Tour[] }>({  
     queryKey: ['tours', status],
     queryFn: async () => {
       try {
@@ -96,10 +96,10 @@ const TourStatusList: React.FC = () => {
       title: 'Tên Tour',
       dataIndex: ['tour', 'nameTour'],
       key: 'nameTour',
-      render: (text: string, record: Tour) => {
+      render: (_text: string, record: Tour) => {
         // Kiểm tra dữ liệu hợp lệ trước khi render
         if (!record?.tour?.imagesTour?.length) {
-          return <span>{text || 'N/A'}</span>;
+          return <span>{_text || 'N/A'}</span>;
         }
         return (
           <Space>
@@ -109,7 +109,7 @@ const TourStatusList: React.FC = () => {
               preview={false} 
               style={{ borderRadius: '5px' }} 
             />
-            <span>{text || 'N/A'}</span>
+            <span>{_text || 'N/A'}</span>
           </Space>
         );
       },
@@ -132,9 +132,60 @@ const TourStatusList: React.FC = () => {
       render: (status: string) => getStatusTag(status),
     },
     {
+      title: 'Trạng thái HDV',
+      key: 'tourStatus',
+      render: (_: any, record: any) => {
+        const tourStatus = record.tourStatus || 'preparing';
+        const statusNote = record.statusNote;
+        const updatedBy = record.statusUpdatedBy;
+        const updatedAt = record.statusUpdatedAt;
+
+        let color = '';
+        let text = '';
+
+        switch (tourStatus) {
+          case 'preparing':
+            color = 'blue';
+            text = 'Chuẩn bị diễn ra';
+            break;
+          case 'ongoing':
+            color = 'orange';
+            text = 'Đang diễn ra';
+            break;
+          case 'completed':
+            color = 'green';
+            text = 'Hoàn thành';
+            break;
+          case 'postponed':
+            color = 'red';
+            text = 'Hoãn tour';
+            break;
+          default:
+            color = 'default';
+            text = 'Chưa xác định';
+        }
+
+        return (
+          <div className="space-y-1">
+            <Tag color={color}>{text}</Tag>
+            {statusNote && (
+              <div className="text-xs text-gray-500" title={statusNote}>
+                📝 {statusNote.length > 30 ? statusNote.substring(0, 30) + '...' : statusNote}
+              </div>
+            )}
+            {updatedAt && (
+              <div className="text-xs text-gray-400">
+                {updatedBy} • {dayjs(updatedAt).format('DD/MM/YYYY HH:mm')}
+              </div>
+            )}
+          </div>
+        );
+      },
+    },
+    {
       title: 'Số chỗ còn trống',
       key: 'availableSeats',
-      render: (text: string, record: Tour) => (
+      render: (_text: string, record: Tour) => (
         <Badge 
           count={record.availableSeats} 
           showZero 
@@ -171,7 +222,7 @@ const TourStatusList: React.FC = () => {
     {
       title: 'Thao tác',
       key: 'action',
-      render: (text: string, record: Tour) => {
+      render: (_text: string, record: Tour) => {
         // Kiểm tra dữ liệu hợp lệ trước khi render
         if (!record?.tour?._id || !record?._id) {
           return null;
