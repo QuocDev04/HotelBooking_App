@@ -69,14 +69,12 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
     const events = slots?.map((slot: any) => {
         const date = dayjs(slot.dateTour);
         const isSelectable = isDateSelectable(date.toDate());
-
-        // Nếu có finalPrice thì lấy finalPrice, không thì lấy price
         const priceToShow = tours?.finalPrice ?? tours?.price;
-
+        
         return {
             title: `Còn: ${slot.availableSeats} chỗ \nGiá: ${priceToShow?.toLocaleString('vi-VN')} đ`,
             date: date.format("YYYY-MM-DD"),
-            backgroundColor: isSelectable ? '#3B82F6' : '#9CA3AF', // Xanh cho ngày hợp lệ, xám cho ngày không hợp lệ
+            backgroundColor: isSelectable ? '#3B82F6' : '#9CA3AF',
             borderColor: isSelectable ? '#2563EB' : '#6B7280',
             textColor: isSelectable ? '#FFFFFF' : '#9CA3AF'
         };
@@ -85,7 +83,7 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
     function handleDateClick(info: any) {
         const clickedDate = dayjs(info.date);
         
-        // Kiểm tra xem ngày có hợp lệ để chọn không
+        // Kiểm tra ngày có hợp lệ để chọn không
         if (!isDateSelectable(info.date)) {
             toast.warning("Không thể chọn ngày đã qua hoặc ngày hôm nay");
             return;
@@ -93,17 +91,15 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
 
         const clickedDateStr = clickedDate.format("YYYY-MM-DD");
         const isDateAvailable = events.some((event: any) => event.date === clickedDateStr);
-
+        
         if (isDateAvailable) {
             setSelectedDate(info.date);
-            // Tìm slot tương ứng để hiển thị thông tin
             const slot = slots.find((s: any) => dayjs(s.dateTour).format("YYYY-MM-DD") === clickedDateStr);
             if (slot) {
                 console.log("Selected slot:", slot);
                 toast.success(`Đã chọn ngày ${clickedDate.format("DD/MM/YYYY")} - Còn ${slot.availableSeats} chỗ`);
             }
         } else {
-            // Hiển thị thông báo khi chọn ngày không có tour
             toast.warning("Ngày này không có tour, vui lòng chọn ngày khác");
             console.log("Ngày này không có tour");
         }
@@ -112,7 +108,7 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
     function handleEventClick(clickInfo: any) {
         const clickedDate = dayjs(clickInfo.event.start);
         
-        // Kiểm tra xem ngày có hợp lệ để chọn không
+        // Kiểm tra ngày có hợp lệ để chọn không
         if (!isDateSelectable(clickInfo.event.start)) {
             toast.warning("Không thể chọn ngày đã qua hoặc ngày hôm nay");
             return;
@@ -120,10 +116,9 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
 
         const clickedDateStr = clickedDate.format("YYYY-MM-DD");
         const isDateAvailable = events.some((event: any) => event.date === clickedDateStr);
-
+        
         if (isDateAvailable) {
             setSelectedDate(clickInfo.event.start);
-            // Tìm slot tương ứng để hiển thị thông tin
             const slot = slots.find((s: any) => dayjs(s.dateTour).format("YYYY-MM-DD") === clickedDateStr);
             if (slot) {
                 console.log("Selected slot:", slot);
@@ -135,11 +130,7 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
         }
     }
 
-    const selectedSlot = slots?.find((slot: TourData) =>
-        dayjs(slot?.dateTour).isSame(selectedDate, 'day')
-    );
-
-    // Hàm tùy chỉnh để vô hiệu hóa các ngày không hợp lệ
+    // Hàm tạo class cho các ô ngày
     const dayCellClassNames = (arg: any) => {
         const date = dayjs(arg.date);
         if (!isDateSelectable(date.toDate())) {
@@ -148,6 +139,9 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
         return [];
     };
 
+    const selectedSlot = slots?.find((slot: TourData) =>
+        dayjs(slot?.dateTour).isSame(selectedDate, 'day')
+    );
     return (
         <>
             {/* Image Gallery Section */}
@@ -212,6 +206,22 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                             📅 Lịch Tour Du Lịch
                         </h2>
                         <p className="text-gray-600">Chọn ngày khởi hành phù hợp với lịch trình của bạn</p>
+                        
+                        {/* Legend cho calendar */}
+                        <div className="flex items-center justify-center gap-6 mt-4 text-sm">
+                            <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                                <span className="text-gray-700">Có thể đặt</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 bg-gray-400 rounded"></div>
+                                <span className="text-gray-500">Đã hết hạn</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 bg-gray-200 rounded border border-gray-300"></div>
+                                <span className="text-gray-400">Không thể chọn</span>
+                            </div>
+                        </div>
                     </div>
 
                     {selectedDate == null ? (

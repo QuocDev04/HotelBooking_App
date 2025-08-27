@@ -127,41 +127,43 @@ const FeaturedDestination = () => {
     }
 
     return (
-        <div className="min-h-full w-full px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 flex flex-col items-center relative overflow-hidden py-12 sm:py-16">
-            <style>{`
+        <div className="min-h-full w-full flex flex-col items-center relative overflow-hidden py-12 sm:py-16">
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
+                <style>{`
         .marquee-inner { animation: marqueeScroll linear infinite; }
         @keyframes marqueeScroll { 0%{ transform: translateX(0%); } 100%{ transform: translateX(-50%); } }
       `}</style>
 
-            <div className="w-full flex flex-col md:flex-row justify-between items-start px-4 md:px-8 mb-10">
-                <div className="mb-4 md:mb-0">
-                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-snug">Các địa điểm và phổ biến nhất</h2>
-                    <div className="w-16 h-1 mt-2 bg-gradient-to-r from-[#00c6ff] to-[#0072ff] rounded-full" />
-                </div>
-                <p className="text-gray-600 max-w-xl text-sm md:text-base leading-relaxed">
-                    Tận hưởng sự xa hoa và đẳng cấp tối đa trên du thuyền mới nhất và phổ biến nhất. Khám phá một hành trình tuyệt
-                    vời đưa bạn vào thế giới của sự sang trọng, tiện nghi và trải nghiệm không thể quên.
-                </p>
-            </div>
-
-            {cards.length === 0 ? (
-                <div className="w-full text-center text-gray-500">Chưa có tour nổi bật được chọn bởi admin.</div>
-            ) : (
-                <div className="relative w-full overflow-hidden" onMouseEnter={() => setPause(true)} onMouseLeave={() => setPause(false)}>
-                    <div className="absolute left-0 top-0 h-full w-20 z-10 pointer-events-none bg-gradient-to-r from-[#F5F7FF] to-transparent" />
-                    <div
-                        className="marquee-inner flex w-fit"
-                        style={{ animationPlayState: pause ? "paused" : "running", animationDuration: Math.max(cards.length, 1) * 3500 + "ms" }}
-                    >
-                        <div className="flex">
-                            {[...cards, ...cards].map((card, idx) => (
-                                <FadeUpCard key={idx} card={card} index={idx % cards.length} />
-                            ))}
-                        </div>
+                <div className="w-full flex flex-col md:flex-row justify-between items-start px-2 sm:px-4 md:px-6 lg:px-8 mb-10">
+                    <div className="mb-4 md:mb-0">
+                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-snug">Các địa điểm và phổ biến nhất</h2>
+                        <div className="w-16 h-1 mt-2 bg-gradient-to-r from-[#00c6ff] to-[#0072ff] rounded-full" />
                     </div>
-                    <div className="absolute right-0 top-0 h-full w-20 md:w-40 z-10 pointer-events-none bg-gradient-to-l from-[#F5F7FF] to-transparent" />
+                    <p className="text-gray-600 max-w-xl text-sm md:text-base leading-relaxed">
+                        Tận hưởng sự xa hoa và đẳng cấp tối đa trên du thuyền mới nhất và phổ biến nhất. Khám phá một hành trình tuyệt
+                        vời đưa bạn vào thế giới của sự sang trọng, tiện nghi và trải nghiệm không thể quên.
+                    </p>
                 </div>
-            )}
+
+                {cards.length === 0 ? (
+                    <div className="w-full text-center text-gray-500 px-4">Chưa có tour nổi bật được chọn bởi admin.</div>
+                ) : (
+                    <div className="relative w-full overflow-hidden px-2 sm:px-4 md:px-6" onMouseEnter={() => setPause(true)} onMouseLeave={() => setPause(false)}>
+                        <div className="absolute left-0 top-0 h-full w-20 z-10 pointer-events-none bg-gradient-to-r from-[#F5F7FF] to-transparent" />
+                        <div
+                            className="marquee-inner flex w-fit"
+                            style={{ animationPlayState: pause ? "paused" : "running", animationDuration: Math.max(cards.length, 1) * 3500 + "ms" }}
+                        >
+                            <div className="flex">
+                                {[...cards, ...cards].map((card, idx) => (
+                                    <FadeUpCard key={idx} card={card} index={idx % cards.length} />
+                                ))}
+                            </div>
+                        </div>
+                        <div className="absolute right-0 top-0 h-full w-20 md:w-40 z-10 pointer-events-none bg-gradient-to-l from-[#F5F7FF] to-transparent" />
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

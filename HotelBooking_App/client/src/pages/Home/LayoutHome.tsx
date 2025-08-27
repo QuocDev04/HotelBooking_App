@@ -19,7 +19,6 @@ const LayoutHome = () => {
       <AboutUs/>
       <Internatinal/>
       <FeaturedDestination/>
-
       <HotelPromotion/>
       <TourIn/>
       <News/>
