@@ -358,7 +358,7 @@ const HotelDetailRefactored: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '80px auto 0 auto' }}>
+    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0px auto 0 auto' }}>
       {/* Header */}
       <div style={{ marginBottom: '20px' }}>
         <Button 

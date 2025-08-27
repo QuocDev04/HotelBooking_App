@@ -24,7 +24,7 @@ const InfoAll = () => {
       }}
     >
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold my-20 text-center text-white">Thông tin chung</h1>
+        <h1 className="text-3xl font-bold text-center text-white">Thông tin chung</h1>
         <div className="space-y-4">
           {sections.map((sec, idx) => (
             <div 
