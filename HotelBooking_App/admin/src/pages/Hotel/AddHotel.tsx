@@ -14,6 +14,7 @@ interface HotelFormData {
   location: string;
   description: string;
   starRating: number;
+  floorsCount: number;
   hotelImages: string[];
   hotelAmenities: { name: string; icon?: string }[];
   contactInfo: {
@@ -209,6 +210,7 @@ const AddHotel: React.FC = () => {
           initialValues={{
             status: true,
             starRating: 5,
+            floorsCount: 2,
             policies: {
               checkIn: '14:00',
               checkOut: '12:00',
@@ -298,6 +300,14 @@ const AddHotel: React.FC = () => {
                   character={<StarFilled />}
                   className="text-2xl"
                 />
+              </Form.Item>
+
+              <Form.Item
+                label="Số tầng"
+                name="floorsCount"
+                rules={[{ required: true, message: 'Vui lòng nhập số tầng!' }]}
+              >
+                <InputNumber min={2} placeholder="Số tầng" style={{ width: '100%' }} />
               </Form.Item>
 
 

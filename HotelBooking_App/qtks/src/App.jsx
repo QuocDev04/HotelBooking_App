@@ -4,24 +4,27 @@ import Header from "./components/Header";
 import TrangChu from "./pages/Trangchu";
 import ThongBao from "./pages/Thongbao";
 import HoSo from "./pages/Hoso";
+import Login from "./components/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { AuthProvider } from "./context/AuthContext";
 
 const App = () => {
   return (
-    <Router>
-      <div className="flex flex-col h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-        {/* Header */}
-        <Header />
-
-        {/* Main Content */}
-        <main className="flex-1 overflow-y-auto">
-          <Routes>
-            <Route path="/" element={<TrangChu />} />
-            <Route path="/thongbao" element={<ThongBao />} />
-            <Route path="/hoso" element={<HoSo />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div className="flex flex-col h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+          <Header />
+          <main className="flex-1 overflow-y-auto">
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={<ProtectedRoute><TrangChu /></ProtectedRoute>} />
+              <Route path="/thongbao" element={<ProtectedRoute><ThongBao /></ProtectedRoute>} />
+              <Route path="/hoso" element={<ProtectedRoute><HoSo /></ProtectedRoute>} />
+            </Routes>
+          </main>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 };
 

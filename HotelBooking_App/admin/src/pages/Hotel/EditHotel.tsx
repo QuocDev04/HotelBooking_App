@@ -19,6 +19,7 @@ interface Hotel {
   };
   description: string;
   starRating: number;
+  floorsCount?: number;
   hotelImages: string[];
   hotelAmenities: { name: string; icon?: string }[];
   contactInfo: {
@@ -50,6 +51,7 @@ interface HotelFormData {
   location: string;
   description: string;
   starRating: number;
+  floorsCount: number;
   hotelImages: string[];
   hotelAmenities: { name: string; icon?: string }[];
   contactInfo: {
@@ -140,6 +142,7 @@ const EditHotel: React.FC = () => {
         location: hotel.location?.locationName,
         description: hotel.description,
         starRating: hotel.starRating,
+        floorsCount: hotel.floorsCount ?? 2,
         contactInfo: {
           phone: hotel.contactInfo?.phone,
           email: hotel.contactInfo?.email
@@ -174,6 +177,7 @@ const EditHotel: React.FC = () => {
       location: hotel?.location?._id || '',
       description: values.description,
       starRating: values.starRating,
+      floorsCount: values.floorsCount,
       hotelImages: fileList.map(file => {
         if (file.url) return file.url;
         if (file.response?.url) return file.response.url;
@@ -365,6 +369,14 @@ const EditHotel: React.FC = () => {
                   size="large"
                   className="w-full"
                 />
+              </Form.Item>
+
+              <Form.Item
+                label="Số tầng"
+                name="floorsCount"
+                rules={[{ required: true, message: 'Vui lòng nhập số tầng!' }]}
+              >
+                <InputNumber min={2} placeholder="Số tầng" style={{ width: '100%' }} />
               </Form.Item>
 
               <Form.Item

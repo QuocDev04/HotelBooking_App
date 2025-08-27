@@ -86,7 +86,7 @@ const Sidebar = () => {
             icon: '👥',
             children: [
                 { name: 'Tài khoản Khách hàng', path: '/admin/customer-accounts', icon: '👤' },
-                { name: 'Tài khoản HDV', path: '/admin/hdv-accounts', icon: '🧑‍🏫' },
+                { name: 'Tài khoản nhân viên', path: '/admin/hdv-accounts', icon: '🧑‍🏫' },
                 { name: 'Phân công HDV', path: '/admin/employee-assignment', icon: '📋' },
             ],
         },

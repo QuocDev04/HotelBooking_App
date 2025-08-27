@@ -30,6 +30,7 @@ const Login = ({ onLogin }) => {
       const response = await axios.post("http://localhost:8080/api/employee/login", {
         email: formData.email.trim(),
         password: formData.password,
+        portal: "hdv",
       });
 
       if (response.data.success) {

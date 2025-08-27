@@ -32,7 +32,7 @@ const generateRefreshToken = (employee) => {
 // Đăng nhập
 const loginEmployee = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, portal } = req.body;
         if (!email || !password) {
             return res.status(StatusCodes.BAD_REQUEST).json({
                 success: false,
@@ -61,6 +61,24 @@ const loginEmployee = async (req, res) => {
                 success: false,
                 message: "Mật khẩu không chính xác",
             });
+        }
+
+        // Kiểm tra ràng buộc portal theo phòng ban/position
+        // Mapping mặc định: hdv -> department 'tour'; qtks -> department 'hotel'
+        if (portal) {
+            const normalizedPortal = String(portal).toLowerCase().trim();
+            const departmentByPortal = {
+                hdv: 'tour',
+                qtks: 'hotel',
+            };
+
+            const requiredDepartment = departmentByPortal[normalizedPortal];
+            if (requiredDepartment && employee.department !== requiredDepartment) {
+                return res.status(StatusCodes.FORBIDDEN).json({
+                    success: false,
+                    message: `Tài khoản không thuộc phòng ban phù hợp để đăng nhập portal '${normalizedPortal}'`,
+                });
+            }
         }
 
         employee.last_login = new Date();

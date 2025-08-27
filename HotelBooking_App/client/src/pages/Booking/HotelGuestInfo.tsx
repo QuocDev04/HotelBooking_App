@@ -512,15 +512,15 @@ const HotelGuestInfo = () => {
                     <div>{formattedCheckOut}</div>
                   </div>
                 </div>
-
-                                 <div className="flex items-center text-gray-600">
-                   <UserOutlined className="mr-2" />
-                   <div>
-                     <div className="font-medium">Số khách</div>
-                     <div>{bookingData?.adults} người, {bookingData?.children} trẻ em</div>
-                   </div>
-                 </div>
-
+                
+                <div className="flex items-center text-gray-600">
+                  <UserOutlined className="mr-2" />
+                  <div>
+                    <div className="font-medium">Số khách</div>
+                    <div>{bookingData?.adults} người</div>
+                  </div>
+                </div>
+                
                 <div className="flex items-center text-gray-600">
                   <HomeOutlined className="mr-2" />
                   <div>
