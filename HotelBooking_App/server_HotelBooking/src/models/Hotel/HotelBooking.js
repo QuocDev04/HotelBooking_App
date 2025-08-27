@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const GuestSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
-    gender: { type: String, enum: ["Nam", "Nữ"], required: true },
+    gender: { type: String, enum: ["male", "female"], required: true },
     birthDate: { type: Date, required: true },
     idNumber: { type: String }, // CMND/CCCD
     nationality: { type: String, default: "Việt Nam" }

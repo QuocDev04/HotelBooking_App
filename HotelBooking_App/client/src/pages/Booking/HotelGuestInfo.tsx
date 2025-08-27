@@ -64,18 +64,18 @@ const HotelGuestInfo = () => {
       const paymentMethod = data?.data?.payment_method;
       const paymentType = data?.data?.paymentType;
       console.log("databongking", data?.data?._id);
-      
+
       if (paymentMethod === "bank_transfer") {
         try {
           const res = await fetch(`http://localhost:8080/api/vnpay/${data?.data?._id}`, {
             method: 'POST'
           }).then(res => res.json());
-          
+
           console.log("VNPay response:", res?.data);
 
           if (res.data?.success && res.data?.paymentUrl) {
             window.location.href = res.data.paymentUrl;
-          } else {
+        } else {
             message.error("Không thể lấy liên kết thanh toán từ VNPay");
           }
         } catch (error) {
