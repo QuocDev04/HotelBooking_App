@@ -6,7 +6,9 @@ import instanceClient from "../../../configs/instance";
 import { useEffect, useState } from "react";
 import  dayjs from 'dayjs';
 import type { AxiosError } from "axios";
-import { Form, Input, message } from "antd";
+import { Form, Input, message, DatePicker, Select } from "antd";
+
+const { Option } = Select;
 
 // Định nghĩa kiểu dữ liệu cho BookingData
 interface BookingData {
@@ -96,6 +98,11 @@ const BookingRoom = () => {
       check_out_date: bookingData?.check_out_date,
       adults: bookingData?.adults,
       children: bookingData?.children,
+      guests: values.guests ? values.guests.map((guest: any) => ({
+        fullName: guest.fullName,
+        gender: guest.gender,
+        birthDate: guest.birthDate ? dayjs(guest.birthDate).format('YYYY-MM-DD') : new Date('1990-01-01')
+      })) : [],
       ...values,  // username, email, phone_number
     };
 
@@ -404,6 +411,181 @@ const BookingRoom = () => {
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Guest Information Section */}
+            <div className="mb-8">
+              <h3 className="text-2xl font-semibold text-gray-800 mb-6">
+                Thông tin khách lưu trú
+              </h3>
+              
+              {/* Guest 1 (Main Guest) */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-4">
+                <h4 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  Khách 1 (Người đặt)
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Họ và tên <span className="text-red-500">*</span>
+                    </label>
+                    <Form.Item
+                      name={['guests', 0, 'fullName']}
+                      rules={[{ required: true, message: 'Vui lòng nhập họ và tên khách 1!' }]}
+                      initialValue={form.getFieldValue('userName')}
+                    >
+                      <Input placeholder="Nhập họ và tên khách 1" />
+                    </Form.Item>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Giới tính <span className="text-red-500">*</span>
+                    </label>
+                    <Form.Item
+                      name={['guests', 0, 'gender']}
+                      rules={[{ required: true, message: 'Vui lòng chọn giới tính!' }]}
+                    >
+                      <Select placeholder="Chọn giới tính">
+                        <Option value="male">Nam</Option>
+                        <Option value="female">Nữ</Option>
+                      </Select>
+                    </Form.Item>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Ngày sinh <span className="text-red-500">*</span>
+                    </label>
+                    <Form.Item
+                      name={['guests', 0, 'birthDate']}
+                      rules={[{ required: true, message: 'Vui lòng nhập ngày sinh!' }]}
+                    >
+                      <DatePicker 
+                        style={{ width: '100%' }} 
+                        placeholder="Chọn ngày sinh"
+                        format="DD/MM/YYYY"
+                      />
+                    </Form.Item>
+                  </div>
+                </div>
+              </div>
+
+              {/* Guest 2 (if adults > 1) */}
+              {bookingData?.adults && bookingData.adults > 1 && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-4">
+                  <h4 className="text-lg font-semibold text-green-800 mb-4 flex items-center">
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                    </svg>
+                    Khách 2
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Họ và tên <span className="text-red-500">*</span>
+                      </label>
+                      <Form.Item
+                        name={['guests', 1, 'fullName']}
+                        rules={[{ required: true, message: 'Vui lòng nhập họ và tên khách 2!' }]}
+                      >
+                        <Input placeholder="Nhập họ và tên khách 2" />
+                      </Form.Item>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Giới tính <span className="text-red-500">*</span>
+                      </label>
+                      <Form.Item
+                        name={['guests', 1, 'gender']}
+                        rules={[{ required: true, message: 'Vui lòng chọn giới tính!' }]}
+                      >
+                        <Select placeholder="Chọn giới tính">
+                          <Option value="male">Nam</Option>
+                          <Option value="female">Nữ</Option>
+                        </Select>
+                      </Form.Item>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Ngày sinh <span className="text-red-500">*</span>
+                      </label>
+                      <Form.Item
+                        name={['guests', 1, 'birthDate']}
+                        rules={[{ required: true, message: 'Vui lòng nhập ngày sinh!' }]}
+                      >
+                        <DatePicker 
+                          style={{ width: '100%' }} 
+                          placeholder="Chọn ngày sinh"
+                          format="DD/MM/YYYY"
+                        />
+                      </Form.Item>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Additional Guests (if adults > 2) */}
+              {bookingData?.adults && bookingData.adults > 2 && (
+                <div className="mb-4">
+                  <h4 className="text-lg font-semibold text-orange-800 mb-4 flex items-center">
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    Khách bổ sung (Khách 3 - {bookingData.adults})
+                  </h4>
+                  {Array.from({ length: bookingData.adults - 2 }, (_, index) => (
+                    <div key={index} className="bg-orange-50 border border-orange-200 rounded-lg p-6 mb-4">
+                      <h5 className="text-lg font-semibold text-orange-800 mb-4">
+                        Khách {index + 3}
+                      </h5>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Họ và tên <span className="text-red-500">*</span>
+                          </label>
+                          <Form.Item
+                            name={['guests', index + 2, 'fullName']}
+                            rules={[{ required: true, message: `Vui lòng nhập họ và tên khách ${index + 3}!` }]}
+                          >
+                            <Input placeholder={`Nhập họ và tên khách ${index + 3}`} />
+                          </Form.Item>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Giới tính <span className="text-red-500">*</span>
+                          </label>
+                          <Form.Item
+                            name={['guests', index + 2, 'gender']}
+                            rules={[{ required: true, message: 'Vui lòng chọn giới tính!' }]}
+                          >
+                            <Select placeholder="Chọn giới tính">
+                              <Option value="male">Nam</Option>
+                              <Option value="female">Nữ</Option>
+                            </Select>
+                          </Form.Item>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Ngày sinh <span className="text-red-500">*</span>
+                          </label>
+                          <Form.Item
+                            name={['guests', index + 2, 'birthDate']}
+                            rules={[{ required: true, message: 'Vui lòng nhập ngày sinh!' }]}
+                          >
+                            <DatePicker 
+                              style={{ width: '100%' }} 
+                              placeholder="Chọn ngày sinh"
+                              format="DD/MM/YYYY"
+                            />
+                          </Form.Item>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="mb-8 p-6 border border-green-600 rounded-md bg-green-50 shadow-inner">

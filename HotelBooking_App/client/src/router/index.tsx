@@ -24,6 +24,7 @@ import HotelDetail from "../pages/Hotel/HotelDetail"
 import HotelDetailRefactored from "../pages/Hotel/HotelDetailRefactored"
 import HotelBookingConfirmation from "../pages/Hotel/HotelBookingConfirmation"
 import HotelBookings from "../pages/Hotel/HotelBookings"
+import HotelGuestInfo from "../pages/Booking/HotelGuestInfo"
 import TestDateSelection from "../components/DateSelection/TestDateSelection"
 import TestCashDepositModal from "../components/Payment/TestCashDepositModal"
 import { HotelPolicy } from "../pages/Blog/hotelPolicy"
@@ -64,6 +65,7 @@ const Router = () => {
                 <Route path="/hotels-old/:id" element={<HotelDetail />} />
                 <Route path="/hotel-booking-confirmation/:id" element={<HotelBookingConfirmation />} />
                 <Route path="/my-hotel-bookings" element={<HotelBookings />} />
+                <Route path="/hotel-guest-info/:id" element={<HotelGuestInfo />} />
                 {/* Test routes */}
                 <Route path="/test-date-selection" element={<TestDateSelection />} />
                 <Route path="/test-cash-deposit-modal" element={<TestCashDepositModal />} />

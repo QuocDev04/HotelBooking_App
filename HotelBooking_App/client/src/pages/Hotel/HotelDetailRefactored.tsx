@@ -148,8 +148,22 @@ const HotelDetailRefactored: React.FC = () => {
 
   // Handle room selection
   const handleRoomSelect = (roomType: RoomAvailability, price: number) => {
-    setSelectedRoomType({ ...roomType, price });
-    setBookingModalVisible(true);
+    // Save booking data to localStorage
+    const bookingData = {
+      roomId: roomType.roomTypeIndex.toString(),
+      check_in_date: checkInDate,
+      check_out_date: checkOutDate,
+      adults: guests,
+      children: 0, // Default to 0 for now
+      hotelId: hotel?._id,
+      roomType: hotel?.roomTypes[roomType.roomTypeIndex]?.typeName,
+      price: price
+    };
+    
+    localStorage.setItem("bookingData", JSON.stringify(bookingData));
+    
+    // Navigate to guest info page
+    navigate(`/hotel-guest-info/${hotel?._id}`);
   };
 
   const [depositModalVisible, setDepositModalVisible] = useState(false);

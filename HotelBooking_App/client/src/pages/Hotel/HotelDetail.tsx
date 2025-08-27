@@ -200,6 +200,20 @@ const HotelDetail: React.FC = () => {
   const handleBookRoom = (roomType: any, availableRooms: number, price: number) => {
     setSelectedRoomType({ ...roomType, availableRooms, price });
     setBookingModalVisible(true);
+    
+    // Auto-fill guest 1 name when modal opens
+    setTimeout(() => {
+      const fullName = form.getFieldValue('fullName');
+      if (fullName) {
+        form.setFieldsValue({
+          guests: [{
+            fullName: fullName,
+            gender: undefined,
+            birthDate: undefined
+          }]
+        });
+      }
+    }, 100);
   };
 
   const [depositModalVisible, setDepositModalVisible] = useState(false);
@@ -230,17 +244,26 @@ const HotelDetail: React.FC = () => {
         hotelId: hotel?._id,
         checkInDate,
         checkOutDate,
+        numberOfNights: moment(checkOutDate).diff(moment(checkInDate), 'days'),
+        totalGuests: guests,
         fullNameUser: values.fullName,
         email: values.email,
         phone: values.phone,
         address: values.address || '',
         roomBookings: [{
           roomTypeIndex: hotel?.roomTypes.findIndex(rt => rt._id === selectedRoomType._id),
+          roomTypeName: selectedRoomType.typeName,
           numberOfRooms: values.numberOfRooms,
-          guests: Array.from({ length: guests }, (_, i) => ({
+          pricePerNight: selectedRoomType.price,
+          totalPrice: selectedRoomType.price * values.numberOfRooms * moment(checkOutDate).diff(moment(checkInDate), 'days'),
+          guests: values.guests ? values.guests.map((guest: any) => ({
+            fullName: guest.fullName,
+            gender: guest.gender,
+            birthDate: guest.birthDate ? moment(guest.birthDate).format('YYYY-MM-DD') : new Date('1990-01-01')
+          })) : Array.from({ length: guests }, (_, i) => ({
             fullName: i === 0 ? values.fullName : `Guest ${i + 1}`,
-            gender: 'Nam', // Default gender, can be customized later
-            birthDate: new Date('1990-01-01') // Default birth date, can be customized later
+            gender: 'male', // Default gender
+            birthDate: new Date('1990-01-01') // Default birth date
           }))
         }],
         payment_method: values.paymentMethod,
@@ -726,6 +749,160 @@ const HotelDetail: React.FC = () => {
                 </Form.Item>
               </Col>
             </Row>
+
+            {/* Guest Information Section */}
+            <div style={{ marginBottom: 24 }}>
+              <Title level={5} style={{ marginBottom: 16, color: '#1890ff' }}>
+                Thông tin khách lưu trú
+              </Title>
+              
+              {/* Guest 1 (Main Guest) */}
+              <Card size="small" style={{ marginBottom: 16, backgroundColor: '#f0f8ff' }}>
+                <Title level={5} style={{ marginBottom: 12, color: '#1890ff' }}>
+                  Khách 1 (Người đặt)
+                </Title>
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <Form.Item
+                      label="Họ và tên"
+                      name={['guests', 0, 'fullName']}
+                      rules={[{ required: true, message: 'Vui lòng nhập họ và tên khách 1!' }]}
+                      initialValue={form.getFieldValue('fullName')}
+                    >
+                      <Input placeholder="Nhập họ và tên khách 1" />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item
+                      label="Giới tính"
+                      name={['guests', 0, 'gender']}
+                      rules={[{ required: true, message: 'Vui lòng chọn giới tính!' }]}
+                    >
+                      <Select placeholder="Chọn giới tính">
+                        <Option value="male">Nam</Option>
+                        <Option value="female">Nữ</Option>
+                      </Select>
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <Row gutter={16}>
+                  <Col span={24}>
+                    <Form.Item
+                      label="Ngày sinh"
+                      name={['guests', 0, 'birthDate']}
+                      rules={[{ required: true, message: 'Vui lòng nhập ngày sinh!' }]}
+                    >
+                      <DatePicker 
+                        style={{ width: '100%' }} 
+                        placeholder="Chọn ngày sinh"
+                        format="DD/MM/YYYY"
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
+              </Card>
+
+              {/* Guest 2 (if guests > 1) */}
+              {guests > 1 && (
+                <Card size="small" style={{ marginBottom: 16, backgroundColor: '#f6ffed' }}>
+                  <Title level={5} style={{ marginBottom: 12, color: '#52c41a' }}>
+                    Khách 2
+                  </Title>
+                  <Row gutter={16}>
+                    <Col span={12}>
+                      <Form.Item
+                        label="Họ và tên"
+                        name={['guests', 1, 'fullName']}
+                        rules={[{ required: true, message: 'Vui lòng nhập họ và tên khách 2!' }]}
+                      >
+                        <Input placeholder="Nhập họ và tên khách 2" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label="Giới tính"
+                        name={['guests', 1, 'gender']}
+                        rules={[{ required: true, message: 'Vui lòng chọn giới tính!' }]}
+                      >
+                        <Select placeholder="Chọn giới tính">
+                          <Option value="male">Nam</Option>
+                          <Option value="female">Nữ</Option>
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Row gutter={16}>
+                    <Col span={24}>
+                      <Form.Item
+                        label="Ngày sinh"
+                        name={['guests', 1, 'birthDate']}
+                        rules={[{ required: true, message: 'Vui lòng nhập ngày sinh!' }]}
+                      >
+                        <DatePicker 
+                          style={{ width: '100%' }} 
+                          placeholder="Chọn ngày sinh"
+                          format="DD/MM/YYYY"
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </Card>
+              )}
+
+              {/* Additional Guests (if guests > 2) */}
+              {guests > 2 && (
+                <div style={{ marginBottom: 16 }}>
+                  <Title level={5} style={{ marginBottom: 12, color: '#fa8c16' }}>
+                    Khách bổ sung (Khách 3 - {guests})
+                  </Title>
+                  {Array.from({ length: guests - 2 }, (_, index) => (
+                    <Card key={index} size="small" style={{ marginBottom: 12, backgroundColor: '#fff7e6' }}>
+                      <Title level={5} style={{ marginBottom: 12, color: '#fa8c16' }}>
+                        Khách {index + 3}
+                      </Title>
+                      <Row gutter={16}>
+                        <Col span={12}>
+                          <Form.Item
+                            label="Họ và tên"
+                            name={['guests', index + 2, 'fullName']}
+                            rules={[{ required: true, message: `Vui lòng nhập họ và tên khách ${index + 3}!` }]}
+                          >
+                            <Input placeholder={`Nhập họ và tên khách ${index + 3}`} />
+                          </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                          <Form.Item
+                            label="Giới tính"
+                            name={['guests', index + 2, 'gender']}
+                            rules={[{ required: true, message: 'Vui lòng chọn giới tính!' }]}
+                          >
+                            <Select placeholder="Chọn giới tính">
+                              <Option value="male">Nam</Option>
+                              <Option value="female">Nữ</Option>
+                            </Select>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                      <Row gutter={16}>
+                        <Col span={24}>
+                          <Form.Item
+                            label="Ngày sinh"
+                            name={['guests', index + 2, 'birthDate']}
+                            rules={[{ required: true, message: 'Vui lòng nhập ngày sinh!' }]}
+                          >
+                            <DatePicker 
+                              style={{ width: '100%' }} 
+                              placeholder="Chọn ngày sinh"
+                              format="DD/MM/YYYY"
+                            />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <Form.Item
               label="Yêu cầu đặc biệt"
