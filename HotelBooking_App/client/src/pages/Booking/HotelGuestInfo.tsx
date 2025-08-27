@@ -61,28 +61,22 @@ const  HotelGuestInfo = () => {
     },
 
     onSuccess: async (data) => {
-      const paymentMethod = data?.data?.payment_method;
-      const paymentType = data?.data?.paymentType;
-      console.log("databongking", data?.data?._id);
-      
-      if (paymentMethod === "bank_transfer") {
-        try {
-          const res = await fetch(`http://localhost:8080/api/vnpay/${data?.data?._id}`, {
-            method: 'POST'
-          }).then(res => res.json());
-          
-          console.log("VNPay response:", res?.data);
+      console.log("Booking response data:", data);
 
-          if (res.data?.success && res.data?.paymentUrl) {
-            window.location.href = res.data.paymentUrl;
-          } else {
-            message.error("Không thể lấy liên kết thanh toán từ VNPay");
-          }
-        } catch (error) {
-          message.error("Đã xảy ra lỗi khi kết nối VNPay");
+      const paymentMethod = data?.payment_method || data?.newBooking?.payment_method;
+      const paymentType = data?.paymentType || data?.newBooking?.paymentType;
+
+      if (paymentMethod === "bank_transfer") {
+        const vnpayUrl = data?.vnpayUrl;
+
+        console.log("VNPay URL:", vnpayUrl);
+
+        if (vnpayUrl) {
+          window.location.href = vnpayUrl; // ⬅️ redirect luôn
+        } else {
+          message.error("Không tìm thấy liên kết VNPay");
         }
       } else if (paymentMethod === "cash") {
-        // Xử lý thanh toán tiền mặt
         if (paymentType === "deposit") {
           message.success("Đặt phòng thành công! Vui lòng thanh toán cọc để hoàn tất.");
         } else {
@@ -90,11 +84,12 @@ const  HotelGuestInfo = () => {
         }
         navigate("/booking-success");
       } else {
-        // Fallback
         message.success("Đặt phòng thành công!");
         navigate("/booking-success");
       }
     },
+
+
 
     onError: (error: any) => {
       message.error(error.message || "Có lỗi xảy ra khi đặt phòng");
