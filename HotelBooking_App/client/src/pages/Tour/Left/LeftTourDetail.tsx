@@ -19,27 +19,13 @@ interface LeftTourDetailProps {
     selectedDate: Date | null;
     setSelectedDate: (date: Date | null) => void;
 }
-
-// Hàm kiểm tra ngày có hợp lệ để chọn không
-const isDateSelectable = (date: Date): boolean => {
-    const today = dayjs().startOf('day');
-    const checkDate = dayjs(date).startOf('day');
-    return checkDate.isAfter(today);
-};
-
 function renderEventContent(eventInfo: any) {
-    const eventDate = dayjs(eventInfo.event.start);
-    const isSelectable = isDateSelectable(eventDate.toDate());
-    
     return (
-        <div className={`font-bold text-xs whitespace-pre-line cursor-pointer ${
-            isSelectable ? 'text-white' : 'text-gray-400'
-        }`}>
+        <div className="text-white font-bold text-xs whitespace-pre-line cursor-pointer">
             {eventInfo.event.title}
         </div>
     );
 }
-
 const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetailProps) => {
     const { id: tourId } = useParams<{ id: string }>();
     const { id } = useParams<{ id: string }>();
@@ -68,39 +54,28 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
 
     const events = slots?.map((slot: any) => {
         const date = dayjs(slot.dateTour);
-        const isSelectable = isDateSelectable(date.toDate());
 
         // Nếu có finalPrice thì lấy finalPrice, không thì lấy price
         const priceToShow = tours?.finalPrice ?? tours?.price;
 
         return {
             title: `Còn: ${slot.availableSeats} chỗ \nGiá: ${priceToShow?.toLocaleString('vi-VN')} đ`,
-            date: date.format("YYYY-MM-DD"),
-            backgroundColor: isSelectable ? '#3B82F6' : '#9CA3AF', // Xanh cho ngày hợp lệ, xám cho ngày không hợp lệ
-            borderColor: isSelectable ? '#2563EB' : '#6B7280',
-            textColor: isSelectable ? '#FFFFFF' : '#9CA3AF'
+            date: date.format("YYYY-MM-DD")
         };
     });
 
-    function handleDateClick(info: any) {
-        const clickedDate = dayjs(info.date);
-        
-        // Kiểm tra xem ngày có hợp lệ để chọn không
-        if (!isDateSelectable(info.date)) {
-            toast.warning("Không thể chọn ngày đã qua hoặc ngày hôm nay");
-            return;
-        }
 
-        const clickedDateStr = clickedDate.format("YYYY-MM-DD");
-        const isDateAvailable = events.some((event: any) => event.date === clickedDateStr);
+    function handleDateClick(info: any) {
+        const clickedDate = dayjs(info.date).format("YYYY-MM-DD");
+        const isDateAvailable = events.some((event: any) => event.date === clickedDate);
 
         if (isDateAvailable) {
             setSelectedDate(info.date);
             // Tìm slot tương ứng để hiển thị thông tin
-            const slot = slots.find((s: any) => dayjs(s.dateTour).format("YYYY-MM-DD") === clickedDateStr);
+            const slot = slots.find((s: any) => dayjs(s.dateTour).format("YYYY-MM-DD") === clickedDate);
             if (slot) {
                 console.log("Selected slot:", slot);
-                toast.success(`Đã chọn ngày ${clickedDate.format("DD/MM/YYYY")} - Còn ${slot.availableSeats} chỗ`);
+                toast.success(`Đã chọn ngày ${dayjs(info.date).format("DD/MM/YYYY")} - Còn ${slot.availableSeats} chỗ`);
             }
         } else {
             // Hiển thị thông báo khi chọn ngày không có tour
@@ -110,44 +85,25 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
     }
 
     function handleEventClick(clickInfo: any) {
-        const clickedDate = dayjs(clickInfo.event.start);
-        
-        // Kiểm tra xem ngày có hợp lệ để chọn không
-        if (!isDateSelectable(clickInfo.event.start)) {
-            toast.warning("Không thể chọn ngày đã qua hoặc ngày hôm nay");
-            return;
-        }
-
-        const clickedDateStr = clickedDate.format("YYYY-MM-DD");
-        const isDateAvailable = events.some((event: any) => event.date === clickedDateStr);
+        const clickedDate = dayjs(clickInfo.event.start).format("YYYY-MM-DD");
+        const isDateAvailable = events.some((event: any) => event.date === clickedDate);
 
         if (isDateAvailable) {
             setSelectedDate(clickInfo.event.start);
             // Tìm slot tương ứng để hiển thị thông tin
-            const slot = slots.find((s: any) => dayjs(s.dateTour).format("YYYY-MM-DD") === clickedDateStr);
+            const slot = slots.find((s: any) => dayjs(s.dateTour).format("YYYY-MM-DD") === clickedDate);
             if (slot) {
                 console.log("Selected slot:", slot);
-                toast.success(`Đã chọn ngày ${clickedDate.format("DD/MM/YYYY")} - Còn ${slot.availableSeats} chỗ`);
+                toast.success(`Đã chọn ngày ${dayjs(clickInfo.event.start).format("DD/MM/YYYY")} - Còn ${slot.availableSeats} chỗ`);
             }
         } else {
             toast.warning("Ngày này không có tour, vui lòng chọn ngày khác");
             console.log("Ngày này không có tour");
         }
     }
-
     const selectedSlot = slots?.find((slot: TourData) =>
         dayjs(slot?.dateTour).isSame(selectedDate, 'day')
     );
-
-    // Hàm tùy chỉnh để vô hiệu hóa các ngày không hợp lệ
-    const dayCellClassNames = (arg: any) => {
-        const date = dayjs(arg.date);
-        if (!isDateSelectable(date.toDate())) {
-            return ['disabled-date'];
-        }
-        return [];
-    };
-
     return (
         <>
             {/* Image Gallery Section */}
@@ -235,12 +191,6 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                 eventContent={renderEventContent}
                                 dateClick={handleDateClick}
                                 eventClick={handleEventClick}
-                                dayCellClassNames={dayCellClassNames}
-                                selectable={true}
-                                selectConstraint={{
-                                    start: dayjs().add(1, 'day').startOf('day').toDate(),
-                                    end: '2100-12-31'
-                                }}
                             />
                         </div>
                     ) : (
