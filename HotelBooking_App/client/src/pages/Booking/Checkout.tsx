@@ -167,6 +167,9 @@ const Checkout = () => {
   const tours = data?.data?.data;
   console.log(tours);
 
+  // Giá người lớn: ưu tiên finalPrice nếu có, không thì dùng price gốc
+  const adultUnitPrice = (tours?.tour?.finalPrice ?? tours?.tour?.price) || 0;
+
   const totalSingleRoomPrice = singleRoom.reduce(
     (sum, val) => (val ? sum + (tours?.tour?.priceSingleRoom || 0) : sum),
     0
@@ -337,7 +340,7 @@ const Checkout = () => {
   };
 
 
-  const totalPrice = (adultCount * (tours?.tour?.finalPrice || 0) +
+  const totalPrice = (adultCount * adultUnitPrice +
     totalSingleRoomPrice +
     kidCount * (tours?.tour?.priceChildren || 0) +
     childCount * (tours?.tour?.priceLittleBaby || 0));
@@ -432,7 +435,7 @@ const Checkout = () => {
   };
 
   return (
-    <div className="min-h-screen px-2 py-8 mt-20 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 md:px-8">
+    <div className="min-h-screen px-2 py-8 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 md:px-8">
       <div className="mx-auto max-w-7xl">
         {/* Header Section */}
         <div className="mb-8 text-center">
@@ -1061,25 +1064,16 @@ const Checkout = () => {
                 <div className="mb-1 font-semibold">THÔNG TIN DI CHUYỂN</div>
                 <div className="flex justify-between mb-1">
                   <span>Ngày đi - {dayjs(tours?.dateTour).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY")}</span>
-                  <span>17:05</span>
-                  <span className="text-gray-400">✈️</span>
-                  <span>18:50</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Ngày về - 14/07/2025</span>
-                  <span>19:55</span>
-                  <span className="text-gray-400">✈️</span>
-                  <span>21:40</span>
                 </div>
               </div>
               {/* Giá */}
               <div className="flex items-center justify-between text-sm">
                 <span className="font-semibold">Giá Combo </span>
-                <span className="text-lg font-bold text-red-600">{tours?.tour?.finalPrice.toLocaleString()} ₫</span>
+                {/* <span className="text-lg font-bold text-red-600">{tours?.tour?.finalPrice.toLocaleString()} ₫</span> */}
               </div>
               <div className="flex justify-between text-sm">
                 <span>Người lớn</span>
-                <span>{adultCount} x {tours?.tour?.finalPrice.toLocaleString()} ₫</span>
+                {/* <span>{adultCount} x {tours?.tour?.finalPrice.toLocaleString()} ₫</span> */}
               </div>
               <div className="flex justify-between text-sm">
                 <span>Trẻ em</span>

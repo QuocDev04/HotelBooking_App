@@ -22,7 +22,7 @@ interface BookingData {
   price?: number;
 }
 
-const HotelGuestInfo = () => {
+const  HotelGuestInfo = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [form] = Form.useForm();
