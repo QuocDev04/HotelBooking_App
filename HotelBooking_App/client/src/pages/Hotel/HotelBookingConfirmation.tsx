@@ -417,7 +417,7 @@ const HotelBookingConfirmation: React.FC = () => {
                 {booking.isDeposit && booking.depositAmount > 0 && (
                   <>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                      <Text>Tiền cọc (30%):</Text>
+                      <Text>Tiền cọc (50%):</Text>
                       <Text style={{ color: '#52c41a' }}>
                         {booking.depositAmount.toLocaleString('vi-VN')} VNĐ
                       </Text>
