@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const Employee = require("../../models/People/EmployeeModel");
 const Admin = require("../../models/People/AdminModel");
 const TourModel = require("../../models/Tour/TourModel");
+const HotelAssignment = require("../../models/Hotel/HotelAssignmentModel");
 
 // Tạo Access Token
 const generateAccessToken = (employee) => {
@@ -32,7 +33,7 @@ const generateRefreshToken = (employee) => {
 // Đăng nhập
 const loginEmployee = async (req, res) => {
     try {
-        const { email, password, portal } = req.body;
+        const { email, password, portal, hotelId } = req.body;
         if (!email || !password) {
             return res.status(StatusCodes.BAD_REQUEST).json({
                 success: false,
@@ -79,6 +80,29 @@ const loginEmployee = async (req, res) => {
                     message: `Tài khoản không thuộc phòng ban phù hợp để đăng nhập portal '${normalizedPortal}'`,
                 });
             }
+
+            // Với QTKS bắt buộc phải có hotelId và có phân công active
+            if (normalizedPortal === 'qtks') {
+                if (!hotelId) {
+                    return res.status(StatusCodes.BAD_REQUEST).json({
+                        success: false,
+                        message: "Thiếu hotelId khi đăng nhập QTKS",
+                    });
+                }
+
+                const assignment = await HotelAssignment.findOne({
+                    employeeId: employee._id,
+                    hotelId: hotelId,
+                    status: 'active',
+                });
+
+                if (!assignment) {
+                    return res.status(StatusCodes.FORBIDDEN).json({
+                        success: false,
+                        message: "Tài khoản không được phân quyền khách sạn này",
+                    });
+                }
+            }
         }
 
         employee.last_login = new Date();
@@ -105,6 +129,7 @@ const loginEmployee = async (req, res) => {
                 department: employee.department,
                 profile_picture: employee.profile_picture,
             },
+            hotelId: hotelId || null,
         });
     } catch (error) {
         console.error("Login error:", error);

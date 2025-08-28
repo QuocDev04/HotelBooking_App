@@ -182,22 +182,16 @@ const ListHotel: React.FC = () => {
     }
   };
 
-  const amenitiesOptions = [
-    'WiFi miễn phí',
-    'Bể bơi',
-    'Phòng gym',
-    'Spa',
-    'Nhà hàng',
-    'Bar',
-    'Dịch vụ phòng 24/7',
-    'Bãi đậu xe',
-    'Trung tâm hội nghị',
-    'Dịch vụ giặt ủi',
-    'Sân tennis',
-    'Sân golf',
-    'Khu vui chơi trẻ em',
-    'Dịch vụ đưa đón sân bay'
-  ];
+  // Fetch amenities for hotel form
+  const { data: amenitiesOptions = [] } = useQuery({
+    queryKey: ['amenities'],
+    queryFn: async () => {
+      const response = await fetch('http://localhost:8080/api/admin/amenities/active');
+      if (!response.ok) throw new Error('Failed to fetch amenities');
+      const result = await response.json();
+      return result.data || [];
+    }
+  });
 
   const filteredHotels = hotels.filter((hotel: Hotel) =>
     hotel.hotelName.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -251,6 +245,29 @@ const ListHotel: React.FC = () => {
         <div className="flex items-center">
           <Rate disabled defaultValue={rating} className="text-sm" />
           <span className="ml-2 text-gray-600">({rating})</span>
+        </div>
+      )
+    },
+    {
+      title: 'Tiện ích',
+      dataIndex: 'hotelAmenities',
+      key: 'hotelAmenities',
+      render: (amenities: any[]) => (
+        <div className="flex flex-wrap gap-1">
+          {amenities && amenities.length > 0 ? (
+            amenities.slice(0, 3).map((amenity: any, index: number) => (
+              <Tag key={index} color="blue" size="small">
+                {amenity.name}
+              </Tag>
+            ))
+          ) : (
+            <span className="text-gray-400 text-sm">Không có</span>
+          )}
+          {amenities && amenities.length > 3 && (
+            <Tag color="default" size="small">
+              +{amenities.length - 3} nữa
+            </Tag>
+          )}
         </div>
       )
     },
@@ -475,9 +492,9 @@ const ListHotel: React.FC = () => {
                 mode="multiple"
                 placeholder="Chọn các tiện ích"
                 labelInValue
-                options={amenitiesOptions.map(amenity => ({
-                  label: amenity,
-                  value: amenity
+                options={amenitiesOptions.map((amenity: any) => ({
+                  label: amenity.name,
+                  value: amenity.name
                 }))}
               />
             </Form.Item>

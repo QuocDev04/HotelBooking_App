@@ -18,7 +18,7 @@ import TourStatusList from "../pages/Tour/TourStatusList"
 import RefundManagement from "../pages/Tour/RefundManagement"
 import TourParticipants from "../pages/Tour/TourParticipants"
 import CustomerAccounts from "../pages/Account/CustomerAccounts"
-import HdvAccounts from "../pages/Account/HdvAccounts"
+import EmployeeAccounts from "../pages/Account/EmployeeAccounts"
 import EmployeeAssignment from "../pages/Account/EmployeeAssignment"
 import ListHotel from "../pages/Hotel/ListHotel"
 import AddHotel from "../pages/Hotel/AddHotel"
@@ -26,6 +26,7 @@ import EditHotel from "../pages/Hotel/EditHotel"
 import HotelDetail from "../pages/Hotel/HotelDetail"
 import ListHotelBooking from "../pages/Hotel/ListHotelBooking"
 import RoomManagement from "../pages/Hotel/RoomManagement"
+import AmenityManagement from "../pages/Hotel/AmenityManagement"
 import ListTour from "../pages/Tour/ListTour"
 import AddTour from "../pages/Tour/AddTour"
 import EditTour from "../pages/Tour/EditTour"
@@ -38,6 +39,7 @@ import ListTourSchedule from "../pages/TourSchedule/ListTourSchedule"
 import AddTourSchedule from "../pages/TourSchedule/AddTourSchedule"
 import EditTourSchedule from "../pages/TourSchedule/EditTourSchedule"
 import Detail from "../pages/Blog/Detail"
+import HotelAssignment from "../pages/Account/HotelAssignment"
 
 
 
@@ -100,8 +102,9 @@ const Router = () => {
                     <Route path="/admin/slot-detail/:id" element={<SlotDetail />} />
 
                     <Route path="/admin/customer-accounts" element={<CustomerAccounts />} />
-                    <Route path="/admin/hdv-accounts" element={<HdvAccounts />} />
+                    <Route path="/admin/employee-accounts" element={<EmployeeAccounts />} />
                     <Route path="/admin/employee-assignment" element={<EmployeeAssignment />} />
+                    <Route path="/admin/hotel-assignment" element={<HotelAssignment />} />
 
                     <Route path="/admin/hotels" element={<ListHotel />} />
                     <Route path="/admin/hotels/add" element={<AddHotel />} />
@@ -109,6 +112,7 @@ const Router = () => {
                     <Route path="/admin/hotels/view/:id" element={<HotelDetail />} />
                     <Route path="/admin/hotel-bookings" element={<ListHotelBooking />} />
                     <Route path="/admin/room-management" element={<RoomManagement />} />
+                    <Route path="/admin/amenity-management" element={<AmenityManagement />} />
                 </Route>
             </Routes>
         </>

@@ -23,6 +23,8 @@ const { dateRouter } = require("./router/TourRouter/DateTour");
 const autoCancelRouter = require("./router/autoCancel/autoCancelRouter");
 const RouterHotel = require('./router/HotelRouter/HotelRouter');
 const RouterHotelBooking = require('./router/HotelRouter/HotelBookingRouter');
+const HotelAssignmentRouter = require('./router/HotelRouter/HotelAssignmentRouter');
+const AmenityRouter = require('./router/amenityRoutes');
 const { startAutoCancelJob } = require("./jobs/autoCancelJob");
 const BlogRouter = require('./router/Blog/Blog');
 const Chat = require('./controller/Chatbot/Chatbot');
@@ -60,6 +62,8 @@ app.use('/api/', dateRouter);
 app.use('/api/auto-cancel', autoCancelRouter);
 app.use('/api/', RouterHotel);
 app.use('/api/', RouterHotelBooking);
+app.use('/api/hotel-assignment', HotelAssignmentRouter);
+app.use('/api/admin/amenities', AmenityRouter);
 app.use('/api/', BlogRouter);
 app.use('/api/', Chat);
 // Error handler
