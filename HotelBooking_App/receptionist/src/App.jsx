@@ -7,6 +7,7 @@ import HoSo from "./pages/Hoso";
 import Login from "./components/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
+import HotelPicker from "./components/HotelPicker";
 
 const App = () => {
   return (
@@ -16,8 +17,9 @@ const App = () => {
           <Header />
           <main className="flex-1 overflow-y-auto">
             <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/" element={<ProtectedRoute><TrangChu /></ProtectedRoute>} />
+              <Route path="/" element={<HotelPicker />} />
+              <Route path="/:hotelId/login" element={<Login />} />
+              <Route path="/app" element={<ProtectedRoute><TrangChu /></ProtectedRoute>} />
               <Route path="/thongbao" element={<ProtectedRoute><ThongBao /></ProtectedRoute>} />
               <Route path="/hoso" element={<ProtectedRoute><HoSo /></ProtectedRoute>} />
             </Routes>
