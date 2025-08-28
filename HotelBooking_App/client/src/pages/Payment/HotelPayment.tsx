@@ -102,6 +102,33 @@ export default function HotelPaymentPage() {
                     </div>
                   </div>
                   
+                  {/* Chi tiết tính phí */}
+                  <div className="bg-white p-4 rounded-lg border space-y-2">
+                    <h4 className="font-semibold text-gray-800 mb-3">Chi tiết thanh toán:</h4>
+                    
+                    <div className="border-t pt-2 mt-3">
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-gray-800">Tổng tiền:</span>
+                        <span className="font-bold text-lg">{booking.totalPrice?.toLocaleString()} VND</span>
+                      </div>
+                      
+                      {booking.isDeposit && booking.depositAmount > 0 && (
+                        <>
+                          <div className="flex justify-between text-sm mt-1">
+                            <span className="text-gray-600">Tiền cọc (30%):</span>
+                            <span className="text-green-600 font-medium">{booking.depositAmount?.toLocaleString()} VND</span>
+                          </div>
+                          {booking.payment_status === 'deposit_paid' && (
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-600">Còn lại:</span>
+                              <span className="text-orange-600 font-medium">{(booking.totalPrice - booking.depositAmount)?.toLocaleString()} VND</span>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  
                   <div className="bg-white p-4 rounded-lg border-2 border-green-200">
                     <p className="text-gray-600 mb-1">Số tiền cần thanh toán:</p>
                     <p className="text-2xl font-bold text-green-600">

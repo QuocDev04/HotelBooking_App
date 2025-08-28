@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { instanceAdmin } from "../../configs/axios";
+import { useUser } from '@clerk/clerk-react';
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -51,6 +52,16 @@ const ListHotelBooking: React.FC = () => {
   const [paymentFilter, setPaymentFilter] = useState<string>('');
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);
   const queryClient = useQueryClient();
+  const { user } = useUser();
+  
+  // Modal states
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [showFullPaymentModal, setShowFullPaymentModal] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<HotelBooking | null>(null);
+  const [depositNote, setDepositNote] = useState('');
+  const [depositImage, setDepositImage] = useState<File | null>(null);
+  const [fullPaymentNote, setFullPaymentNote] = useState('');
+  const [fullPaymentImage, setFullPaymentImage] = useState<File | null>(null);
 
   // Fetch hotel bookings
   const { data: bookings = [], isLoading } = useQuery({
@@ -83,12 +94,26 @@ const ListHotelBooking: React.FC = () => {
 
   // Confirm deposit payment mutation
   const confirmPaymentMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await instanceAdmin.put(`/admin/hotel-bookings/confirm-payment/${id}`);
-      return response.data;
+    mutationFn: async ({ bookingId, note, image }: { bookingId: string; note?: string; image?: File }) => {
+      const formData = new FormData();
+      const adminId = user?.id || '';
+      
+      formData.append('adminId', adminId);
+      if (note) formData.append('note', note);
+      if (image) formData.append('paymentImage', image);
+      
+      return instanceAdmin.put(`/admin/hotel-bookings/confirm-payment/${bookingId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hotel-bookings'] });
+      setShowDepositModal(false);
+      setSelectedBooking(null);
+      setDepositNote('');
+      setDepositImage(null);
       message.success('Xác nhận đặt cọc thành công!');
     },
     onError: (error: any) => {
@@ -98,12 +123,26 @@ const ListHotelBooking: React.FC = () => {
 
   // Confirm full payment mutation
   const confirmFullPaymentMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await instanceAdmin.put(`/admin/hotel-bookings/confirm-full-payment/${id}`);
-      return response.data;
+    mutationFn: async ({ bookingId, note, image }: { bookingId: string; note?: string; image?: File }) => {
+      const formData = new FormData();
+      const adminId = user?.id || '';
+      
+      formData.append('adminId', adminId);
+      if (note) formData.append('note', note);
+      if (image) formData.append('paymentImage', image);
+      
+      return instanceAdmin.put(`/admin/hotel-bookings/confirm-full-payment/${bookingId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hotel-bookings'] });
+      setShowFullPaymentModal(false);
+      setSelectedBooking(null);
+      setFullPaymentNote('');
+      setFullPaymentImage(null);
       message.success('Xác nhận thanh toán đầy đủ thành công!');
     },
     onError: (error: any) => {
@@ -120,6 +159,62 @@ const ListHotelBooking: React.FC = () => {
       okType: 'danger',
       onOk: () => deleteMutation.mutate(id)
     });
+  };
+
+  // Handle deposit confirmation
+  const handleConfirmDeposit = (booking: HotelBooking) => {
+    setSelectedBooking(booking);
+    setShowDepositModal(true);
+  };
+
+  const confirmDeposit = () => {
+    if (!depositImage) {
+      message.error('Vui lòng chọn hình ảnh xác nhận thanh toán!');
+      return;
+    }
+
+    if (selectedBooking) {
+      confirmPaymentMutation.mutate({
+        bookingId: selectedBooking._id,
+        note: depositNote,
+        image: depositImage
+      });
+    }
+  };
+
+  const closeDepositModal = () => {
+    setShowDepositModal(false);
+    setSelectedBooking(null);
+    setDepositNote('');
+    setDepositImage(null);
+  };
+
+  // Handle full payment confirmation
+  const handleConfirmFullPayment = (booking: HotelBooking) => {
+    setSelectedBooking(booking);
+    setShowFullPaymentModal(true);
+  };
+
+  const confirmFullPayment = () => {
+    if (!fullPaymentImage) {
+      message.error('Vui lòng chọn hình ảnh xác nhận thanh toán!');
+      return;
+    }
+
+    if (selectedBooking) {
+      confirmFullPaymentMutation.mutate({
+        bookingId: selectedBooking._id,
+        note: fullPaymentNote,
+        image: fullPaymentImage
+      });
+    }
+  };
+
+  const closeFullPaymentModal = () => {
+    setShowFullPaymentModal(false);
+    setSelectedBooking(null);
+    setFullPaymentNote('');
+    setFullPaymentImage(null);
   };
 
   const filteredBookings = bookings.filter((booking: HotelBooking) => {
@@ -314,15 +409,7 @@ const ListHotelBooking: React.FC = () => {
               type="default"
               icon={<CheckOutlined />} 
               size="small"
-              onClick={() => {
-                Modal.confirm({
-                  title: 'Xác nhận đặt cọc',
-                  content: `Bạn có chắc chắn muốn xác nhận đặt cọc cho đặt phòng tại "${record.hotelId?.hotelName}"?`,
-                  okText: 'Xác nhận',
-                  cancelText: 'Hủy',
-                  onOk: () => confirmPaymentMutation.mutate(record._id)
-                });
-              }}
+              onClick={() => handleConfirmDeposit(record)}
               loading={confirmPaymentMutation.isPending}
             >
               Xác nhận cọc
@@ -333,15 +420,7 @@ const ListHotelBooking: React.FC = () => {
               type="default"
               icon={<DollarOutlined />} 
               size="small"
-              onClick={() => {
-                Modal.confirm({
-                  title: 'Xác nhận thanh toán đầy đủ',
-                  content: `Bạn có chắc chắn muốn xác nhận thanh toán đầy đủ cho đặt phòng tại "${record.hotelId?.hotelName}"?`,
-                  okText: 'Xác nhận',
-                  cancelText: 'Hủy',
-                  onOk: () => confirmFullPaymentMutation.mutate(record._id)
-                });
-              }}
+              onClick={() => handleConfirmFullPayment(record)}
               loading={confirmFullPaymentMutation.isPending}
             >
               Xác nhận thanh toán
@@ -427,6 +506,326 @@ const ListHotelBooking: React.FC = () => {
           className="shadow-sm"
         />
       </Card>
+
+      {/* Deposit Confirmation Modal */}
+      {showDepositModal && selectedBooking && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-gray-200 max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">
+                Xác nhận đặt cọc khách sạn
+              </h2>
+              <button
+                onClick={closeDepositModal}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6">
+              {/* Booking Information */}
+              <div className="bg-blue-50 p-4 rounded-lg mb-6">
+                <h3 className="font-semibold text-blue-900 mb-3">Thông tin đặt phòng</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Khách sạn:</span>
+                    <span className="ml-2 text-gray-900">{selectedBooking.hotelId?.hotelName}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Khách hàng:</span>
+                    <span className="ml-2 text-gray-900">{selectedBooking.fullNameUser}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Email:</span>
+                    <span className="ml-2 text-gray-900">{selectedBooking.email}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Điện thoại:</span>
+                    <span className="ml-2 text-gray-900">{selectedBooking.phone}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Số đêm:</span>
+                    <span className="ml-2 text-gray-900">{selectedBooking.numberOfNights} đêm</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Số khách:</span>
+                    <span className="ml-2 text-gray-900">{selectedBooking.totalGuests} khách</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Information */}
+              <div className="bg-green-50 p-4 rounded-lg mb-6">
+                <h3 className="font-semibold text-green-900 mb-3">Thông tin thanh toán</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-gray-700">Tổng tiền:</span>
+                    <span className="text-lg font-bold text-green-600">
+                      {selectedBooking.totalPrice?.toLocaleString('vi-VN')} VNĐ
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-gray-700">Số tiền cọc (50%):</span>
+                    <span className="text-lg font-bold text-orange-600">
+                      {(selectedBooking.totalPrice * 0.5)?.toLocaleString('vi-VN')} VNĐ
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-gray-700">Phương thức:</span>
+                    <span className="text-gray-900">{getPaymentStatusText(selectedBooking.payment_method)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Important Notes */}
+              <div className="bg-yellow-50 p-4 rounded-lg mb-6">
+                <div className="text-yellow-800">
+                  <p className="font-semibold mb-1">Lưu ý quan trọng</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>Bắt buộc phải có hình ảnh chứng minh đã nhận tiền cọc</li>
+                    <li>Hình ảnh có thể là biên lai, ảnh chụp tiền mặt, ảnh chuyển khoản</li>
+                    <li>Chỉ upload 1 hình ảnh rõ nét, không quá 10MB</li>
+                    <li>Thông tin này sẽ được lưu trữ làm bằng chứng pháp lý</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Image Upload */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hình ảnh xác nhận thanh toán <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      if (file.size > 10 * 1024 * 1024) {
+                        message.error('Kích thước file không được vượt quá 10MB!');
+                        return;
+                      }
+                      setDepositImage(file);
+                    }
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+                {depositImage && (
+                  <p className="text-sm text-green-600 mt-1">
+                    ✓ Đã chọn: {depositImage.name}
+                  </p>
+                )}
+              </div>
+
+              {/* Note */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ghi chú (tùy chọn)
+                </label>
+                <textarea
+                  value={depositNote}
+                  onChange={(e) => setDepositNote(e.target.value)}
+                  placeholder="Nhập ghi chú về việc xác nhận thanh toán..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200">
+              <button
+                onClick={closeDepositModal}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-200"
+                disabled={confirmPaymentMutation.isPending}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmDeposit}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={confirmPaymentMutation.isPending || !depositImage}
+              >
+                {confirmPaymentMutation.isPending ? (
+                  <div className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Đang xử lý...
+                  </div>
+                ) : (
+                  'Xác nhận đặt cọc'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Full Payment Confirmation Modal */}
+      {showFullPaymentModal && selectedBooking && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-gray-200 max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">
+                Xác nhận thanh toán đầy đủ
+              </h2>
+              <button
+                onClick={closeFullPaymentModal}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6">
+              {/* Booking Information */}
+              <div className="bg-blue-50 p-4 rounded-lg mb-6">
+                <h3 className="font-semibold text-blue-900 mb-3">Thông tin đặt phòng</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Khách sạn:</span>
+                    <span className="ml-2 text-gray-900">{selectedBooking.hotelId?.hotelName}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Khách hàng:</span>
+                    <span className="ml-2 text-gray-900">{selectedBooking.fullNameUser}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Email:</span>
+                    <span className="ml-2 text-gray-900">{selectedBooking.email}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Điện thoại:</span>
+                    <span className="ml-2 text-gray-900">{selectedBooking.phone}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Information */}
+              <div className="bg-green-50 p-4 rounded-lg mb-6">
+                <h3 className="font-semibold text-green-900 mb-3">Thông tin thanh toán</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-gray-700">Tổng tiền:</span>
+                    <span className="text-lg font-bold text-green-600">
+                      {selectedBooking.totalPrice?.toLocaleString('vi-VN')} VNĐ
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-gray-700">Đã đặt cọc:</span>
+                    <span className="text-lg font-bold text-blue-600">
+                      {(selectedBooking.totalPrice * 0.5)?.toLocaleString('vi-VN')} VNĐ
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-gray-700">Còn lại cần thanh toán:</span>
+                    <span className="text-lg font-bold text-orange-600">
+                      {(selectedBooking.totalPrice * 0.5)?.toLocaleString('vi-VN')} VNĐ
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-gray-700">Phương thức:</span>
+                    <span className="text-gray-900">{getPaymentStatusText(selectedBooking.payment_method)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Important Notes */}
+              <div className="bg-yellow-50 p-4 rounded-lg mb-6">
+                <div className="text-yellow-800">
+                  <p className="font-semibold mb-1">Lưu ý quan trọng</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>Bắt buộc phải có hình ảnh chứng minh đã nhận thanh toán đầy đủ</li>
+                    <li>Hình ảnh có thể là biên lai, ảnh chụp tiền mặt, ảnh chuyển khoản</li>
+                    <li>Chỉ upload 1 hình ảnh rõ nét, không quá 10MB</li>
+                    <li>Sau khi xác nhận, đặt phòng sẽ chuyển sang trạng thái "Đã thanh toán đầy đủ"</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Image Upload */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hình ảnh xác nhận thanh toán <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      if (file.size > 10 * 1024 * 1024) {
+                        message.error('Kích thước file không được vượt quá 10MB!');
+                        return;
+                      }
+                      setFullPaymentImage(file);
+                    }
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+                {fullPaymentImage && (
+                  <p className="text-sm text-green-600 mt-1">
+                    ✓ Đã chọn: {fullPaymentImage.name}
+                  </p>
+                )}
+              </div>
+
+              {/* Note */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ghi chú (tùy chọn)
+                </label>
+                <textarea
+                  value={fullPaymentNote}
+                  onChange={(e) => setFullPaymentNote(e.target.value)}
+                  placeholder="Nhập ghi chú về việc xác nhận thanh toán..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200">
+              <button
+                onClick={closeFullPaymentModal}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-200"
+                disabled={confirmFullPaymentMutation.isPending}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmFullPayment}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={confirmFullPaymentMutation.isPending || !fullPaymentImage}
+              >
+                {confirmFullPaymentMutation.isPending ? (
+                  <div className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Đang xử lý...
+                  </div>
+                ) : (
+                  'Xác nhận thanh toán đầy đủ'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

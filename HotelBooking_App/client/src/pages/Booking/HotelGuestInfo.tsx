@@ -6,6 +6,8 @@ import dayjs from 'dayjs';
 import type { AxiosError } from "axios";
 import { Form, Input, message, DatePicker, Select, Card, Button, Typography, Row, Col, Divider } from "antd";
 import { UserOutlined, CalendarOutlined, PhoneOutlined, MailOutlined, HomeOutlined } from '@ant-design/icons';
+import { CashDepositModal } from '../../components/Payment/CashDepositModal';
+import BookingSuccessModal from '../../components/Modal/BookingSuccessModal';
 
 const { Option } = Select;
 const { Title, Text } = Typography;
@@ -28,6 +30,10 @@ const HotelGuestInfo = () => {
   const [form] = Form.useForm();
   const [bookingData, setBookingData] = useState<BookingData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [cashDepositModalVisible, setCashDepositModalVisible] = useState(false);
+  const [bookingSuccessModalVisible, setBookingSuccessModalVisible] = useState(false);
+  const [pendingFormValues, setPendingFormValues] = useState<any>(null);
+  const [successBookingData, setSuccessBookingData] = useState<any>(null);
 
   useEffect(() => {
     const data = localStorage.getItem("bookingData");
@@ -82,13 +88,25 @@ const HotelGuestInfo = () => {
           message.error("Đã xảy ra lỗi khi kết nối VNPay");
         }
       } else if (paymentMethod === "cash") {
-        // Xử lý thanh toán tiền mặt
-        if (paymentType === "deposit") {
-          message.success("Đặt phòng thành công! Vui lòng thanh toán cọc để hoàn tất.");
-        } else {
-          message.success("Đặt phòng thành công!");
-        }
-        navigate("/booking-success");
+        // Xử lý thanh toán tiền mặt - hiển thị modal thông báo
+        const bookingInfo = {
+          bookingId: data?.data?._id || 'N/A',
+          totalAmount: calculateTotalPrice(),
+          paymentDeadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(), // 48 giờ từ bây giờ
+          hotelName: bookingData?.roomType || 'Khách sạn',
+          customerName: pendingFormValues?.userName || 'N/A',
+          address: 'Số 25 - Ngõ 38 Phố Yên Lãng – Quận Đống Đa – Hà Nội',
+          schedule: '9h00 - 17h30 từ thứ 2 - đến thứ 6 và 9h00 - 12h00 thứ 7',
+          roomType: bookingData?.roomType || 'N/A',
+          checkInDate: bookingData?.check_in_date,
+          checkOutDate: bookingData?.check_out_date,
+          numberOfNights: numberOfNights,
+          adults: bookingData?.adults || 1,
+          children: bookingData?.children || 0
+        };
+        
+        setSuccessBookingData(bookingInfo);
+        setBookingSuccessModalVisible(true);
       } else {
         // Fallback
         message.success("Đặt phòng thành công!");
@@ -107,6 +125,18 @@ const HotelGuestInfo = () => {
       return;
     }
 
+    // Kiểm tra nếu chọn thanh toán tiền mặt, hiển thị modal thông báo
+    if (values.payment_method === 'cash') {
+      setPendingFormValues(values);
+      setCashDepositModalVisible(true);
+      return;
+    }
+
+    // Xử lý đặt phòng bình thường cho VNPay
+    processBooking(values);
+  };
+
+  const processBooking = (values: any) => {
     setLoading(true);
 
     const payload = {
@@ -423,7 +453,7 @@ const HotelGuestInfo = () => {
                       >
                         <Select placeholder="Chọn loại thanh toán">
                           <Option value="full">Thanh toán toàn bộ</Option>
-                          <Option value="deposit">Thanh toán cọc (30%)</Option>
+                          <Option value="deposit">Thanh toán cọc (50%)</Option>
                         </Select>
                       </Form.Item>
                     </Col>
@@ -552,9 +582,9 @@ const HotelGuestInfo = () => {
                       </span>
                     </div>
                     <div className="flex justify-between text-xs text-gray-500">
-                      <span>Phí cọc (30%):</span>
+                      <span>Phí cọc (50%):</span>
                       <span>
-                        {bookingData?.price ? new Intl.NumberFormat('vi-VN').format(Math.floor(bookingData.price * numberOfNights * 0.3)) : '0'} VNĐ
+                        {bookingData?.price ? new Intl.NumberFormat('vi-VN').format(Math.floor(bookingData.price * numberOfNights * 0.5)) : '0'} VNĐ
                       </span>
                     </div>
                   </div>
@@ -566,7 +596,7 @@ const HotelGuestInfo = () => {
                     <li>• Vui lòng điền đầy đủ thông tin cho tất cả khách</li>
                     <li>• Thông tin sẽ được sử dụng để check-in</li>
                     <li>• Có thể hủy miễn phí trước 24h</li>
-                    <li>• Thanh toán cọc: 30% tổng tiền</li>
+                    <li>• Thanh toán cọc: 50% tổng tiền</li>
                   </ul>
                 </div>
               </div>
@@ -574,8 +604,96 @@ const HotelGuestInfo = () => {
           </div>
         </div>
       </div>
+
+      {/* Cash Deposit Modal */}
+      <CashDepositModal
+        visible={cashDepositModalVisible}
+        onCancel={() => setCashDepositModalVisible(false)}
+        onConfirmCash={handleCashDepositConfirm}
+        onChooseVNPay={handleCashDepositChooseVNPay}
+        loading={loading}
+        depositAmount={calculateDepositAmount()}
+        hotelName={bookingData?.roomType || 'Khách sạn'}
+        totalAmount={calculateTotalPrice()}
+        numberOfNights={numberOfNights}
+        bookingId={successBookingData?.bookingCode || successBookingData?._id || `HOTEL-${Date.now()}`}
+        pricePerNight={bookingData?.price || 0}
+        checkInDate={bookingData?.check_in_date}
+        checkOutDate={bookingData?.check_out_date}
+        customerName={pendingFormValues?.fullName || form.getFieldValue('fullName') || 'Khách hàng'}
+        customerPhone={pendingFormValues?.phoneName || form.getFieldValue('phoneName') || ''}
+      />
+
+      {/* Booking Success Modal */}
+      <BookingSuccessModal
+        visible={bookingSuccessModalVisible}
+        onOk={handleBookingSuccessModalOk}
+        bookingData={successBookingData}
+      />
     </div>
   );
+
+  // Tính toán số tiền cọc (50%)
+  function calculateDepositAmount() {
+    if (!bookingData?.price) return 0;
+    return Math.floor(bookingData.price * numberOfNights * 0.5);
+  }
+
+  // Tính toán tổng tiền
+  function calculateTotalPrice() {
+    if (!bookingData?.price) return 0;
+    return bookingData.price * numberOfNights;
+  }
+
+  // Xử lý xác nhận thanh toán tiền mặt
+  function handleCashDepositConfirm() {
+    if (!pendingFormValues) return;
+    setCashDepositModalVisible(false);
+    processBooking(pendingFormValues);
+  }
+
+  // Xử lý chuyển sang VNPay
+  function handleCashDepositChooseVNPay() {
+    if (!pendingFormValues) return;
+    setCashDepositModalVisible(false);
+    
+    // Cập nhật phương thức thanh toán thành VNPay
+    const updatedValues = {
+      ...pendingFormValues,
+      payment_method: 'bank_transfer'
+    };
+    
+    // Cập nhật form
+    form.setFieldsValue({ payment_method: 'bank_transfer' });
+    
+    // Xử lý đặt phòng với VNPay
+    processBooking(updatedValues);
+  }
+
+  // Xử lý khi nhấn OK trong modal thông báo thành công
+  function handleBookingSuccessModalOk() {
+    setBookingSuccessModalVisible(false);
+    
+    // Lưu thông tin booking vào localStorage để sử dụng trong trang booking-success
+    if (successBookingData) {
+      localStorage.setItem('bookingData', JSON.stringify({
+        ...successBookingData,
+        customerPhone: pendingFormValues?.phoneName || 'N/A',
+        customerEmail: pendingFormValues?.emailName || 'N/A',
+        tourName: bookingData?.roomType || 'Khách sạn',
+        departureDate: bookingData?.check_in_date || new Date().toISOString(),
+        departureLocation: 'Hà Nội',
+        schedule: `${formattedCheckIn} - ${formattedCheckOut}`,
+        adults: bookingData?.adults || 1,
+        children: bookingData?.children || 0,
+        depositAmount: calculateDepositAmount(),
+        paymentStatus: 'pending'
+      }));
+    }
+    
+    // Chuyển đến trang booking-success
+    navigate('/booking-success');
+  }
 };
 
 export default HotelGuestInfo;

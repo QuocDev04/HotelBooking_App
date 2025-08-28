@@ -10,6 +10,7 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import type { AxiosError } from "axios";
 import type moment from "moment";
+import { CashDepositModal } from '../../components/Payment/CashDepositModal';
 
 // Khởi tạo plugin
 dayjs.extend(utc);
@@ -26,6 +27,8 @@ const Checkout = () => {
   const [childCount, setChildCount] = useState(0);
   const [kidCount, setKidCount] = useState(0);
   const [babyCount, setBabyCount] = useState(0);
+  const [cashDepositModalVisible, setCashDepositModalVisible] = useState(false);
+  const [pendingFormValues, setPendingFormValues] = useState<any>(null);
   const navigate = useNavigate();
 
   // Lấy id từ params và kiểm tra
@@ -303,10 +306,17 @@ const Checkout = () => {
     // Chuyển đổi isFullPayment từ chuỗi sang boolean
     const isFullPayment = values.isFullPayment === "true";
 
+    // Kiểm tra nếu chọn thanh toán tiền mặt, hiển thị CashDepositModal
+    if (values.payment_method === 'cash') {
+      setPendingFormValues(values);
+      setCashDepositModalVisible(true);
+      return;
+    }
+
     // Kiểm tra nếu là thanh toán cọc và phương thức thanh toán không phải là bank_transfer
     if (!isFullPayment && values.payment_method !== "bank_transfer") {
       // Hiển thị modal thông báo
-      setDepositModalVisible(true);
+      setCashDepositModalVisible(true);
       return;
     }
 
@@ -355,13 +365,12 @@ const Checkout = () => {
   };
 
   // Modal thông báo khi chọn thanh toán cọc nhưng không chọn VNPay
-  const [depositModalVisible, setDepositModalVisible] = useState(false);
 
   const handleDepositConfirm = () => {
     // Ngăn chặn multiple clicks
     if (isLoading) return;
 
-    setDepositModalVisible(false);
+    setCashDepositModalVisible(false);
 
     // Lấy tất cả giá trị form hiện tại
     const formValues = form.getFieldsValue();
@@ -398,7 +407,7 @@ const Checkout = () => {
     // Ngăn chặn multiple clicks
     if (isLoading) return;
 
-    setDepositModalVisible(false);
+    setCashDepositModalVisible(false);
 
     // Lấy tất cả giá trị form hiện tại
     const formValues = form.getFieldsValue();
@@ -428,6 +437,77 @@ const Checkout = () => {
       childPassengers: processPassengers(formValues.childPassengers),
       toddlerPassengers: processPassengers(formValues.toddlerPassengers),
       infantPassengers: processPassengers(formValues.infantPassengers)
+    });
+  };
+
+  // Hàm tính toán số tiền cọc (50% tổng tiền cho tour)
+  const calculateDepositAmount = () => {
+    return Math.round(totalPrice * 0.5);
+  };
+
+  // Xử lý khi khách hàng xác nhận thanh toán tiền mặt
+  const handleCashDepositConfirm = () => {
+    if (!pendingFormValues) return;
+    setCashDepositModalVisible(false);
+    
+    // Xử lý các trường ngày tháng
+    const processPassengers = (passengers: any[]) => {
+      if (!passengers) return [];
+      return passengers.map(p => ({
+        ...p,
+        birthDate: p.birthDate ? p.birthDate.toISOString() : null
+      }));
+    };
+
+    const isFullPayment = pendingFormValues.isFullPayment === "true";
+    
+    mutate({
+      ...pendingFormValues,
+      isFullPayment,
+      adultsTour: adultCount,
+      childrenTour: kidCount,
+      toddlerTour: childCount,
+      infantTour: babyCount,
+      adultPassengers: processPassengers(pendingFormValues.adultPassengers),
+      childPassengers: processPassengers(pendingFormValues.childPassengers),
+      toddlerPassengers: processPassengers(pendingFormValues.toddlerPassengers),
+      infantPassengers: processPassengers(pendingFormValues.infantPassengers)
+    });
+  };
+
+  // Xử lý khi khách hàng chọn VNPay từ modal
+  const handleCashDepositChooseVNPay = () => {
+    if (!pendingFormValues) return;
+    setCashDepositModalVisible(false);
+    
+    // Cập nhật phương thức thanh toán thành VNPay
+    const updatedValues = {
+      ...pendingFormValues,
+      payment_method: 'bank_transfer'
+    };
+    
+    // Xử lý các trường ngày tháng
+    const processPassengers = (passengers: any[]) => {
+      if (!passengers) return [];
+      return passengers.map(p => ({
+        ...p,
+        birthDate: p.birthDate ? p.birthDate.toISOString() : null
+      }));
+    };
+
+    const isFullPayment = updatedValues.isFullPayment === "true";
+    
+    mutate({
+      ...updatedValues,
+      isFullPayment,
+      adultsTour: adultCount,
+      childrenTour: kidCount,
+      toddlerTour: childCount,
+      infantTour: babyCount,
+      adultPassengers: processPassengers(updatedValues.adultPassengers),
+      childPassengers: processPassengers(updatedValues.childPassengers),
+      toddlerPassengers: processPassengers(updatedValues.toddlerPassengers),
+      infantPassengers: processPassengers(updatedValues.infantPassengers)
     });
   };
 
@@ -1415,8 +1495,8 @@ const Checkout = () => {
       {/* Modal thông báo khi chọn thanh toán cọc nhưng không chọn VNPay */}
       <Modal
         title={<div className="text-xl font-bold text-blue-700">Lựa chọn phương thức đặt cọc</div>}
-        open={depositModalVisible}
-        onCancel={isLoading ? undefined : () => setDepositModalVisible(false)}
+        open={cashDepositModalVisible}
+        onCancel={isLoading ? undefined : () => setCashDepositModalVisible(false)}
         closable={!isLoading}
         maskClosable={!isLoading}
         footer={null}
@@ -1491,7 +1571,7 @@ const Checkout = () => {
 
           <div className="mt-4 text-center">
             <Button
-              onClick={() => setDepositModalVisible(false)}
+              onClick={() => setCashDepositModalVisible(false)}
               disabled={isLoading}
             >
               Quay lại chỉnh sửa
@@ -1499,6 +1579,17 @@ const Checkout = () => {
           </div>
         </div>
       </Modal>
+
+      {/* Cash Deposit Modal */}
+      <CashDepositModal
+        visible={cashDepositModalVisible}
+        onClose={() => setCashDepositModalVisible(false)}
+        onConfirmCash={handleCashDepositConfirm}
+        onChooseVNPay={handleCashDepositChooseVNPay}
+        bookingCode={tours?.tour?.nameTour || ''}
+        totalAmount={totalPrice}
+        depositAmount={calculateDepositAmount()}
+      />
 
     </div>
   );

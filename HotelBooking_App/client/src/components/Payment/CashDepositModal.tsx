@@ -133,7 +133,7 @@ export const CashDepositModal: React.FC<CashDepositModalProps> = ({
                   </Row>
                   <Divider style={{ margin: '8px 0' }} />
                   <Row justify="space-between">
-                    <Col><Text strong style={{ color: '#d46b08' }}>Tiền cọc (30%):</Text></Col>
+                    <Col><Text strong style={{ color: '#d46b08' }}>Tiền cọc (50%):</Text></Col>
                     <Col><Text strong style={{ color: '#d46b08' }}>{formatPrice(depositAmount)} VNĐ</Text></Col>
                   </Row>
                 </div>

@@ -29,6 +29,7 @@ import TestDateSelection from "../components/DateSelection/TestDateSelection"
 import TestCashDepositModal from "../components/Payment/TestCashDepositModal"
 import { HotelPolicy } from "../pages/Blog/hotelPolicy"
 import BlogDetail from "../pages/Blog/blogDeital"
+import BookingSuccess from "../pages/Booking/BookingSuccess"
 
 
 const Router = () => {
@@ -69,6 +70,7 @@ const Router = () => {
                 {/* Test routes */}
                 <Route path="/test-date-selection" element={<TestDateSelection />} />
                 <Route path="/test-cash-deposit-modal" element={<TestCashDepositModal />} />
+                <Route path="/booking-success" element={<BookingSuccess />} />
             </Route>
         </Routes>
     )

@@ -65,6 +65,7 @@ interface HotelFormData {
     petPolicy?: boolean;
     smokingPolicy?: boolean;
   };
+
   roomTypes: {
     typeName: string;
     basePrice: number;
@@ -154,6 +155,7 @@ const EditHotel: React.FC = () => {
           petPolicy: hotel.policies?.petPolicy,
           smokingPolicy: hotel.policies?.smokingPolicy
         },
+
         hotelAmenities: hotel.hotelAmenities?.map(amenity => amenity.name) || [],
         roomTypes: hotel.roomTypes || [],
         status: hotel.status
@@ -195,6 +197,7 @@ const EditHotel: React.FC = () => {
         petPolicy: values.policies?.petPolicy !== undefined ? values.policies?.petPolicy : hotel?.policies?.petPolicy,
         smokingPolicy: values.policies?.smokingPolicy !== undefined ? values.policies?.smokingPolicy : hotel?.policies?.smokingPolicy
       },
+
       roomTypes: values.roomTypes || hotel?.roomTypes || [],
       status: values.status
     };
@@ -490,6 +493,8 @@ const EditHotel: React.FC = () => {
                />
              </Form.Item>
            </div>
+
+
 
           <div className="mt-6">
             <h3 className="text-lg font-semibold mb-4">Loại phòng và giá</h3>

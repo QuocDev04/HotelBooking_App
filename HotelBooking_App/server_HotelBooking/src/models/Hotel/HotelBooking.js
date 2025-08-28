@@ -46,9 +46,6 @@ const HotelBookingSchema = new mongoose.Schema({
     totalGuests: { type: Number, required: true },
     
     // Thông tin giá
-    subtotal: { type: Number, required: true }, // Tổng tiền phòng
-    taxAmount: { type: Number, default: 0 }, // Thuế
-    serviceCharge: { type: Number, default: 0 }, // Phí dịch vụ
     totalPrice: { type: Number, required: true }, // Tổng tiền cuối cùng
     
     // Thông tin thanh toán

@@ -142,7 +142,7 @@ const CheckOutTour = () => {
 
   // Xu ly thanh toan dat coc
   const handleDepositPayment = () => {
-    const depositAmount = booking?.depositAmount || (booking?.totalPriceTour * 0.3); // 30% dat coc
+    const depositAmount = booking?.depositAmount || (booking?.totalPriceTour * 0.5); // 50% dat coc
     handleVNPayPayment(depositAmount, 'deposit');
   };
 

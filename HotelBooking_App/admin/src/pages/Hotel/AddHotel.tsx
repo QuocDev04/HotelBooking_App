@@ -28,6 +28,7 @@ interface HotelFormData {
     petPolicy?: boolean;
     smokingPolicy?: boolean;
   };
+
   roomTypes: {
     typeName: string;
     basePrice: number;
@@ -98,7 +99,8 @@ const AddHotel: React.FC = () => {
     const formData: HotelFormData = {
       ...values,
       hotelAmenities,
-      hotelImages: validImages
+      hotelImages: validImages,
+
     };
     
     console.log('Form data being sent:', JSON.stringify(formData, null, 2));
@@ -217,6 +219,7 @@ const AddHotel: React.FC = () => {
               petPolicy: false,
               smokingPolicy: false
             },
+
             contactInfo: {
               phone: '',
               email: ''
@@ -535,6 +538,8 @@ const AddHotel: React.FC = () => {
               </Form.Item>
             </div>
           </div>
+
+
 
           <Form.Item className="mb-0">
             <Space className="w-full justify-end">

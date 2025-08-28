@@ -50,6 +50,12 @@ const HotelSchema = new mongoose.Schema({
         petPolicy: { type: String },
         smokingPolicy: { type: String }
     },
+    pricingPolicy: {
+        taxIncluded: { type: Boolean, default: false }, // true: thuế đã tính vào giá phòng, false: tách riêng
+        serviceChargeIncluded: { type: Boolean, default: false }, // true: phí dịch vụ đã tính vào giá phòng, false: tách riêng
+        taxRate: { type: Number, default: 0.1 }, // Tỷ lệ thuế VAT (10%)
+        serviceChargeRate: { type: Number, default: 0.05 } // Tỷ lệ phí dịch vụ (5%)
+    },
     contactInfo: {
         phone: { type: String },
         email: { type: String },

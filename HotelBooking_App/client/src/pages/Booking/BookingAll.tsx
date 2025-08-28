@@ -7,6 +7,7 @@ import instanceClient from "../../../configs/instance";
 import { Form, Input, message, type FormProps } from "antd";
 import type { AxiosError } from "axios";
 import { useState, useEffect } from "react";
+import { CashDepositModal } from '../../components/Payment/CashDepositModal';
 
 const BookingTour = () => {
   const [form] = Form.useForm();
@@ -143,6 +144,8 @@ const BookingTour = () => {
 
   // Hiển thị modal chọn phương thức thanh toán
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [cashDepositModalVisible, setCashDepositModalVisible] = useState(false);
+  const [pendingPaymentMethod, setPendingPaymentMethod] = useState<string>('');
 
   const handlePayRemainingAmount = () => {
     setIsModalVisible(true);
@@ -153,8 +156,32 @@ const BookingTour = () => {
   };
 
   const handlePaymentMethodSelect = (method: string) => {
+    if (method === 'cash') {
+      setPendingPaymentMethod(method);
+      setIsModalVisible(false);
+      setCashDepositModalVisible(true);
+      return;
+    }
+    
     onFinish({ payment_method: method });
     setIsModalVisible(false);
+  };
+
+  // Hàm tính toán số tiền cọc (50% tổng tiền)
+  const calculateDepositAmount = () => {
+    return Math.round((bookingTour?.totalPriceBooking || 0) * 0.5);
+  };
+
+  // Xử lý khi khách hàng xác nhận thanh toán tiền mặt
+  const handleCashDepositConfirm = () => {
+    setCashDepositModalVisible(false);
+    onFinish({ payment_method: pendingPaymentMethod });
+  };
+
+  // Xử lý khi khách hàng chọn VNPay từ modal
+  const handleCashDepositChooseVNPay = () => {
+    setCashDepositModalVisible(false);
+    onFinish({ payment_method: 'bank_transfer' });
   };
 
   const onFinish: FormProps<any>["onFinish"] = (values) => {
@@ -527,9 +554,19 @@ const BookingTour = () => {
           </button>
         </Form>
       </div>
+
+      {/* Cash Deposit Modal */}
+      <CashDepositModal
+        visible={cashDepositModalVisible}
+        onCancel={() => setCashDepositModalVisible(false)}
+        onConfirmCash={handleCashDepositConfirm}
+        onChooseVNPay={handleCashDepositChooseVNPay}
+        bookingId={bookingTour?.bookingCode || ''}
+        totalAmount={bookingTour?.totalPriceBooking || 0}
+        depositAmount={calculateDepositAmount()}
+      />
     </div>
   );
 };
-
 
 export default BookingTour;

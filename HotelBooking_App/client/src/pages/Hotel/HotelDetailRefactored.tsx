@@ -183,10 +183,10 @@ const HotelDetailRefactored: React.FC = () => {
     return selectedRoomType.price * nights;
   };
 
-  // Calculate deposit amount (30% of total price)
+  // Calculate deposit amount (50% of total price)
   const calculateDepositAmount = () => {
     const totalPrice = calculateTotalPrice();
-    return Math.floor(totalPrice * 0.3);
+    return Math.floor(totalPrice * 0.5);
   };
 
   const handleBookingSubmit = async (values: any) => {
@@ -606,7 +606,7 @@ const HotelDetailRefactored: React.FC = () => {
             >
               <Select>
                 <Option value="full">Thanh toán toàn bộ</Option>
-                <Option value="deposit">Đặt cọc (30%)</Option>
+                <Option value="deposit">Đặt cọc (50%)</Option>
               </Select>
             </Form.Item>
 

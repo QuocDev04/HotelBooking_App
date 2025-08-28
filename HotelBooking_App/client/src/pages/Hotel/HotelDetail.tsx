@@ -387,7 +387,7 @@ const HotelDetail: React.FC = () => {
               <p className="font-semibold mt-2">Thông tin thanh toán:</p>
               <ul className="list-disc pl-5 mt-1">
                 <li>Mã đặt phòng: {response.data.bookingId}</li>
-                <li>Số tiền cần thanh toán: {selectedRoomType ? Math.round(selectedRoomType.finalPrice * 0.3).toLocaleString() : '0'} ₫</li>
+                <li>Số tiền cần thanh toán: {selectedRoomType ? Math.round(selectedRoomType.finalPrice * 0.5).toLocaleString() : '0'} ₫</li>
                 <li className="text-red-600 font-semibold">Hạn thanh toán: {deadlineStr}</li>
                 <li>Địa chỉ: Số 81A ngõ 295 - Phố Bằng Liệt - Phường Lĩnh Nam - Quận Hoàng Mai - Hà Nội</li>
                 <li>Thời gian: 9h00 - 17h30 từ thứ 2 - đến thứ 6 và 9h00 - 12h00 thứ 7</li>
@@ -743,7 +743,7 @@ const HotelDetail: React.FC = () => {
                   initialValue="deposit"
                 >
                   <Select placeholder="Chọn loại thanh toán">
-                    <Option value="deposit">Đặt cọc (30%)</Option>
+                    <Option value="deposit">Đặt cọc (50%)</Option>
                     <Option value="full">Thanh toán toàn bộ</Option>
                   </Select>
                 </Form.Item>
@@ -960,7 +960,7 @@ const HotelDetail: React.FC = () => {
                 <h3 className="font-semibold text-blue-700">Thanh toán qua VNPay (Khuyến nghị)</h3>
               </div>
               <ul className="list-disc pl-5 text-gray-700">
-                <li>Số tiền cần thanh toán: <span className="font-semibold text-red-600">{selectedRoomType ? Math.round(selectedRoomType.finalPrice * 0.3).toLocaleString() : '0'} ₫</span></li>
+                <li>Số tiền cần thanh toán: <span className="font-semibold text-red-600">{selectedRoomType ? Math.round(selectedRoomType.finalPrice * 0.5).toLocaleString() : '0'} ₫</span></li>
                 <li>Thanh toán ngay trực tuyến qua thẻ</li>
                 <li>Xác nhận đặt phòng ngay lập tức</li>
                 <li>Đảm bảo giữ chỗ cho phòng</li>
@@ -987,7 +987,7 @@ const HotelDetail: React.FC = () => {
                 <h3 className="font-semibold text-green-700">Thanh toán tiền mặt tại văn phòng</h3>
               </div>
               <ul className="list-disc pl-5 text-gray-700">
-                <li>Số tiền cần đặt cọc: <span className="font-semibold text-red-600">{selectedRoomType ? Math.round(selectedRoomType.finalPrice * 0.3).toLocaleString() : '0'} ₫</span></li>
+                <li>Số tiền cần đặt cọc: <span className="font-semibold text-red-600">{selectedRoomType ? Math.round(selectedRoomType.finalPrice * 0.5).toLocaleString() : '0'} ₫</span></li>
                 <li>Địa chỉ: Số 81A ngõ 295 - Phố Bằng Liệt - Phường Lĩnh Nam - Quận Hoàng Mai - Hà Nội</li>
                 <li>Thời gian: 9h00 - 17h30 từ thứ 2 - đến thứ 6 và 9h00 - 12h00 thứ 7</li>
                 <li><span className="text-red-500 font-medium">Lưu ý:</span> Đặt phòng chỉ được xác nhận sau khi đã thanh toán đặt cọc trong vòng 24 giờ</li>

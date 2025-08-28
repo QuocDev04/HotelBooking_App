@@ -408,8 +408,8 @@ const HotelBookingConfirmation: React.FC = () => {
 
               <div style={{ marginBottom: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <Text>Tổng tiền:</Text>
-                  <Text strong style={{ fontSize: '1.1rem', color: '#1890ff' }}>
+                  <Text strong style={{ fontSize: '1.1rem' }}>Tổng tiền:</Text>
+                  <Text strong style={{ fontSize: '1.2rem', color: '#1890ff' }}>
                     {booking.totalPrice.toLocaleString('vi-VN')} VNĐ
                   </Text>
                 </div>
@@ -417,7 +417,7 @@ const HotelBookingConfirmation: React.FC = () => {
                 {booking.isDeposit && booking.depositAmount > 0 && (
                   <>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                      <Text>Tiền cọc:</Text>
+                      <Text>Tiền cọc (30%):</Text>
                       <Text style={{ color: '#52c41a' }}>
                         {booking.depositAmount.toLocaleString('vi-VN')} VNĐ
                       </Text>

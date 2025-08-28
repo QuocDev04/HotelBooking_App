@@ -89,8 +89,8 @@ const bookHotel = async (req, res) => {
         const availability = await checkHotelAvailability(hotelId, checkIn, checkOut, totalRoomsNeeded, totalGuests);
         if (!availability.available) return res.status(400).json({ success: false, message: "Không có đủ phòng trống" });
 
-        // Tính toán giá
-        let subtotal = 0;
+        // Tính toán giá đơn giản (không có thuế và phí dịch vụ)
+        let totalPrice = 0;
         const processedRoomBookings = [];
 
         for (const roomBooking of roomBookings) {
@@ -98,23 +98,19 @@ const bookHotel = async (req, res) => {
             if (!roomType) return res.status(400).json({ success: false, message: `Loại phòng không tồn tại: ${roomBooking.roomTypeIndex}` });
 
             const pricePerNight = roomType.finalPrice || roomType.basePrice;
-            const totalPrice = pricePerNight * roomBooking.numberOfRooms * numberOfNights;
-            subtotal += totalPrice;
+            const roomTotalPrice = pricePerNight * roomBooking.numberOfRooms * numberOfNights;
+            totalPrice += roomTotalPrice;
 
             processedRoomBookings.push({
                 roomTypeIndex: roomBooking.roomTypeIndex,
                 roomTypeName: roomType.typeName,
                 numberOfRooms: roomBooking.numberOfRooms,
                 pricePerNight,
-                totalPrice,
+                totalPrice: roomTotalPrice,
                 guests: roomBooking.guests || [],
                 specialRequests: roomBooking.specialRequests || ''
             });
         }
-
-        const taxAmount = subtotal * 0.1;
-        const serviceCharge = subtotal * 0.05;
-        const totalPrice = subtotal + taxAmount + serviceCharge;
 
         // Deposit
         let depositAmount = 0;
@@ -139,9 +135,6 @@ const bookHotel = async (req, res) => {
             address,
             roomBookings: processedRoomBookings,
             totalGuests,
-            subtotal,
-            taxAmount,
-            serviceCharge,
             totalPrice,
             isDeposit,
             depositAmount,
