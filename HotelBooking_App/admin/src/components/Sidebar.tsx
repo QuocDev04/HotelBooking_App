@@ -78,6 +78,7 @@ const Sidebar = () => {
                 { name: 'Thêm Khách sạn', path: '/admin/hotels/add', icon: '🆕' },
                 { name: 'Quản lý Phòng', path: '/admin/room-management', icon: '🛏️' },
                 { name: 'Quản lý Đặt phòng', path: '/admin/hotel-bookings', icon: '📋' },
+                { name: 'Quản lý Tiện ích', path: '/admin/amenity-management', icon: '⚙️' },
             ],
         },
 
@@ -86,8 +87,9 @@ const Sidebar = () => {
             icon: '👥',
             children: [
                 { name: 'Tài khoản Khách hàng', path: '/admin/customer-accounts', icon: '👤' },
-                { name: 'Tài khoản nhân viên', path: '/admin/hdv-accounts', icon: '🧑‍🏫' },
+                { name: 'Tài khoản nhân viên', path: '/admin/employee-accounts', icon: '🧑‍🏫' },
                 { name: 'Phân công HDV', path: '/admin/employee-assignment', icon: '📋' },
+                { name: 'Phân công quản lý khách sạn', path: '/admin/hotel-assignment', icon: '🏨' },
             ],
         },
     ];
