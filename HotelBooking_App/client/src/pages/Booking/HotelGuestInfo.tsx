@@ -35,6 +35,33 @@ const HotelGuestInfo = () => {
   const [pendingFormValues, setPendingFormValues] = useState<any>(null);
   const [successBookingData, setSuccessBookingData] = useState<any>(null);
 
+  // Hàm tính tuổi
+  const calculateAge = (birthDate: any) => {
+    return dayjs().diff(dayjs(birthDate), "year");
+  };
+
+  // Rule validate ngày sinh
+  const birthDateRule = (index: number, adults: number) => ({
+    validator(_: any, value: any) {
+      if (!value) return Promise.resolve();
+
+      const age = calculateAge(value);
+
+      // Nếu chỉ có 1 khách -> khách 1 phải >= 18 tuổi
+      if (adults === 1 && index === 0 && age < 18) {
+        return Promise.reject(new Error("Khách đi 1 mình phải từ 18 tuổi trở lên!"));
+      }
+
+      // Nếu có >= 2 khách -> mọi khách đều phải >= 16 tuổi
+      if (adults > 1 && age < 16) {
+        return Promise.reject(new Error(`Khách ${index + 1} phải từ 16 tuổi trở lên!`));
+      }
+
+      return Promise.resolve();
+    },
+  });
+
+
   useEffect(() => {
     const data = localStorage.getItem("bookingData");
     if (data) {
@@ -55,11 +82,11 @@ const HotelGuestInfo = () => {
           },
           body: JSON.stringify(data)
         });
-        
+
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        
+
         return await response.json();
       } catch (error) {
         throw new Error('Đã có lỗi xảy ra khi đặt phòng');
@@ -81,7 +108,7 @@ const HotelGuestInfo = () => {
 
           if (res.data?.success && res.data?.paymentUrl) {
             window.location.href = res.data.paymentUrl;
-        } else {
+          } else {
             message.error("Không thể lấy liên kết thanh toán từ VNPay");
           }
         } catch (error) {
@@ -104,7 +131,7 @@ const HotelGuestInfo = () => {
           adults: bookingData?.adults || 1,
           children: bookingData?.children || 0
         };
-        
+
         setSuccessBookingData(bookingInfo);
         setBookingSuccessModalVisible(true);
       } else {
@@ -170,7 +197,7 @@ const HotelGuestInfo = () => {
 
   const checkInDate = bookingData?.check_in_date ? new Date(bookingData.check_in_date) : null;
   const checkOutDate = bookingData?.check_out_date ? new Date(bookingData.check_out_date) : null;
-  
+
   let numberOfNights = 0;
   if (checkInDate && checkOutDate) {
     const timeDiff = checkOutDate.getTime() - checkInDate.getTime();
@@ -185,14 +212,14 @@ const HotelGuestInfo = () => {
     .format("DD/MM/YYYY [lúc] HH:mm");
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4">
+    <div className="min-h-screen py-8 bg-gray-50">
+      <div className="max-w-6xl px-4 mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="mb-8 text-center">
           <Title level={2} className="text-gray-800">
             Thông tin khách lưu trú
           </Title>
-          <Text className="text-gray-600 text-lg">
+          <Text className="text-lg text-gray-600">
             Vui lòng điền đầy đủ thông tin cho tất cả khách lưu trú
           </Text>
         </div>
@@ -201,23 +228,23 @@ const HotelGuestInfo = () => {
         <div className="flex items-center justify-center mb-8">
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
-              <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center">
+              <div className="flex items-center justify-center w-8 h-8 text-white bg-green-500 rounded-full">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <span className="ml-2 text-green-600 font-medium">Chọn phòng</span>
+              <span className="ml-2 font-medium text-green-600">Chọn phòng</span>
             </div>
             <div className="w-16 h-0.5 bg-green-500"></div>
             <div className="flex items-center">
-              <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
+              <div className="flex items-center justify-center w-8 h-8 text-white bg-blue-500 rounded-full">
                 2
               </div>
-              <span className="ml-2 text-blue-600 font-medium">Thông tin khách</span>
+              <span className="ml-2 font-medium text-blue-600">Thông tin khách</span>
             </div>
             <div className="w-16 h-0.5 bg-gray-300"></div>
             <div className="flex items-center">
-              <div className="w-8 h-8 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center">
+              <div className="flex items-center justify-center w-8 h-8 text-gray-500 bg-gray-300 rounded-full">
                 3
               </div>
               <span className="ml-2 text-gray-400">Hoàn tất</span>
@@ -225,7 +252,7 @@ const HotelGuestInfo = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Left: Guest Information Form */}
           <div className="lg:col-span-2">
             <Card className="shadow-lg">
@@ -288,16 +315,16 @@ const HotelGuestInfo = () => {
 
                 <Divider />
 
-                                 {/* Guest Information */}
-                 <div className="mb-8">
-                   <Title level={4} className="flex items-center mb-6">
-                     <UserOutlined className="mr-2 text-green-500" />
-                     Thông tin khách lưu trú ({bookingData?.adults} người)
-                   </Title>
-                  
+                {/* Guest Information */}
+                <div className="mb-8">
+                  <Title level={4} className="flex items-center mb-6">
+                    <UserOutlined className="mr-2 text-green-500" />
+                    Thông tin khách lưu trú ({bookingData?.adults} người)
+                  </Title>
+
                   {/* Guest 1 (Main Guest) */}
                   <Card size="small" className="mb-4 border-blue-200 bg-blue-50">
-                    <Title level={5} className="text-blue-800 mb-4 flex items-center">
+                    <Title level={5} className="flex items-center mb-4 text-blue-800">
                       <UserOutlined className="mr-2" />
                       Khách 1 (Người đặt)
                     </Title>
@@ -327,10 +354,13 @@ const HotelGuestInfo = () => {
                         <Form.Item
                           label="Ngày sinh"
                           name={['guests', 0, 'birthDate']}
-                          rules={[{ required: true, message: 'Vui lòng nhập ngày sinh!' }]}
+                          rules={[
+                            { required: true, message: 'Vui lòng nhập ngày sinh!' },
+                            birthDateRule(0, bookingData?.adults || 1),
+                          ]}
                         >
-                          <DatePicker 
-                            style={{ width: '100%' }} 
+                          <DatePicker
+                            style={{ width: '100%' }}
                             placeholder="Chọn ngày sinh"
                             format="DD/MM/YYYY"
                           />
@@ -342,7 +372,7 @@ const HotelGuestInfo = () => {
                   {/* Guest 2 (if adults > 1) */}
                   {bookingData?.adults && bookingData.adults > 1 && (
                     <Card size="small" className="mb-4 border-green-200 bg-green-50">
-                      <Title level={5} className="text-green-800 mb-4 flex items-center">
+                      <Title level={5} className="flex items-center mb-4 text-green-800">
                         <UserOutlined className="mr-2" />
                         Khách 2
                       </Title>
@@ -372,10 +402,13 @@ const HotelGuestInfo = () => {
                           <Form.Item
                             label="Ngày sinh"
                             name={['guests', 1, 'birthDate']}
-                            rules={[{ required: true, message: 'Vui lòng nhập ngày sinh!' }]}
+                            rules={[
+                              { required: true, message: 'Vui lòng nhập ngày sinh!' },
+                              birthDateRule(1, bookingData?.adults || 1),
+                            ]}
                           >
-                            <DatePicker 
-                              style={{ width: '100%' }} 
+                            <DatePicker
+                              style={{ width: '100%' }}
                               placeholder="Chọn ngày sinh"
                               format="DD/MM/YYYY"
                             />
@@ -385,12 +418,12 @@ const HotelGuestInfo = () => {
                     </Card>
                   )}
 
-                                     {/* Additional Guests (if adults > 2) */}
-                   {bookingData?.adults && bookingData.adults > 2 && (
-                     <div className="mb-4">
-                       {Array.from({ length: bookingData.adults - 2 }, (_, index) => (
+                  {/* Additional Guests (if adults > 2) */}
+                  {bookingData?.adults && bookingData.adults > 2 && (
+                    <div className="mb-4">
+                      {Array.from({ length: bookingData.adults - 2 }, (_, index) => (
                         <Card key={index} size="small" className="mb-4 border-orange-200 bg-orange-50">
-                          <Title level={5} className="text-orange-800 mb-4">
+                          <Title level={5} className="mb-4 text-orange-800">
                             Khách {index + 3}
                           </Title>
                           <Row gutter={16}>
@@ -419,10 +452,13 @@ const HotelGuestInfo = () => {
                               <Form.Item
                                 label="Ngày sinh"
                                 name={['guests', index + 2, 'birthDate']}
-                                rules={[{ required: true, message: 'Vui lòng nhập ngày sinh!' }]}
+                                rules={[
+                                  { required: true, message: `Vui lòng nhập ngày sinh khách ${index + 3}!` },
+                                  birthDateRule(index + 2, bookingData?.adults || 1),
+                                ]}
                               >
-                                <DatePicker 
-                                  style={{ width: '100%' }} 
+                                <DatePicker
+                                  style={{ width: '100%' }}
                                   placeholder="Chọn ngày sinh"
                                   format="DD/MM/YYYY"
                                 />
@@ -457,19 +493,19 @@ const HotelGuestInfo = () => {
                         </Select>
                       </Form.Item>
                     </Col>
-                                         <Col span={12}>
-                       <Form.Item
-                         label="Phương thức thanh toán"
-                         name="payment_method"
-                         rules={[{ required: true, message: "Vui lòng chọn phương thức thanh toán" }]}
-                         initialValue="bank_transfer"
-                       >
-                                                 <Select placeholder="Chọn phương thức thanh toán">
+                    <Col span={12}>
+                      <Form.Item
+                        label="Phương thức thanh toán"
+                        name="payment_method"
+                        rules={[{ required: true, message: "Vui lòng chọn phương thức thanh toán" }]}
+                        initialValue="bank_transfer"
+                      >
+                        <Select placeholder="Chọn phương thức thanh toán">
                           <Option value="bank_transfer">VNPay</Option>
                           <Option value="cash">Tiền mặt</Option>
                         </Select>
-                       </Form.Item>
-                     </Col>
+                      </Form.Item>
+                    </Col>
                   </Row>
                 </div>
 
@@ -485,8 +521,8 @@ const HotelGuestInfo = () => {
                         label="Yêu cầu đặc biệt"
                         name="specialRequests"
                       >
-                        <Input.TextArea 
-                          placeholder="Nhập yêu cầu đặc biệt (nếu có)" 
+                        <Input.TextArea
+                          placeholder="Nhập yêu cầu đặc biệt (nếu có)"
                           rows={3}
                         />
                       </Form.Item>
@@ -496,8 +532,8 @@ const HotelGuestInfo = () => {
                         label="Ghi chú"
                         name="note"
                       >
-                        <Input.TextArea 
-                          placeholder="Ghi chú thêm" 
+                        <Input.TextArea
+                          placeholder="Ghi chú thêm"
                           rows={3}
                         />
                       </Form.Item>
@@ -514,7 +550,7 @@ const HotelGuestInfo = () => {
                     htmlType="submit"
                     size="large"
                     loading={loading}
-                    className="px-12 py-3 h-auto text-lg font-semibold"
+                    className="h-auto px-12 py-3 text-lg font-semibold"
                   >
                     Hoàn tất đặt phòng
                   </Button>
@@ -525,7 +561,7 @@ const HotelGuestInfo = () => {
 
           {/* Right: Booking Summary */}
           <div className="lg:col-span-1">
-            <Card title="Tóm tắt đặt phòng" className="shadow-lg sticky top-4">
+            <Card title="Tóm tắt đặt phòng" className="sticky shadow-lg top-4">
               <div className="space-y-4">
                 <div className="flex items-center text-gray-600">
                   <CalendarOutlined className="mr-2" />
@@ -534,7 +570,7 @@ const HotelGuestInfo = () => {
                     <div>{formattedCheckIn}</div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center text-gray-600">
                   <CalendarOutlined className="mr-2" />
                   <div>
@@ -542,7 +578,7 @@ const HotelGuestInfo = () => {
                     <div>{formattedCheckOut}</div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center text-gray-600">
                   <UserOutlined className="mr-2" />
                   <div>
@@ -550,7 +586,7 @@ const HotelGuestInfo = () => {
                     <div>{bookingData?.adults} người</div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center text-gray-600">
                   <HomeOutlined className="mr-2" />
                   <div>
@@ -562,8 +598,8 @@ const HotelGuestInfo = () => {
                 <Divider />
 
                 {/* Payment Summary */}
-                <div className="bg-gray-50 p-4 rounded-lg mb-4">
-                  <div className="text-sm font-medium text-gray-700 mb-2">Tóm tắt thanh toán:</div>
+                <div className="p-4 mb-4 rounded-lg bg-gray-50">
+                  <div className="mb-2 text-sm font-medium text-gray-700">Tóm tắt thanh toán:</div>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span>Giá phòng/đêm:</span>
@@ -577,7 +613,7 @@ const HotelGuestInfo = () => {
                     </div>
                     <div className="flex justify-between">
                       <span>Tổng tiền:</span>
-                      <span className="font-medium text-lg text-blue-600">
+                      <span className="text-lg font-medium text-blue-600">
                         {bookingData?.price ? new Intl.NumberFormat('vi-VN').format(bookingData.price * numberOfNights) : '0'} VNĐ
                       </span>
                     </div>
@@ -590,9 +626,9 @@ const HotelGuestInfo = () => {
                   </div>
                 </div>
 
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <div className="text-sm text-blue-600 mb-2">Thông tin quan trọng:</div>
-                  <ul className="text-xs text-blue-700 space-y-1">
+                <div className="p-4 rounded-lg bg-blue-50">
+                  <div className="mb-2 text-sm text-blue-600">Thông tin quan trọng:</div>
+                  <ul className="space-y-1 text-xs text-blue-700">
                     <li>• Vui lòng điền đầy đủ thông tin cho tất cả khách</li>
                     <li>• Thông tin sẽ được sử dụng để check-in</li>
                     <li>• Có thể hủy miễn phí trước 24h</li>
@@ -656,16 +692,16 @@ const HotelGuestInfo = () => {
   function handleCashDepositChooseVNPay() {
     if (!pendingFormValues) return;
     setCashDepositModalVisible(false);
-    
+
     // Cập nhật phương thức thanh toán thành VNPay
     const updatedValues = {
       ...pendingFormValues,
       payment_method: 'bank_transfer'
     };
-    
+
     // Cập nhật form
     form.setFieldsValue({ payment_method: 'bank_transfer' });
-    
+
     // Xử lý đặt phòng với VNPay
     processBooking(updatedValues);
   }
@@ -673,7 +709,7 @@ const HotelGuestInfo = () => {
   // Xử lý khi nhấn OK trong modal thông báo thành công
   function handleBookingSuccessModalOk() {
     setBookingSuccessModalVisible(false);
-    
+
     // Lưu thông tin booking vào localStorage để sử dụng trong trang booking-success
     if (successBookingData) {
       localStorage.setItem('bookingData', JSON.stringify({
@@ -690,7 +726,7 @@ const HotelGuestInfo = () => {
         paymentStatus: 'pending'
       }));
     }
-    
+
     // Chuyển đến trang booking-success
     navigate('/booking-success');
   }
