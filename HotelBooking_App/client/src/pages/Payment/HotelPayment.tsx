@@ -115,7 +115,7 @@ export default function HotelPaymentPage() {
                       {booking.isDeposit && booking.depositAmount > 0 && (
                         <>
                           <div className="flex justify-between text-sm mt-1">
-                            <span className="text-gray-600">Tiền cọc (30%):</span>
+                            <span className="text-gray-600">Tiền cọc (50%):</span>
                             <span className="text-green-600 font-medium">{booking.depositAmount?.toLocaleString()} VND</span>
                           </div>
                           {booking.payment_status === 'deposit_paid' && (
