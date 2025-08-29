@@ -690,6 +690,131 @@ const getRoomAvailability = async (req, res) => {
     }
 };
 
+// Lấy tình trạng phòng theo tầng
+const getRoomStatusByFloor = async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log('🔍 getRoomStatusByFloor called with hotel ID:', id);
+        
+        const hotel = await Hotel.findById(id);
+        console.log('🏨 Hotel found:', hotel ? 'Yes' : 'No');
+        
+        if (!hotel) {
+            console.log('❌ Hotel not found for ID:', id);
+            return res.status(404).json({ 
+                success: false, 
+                message: "Không tìm thấy khách sạn" 
+            });
+        }
+        
+        console.log('📊 Hotel data:', {
+            _id: hotel._id,
+            hotelName: hotel.hotelName,
+            floorsCount: hotel.floorsCount,
+            roomTypesCount: hotel.roomTypes ? hotel.roomTypes.length : 0
+        });
+        
+        const floorsCount = hotel.floorsCount || 5; // Default to 5 floors if not set
+        const roomTypes = hotel.roomTypes || []; // Default to empty array if not set
+        
+        console.log('🏗️ Processing floors:', floorsCount, 'Room types:', roomTypes.length);
+        
+        // Tạo danh sách phòng theo tầng - BẮT ĐẦU TỪ TẦNG 2
+        const roomsByFloor = [];
+        
+        // Bắt đầu từ tầng 2 thay vì tầng 1
+        for (let floor = 2; floor <= floorsCount + 1; floor++) {
+            const floorRooms = [];
+            
+            if (roomTypes.length === 0) {
+                // Nếu không có room types, tạo phòng mẫu
+                console.log(`📝 Creating sample rooms for floor ${floor}`);
+                for (let roomNum = 1; roomNum <= 8; roomNum++) {
+                    const roomNumber = `${floor}${roomNum.toString().padStart(2, '0')}`;
+                    floorRooms.push({
+                        roomNumber: roomNumber,
+                        roomType: "Standard",
+                        roomTypeIndex: 0,
+                        floor: floor,
+                        basePrice: 100,
+                        maxOccupancy: 2,
+                        bedType: "Queen",
+                        roomSize: 25
+                    });
+                }
+            } else {
+                // Xử lý từng loại phòng từ database
+                roomTypes.forEach((roomType, roomTypeIndex) => {
+                    console.log(`🏠 Processing room type: ${roomType.typeName}, totalRooms: ${roomType.totalRooms}`);
+                    
+                    // Tính số phòng cho mỗi tầng (chia đều)
+                    const roomsPerFloor = Math.floor(roomType.totalRooms / floorsCount);
+                    const extraRooms = roomType.totalRooms % floorsCount;
+                    
+                    console.log(`📊 Rooms per floor for ${roomType.typeName}: ${roomsPerFloor} + ${extraRooms} extra`);
+                    
+                    // Tạo phòng cho tầng hiện tại
+                    const roomsForThisFloor = roomsPerFloor + (floor - 1 <= extraRooms ? 1 : 0);
+                    
+                    console.log(`🔢 Creating ${roomsForThisFloor} rooms for floor ${floor}, type: ${roomType.typeName}`);
+                    
+                    for (let roomNum = 1; roomNum <= roomsForThisFloor; roomNum++) {
+                        const roomNumber = `${floor}${roomNum.toString().padStart(2, '0')}`;
+                        floorRooms.push({
+                            roomNumber: roomNumber,
+                            roomType: roomType.typeName,
+                            roomTypeIndex: roomTypeIndex,
+                            floor: floor,
+                            basePrice: roomType.basePrice,
+                            maxOccupancy: roomType.maxOccupancy,
+                            bedType: roomType.bedType,
+                            roomSize: roomType.roomSize
+                        });
+                    }
+                });
+            }
+            
+            console.log(`✅ Floor ${floor}: ${floorRooms.length} rooms created`);
+            roomsByFloor.push({
+                floor: floor,
+                totalRooms: floorRooms.length,
+                rooms: floorRooms
+            });
+        }
+        
+        const totalRooms = roomsByFloor.reduce((sum, floor) => sum + floor.totalRooms, 0);
+        console.log('🎯 Final result:', {
+            totalFloors: roomsByFloor.length,
+            totalRooms: totalRooms,
+            floors: roomsByFloor.map(f => f.floor),
+            roomsByFloor: roomsByFloor.map(f => ({ 
+                floor: f.floor, 
+                totalRooms: f.totalRooms,
+                sampleRooms: f.rooms.slice(0, 3).map(r => r.roomNumber)
+            }))
+        });
+        
+        res.status(200).json({
+            success: true,
+            data: {
+                hotel: {
+                    _id: hotel._id,
+                    hotelName: hotel.hotelName,
+                    floorsCount: floorsCount
+                },
+                roomsByFloor: roomsByFloor
+            }
+        });
+    } catch (error) {
+        console.error('❌ Error in getRoomStatusByFloor:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Lỗi server", 
+            error: error.message 
+        });
+    }
+};
+
 module.exports = {
     getAllHotels,
     getHotelById,
@@ -702,5 +827,6 @@ module.exports = {
     addRoomType,
     updateRoomType,
     deleteRoomType,
-    getRoomAvailability
+    getRoomAvailability,
+    getRoomStatusByFloor
 };

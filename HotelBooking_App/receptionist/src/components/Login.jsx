@@ -47,7 +47,7 @@ const Login = () => {
       });
       if (res.data?.success) {
         const { accessToken, employee } = res.data;
-        login(employee, accessToken);
+        login(employee, accessToken, hotel);
         navigate("/app", { replace: true });
       }
     } catch (err) {

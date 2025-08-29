@@ -12,6 +12,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [selectedHotel, setSelectedHotel] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -39,35 +40,45 @@ export const AuthProvider = ({ children }) => {
     try {
       const savedToken = localStorage.getItem("qtks_token");
       const savedUser = localStorage.getItem("qtks_user");
+      const savedHotel = localStorage.getItem("qtks_hotel");
       if (savedToken && savedUser) {
         setToken(savedToken);
         setUser(JSON.parse(savedUser));
       }
+      if (savedHotel) {
+        setSelectedHotel(JSON.parse(savedHotel));
+      }
     } catch (e) {
       localStorage.removeItem("qtks_token");
       localStorage.removeItem("qtks_user");
+      localStorage.removeItem("qtks_hotel");
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  const login = (userData, accessToken) => {
+  const login = (userData, accessToken, hotelData) => {
     setUser(userData);
     setToken(accessToken);
+    setSelectedHotel(hotelData);
     localStorage.setItem("qtks_token", accessToken);
     localStorage.setItem("qtks_user", JSON.stringify(userData));
+    localStorage.setItem("qtks_hotel", JSON.stringify(hotelData));
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
+    setSelectedHotel(null);
     localStorage.removeItem("qtks_token");
     localStorage.removeItem("qtks_user");
+    localStorage.removeItem("qtks_hotel");
   };
 
   const value = {
     user,
     token,
+    selectedHotel,
     isLoading,
     login,
     logout,

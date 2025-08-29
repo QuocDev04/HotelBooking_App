@@ -5,7 +5,7 @@ const Sidebar = ({ isOpen }) => {
   const location = useLocation();
 
   const menu = [
-    { name: "Phòng được giao", path: "/", icon: "🏨" },
+    { name: "Phòng được giao", path: "/app", icon: "🏨" },
     { name: "Thông báo", path: "/thongbao", icon: "🔔" },
     { name: "Hồ sơ", path: "/hoso", icon: "👤" },
   ];
