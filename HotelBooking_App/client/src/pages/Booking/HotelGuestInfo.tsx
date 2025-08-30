@@ -102,23 +102,13 @@ const HotelGuestInfo = () => {
       console.log("Booking ID:", bookingId);
       console.log("Payment method:", paymentMethod);
       console.log("Payment type:", paymentType);
+      console.log("Data:", data);
 
       if (paymentMethod === "bank_transfer") {
-
-        try {
-          const res = await fetch(`http://localhost:8080/api/vnpay/${data?.data?._id}`, {
-            method: 'POST'
-          }).then(res => res.json());
-
-          console.log("VNPay response:", res?.data);
-
-          if (res.data?.success && res.data?.paymentUrl) {
-            window.location.href = res.data.paymentUrl;
-          } else {
-            message.error("Không thể lấy liên kết thanh toán từ VNPay");
-          }
-        } catch (error) {
-          message.error("Đã xảy ra lỗi khi kết nối VNPay");
+        if (data?.vnpayUrl) {
+          window.location.href = data.vnpayUrl; 
+        } else {
+          message.error("Không tìm thấy link thanh toán VNPay");
         }
       } else if (paymentMethod === "cash") {
         // Xử lý thanh toán tiền mặt - hiển thị modal thông báo
