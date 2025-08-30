@@ -48,7 +48,7 @@ Vnpay.post('/create-payment', async (req, res) => {
         });
 
 
-        const paymentUrl = await vnpay.buildPaymentUrl({
+        const Vnpays = await vnpay.buildPaymentUrl({
             vnp_Amount: totalAmount,
             vnp_IpAddr: req.ip || '127.0.0.1',
             vnp_TxnRef: `${booking._id}-${Date.now()}`,
@@ -61,8 +61,9 @@ Vnpay.post('/create-payment', async (req, res) => {
             vnp_CreateDate: dateFormat(new Date()),
             vnp_ExpireDate: dateFormat(new Date(Date.now() + 24 * 60 * 60 * 1000)),
         });
-
-        return res.status(200).json({ success: true, paymentUrl, bookingId: booking._id, type });
+        console.log("VNPAY", Vnpays);
+        
+        return res.status(200).json({ success: true, Vnpays, bookingId: booking._id, type });
     } catch (error) {
         console.error('Lỗi tạo thanh toán:', error);
         return res.status(500).json({ success: false, message: error.message });
@@ -128,49 +129,69 @@ Vnpay.get('/payment-callback', async (req, res) => {
                 try {
                     const totalPriceVN = (updatedBooking.totalPriceTour || updatedBooking.totalPrice || 0).toLocaleString('vi-VN');
 
-                    // Xác định nội dung email dựa trên tour hoặc hotel
                     let emailHtml = '';
                     if (isHotelBooking) {
+                        // render chi tiết phòng + khách
+                        let roomDetailsHtml = updatedBooking.roomBookings.map(rb => `
+                <li style="margin-bottom: 10px;">
+                    <b>${rb.roomTypeName}</b> - ${rb.numberOfRooms} phòng<br/>
+                    Giá/đêm: ${rb.pricePerNight.toLocaleString('vi-VN')} VNĐ<br/>
+                    Tổng: ${rb.totalPrice.toLocaleString('vi-VN')} VNĐ<br/>
+                    Khách: ${rb.guests.map(g => g.fullName).join(', ') || 'Chưa nhập'}
+                </li>
+            `).join('');
+
                         emailHtml = `
-                            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                                <h2 style="color: #28a745;">Thanh toán thành công!</h2>
-                                <p>Xin chào <strong>${updatedBooking.fullNameUser || 'Khách hàng'}</strong>,</p>
-                                <p>Bạn đã <b>thanh toán thành công</b> cho khách sạn <b>${updatedBooking.hotelId?.hotelName || 'N/A'}</b>.</p>
-                                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                                    <h3>Thông tin đặt phòng:</h3>
-                                    <ul style="list-style: none; padding: 0;">
-                                        <li><strong>Mã booking:</strong> ${bookingId}</li>
-                                        <li><strong>Tổng giá:</strong> ${totalPriceVN} VNĐ</li>
-                                        <li><strong>Loại thanh toán:</strong> ${updatedBooking.paymentType || 'Không xác định'}</li>
-                                    </ul>
-                                </div>
-                                <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi!</p>
-                                <p>Nếu có thắc mắc, vui lòng liên hệ: <strong>support@example.com</strong></p>
-                            </div>
-                        `;
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #28a745;">Thanh toán thành công!</h2>
+                    <p>Xin chào <strong>${updatedBooking.fullNameUser || 'Khách hàng'}</strong>,</p>
+                    <p>Bạn đã <b>thanh toán thành công</b> cho khách sạn <b>${updatedBooking.hotelId?.hotelName || 'N/A'}</b>.</p>
+                    
+                    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                        <h3>Thông tin đặt phòng:</h3>
+                        <ul style="list-style: none; padding: 0;">
+                            <li><strong>Mã booking:</strong> ${bookingId}</li>
+                            <li><strong>Tổng giá:</strong> ${totalPriceVN} VNĐ</li>
+                            <li><strong>Loại thanh toán:</strong> ${updatedBooking.paymentType || 'Không xác định'}</li>
+                            <li><strong>Ngày nhận phòng:</strong> ${new Date(updatedBooking.checkInDate).toLocaleDateString('vi-VN')}</li>
+                            <li><strong>Ngày trả phòng:</strong> ${new Date(updatedBooking.checkOutDate).toLocaleDateString('vi-VN')}</li>
+                            <li><strong>Số đêm:</strong> ${updatedBooking.numberOfNights}</li>
+                        </ul>
+                        
+                        <h3>Chi tiết phòng:</h3>
+                        <ul style="list-style: none; padding: 0;">
+                            ${roomDetailsHtml}
+                        </ul>
+                    </div>
+
+                    <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi!</p>
+                    <p>Nếu có thắc mắc, vui lòng liên hệ: <strong>support@example.com</strong></p>
+                </div>
+            `;
                     } else {
+                        // giữ nguyên phần email tour
                         emailHtml = `
-                            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                                <h2 style="color: #28a745;">Thanh toán thành công!</h2>
-                                <p>Xin chào <strong>${updatedBooking.fullNameUser}</strong>,</p>
-                                <p>Bạn đã <b>thanh toán thành công</b> cho tour <b>${updatedBooking.slotId?.tour?.nameTour || 'N/A'}</b>.</p>
-                                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                                    <h3>Thông tin đặt chỗ:</h3>
-                                    <ul style="list-style: none; padding: 0;">
-                                        <li><strong>Mã đặt chỗ:</strong> ${bookingId}</li>
-                                        <li><strong>Ngày đi:</strong> ${updatedBooking.slotId?.dateTour || 'N/A'}</li>
-                                        <li><strong>Người lớn:</strong> ${updatedBooking.adultsTour} người</li>
-                                        <li><strong>Trẻ em:</strong> ${updatedBooking.childrenTour || 0} người</li>
-                                        <li><strong>Trẻ nhỏ:</strong> ${updatedBooking.toddlerTour || 0} người</li>
-                                        <li><strong>Em bé:</strong> ${updatedBooking.infantTour || 0} người</li>
-                                        <li><strong>Tổng giá:</strong> ${totalPriceVN} VNĐ</li>
-                                        <li><strong>Loại thanh toán:</strong> ${updatedBooking.paymentType || 'Không xác định'}</li>
-                                    </ul>
-                                </div>
-                                <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi!</p>
-                                <p>Nếu có thắc mắc, vui lòng liên hệ: <strong>support@example.com</strong></p>
-                            </div>
-                        `;
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #28a745;">Thanh toán thành công!</h2>
+                    <p>Xin chào <strong>${updatedBooking.fullNameUser}</strong>,</p>
+                    <p>Bạn đã <b>thanh toán thành công</b> cho tour <b>${updatedBooking.slotId?.tour?.nameTour || 'N/A'}</b>.</p>
+                    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                        <h3>Thông tin đặt chỗ:</h3>
+                        <ul style="list-style: none; padding: 0;">
+                            <li><strong>Mã đặt chỗ:</strong> ${bookingId}</li>
+                            <li><strong>Ngày đi:</strong> ${updatedBooking.slotId?.dateTour || 'N/A'}</li>
+                            <li><strong>Người lớn:</strong> ${updatedBooking.adultsTour} người</li>
+                            <li><strong>Trẻ em:</strong> ${updatedBooking.childrenTour || 0} người</li>
+                            <li><strong>Trẻ nhỏ:</strong> ${updatedBooking.toddlerTour || 0} người</li>
+                            <li><strong>Em bé:</strong> ${updatedBooking.infantTour || 0} người</li>
+                            <li><strong>Tổng giá:</strong> ${totalPriceVN} VNĐ</li>
+                            <li><strong>Loại thanh toán:</strong> ${updatedBooking.paymentType || 'Không xác định'}</li>
+                        </ul>
+                    </div>
+                    <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi!</p>
+                    <p>Nếu có thắc mắc, vui lòng liên hệ: <strong>support@example.com</strong></p>
+                </div>
+            `;
                     }
 
                     await sendMail({
@@ -184,6 +205,7 @@ Vnpay.get('/payment-callback', async (req, res) => {
                     console.error('Lỗi gửi email:', mailErr);
                 }
             }
+
 
             return res.redirect(`http://localhost:5173/payment-result?vnp_ResponseCode=00&success=true&bookingId=${bookingId}`);
         } else {
@@ -315,19 +337,33 @@ Vnpay.post('/process-payment', async (req, res) => {
             console.log('Tìm thấy booking hiện tại:', existingBooking._id);
         }
 
-        // Tính tổng giá nếu không có
-        if (!bookingData.totalPriceTour) {
-            // Tính giá dựa trên số lượng khách (ví dụ)
+        // Sử dụng giá từ request hoặc tính tổng giá nếu không có
+        let totalAmount = 0;
+        
+        if (bookingData.tourPrice) {
+            // Sử dụng giá tour từ request
+            totalAmount = bookingData.tourPrice;
+        } else if (bookingData.totalPriceTour) {
+            // Sử dụng totalPriceTour nếu có
+            totalAmount = bookingData.totalPriceTour;
+        } else {
+            // Tính giá dựa trên số lượng khách (fallback)
             const adultPrice = 5000000; // 5 triệu/người lớn
             const childPrice = 3000000; // 3 triệu/trẻ em
             const toddlerPrice = 1000000; // 1 triệu/trẻ nhỏ
             const infantPrice = 0; // Em bé miễn phí
 
-            bookingData.totalPriceTour = 
+            totalAmount = 
                 (bookingData.adultsTour || 0) * adultPrice +
                 (bookingData.childrenTour || 0) * childPrice +
                 (bookingData.toddlerTour || 0) * toddlerPrice +
                 (bookingData.infantTour || 0) * infantPrice;
+        }
+
+        // Xử lý loại thanh toán (đặt cọc hay thanh toán đầy đủ)
+        if (bookingData.isFullPayment === false) {
+            // Nếu là đặt cọc, chỉ tính 50% tổng tiền
+            totalAmount = Math.round(totalAmount * 0.5);
         }
 
         // Sử dụng booking hiện tại hoặc tạo mới nếu cần
@@ -343,7 +379,7 @@ Vnpay.post('/process-payment', async (req, res) => {
             console.log('Booking mới đã được tạo:', bookingToUse._id);
         }
         
-        console.log('Tổng giá tour:', bookingData.totalPriceTour);
+        console.log('Tổng giá tour:', totalAmount);
         console.log('Loại thanh toán:', bookingData.paymentType);
 
         // Cấu hình VNPay
@@ -358,19 +394,15 @@ Vnpay.post('/process-payment', async (req, res) => {
 
         // Tạo thông tin đơn hàng dựa trên loại thanh toán
         let orderInfo = '';
-        if (bookingData.paymentType === 'deposit') {
+        if (bookingData.isFullPayment === false) {
             orderInfo = `Đặt cọc tour #${bookingToUse._id}`;
-        } else if (bookingData.paymentType === 'full') {
-            orderInfo = `Thanh toán toàn bộ tour #${bookingToUse._id}`;
-        } else if (bookingData.paymentType === 'remaining') {
-            orderInfo = `Thanh toán số tiền còn lại tour #${bookingToUse._id}`;
         } else {
-            orderInfo = `Thanh toán tour #${bookingToUse._id}`;
+            orderInfo = `Thanh toán đầy đủ tour #${bookingToUse._id}`;
         }
 
         // Tạo URL thanh toán
         const paymentUrl = await vnpay.buildPaymentUrl({
-            vnp_Amount: bookingData.totalPriceTour, // VNPay yêu cầu số tiền tính bằng xu
+            vnp_Amount: totalAmount, // VNPay yêu cầu số tiền tính bằng xu
             vnp_IpAddr: req.ip || '127.0.0.1',
             vnp_TxnRef: `${bookingToUse._id}-${Date.now()}`,
             vnp_OrderInfo: orderInfo,
@@ -388,7 +420,7 @@ Vnpay.post('/process-payment', async (req, res) => {
             paymentUrl,
             bookingId: bookingToUse._id,
             paymentType: bookingData.paymentType,
-            amount: bookingData.totalPriceTour,
+            amount: totalAmount,
             isExistingBooking: !!existingBooking
         });
 

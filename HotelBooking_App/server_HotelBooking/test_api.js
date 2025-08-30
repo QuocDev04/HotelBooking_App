@@ -1,56 +1,51 @@
 const axios = require('axios');
 
-const testAPI = async () => {
-    try {
-        console.log('Testing API endpoint: http://localhost:3002/api/status/upcoming');
-        
-        const response = await axios.get('http://localhost:3002/api/status/upcoming');
-        
-        console.log('\n=== API Response ===');
-        console.log('Success:', response.data.success);
-        console.log('Count:', response.data.count);
-        console.log('\n=== Sample Data ===');
-        
-        const tours = response.data.data;
-        
-        tours.slice(0, 5).forEach((tour, index) => {
-            console.log(`\n--- Tour ${index + 1} ---`);
-            console.log('DateTour ID:', tour._id);
-            console.log('Tour object:', tour.tour ? 'EXISTS' : 'NULL');
-            
-            if (tour.tour) {
-                console.log('Tour Name:', tour.tour.nameTour || 'UNDEFINED');
-                console.log('Destination:', tour.tour.destination || 'UNDEFINED');
-                console.log('Images:', tour.tour.imagesTour ? tour.tour.imagesTour.length : 'UNDEFINED');
-            } else {
-                console.log('❌ TOUR OBJECT IS NULL - This causes N/A display');
-            }
-            
-            console.log('Date:', tour.dateTour);
-            console.log('Status:', tour.status);
-            console.log('Available Seats:', tour.availableSeats);
-        });
-        
-        // Đếm số record có tour null
-        const nullTourCount = tours.filter(tour => !tour.tour).length;
-        console.log(`\n=== Summary ===`);
-        console.log(`Total tours: ${tours.length}`);
-        console.log(`Tours with NULL tour object: ${nullTourCount}`);
-        console.log(`Tours with valid tour object: ${tours.length - nullTourCount}`);
-        
-        if (nullTourCount > 0) {
-            console.log('\n❌ FOUND NULL TOUR OBJECTS - This explains the N/A display issue!');
-        } else {
-            console.log('\n✅ All tour objects are valid');
+async function testAPI() {
+  try {
+    console.log('🧪 Testing Room Status API with REAL data...');
+    
+    // Test với hotel ID thực tế từ database
+    const hotelId = '68ac972b1c2f309f07af9bd1';
+    
+    console.log(`🔗 Testing: http://localhost:8080/api/hotels/${hotelId}/rooms/status-by-floor`);
+    
+    const response = await axios.get(`http://localhost:8080/api/hotels/${hotelId}/rooms/status-by-floor`);
+    
+    console.log('✅ API Response Status:', response.status);
+    console.log('✅ API Response Data:', JSON.stringify(response.data, null, 2));
+    
+    // Kiểm tra dữ liệu
+    if (response.data?.success && response.data?.data?.roomsByFloor) {
+      const roomsByFloor = response.data.data.roomsByFloor;
+      console.log('\n📊 Room Data Analysis:');
+      console.log(`Total floors: ${roomsByFloor.length}`);
+      
+      roomsByFloor.forEach(floor => {
+        console.log(`\n🏗️ Floor ${floor.floor}: ${floor.totalRooms} rooms`);
+        if (floor.rooms && floor.rooms.length > 0) {
+          console.log(`  Sample rooms: ${floor.rooms.slice(0, 5).map(r => r.roomNumber).join(', ')}`);
+          console.log(`  Room types: ${[...new Set(floor.rooms.map(r => r.roomType))].join(', ')}`);
         }
-        
-    } catch (error) {
-        console.error('Error testing API:', error.message);
-        if (error.response) {
-            console.error('Response status:', error.response.status);
-            console.error('Response data:', error.response.data);
-        }
+      });
+      
+      const totalRooms = roomsByFloor.reduce((sum, floor) => sum + floor.totalRooms, 0);
+      console.log(`\n🎯 Total rooms across all floors: ${totalRooms}`);
+      
+    } else {
+      console.log('❌ No room data found in response');
     }
-};
+    
+  } catch (error) {
+    console.error('❌ API Error:');
+    if (error.response) {
+      console.error('Status:', error.response.status);
+      console.error('Data:', error.response.data);
+    } else {
+      console.error('Error:', error.message);
+    }
+  }
+}
 
+// Test API
+console.log('🚀 Starting API test...');
 testAPI();

@@ -35,6 +35,7 @@ import moment from 'moment';
 import { EnhancedDatePicker } from '../../components/DateSelection/EnhancedDatePicker';
 import { AvailabilityChecker } from '../../components/DateSelection/AvailabilityChecker';
 import { CashDepositModal } from '../../components/Payment/CashDepositModal';
+import Login from '../../components/Login';
 
 const { Option } = Select;
 const { Title, Paragraph, Text } = Typography;
@@ -95,6 +96,7 @@ const HotelDetailRefactored: React.FC = () => {
   const [bookingModalVisible, setBookingModalVisible] = useState(false);
   const [selectedRoomType, setSelectedRoomType] = useState<any>(null);
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   
   // Date and guest states - simplified with our new hook
   const [checkInDate, setCheckInDate] = useState('');
@@ -149,6 +151,14 @@ const HotelDetailRefactored: React.FC = () => {
 
   // Handle room selection
   const handleRoomSelect = (roomType: RoomAvailability, price: number) => {
+    // Kiểm tra đăng nhập trước khi cho phép chọn phòng
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      message.error("Vui lòng đăng nhập để đặt phòng!");
+      setShowLoginModal(true);
+      return;
+    }
+
     // Save booking data to localStorage
     const bookingData = {
       roomId: roomType.roomTypeIndex.toString(),
@@ -354,6 +364,17 @@ const HotelDetailRefactored: React.FC = () => {
     // Thực hiện đặt phòng với VNPay
     const formValues = form.getFieldsValue();
     processBooking(formValues);
+  };
+
+  // Handle login modal
+  const handleCloseLoginModal = () => {
+    setShowLoginModal(false);
+  };
+
+  const handleLoginSuccess = () => {
+    setShowLoginModal(false);
+    // Sau khi đăng nhập thành công, có thể thực hiện thêm logic nếu cần
+    message.success("Đăng nhập thành công! Bây giờ bạn có thể đặt phòng.");
   };
 
   if (loading) {
@@ -690,6 +711,18 @@ const HotelDetailRefactored: React.FC = () => {
         customerName={form.getFieldValue('fullName') || 'Khách hàng'}
         customerPhone={form.getFieldValue('phone') || ''}
       />
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <Login 
+          onClose={handleCloseLoginModal}
+          onLoginSuccess={handleLoginSuccess}
+          openRegister={() => {
+            // Có thể thêm logic để mở modal đăng ký nếu cần
+            setShowLoginModal(false);
+          }}
+        />
+      )}
     </div>
   );
 };

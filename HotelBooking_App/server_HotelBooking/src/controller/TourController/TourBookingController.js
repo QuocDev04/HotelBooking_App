@@ -452,8 +452,7 @@ const BookingTour = async (req, res) => {
             infantPassengers,
             payment_method,
             note,
-
-            isFullPayment, // Thêm trường này để xác định thanh toán đầy đủ hay đặt cọc
+            isFullPayment, // true = thanh toán đầy đủ, false = đặt cọc
         } = req.body;
 
         // Kiểm tra duplicate booking trong vòng 5 phút gần đây
@@ -463,22 +462,24 @@ const BookingTour = async (req, res) => {
             slotId,
             createdAt: { $gte: fiveMinutesAgo }
         });
-        
-        // Tìm slot tương ứng
-        const slot = await DateTourModel.findById(slotId).populate("tour");
-        if (!slot) {
-            return res.status(404).json({ success: false, message: "Không tìm thấy slot" });
+
+        if (existingBooking) {
+            return res.status(400).json({ success: false, message: "Đơn booking đã tồn tại trong 5 phút gần đây" });
         }
 
-        // Kiểm tra số ghế còn lại
+        // Lấy slot và tour
+        const slot = await DateTourModel.findById(slotId).populate("tour");
+        if (!slot) return res.status(404).json({ success: false, message: "Không tìm thấy slot" });
+
         if (slot.availableSeats <= 0) {
             return res.status(400).json({ success: false, message: "Slot đã hết chỗ" });
         }
 
         const tour = slot.tour;
+        if (!tour) return res.status(404).json({ success: false, message: "Không tìm thấy tour" });
 
-        // Lấy giá theo từng loại khách
-        const priceAdult = tour.price || 0;
+        // Lấy giá gốc và giá từng loại khách
+        const priceAdult = tour.finalPrice || tour.price || 0;
         const priceChild = tour.priceChildren || 0;
         const priceToddler = tour.priceLittleBaby || 0;
         const priceInfant = tour.pricebaby || 0;
@@ -495,17 +496,16 @@ const BookingTour = async (req, res) => {
             Number(infantTour || 0) * priceInfant +
             singleRoomCount * priceSingleRoom;
 
-
-        // Tính toán số tiền đặt cọc (50% tổng giá)
+        // Số tiền đặt cọc 50% nếu không thanh toán đầy đủ
         const depositAmount = Math.round(totalFinalPriceTour * 0.5);
 
-        // Xác định trạng thái thanh toán và thông tin đặt cọc
-        let paymentStatus = "pending";
-        let isDeposit = false;
-        let depositAmountValue = 0;
-        let isFullyPaid = false;
+        // Trạng thái thanh toán
+        const paymentStatus = "pending";
+        const isDeposit = !isFullPayment;
+        const depositAmountValue = !isFullPayment ? depositAmount : 0;
+        const isFullyPaid = !!isFullPayment;
 
-        // Thiết lập thời hạn thanh toán cho tiền mặt (48h)
+        // Thời hạn thanh toán tiền mặt
         let cashPaymentDeadline = null;
         if (payment_method === "cash") {
             cashPaymentDeadline = new Date();
@@ -515,7 +515,7 @@ const BookingTour = async (req, res) => {
         // Tạo booking mới
         const booking = new TourBookingSchema({
             userId,
-            tourId: slot.tour._id,
+            tourId: tour._id,
             slotId: slot._id,
             fullNameUser,
             email,
@@ -531,25 +531,23 @@ const BookingTour = async (req, res) => {
             toddlerPassengers,
             infantPassengers,
             payment_method,
-
             payment_status: paymentStatus,
             note,
-            isDeposit: isDeposit,
+            isDeposit,
             depositAmount: depositAmountValue,
-            isFullyPaid: isFullyPaid,
-            cashPaymentDeadline: cashPaymentDeadline
+            isFullyPaid,
+            cashPaymentDeadline
         });
 
         await booking.save();
 
-        // Cập nhật lại số ghế còn lại trong slot
+        // Cập nhật số ghế còn lại
         slot.availableSeats -= Number(adultsTour) + Number(childrenTour || 0) + Number(toddlerTour || 0) + Number(infantTour || 0);
         if (slot.availableSeats < 0) slot.availableSeats = 0;
         await slot.save();
 
-        // Nếu phương thức thanh toán là VNPay (bank_transfer)
+        // Nếu thanh toán VNPay (bank_transfer)
         if (payment_method === "bank_transfer") {
-           
             const vnpay = new VNPay({
                 tmnCode: 'LH54Z11C',
                 secureSecret: 'PO0WDG07TJOGP1P8SO6Z9PHVPIBUWBGQ',
@@ -558,21 +556,19 @@ const BookingTour = async (req, res) => {
                 hashAlgorithm: 'SHA512',
                 loggerFn: ignoreLogger,
             });
+
             const tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
 
-
-            // Xác định số tiền thanh toán (đặt cọc hoặc toàn bộ)
             const paymentAmount = isFullPayment ? totalFinalPriceTour : depositAmount;
 
-            // Tạo url thanh toán
             const paymentUrl = await vnpay.buildPaymentUrl({
-                vnp_Amount: paymentAmount, // VNPay yêu cầu số tiền tính bằng xu
+                vnp_Amount: paymentAmount , // VNPay tính bằng xu
                 vnp_IpAddr: req.ip || '127.0.0.1',
-                vnp_TxnRef: `${booking._id}-${Date.now()}`, // dùng cho callback xác định booking
+                vnp_TxnRef: `${booking._id}-${Date.now()}`,
                 vnp_OrderInfo: `Thanh toán ${isFullPayment ? 'đầy đủ' : 'đặt cọc'} đơn #${booking._id}`,
                 vnp_OrderType: ProductCode.Other,
-                vnp_ReturnUrl: `http://localhost:8080/api/vnpay/payment-callback`, // URL callback về backend
+                vnp_ReturnUrl: `http://localhost:8080/api/vnpay/payment-callback`,
                 vnp_Locale: VnpLocale.VN,
                 vnp_CreateDate: dateFormat(new Date()),
                 vnp_ExpireDate: dateFormat(tomorrow),
@@ -585,18 +581,16 @@ const BookingTour = async (req, res) => {
                 message: "Đặt tour thành công - chuyển đến VNPay",
                 booking,
                 paymentUrl,
-
                 depositAmount: isFullPayment ? null : depositAmount,
                 totalAmount: totalFinalPriceTour
             });
         }
 
-        // Nếu không phải thanh toán qua VNPay thì trả về luôn
+        // Nếu không phải VNPay
         res.status(201).json({
             success: true,
             message: "Đặt tour thành công",
             booking,
-
             depositAmount: isFullPayment ? null : depositAmount,
             totalAmount: totalFinalPriceTour
         });
@@ -610,6 +604,7 @@ const BookingTour = async (req, res) => {
         });
     }
 };
+
 
 const getBookingToursByUser = async (req, res) => {
     try {

@@ -94,25 +94,21 @@ const HotelGuestInfo = () => {
     },
 
     onSuccess: async (data) => {
-      const paymentMethod = data?.data?.payment_method;
-      const paymentType = data?.data?.paymentType;
-      console.log("databongking", data?.data?._id);
+
+      const bookingId = data?.bookingId || data?.newBooking?._id;
+      const paymentMethod = data?.newBooking?.payment_method;
+      const paymentType = data?.newBooking?.paymentType;
+
+      console.log("Booking ID:", bookingId);
+      console.log("Payment method:", paymentMethod);
+      console.log("Payment type:", paymentType);
+      console.log("Data:", data);
 
       if (paymentMethod === "bank_transfer") {
-        try {
-          const res = await fetch(`http://localhost:8080/api/vnpay/${data?.data?._id}`, {
-            method: 'POST'
-          }).then(res => res.json());
-
-          console.log("VNPay response:", res?.data);
-
-          if (res.data?.success && res.data?.paymentUrl) {
-            window.location.href = res.data.paymentUrl;
-          } else {
-            message.error("Không thể lấy liên kết thanh toán từ VNPay");
-          }
-        } catch (error) {
-          message.error("Đã xảy ra lỗi khi kết nối VNPay");
+        if (data?.vnpayUrl) {
+          window.location.href = data.vnpayUrl; 
+        } else {
+          message.error("Không tìm thấy link thanh toán VNPay");
         }
       } else if (paymentMethod === "cash") {
         // Xử lý thanh toán tiền mặt - hiển thị modal thông báo
@@ -417,6 +413,7 @@ const HotelGuestInfo = () => {
                       </Row>
                     </Card>
                   )}
+
 
                   {/* Additional Guests (if adults > 2) */}
                   {bookingData?.adults && bookingData.adults > 2 && (

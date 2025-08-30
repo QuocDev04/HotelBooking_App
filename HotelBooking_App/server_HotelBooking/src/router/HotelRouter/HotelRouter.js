@@ -10,7 +10,8 @@ const {
     addRoomType,
     updateRoomType,
     deleteRoomType,
-    getRoomAvailability
+    getRoomAvailability,
+    getRoomStatusByFloor
 } = require('../../controller/HotelController/HotelController.js');
 const { uploadHotelImages } = require('../../Middleware/uploadMiddleware');
 
@@ -27,6 +28,7 @@ RouterHotel.get('/hotels', getAllHotels);
 RouterHotel.get('/hotels/search', searchHotels);
 RouterHotel.get('/hotels/:id', getHotelById);
 RouterHotel.get('/hotels/:id/availability', getHotelAvailability);
+RouterHotel.get('/hotels/:id/rooms/status-by-floor', getRoomStatusByFloor);
 
 // Test route without middleware
 RouterHotel.get('/admin/test', (req, res) => {
