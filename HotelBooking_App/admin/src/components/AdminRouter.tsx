@@ -9,7 +9,7 @@ interface AdminRouteProps {
     children: React.ReactNode;
 }
 
-const allowedAdminEmail = "tienminh1203g@gmail.com";
+const allowedAdminEmail = "doson2872@gmail.com";
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     const { user, isLoaded } = useUser();

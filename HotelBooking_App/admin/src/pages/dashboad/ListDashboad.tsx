@@ -27,10 +27,14 @@ import BookingStats from './BookingStats';
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
-
 const ListDashboad = () => {
   const [dateRange, setDateRange] = useState<any>([dayjs().subtract(30, 'day'), dayjs()]);
   const [filterType, setFilterType] = useState('all');
+  const [showReport, setShowReport] = useState(false);
+
+  const handleViewReport = () => {
+    setShowReport(true);
+  };
 
   return (
     <div style={{
@@ -39,7 +43,7 @@ const ListDashboad = () => {
       minHeight: '100vh',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
     }}>
-      {/* Header với gradient và shadow */}
+      {/* Header */}
       <Card
         style={{
           marginBottom: 32,
@@ -87,7 +91,7 @@ const ListDashboad = () => {
                 value={filterType}
                 onChange={setFilterType}
                 style={{
-                  width: 140,
+                  width: 160,
                   borderRadius: 8
                 }}
                 options={[
@@ -100,6 +104,7 @@ const ListDashboad = () => {
                 type="primary"
                 icon={<EyeOutlined />}
                 size="large"
+                onClick={handleViewReport}
                 style={{
                   borderRadius: 8,
                   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -114,29 +119,74 @@ const ListDashboad = () => {
         </Row>
       </Card>
 
-      {/* Thống kê tổng quan với gradient cards */}
-      <Overview />
+      {showReport && (
+        <>
+          {/* Nếu chọn Tour */}
+          {filterType === 'tour' && (
+            <>
+              {/* Thống kê đặt chỗ */}
+              <BookingStats />
 
-      {/* Thống kê đặt chỗ */}
-      <BookingStats />
+              {/* Biểu đồ doanh thu và tour đặt nhiều nhất với glassmorphism */}
+              <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
+                <Revenue />
+                <WeeklyStatistics />
+              </Row>
 
-      {/* Biểu đồ doanh thu và tour đặt nhiều nhất với glassmorphism */}
-      <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
-        <Revenue />
-        <WeeklyStatistics />
-      </Row>
+              {/* Biểu đồ đặt tour theo tuần và khách hàng mới với glassmorphism */}
+              <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
+                <Popular />
+                <NewCustomersData />
+              </Row>
 
-      {/* Biểu đồ đặt tour theo tuần và khách hàng mới với glassmorphism */}
-      <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
-        <Popular />
-        <NewCustomersData />
-      </Row>
+              {/* Thống kê tổng tour đã đặt day month */}
+              <SumTour />
 
-      {/* Thống kê tổng tour đã đặt day month */}
-      <SumTour />
+              {/* Bảng thống kê đặt tour gần đây */}
+              <TourRecently />
+            </>
+          )}
 
-      {/* Bảng thống kê đặt tour gần đây */}
-      <TourRecently />
+          {/* Nếu chọn Hotel */}
+          {filterType === 'hotel' && (
+            <>
+              {/* Ở đây bạn thay bằng các component liên quan khách sạn */}
+              <BookingStats />
+              <Revenue />
+              <NewCustomersData />
+            </>
+          )}
+
+          {/* Nếu chọn All */}
+          {filterType === 'all' && (
+            <>
+              {/* Thống kê tổng quan với gradient cards */}
+              <Overview />
+
+              {/* Thống kê đặt chỗ */}
+              <BookingStats />
+
+              {/* Biểu đồ doanh thu và tour đặt nhiều nhất với glassmorphism */}
+              <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
+                <Revenue />
+                <WeeklyStatistics />
+              </Row>
+
+              {/* Biểu đồ đặt tour theo tuần và khách hàng mới với glassmorphism */}
+              <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
+                <Popular />
+                <NewCustomersData />
+              </Row>
+
+              {/* Thống kê tổng tour đã đặt day month */}
+              <SumTour />
+
+              {/* Bảng thống kê đặt tour gần đây */}
+              <TourRecently />
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 };
