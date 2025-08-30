@@ -16,6 +16,7 @@ const TourRouter = require('./router/TourRouter/TourRouter');
 
 const UserRouter = require('./router/PeopleRouter/UserRouter');
 const RouterChecOutBookingTour = require("./router/TourRouter/checkOutTour");
+const RouterCheckOutBookingHotel = require("./router/HotelRouter/checkOutHotel");
 const routerLocation = require("./router/Location/locationRouter");
 const CmtRouter = require("./router/Cmt/CmtRouter");
 const { dateRouter } = require("./router/TourRouter/DateTour");
@@ -55,6 +56,7 @@ app.use('/api/employee', EmployeeRouter);
 app.use('/api/vnpay', Vnpay);
 app.use('/api/', RouterBookingTour);
 app.use('/api/', RouterChecOutBookingTour);
+app.use('/api/', RouterCheckOutBookingHotel);
 app.use('/api/', routerLocation);
 app.use('/api/', CmtRouter);
 app.use('/api/', dateRouter);

@@ -6,35 +6,31 @@ import {
   Col,
   Space,
   Typography,
-  DatePicker,
   Select,
-  Button,
 } from 'antd';
 import {
-  EyeOutlined,
   TrophyOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import TourRecently from './TourRecently';
 import SumTour from './SumTour';
+import SumHotel from './SumHotel';
 import Overview from './Overview';
 import Revenue from './Revenue';
+import HotelRevenue from './HotelRevenue';
 import Popular from './Popular';
+import PopularHotels from './PopularHotels';
 import WeeklyStatistics from './WeeklyStatistics';
+import HotelWeeklyStatistics from './HotelWeeklyStatistics';
 import NewCustomersData from './NewCustomersData';
 import BookingStats from './BookingStats';
+import HotelBookingStats from './HotelBookingStats';
+import HotelRecently from './HotelRecently';
 
 const { Title, Text } = Typography;
-const { RangePicker } = DatePicker;
 
 const ListDashboad = () => {
-  const [dateRange, setDateRange] = useState<any>([dayjs().subtract(30, 'day'), dayjs()]);
   const [filterType, setFilterType] = useState('all');
-  const [showReport, setShowReport] = useState(false);
-
-  const handleViewReport = () => {
-    setShowReport(true);
-  };
 
   return (
     <div style={{
@@ -91,91 +87,69 @@ const ListDashboad = () => {
                   { value: 'tour', label: '🚌 Tour du lịch' },
                 ]}
               />
-              <Button
-                type="primary"
-                icon={<EyeOutlined />}
-                size="large"
-                onClick={handleViewReport}
-                style={{
-                  borderRadius: 8,
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  border: 'none',
-                  boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)'
-                }}
-              >
-                📈 Xem báo cáo
-              </Button>
             </Space>
           </Col>
         </Row>
       </Card>
 
-      {showReport && (
+      {/* Nội dung dashboard luôn hiển thị */}
+      {/* Nếu chọn Tour */}
+      {filterType === 'tour' && (
         <>
-          {/* Nếu chọn Tour */}
-          {filterType === 'tour' && (
-            <>
-              {/* Thống kê đặt chỗ */}
-              <BookingStats />
+          <BookingStats />
+          <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
+            <Revenue />
+            <WeeklyStatistics />
+          </Row>
+          <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
+            <Popular />
+            <NewCustomersData />
+          </Row>
+          <SumTour />
+          <TourRecently />
+        </>
+      )}
 
-              {/* Biểu đồ doanh thu và tour đặt nhiều nhất với glassmorphism */}
-              <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
-                <Revenue />
-                <WeeklyStatistics />
-              </Row>
+      {/* Nếu chọn Hotel */}
+      {filterType === 'hotel' && (
+        <>
+          <HotelBookingStats />
+          <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
+            <HotelRevenue />
+            <HotelWeeklyStatistics />
+          </Row>
+          <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
+            <PopularHotels />
+          </Row>
+          <SumHotel />
+          <HotelRecently />
+        </>
+      )}
 
-              {/* Biểu đồ đặt tour theo tuần và khách hàng mới với glassmorphism */}
-              <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
-                <Popular />
-                <NewCustomersData />
-              </Row>
-
-              {/* Thống kê tổng tour đã đặt day month */}
-              <SumTour />
-
-              {/* Bảng thống kê đặt tour gần đây */}
-              <TourRecently />
-            </>
-          )}
-
-          {/* Nếu chọn Hotel */}
-          {filterType === 'hotel' && (
-            <>
-              {/* Ở đây bạn thay bằng các component liên quan khách sạn */}
-              <BookingStats />
-              <Revenue />
-              <NewCustomersData />
-            </>
-          )}
-
-          {/* Nếu chọn All */}
-          {filterType === 'all' && (
-            <>
-              {/* Thống kê tổng quan với gradient cards */}
-              <Overview />
-
-              {/* Thống kê đặt chỗ */}
-              <BookingStats />
-
-              {/* Biểu đồ doanh thu và tour đặt nhiều nhất với glassmorphism */}
-              <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
-                <Revenue />
-                <WeeklyStatistics />
-              </Row>
-
-              {/* Biểu đồ đặt tour theo tuần và khách hàng mới với glassmorphism */}
-              <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
-                <Popular />
-                <NewCustomersData />
-              </Row>
-
-              {/* Thống kê tổng tour đã đặt day month */}
-              <SumTour />
-
-              {/* Bảng thống kê đặt tour gần đây */}
-              <TourRecently />
-            </>
-          )}
+      {/* Nếu chọn All */}
+      {filterType === 'all' && (
+        <>
+          <BookingStats />
+          <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
+            <Revenue />
+            <WeeklyStatistics />
+          </Row>
+          <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
+            <Popular />
+            <NewCustomersData />
+          </Row>
+          <SumTour />
+          <TourRecently />
+          <HotelBookingStats />
+          <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
+            <HotelRevenue />
+            <HotelWeeklyStatistics />
+          </Row>
+          <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
+            <PopularHotels />
+          </Row>
+          <SumHotel />
+          <HotelRecently />
         </>
       )}
     </div>
