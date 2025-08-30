@@ -337,19 +337,33 @@ Vnpay.post('/process-payment', async (req, res) => {
             console.log('Tìm thấy booking hiện tại:', existingBooking._id);
         }
 
-        // Tính tổng giá nếu không có
-        if (!bookingData.totalPriceTour) {
-            // Tính giá dựa trên số lượng khách (ví dụ)
+        // Sử dụng giá từ request hoặc tính tổng giá nếu không có
+        let totalAmount = 0;
+        
+        if (bookingData.tourPrice) {
+            // Sử dụng giá tour từ request
+            totalAmount = bookingData.tourPrice;
+        } else if (bookingData.totalPriceTour) {
+            // Sử dụng totalPriceTour nếu có
+            totalAmount = bookingData.totalPriceTour;
+        } else {
+            // Tính giá dựa trên số lượng khách (fallback)
             const adultPrice = 5000000; // 5 triệu/người lớn
             const childPrice = 3000000; // 3 triệu/trẻ em
             const toddlerPrice = 1000000; // 1 triệu/trẻ nhỏ
             const infantPrice = 0; // Em bé miễn phí
 
-            bookingData.totalPriceTour = 
+            totalAmount = 
                 (bookingData.adultsTour || 0) * adultPrice +
                 (bookingData.childrenTour || 0) * childPrice +
                 (bookingData.toddlerTour || 0) * toddlerPrice +
                 (bookingData.infantTour || 0) * infantPrice;
+        }
+
+        // Xử lý loại thanh toán (đặt cọc hay thanh toán đầy đủ)
+        if (bookingData.isFullPayment === false) {
+            // Nếu là đặt cọc, chỉ tính 50% tổng tiền
+            totalAmount = Math.round(totalAmount * 0.5);
         }
 
         // Sử dụng booking hiện tại hoặc tạo mới nếu cần
@@ -365,7 +379,7 @@ Vnpay.post('/process-payment', async (req, res) => {
             console.log('Booking mới đã được tạo:', bookingToUse._id);
         }
         
-        console.log('Tổng giá tour:', bookingData.totalPriceTour);
+        console.log('Tổng giá tour:', totalAmount);
         console.log('Loại thanh toán:', bookingData.paymentType);
 
         // Cấu hình VNPay
@@ -380,19 +394,15 @@ Vnpay.post('/process-payment', async (req, res) => {
 
         // Tạo thông tin đơn hàng dựa trên loại thanh toán
         let orderInfo = '';
-        if (bookingData.paymentType === 'deposit') {
+        if (bookingData.isFullPayment === false) {
             orderInfo = `Đặt cọc tour #${bookingToUse._id}`;
-        } else if (bookingData.paymentType === 'full') {
-            orderInfo = `Thanh toán toàn bộ tour #${bookingToUse._id}`;
-        } else if (bookingData.paymentType === 'remaining') {
-            orderInfo = `Thanh toán số tiền còn lại tour #${bookingToUse._id}`;
         } else {
-            orderInfo = `Thanh toán tour #${bookingToUse._id}`;
+            orderInfo = `Thanh toán đầy đủ tour #${bookingToUse._id}`;
         }
 
         // Tạo URL thanh toán
         const paymentUrl = await vnpay.buildPaymentUrl({
-            vnp_Amount: bookingData.totalPriceTour, // VNPay yêu cầu số tiền tính bằng xu
+            vnp_Amount: totalAmount, // VNPay yêu cầu số tiền tính bằng xu
             vnp_IpAddr: req.ip || '127.0.0.1',
             vnp_TxnRef: `${bookingToUse._id}-${Date.now()}`,
             vnp_OrderInfo: orderInfo,
@@ -410,7 +420,7 @@ Vnpay.post('/process-payment', async (req, res) => {
             paymentUrl,
             bookingId: bookingToUse._id,
             paymentType: bookingData.paymentType,
-            amount: bookingData.totalPriceTour,
+            amount: totalAmount,
             isExistingBooking: !!existingBooking
         });
 

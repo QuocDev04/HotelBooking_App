@@ -81,7 +81,7 @@ const Header = () => {
                         ))}
                     </div>
                     <div className="hidden md:flex items-center gap-4 ">
-                        {token ? (
+                        {userId ? (
                             <Popover content={user} trigger="click" className="cursor-pointer">
                                 <div className="text-[#8B4513] hover:text-[#6B3E26] transition-all duration-300 hover:scale-110 text-center">
                                     <FaUserCircle className="text-2xl" />
@@ -119,13 +119,11 @@ const Header = () => {
                     ))}
 
                     <div className="px-8 py-2.5 rounded-full transition-all duration-500">
-                        {token ? (
+                        {userId ? (
                             <Popover content={user} trigger="click" className="cursor-pointer">
                                 <div className="text-[#8B4513] hover:text-[#6B3E26] transition-all duration-300 hover:scale-110 text-center">
                                     <FaUserCircle className="text-2xl" />
-                                    {userId && (
-                                        <div className="text-xs text-gray-500">ID: {userId}</div>
-                                    )}
+                                    <div className="text-xs text-gray-500">ID: {userId}</div>
                                 </div>
                             </Popover>
                         ) : (
@@ -141,6 +139,13 @@ const Header = () => {
             {showLogin && (
                 <Login
                     onClose={() => setShowLogin(false)}
+                    onLoginSuccess={() => {
+                        setShowLogin(false);
+                        // Đóng mobile menu nếu đang mở
+                        setIsMenuOpen(false);
+                        // Cập nhật lại userId sau khi đăng nhập thành công
+                        setUserId(localStorage.getItem("userId"));
+                    }}
                     openRegister={() => {
                         setShowLogin(false);
                         setShowRegister(true);

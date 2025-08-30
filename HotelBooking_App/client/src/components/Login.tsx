@@ -18,7 +18,13 @@ type FieldType = {
     email: string;
 };
 
-const Login = ({ onClose = () => { }, openRegister = () => { } }) => {
+interface LoginProps {
+    onClose?: () => void;
+    openRegister?: () => void;
+    onLoginSuccess?: () => void;
+}
+
+const Login = ({ onClose = () => { }, openRegister = () => { }, onLoginSuccess = () => { } }: LoginProps) => {
     const [showPassword, setShowPassword] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
 
@@ -43,6 +49,7 @@ const Login = ({ onClose = () => { }, openRegister = () => { } }) => {
                     localStorage.setItem("token", accessToken);
                     localStorage.setItem("user", username);
                     localStorage.setItem("userId", userId);
+                    onLoginSuccess();
                     onClose();
                 }
             } catch (error: unknown) {

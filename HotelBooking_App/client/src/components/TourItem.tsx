@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link } from "react-router-dom";
-import type { Tour } from "../type"
+import type { Tour } from "../type";
 import { motion } from 'framer-motion';
 import { CalendarIcon, TicketIcon } from "lucide-react";
 import { generateTourCode } from "../utils/tourUtils";
@@ -10,6 +10,13 @@ type TourItemProps = {
 }
 
 const TourItem = ({ tour }: TourItemProps) => {
+    const now = new Date();
+
+    const isDiscountValid =
+        tour.price > (tour.finalPrice ?? tour.price) &&
+        tour.discountPercent &&
+        (!tour.discountExpiry || new Date(tour.discountExpiry) > now);
+
     return (
         <motion.div
             key={`${tour._id}`}
@@ -26,7 +33,6 @@ const TourItem = ({ tour }: TourItemProps) => {
                         className="w-full h-48 object-cover"
                     />
                 </Link>
-
             </div>
 
             <div className="p-5 flex flex-col flex-grow">
@@ -37,7 +43,6 @@ const TourItem = ({ tour }: TourItemProps) => {
                     </h3>
                 </Link>
 
-
                 {/* Mã tour */}
                 <div className="mb-2">
                     <span className="text-sm text-gray-500">
@@ -45,7 +50,7 @@ const TourItem = ({ tour }: TourItemProps) => {
                     </span>
                 </div>
 
-                {/* Ngày khởi hành, Địa điểm, Đánh giá */}
+                {/* Ngày khởi hành, Địa điểm, Thời gian */}
                 <div className="space-y-2 mb-3">
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                         <CalendarIcon className="w-4 h-4 flex-shrink-0" />
@@ -57,24 +62,29 @@ const TourItem = ({ tour }: TourItemProps) => {
                     </div>
                 </div>
 
+                {/* Giá & giảm giá */}
                 <div className="flex justify-between items-center mb-3">
                     <div className="flex flex-col">
-                        <span className={`text-sm text-gray-400 line-through ${tour.price > tour.finalPrice ? '' : 'invisible'}`}>
-                            {tour.price.toLocaleString('vi-VN')}đ
-                        </span>
+                        {/* Giá gạch bỏ */}
+                        {isDiscountValid && (
+                            <span className="text-sm text-gray-400 line-through">
+                                {tour.price.toLocaleString('vi-VN')}đ
+                            </span>
+                        )}
+
                         <span className="text-lg font-bold text-blue-600">
                             Giá: {(tour.finalPrice ?? tour.price)?.toLocaleString('vi-VN') || "N/A"}đ
                         </span>
                     </div>
 
-                    {tour.discountPercent && (
+                    {/* Badge giảm giá */}
+                    {isDiscountValid && (
                         <span className="flex items-center gap-1 bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded border border-red-400">
                             <TicketIcon className="w-4 h-4" />
                             -{tour.discountPercent}%
                         </span>
                     )}
                 </div>
-
 
                 {/* Còn chỗ + chi tiết */}
                 <div className="flex justify-between items-center text-sm mb-4 text-gray-600">
@@ -87,6 +97,7 @@ const TourItem = ({ tour }: TourItemProps) => {
                         </span>
                     </Link>
                 </div>
+
                 <Link to={`/detailtour/${tour._id}`}>
                     <button className="mt-auto w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition">
                         Đặt ngay
@@ -97,4 +108,4 @@ const TourItem = ({ tour }: TourItemProps) => {
     )
 }
 
-export default TourItem
+export default TourItem;

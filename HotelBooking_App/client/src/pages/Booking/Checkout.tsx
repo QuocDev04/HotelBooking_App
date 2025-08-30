@@ -194,6 +194,7 @@ const Checkout = () => {
         const payload = {
           userId,
           slotId: id,
+          tourPrice: getDisplayPrice(tours?.tour), // Thêm giá tour vào payload
           ...restData,
         };
 
@@ -334,6 +335,7 @@ const Checkout = () => {
     // Bổ sung adultsTour và isFullPayment vào payload
     mutate({
       ...values,
+      tourPrice: getDisplayPrice(tours?.tour), // Thêm giá tour
       isFullPayment,
       adultsTour: adultCount,
       childrenTour: kidCount,
@@ -347,7 +349,13 @@ const Checkout = () => {
   };
 
 
-  const totalPrice = (adultCount * (tours?.tour?.finalPrice || 0) +
+  // Hàm lấy giá hiển thị: ưu tiên finalPrice, nếu không có thì dùng price
+  const getDisplayPrice = (tour: any) => {
+    if (!tour) return 0;
+    return tour.finalPrice || tour.price || 0;
+  };
+
+  const totalPrice = (adultCount * getDisplayPrice(tours?.tour) +
     totalSingleRoomPrice +
     kidCount * (tours?.tour?.priceChildren || 0) +
     childCount * (tours?.tour?.priceLittleBaby || 0));
@@ -391,6 +399,7 @@ const Checkout = () => {
     // Gọi API với phương thức thanh toán đã cập nhật
     mutate({
       ...formValues,
+      tourPrice: getDisplayPrice(tours?.tour), // Thêm giá tour
       isFullPayment: formValues.isFullPayment,
       adultsTour: adultCount,
       childrenTour: kidCount,
@@ -428,6 +437,7 @@ const Checkout = () => {
     // Gọi API với phương thức thanh toán tiền mặt
     mutate({
       ...formValues,
+      tourPrice: getDisplayPrice(tours?.tour), // Thêm giá tour
       isFullPayment: formValues.isFullPayment,
       adultsTour: adultCount,
       childrenTour: kidCount,
@@ -463,6 +473,7 @@ const Checkout = () => {
     
     mutate({
       ...pendingFormValues,
+      tourPrice: getDisplayPrice(tours?.tour), // Thêm giá tour
       isFullPayment,
       adultsTour: adultCount,
       childrenTour: kidCount,
@@ -499,6 +510,7 @@ const Checkout = () => {
     
     mutate({
       ...updatedValues,
+      tourPrice: getDisplayPrice(tours?.tour), // Thêm giá tour
       isFullPayment,
       adultsTour: adultCount,
       childrenTour: kidCount,
@@ -512,7 +524,7 @@ const Checkout = () => {
   };
 
   return (
-    <div className="min-h-screen px-2 py-8 mt-20 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 md:px-8">
+    <div className="min-h-screen px-2 py-8 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 md:px-8">
       <div className="mx-auto max-w-7xl">
         {/* Header Section */}
         <div className="mb-8 text-center">
@@ -1155,11 +1167,11 @@ const Checkout = () => {
               {/* Giá */}
               <div className="flex items-center justify-between text-sm">
                 <span className="font-semibold">Giá Combo </span>
-                <span className="text-lg font-bold text-red-600">{tours?.tour?.finalPrice.toLocaleString()} ₫</span>
+                <span className="text-lg font-bold text-red-600">{getDisplayPrice(tours?.tour).toLocaleString()} ₫</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Người lớn</span>
-                <span>{adultCount} x {tours?.tour?.finalPrice.toLocaleString()} ₫</span>
+                <span>{adultCount} x {getDisplayPrice(tours?.tour).toLocaleString()} ₫</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Trẻ em</span>
