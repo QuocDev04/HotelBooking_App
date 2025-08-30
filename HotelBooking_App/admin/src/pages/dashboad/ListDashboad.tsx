@@ -78,15 +78,6 @@ const ListDashboad = () => {
           </Col>
           <Col>
             <Space size="large">
-              <RangePicker
-                value={dateRange}
-                onChange={(dates: any) => setDateRange(dates)}
-                format="DD/MM/YYYY"
-                style={{
-                  borderRadius: 8,
-                  border: '1px solid #d9d9d9'
-                }}
-              />
               <Select
                 value={filterType}
                 onChange={setFilterType}
