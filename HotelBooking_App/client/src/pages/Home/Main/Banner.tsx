@@ -101,7 +101,7 @@ const Banner = () => {
                 Với nguồn lực dồi dào, kinh nghiệm và uy tín trong lĩnh vực dịch vụ du lịch, 
                 Lữ hành Elite Travel luôn mang đến cho khách hàng những dịch vụ du lịch giá trị nhất.
               </p>
-              <a href="">
+              <a href="/destinations">
                 <button className="hidden md:inline-block bg-white text-blue-900 px-6 py-3 rounded-full font-semibold hover:bg-blue-50 transition-all duration-300">
                   Tìm hiểu ngay
                 </button>
