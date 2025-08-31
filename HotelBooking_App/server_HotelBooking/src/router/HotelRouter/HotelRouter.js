@@ -42,7 +42,7 @@ RouterHotel.delete('/admin/hotels/:id', deleteHotel);
 
 // Room management routes
 RouterHotel.post('/admin/hotels/:id/rooms', addRoomType);
-RouterHotel.put('/admin/hotels/:hotelId/rooms/:roomTypeId', updateRoomType);
+RouterHotel.put("/admin/hotels/:hotelId/rooms/:roomTypeId", updateRoomType);
 RouterHotel.delete('/admin/hotels/:hotelId/rooms/:roomTypeId', deleteRoomType);
 RouterHotel.get('/admin/hotels/:id/rooms/availability', getRoomAvailability);
 

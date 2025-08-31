@@ -9,6 +9,7 @@ import "react-quill/dist/quill.snow.css";
 import instance from "../../configs/axios";
 import { useParams } from "react-router-dom";
 import moment from "moment";
+
 import dayjs from "dayjs";
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
@@ -97,6 +98,7 @@ const EditTour = () => {
 
             form.setFieldsValue({
                 ...tour,
+
                 itemTransport: transportId,
                 destination: tour.destination?._id || tour.destination, // 👈 thêm dòng này
             });
@@ -257,7 +259,38 @@ const EditTour = () => {
                                         </Form.Item>
                                     </Col>
 
+                                </Row>
 
+                                <Row gutter={24}>
+                                    <Col span={12}>
+                                        <Form.Item
+                                            label="Thời gian khởi hành"
+                                            name="departure_time"
+                                            rules={[
+                                                {
+                                                    pattern: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
+                                                    message: "Định dạng thời gian không hợp lệ. VD: 06:00",
+                                                },
+                                            ]}
+                                        >
+                                            <Input placeholder="VD: 06:00" size="large" />
+                                        </Form.Item>
+                                    </Col>
+
+                                    <Col span={12}>
+                                        <Form.Item
+                                            label="Thời gian kết thúc"
+                                            name="return_time"
+                                            rules={[
+                                                {
+                                                    pattern: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
+                                                    message: "Định dạng thời gian không hợp lệ. VD: 18:00",
+                                                },
+                                            ]}
+                                        >
+                                            <Input placeholder="VD: 18:00" size="large" />
+                                        </Form.Item>
+                                    </Col>
                                 </Row>
 
                                 <Row gutter={24}>
@@ -351,6 +384,7 @@ const EditTour = () => {
                                             rules={[
                                                 ({ getFieldValue }) => ({
                                                     validator(_, value) {
+
                                                         const discount = getFieldValue("discountPercent");
                                                         if (!discount || discount <= 0) return Promise.resolve();
                                                         if (!value) return Promise.reject(new Error("Vui lòng chọn ngày hết hạn"));
@@ -361,6 +395,7 @@ const EditTour = () => {
                                         >
                                             <DatePicker
                                                 showTime
+
                                                 size="large"
                                                 style={{ width: "100%" }}
                                                 placeholder="Chọn ngày giờ hết hạn"

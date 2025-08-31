@@ -26,6 +26,7 @@ const TourBookingSchema = new mongoose.Schema({
 
     // Tổng giá tour
     totalPriceTour: { type: Number, default: 0 },
+
     
     // Thông tin đặt cọc
     isDeposit: { type: Boolean, default: false }, // Đã đặt cọc hay chưa
@@ -49,6 +50,7 @@ const TourBookingSchema = new mongoose.Schema({
         required: true,
         enum: ['cash', 'bank_transfer'],
     },
+
     paymentType: {
         type: String,
         enum: ['deposit', 'full', 'remaining'],
@@ -83,6 +85,7 @@ const TourBookingSchema = new mongoose.Schema({
     cancel_status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
     refund_amount: { type: Number, default: 0 },
     cancel_policy_note: { type: String },
+
     // Trạng thái hoàn tiền: pending (đang chờ), processing (đang xử lý), completed (đã hoàn tiền)
     refund_status: {
         type: String,

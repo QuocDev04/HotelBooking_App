@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMutation, useQuery } from "@tanstack/react-query";
+
 import { useParams, useLocation } from "react-router-dom";
 import instanceClient from "../../../configs/instance";
 import { Form, Input, message, type FormProps } from "antd";
@@ -79,6 +80,7 @@ const BookingTour = () => {
       const paymentMethod = data?.payment?.payment_method;
       console.log('paymentMethod:', paymentMethod);
 
+
       // Nếu thanh toán qua VNPay và có paymentUrl
       if (data.paymentUrl) {
         try {
@@ -111,12 +113,14 @@ const BookingTour = () => {
           } else {
             console.log("Không có paymentUrl hoặc success false");
             message.error("Không thể lấy liên kết thanh toán từ VNPay");
+
             // Chuyển về trang chủ
             window.location.href = '/';
           }
         } catch (error) {
           console.error("Lỗi khi kết nối VNPay:", error);
           message.error("Đã xảy ra lỗi khi kết nối VNPay");
+
           // Chuyển về trang chủ nếu có lỗi
           window.location.href = '/';
         }
@@ -132,6 +136,7 @@ const BookingTour = () => {
     },
     
     onError: (error: any) => {
+
       message.error(error.message || 'Đặt tour thất bại');
     },
   })
@@ -156,6 +161,7 @@ const BookingTour = () => {
     const newValues = {
       ...values,
       BookingTourId: bookingTour._id,
+
       isFullPayment: true, // Thanh toán phần còn lại
     };
     mutate(newValues);
@@ -248,6 +254,7 @@ const BookingTour = () => {
         </div>
       </div>
 
+
       {/* Hiển thị trạng thái thanh toán */}
       {renderPaymentStatus()}
 
@@ -312,6 +319,7 @@ const BookingTour = () => {
               </div>
               <div className="md:table-cell py-3 px-4 align-top">
                 <div className="font-bold mb-1">{bookingTour?.tourId?.nameTour}</div>
+
 
                 <div className="text-green-700 text-xs font-medium mb-1">
                   Vị trí tuyệt vời – <span className="font-bold">8.8</span>
@@ -522,5 +530,6 @@ const BookingTour = () => {
     </div>
   );
 };
+
 
 export default BookingTour;

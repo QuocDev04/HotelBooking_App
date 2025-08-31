@@ -40,6 +40,31 @@ const SumTour = () => {
         return date.isBetween(startOfMonth, endOfMonth, null, "[]");
     }).length;
 
+    // Tính tổng doanh thu
+    const totalRevenue = bookings.reduce((sum: number, item: any) => 
+        sum + (item.totalPriceTour || item.finalPrice || 0), 0
+    );
+
+    const todayRevenue = bookings.filter((item: any) =>
+        dayjs(item.BookingTourId?.createdAt).isSame(today, "day")
+    ).reduce((sum: number, item: any) => 
+        sum + (item.totalPriceTour || item.finalPrice || 0), 0
+    );
+
+    const weekRevenue = bookings.filter((item: any) => {
+        const date = dayjs(item.BookingTourId?.createdAt);
+        return date.isBetween(startOfWeek, endOfWeek, null, "[]");
+    }).reduce((sum: number, item: any) => 
+        sum + (item.totalPriceTour || item.finalPrice || 0), 0
+    );
+
+    const monthRevenue = bookings.filter((item: any) => {
+        const date = dayjs(item.BookingTourId?.createdAt);
+        return date.isBetween(startOfMonth, endOfMonth, null, "[]");
+    }).reduce((sum: number, item: any) => 
+        sum + (item.totalPriceTour || item.finalPrice || 0), 0
+    );
+
     return (
         <div>
             <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
@@ -69,7 +94,7 @@ const SumTour = () => {
                                     <CalendarOutlined style={{ fontSize: 20, color: "white" }} />
                                 </div>
                                 <Text strong style={{ fontSize: 18 }}>
-                                    Tổng tour đã đặt
+                                    Tổng tour đã đặt & Doanh thu
                                 </Text>
                             </Space>
                         }
@@ -103,14 +128,25 @@ const SumTour = () => {
                                 >
                                     <CalendarOutlined style={{ fontSize: 36, color: "white" }} />
                                 </div>
+
+                                {/* Tổng quan */}
+                                <div style={{ marginBottom: 32 }}>
+                                    <Text style={{ fontSize: 18, color: "#666", marginBottom: 16, display: "block" }}>
+                                        Tổng cộng: <strong style={{ color: "#4facfe" }}>{bookings.length}</strong> tour - 
+                                        <strong style={{ color: "#00f2fe" }}> {(totalRevenue / 1000000).toFixed(1)}M VNĐ</strong>
+                                    </Text>
+                                </div>
+
                                 <div
                                     style={{
                                         display: "flex",
                                         justifyContent: "space-around",
                                         marginTop: 24,
+                                        flexWrap: "wrap",
+                                        gap: "16px"
                                     }}
                                 >
-                                    <div style={{ textAlign: "center" }}>
+                                    <div style={{ textAlign: "center", minWidth: "120px" }}>
                                         <div
                                             style={{
                                                 fontSize: 24,
@@ -122,8 +158,11 @@ const SumTour = () => {
                                             {todayCount}
                                         </div>
                                         <Text style={{ color: "#666", fontSize: 14 }}>Hôm nay</Text>
+                                        <div style={{ fontSize: 12, color: "#4facfe", marginTop: 4 }}>
+                                            {(todayRevenue / 1000000).toFixed(1)}M VNĐ
+                                        </div>
                                     </div>
-                                    <div style={{ textAlign: "center" }}>
+                                    <div style={{ textAlign: "center", minWidth: "120px" }}>
                                         <div
                                             style={{
                                                 fontSize: 24,
@@ -137,8 +176,11 @@ const SumTour = () => {
                                         <Text style={{ color: "#666", fontSize: 14 }}>
                                             Tuần này
                                         </Text>
+                                        <div style={{ fontSize: 12, color: "#00f2fe", marginTop: 4 }}>
+                                            {(weekRevenue / 1000000).toFixed(1)}M VNĐ
+                                        </div>
                                     </div>
-                                    <div style={{ textAlign: "center" }}>
+                                    <div style={{ textAlign: "center", minWidth: "120px" }}>
                                         <div
                                             style={{
                                                 fontSize: 24,
@@ -152,6 +194,9 @@ const SumTour = () => {
                                         <Text style={{ color: "#666", fontSize: 14 }}>
                                             Tháng này
                                         </Text>
+                                        <div style={{ fontSize: 12, color: "#667eea", marginTop: 4 }}>
+                                            {(monthRevenue / 1000000).toFixed(1)}M VNĐ
+                                        </div>
                                     </div>
                                 </div>
                             </div>

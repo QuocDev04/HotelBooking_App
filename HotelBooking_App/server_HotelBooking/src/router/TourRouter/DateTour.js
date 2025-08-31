@@ -1,15 +1,18 @@
 const express = require('express');
+
 const { 
     PostdateTour, 
     GetDateTour, 
-    GetAllSlotsByTourId, 
+    GetAllSlotsByTourId,
+    GetAllDateSlots, 
     UpdateDateSlot, 
     DeleteDateSlot,
     getTourStats,
     getToursByStatus,
     updateTourBookingStatsAPI,
     markCustomerNoShow,
-    getNoShowCustomers
+    getNoShowCustomers,
+    getSlotDetail
 } = require('../../controller/TourController/DateTour');
 const { verifyToken, verifyTokenAndAdmin } = require("../../Middleware/verifyToken");
 const { verifyClerkTokenAndAdmin } = require("../../Middleware/Middleware");
@@ -19,7 +22,9 @@ const dateRouter = express.Router();
 // Các API cơ bản cho quản lý slot thời gian tour
 dateRouter.post('/date', PostdateTour);
 dateRouter.get('/date/slot/:id', GetDateTour);
+dateRouter.get('/date/slot-detail/:id', getSlotDetail); // API mới cho trang chi tiết slot
 dateRouter.get('/date/tour/:tourId', GetAllSlotsByTourId);
+dateRouter.get('/dateslots', GetAllDateSlots); // API mới để lấy tất cả dateslots
 dateRouter.put('/date/slot/:id', UpdateDateSlot);
 dateRouter.delete('/date/slot/:id', DeleteDateSlot);
 

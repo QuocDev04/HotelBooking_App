@@ -8,6 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useQuery } from '@tanstack/react-query';
 import instanceClient from '../../../../configs/instance';
+
 import bannerImage from '../../../assets/banner.png';
 
 const Banner = () => {
@@ -18,6 +19,7 @@ const Banner = () => {
 
   const locations = data?.data?.location || [];
   console.log(locations);
+
   const {data:tour, isLoading: isLoadingTours} = useQuery({
     queryKey:['tour'],
     queryFn: () => instanceClient.get('/tour')
@@ -25,6 +27,7 @@ const Banner = () => {
   const tours = tour?.data?.tours
   console.log(tours);
   
+
   const isLoading = isLoadingLocations || isLoadingTours;
   
   const [departure, setDeparture] = useState("");
@@ -34,6 +37,7 @@ const Banner = () => {
 
   const handleSubmit = (e:any) => {
     e.preventDefault();
+
     
     // Kiểm tra nếu đang loading
     if (isLoading) {
@@ -55,6 +59,7 @@ const Banner = () => {
         tour.departure_location === departure &&
         tour.destination._id === destination
     );
+
     
     if (foundTour) {
       navigate(`/detailtour/${foundTour._id}`);
@@ -76,6 +81,7 @@ const Banner = () => {
     <div className="relative">
       {/* Banner Image */}
       <div className="relative">
+        
          <div className="w-full h-[400px] sm:h-[400px] md:h-[500px] lg:h-[600px] 
             bg-gradient-to-r from-[#00CFFF] to-[#001BFF]" />
         <img
@@ -179,6 +185,7 @@ const Banner = () => {
               {/* Nút tìm kiếm */}
               <button
                 type="submit"
+
                 disabled={isLoading}
                 className={`rounded-lg py-3 px-6 transition-colors flex items-center justify-center gap-2 ${
                   isLoading 

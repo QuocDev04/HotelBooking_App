@@ -14,6 +14,7 @@ const DateSlotSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+
     // Trạng thái tour: upcoming (sắp diễn ra), ongoing (đang diễn ra), completed (đã diễn ra)
     // Trạng thái sẽ được tính toán tự động dựa trên ngày hiện tại và ngày tour
     status: {

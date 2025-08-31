@@ -1,10 +1,12 @@
 const express = require('express');
 const { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } = require('vnpay');
+
 const TourBookingSchema = require("../../models/Tour/TourBooking.js");
 const HotelBooking = require("../../models/Hotel/HotelBooking.js");
 const { sendMail } = require("../../controller/mail/sendMail.js");
 
 const Vnpay = express.Router();
+
 
 // Tạo URL thanh toán VNPay
 Vnpay.post('/create-payment', async (req, res) => {
@@ -44,6 +46,7 @@ Vnpay.post('/create-payment', async (req, res) => {
             hashAlgorithm: 'SHA512',
             loggerFn: ignoreLogger,
         });
+
 
         const paymentUrl = await vnpay.buildPaymentUrl({
             vnp_Amount: totalAmount,

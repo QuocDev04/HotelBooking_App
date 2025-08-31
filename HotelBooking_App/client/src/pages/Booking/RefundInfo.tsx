@@ -136,7 +136,7 @@ const RefundInfo = () => {
           </div>
           <div>
             <p className="text-gray-600">Mã đặt tour:</p>
-            <p className="font-medium">{bookingData._id?.slice(0, 8).toUpperCase() || 'N/A'}</p>
+            <p className="font-medium">{bookingData._id?.slice(-8) || 'N/A'}</p>
           </div>
           <div>
             <p className="text-gray-600">Ngày khởi hành:</p>

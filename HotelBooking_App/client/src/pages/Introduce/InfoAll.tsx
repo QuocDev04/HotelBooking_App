@@ -12,6 +12,7 @@ const sections = [
 ];
 
 const InfoAll = () => {
+
   const [openIndex, setOpenIndex] = useState<number | null>(0); // Mặc định mở phần đầu tiên (Giới thiệu)
 
   return (

@@ -214,7 +214,38 @@ const AddTour = () => {
                     </Form.Item>
                   </Col>
 
+                </Row>
 
+                <Row gutter={24}>
+                  <Col span={12}>
+                    <Form.Item
+                      label="Thời gian khởi hành"
+                      name="departure_time"
+                      rules={[
+                        {
+                          pattern: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
+                          message: "Định dạng thời gian không hợp lệ. VD: 06:00",
+                        },
+                      ]}
+                    >
+                      <Input placeholder="VD: 06:00" size="large" />
+                    </Form.Item>
+                  </Col>
+
+                  <Col span={12}>
+                    <Form.Item
+                      label="Thời gian kết thúc"
+                      name="return_time"
+                      rules={[
+                        {
+                          pattern: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
+                          message: "Định dạng thời gian không hợp lệ. VD: 18:00",
+                        },
+                      ]}
+                    >
+                      <Input placeholder="VD: 18:00" size="large" />
+                    </Form.Item>
+                  </Col>
                 </Row>
 
                 <Row gutter={24}>
@@ -294,6 +325,7 @@ const AddTour = () => {
                         style={{ width: "100%" }} />
                     </Form.Item>
                   </Col>
+
                   <Col span={6}>
                     <Form.Item
                       label="Ngày hết hạn giảm giá"
@@ -301,6 +333,7 @@ const AddTour = () => {
                       rules={[
                         ({ getFieldValue }) => ({
                           validator(_, value) {
+
                             const discount = getFieldValue("discountPercent");
                             if (!discount || discount <= 0) return Promise.resolve();
                             if (!value) return Promise.reject(new Error("Vui lòng chọn ngày hết hạn"));
@@ -318,6 +351,7 @@ const AddTour = () => {
                         size="large"
                         style={{ width: "100%" }}
                         placeholder="Chọn ngày giờ hết hạn"
+
                         disabledDate={(current) => {
                           // Không cho chọn ngày trước hôm nay
                           return current && current < dayjs().startOf("day");
@@ -498,6 +532,7 @@ const AddTour = () => {
 
               {/* Cột phải */}
               <Col xs={24} lg={8}>
+
                 <Form.Item
                   required={false}
                   label={requiredLabel("Chọn Phương Tiện")}

@@ -5,6 +5,7 @@ import FeaturedDestination from "./Main/FeaturedDestination"
 import Internatinal from "./Main/Internatinal"
 import News from "./Main/News"
 import TourIn from "./Main/TourIn"
+
 import HotelPromotion from "./Main/HotelPromotion"
 
 const LayoutHome = () => {
@@ -12,11 +13,13 @@ const LayoutHome = () => {
     window.scrollTo(0, 0)
   }, [])
   return (
+
     <div style={{ background: 'transparent' }}>
       <Banner/>
       <AboutUs/>
       <Internatinal/>
       <FeaturedDestination/>
+
       <HotelPromotion/>
       <TourIn/>
       <News/>

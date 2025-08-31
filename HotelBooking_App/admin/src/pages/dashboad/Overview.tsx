@@ -20,6 +20,7 @@ const Overview = () => {
         queryFn: () => instance.get("/admin/bookings")
     });
 
+
     const {
         data: revenueRes,
         isLoading: revenueLoading,
@@ -39,6 +40,7 @@ console.log(bookingRes);
         queryFn: () => instance.get("/user")
     });
 
+
     if (bookingLoading || userLoading || revenueLoading) return <Spin size="large" />;
     if (bookingError || userError || revenueError) return <div>Đã có lỗi xảy ra…</div>;
 
@@ -50,6 +52,7 @@ console.log(bookingRes);
 
     // Tổng lượt đặt tour
     const totalBooking = bookings.length;
+
 
     const revenueData = revenueRes?.data?.data || {};
     const totalRevenue = revenueData.actualRevenue || 0;
