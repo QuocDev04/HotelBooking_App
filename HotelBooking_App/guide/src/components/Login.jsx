@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import axiosGuide from './../../config/axios';
 
 const Login = ({ onLogin }) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -27,7 +28,7 @@ const Login = ({ onLogin }) => {
     }
 
     try {
-      const response = await axios.post("http://localhost:8080/api/employee/login", {
+      const response = await axiosGuide.post("/employee/login", {
         email: formData.email.trim(),
         password: formData.password,
         portal: "hdv",
