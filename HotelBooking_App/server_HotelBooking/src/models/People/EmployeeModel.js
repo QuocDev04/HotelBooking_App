@@ -94,7 +94,6 @@ EmployeeSchema.pre('save', function (next) {
 });
 
 // Index để tìm kiếm nhanh
-EmployeeSchema.index({ email: 1 });
 EmployeeSchema.index({ status: 1 });
 EmployeeSchema.index({ position: 1 });
 EmployeeSchema.index({ department: 1 });
