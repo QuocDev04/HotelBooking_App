@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import axiosGuide from './../../config/axios';
+// import axiosGuide from './../../config/axios.ts';
+
+// Create axios instance directly to bypass cache
+const axiosGuide = axios.create({
+  baseURL: 'http://localhost:8080/api/'
+});
 
 const Login = ({ onLogin }) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -28,6 +33,7 @@ const Login = ({ onLogin }) => {
     }
 
     try {
+      console.log('Making login request to:', axiosGuide.defaults.baseURL + 'employee/login');
       const response = await axiosGuide.post("/employee/login", {
         email: formData.email.trim(),
         password: formData.password,

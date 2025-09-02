@@ -217,29 +217,66 @@ const TourDuocGiao = () => {
   const fetchAssignedTours = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:8080/api/employee/assigned-tours");
+      const response = await axiosGuide.get("/api/employee/assigned-tours");
 
       console.log("Assigned tours response:", response.data);
+      console.log("Raw API response tours:", JSON.stringify(response.data.tours, null, 2));
 
       if (response.data.success) {
         console.log("Tours data:", response.data.tours);
         const toursData = response.data.tours;
 
-        // Lấy thông tin DateSlot cho mỗi tour
+        // Sử dụng assignedDates từ API response thay vì lấy tất cả dateSlots
         const dateSlotsData = {};
         for (const tour of toursData) {
-          try {
-            const dateSlotsResponse = await axios.get(`http://localhost:8080/api/date/tour/${tour._id}`);
-            if (dateSlotsResponse.data.success && dateSlotsResponse.data.data.length > 0) {
-              dateSlotsData[tour._id] = dateSlotsResponse.data.data;
-            }
-          } catch (error) {
-            console.error(`Error fetching date slots for tour ${tour._id}:`, error);
+          console.log(`Processing tour ${tour._id}:`, {
+            name: tour.nameTour,
+            assignedDates: tour.assignedDates
+          });
+          
+          if (tour.assignedDates && tour.assignedDates.length > 0) {
+             // Chỉ hiển thị những ngày được phân công với đầy đủ thông tin
+             dateSlotsData[tour._id] = tour.assignedDates.map(assignedDate => ({
+               _id: assignedDate.dateSlotId,
+               dateTour: assignedDate.dateTour,
+               tourStatus: assignedDate.tourStatus,
+               status: assignedDate.status,
+               availableSeats: assignedDate.availableSeats,
+               bookedSeats: assignedDate.bookedSeats,
+               totalRevenue: assignedDate.totalRevenue,
+               depositAmount: assignedDate.depositAmount,
+               refundAmount: assignedDate.refundAmount,
+               statusNote: assignedDate.statusNote,
+               statusUpdatedAt: assignedDate.statusUpdatedAt
+             }));
+             console.log(`Tour ${tour._id} dateSlots:`, dateSlotsData[tour._id]);
+          } else {
+            console.log(`Tour ${tour._id} has no assignedDates`);
+            // Tạo một dateSlot mặc định nếu không có assignedDates
+            dateSlotsData[tour._id] = [{
+              _id: 'default-' + tour._id,
+              dateTour: new Date().toISOString(),
+              tourStatus: 'preparing',
+              status: 'active',
+              availableSeats: tour.maxPeople || 0,
+              bookedSeats: 0,
+              totalRevenue: 0,
+              depositAmount: 0,
+              refundAmount: 0,
+              statusNote: '',
+              statusUpdatedAt: new Date().toISOString()
+            }];
           }
         }
 
+        console.log('Final dateSlotsData:', dateSlotsData);
         setTourDateSlots(dateSlotsData);
         setTours(toursData);
+        
+        // Debug log sau khi set state
+        setTimeout(() => {
+          console.log('tourDateSlots state after setting:', dateSlotsData);
+        }, 100);
 
         response.data.tours.forEach((tour, index) => {
           console.log(`Tour ${index + 1}:`, {
@@ -262,17 +299,16 @@ const TourDuocGiao = () => {
   const fetchCustomerBookings = async (tourId) => {
     try {
       setLoadingCustomers(true);
-      // Cần tìm các dateSlot của tour này trước
-      const dateSlotsResponse = await axios.get(`http://localhost:8080/api/date/tour/${tourId}`);
-      const dateSlots = dateSlotsResponse.data.data || [];
+      // Chỉ lấy dateSlots được phân công từ tourDateSlots state
+      const assignedDateSlots = tourDateSlots[tourId] || [];
 
-      console.log(`Tour ${tourId} có ${dateSlots.length} dateSlots:`, dateSlots.map(s => ({ id: s._id, date: s.dateTour })));
+      console.log(`Tour ${tourId} có ${assignedDateSlots.length} dateSlots được phân công:`, assignedDateSlots.map(s => ({ id: s._id, date: s.dateTour })));
 
-      // Lấy bookings cho tất cả dateSlots của tour
+      // Lấy bookings cho các dateSlots được phân công
       const allBookings = [];
-      for (const slot of dateSlots) {
+      for (const slot of assignedDateSlots) {
         try {
-          const bookingResponse = await axios.get(`http://localhost:8080/api/admin/bookings?slotId=${slot._id}`);
+          const bookingResponse = await axiosGuide.get(`/api/admin/bookings?slotId=${slot._id}`);
           if (bookingResponse.data.success) {
             console.log(`Slot ${slot._id} có ${bookingResponse.data.bookings.length} bookings`);
             allBookings.push(...bookingResponse.data.bookings);
@@ -328,6 +364,13 @@ const TourDuocGiao = () => {
   };
 
   const handleStatusChange = async (tourId, dateSlotId, newStatus) => {
+    // Kiểm tra xem dateSlotId có phải là ID thật không (không phải default-xxx)
+    if (!dateSlotId || dateSlotId.startsWith('default-')) {
+      alert('Không thể cập nhật trạng thái: Tour này chưa có lịch trình cụ thể được phân công');
+      console.error('Invalid dateSlotId:', dateSlotId);
+      return;
+    }
+
     // Special handling for postponed status
     if (newStatus === 'postponed') {
       const reason = prompt('Vui lòng nhập lý do hoãn tour:');
@@ -571,72 +614,54 @@ const TourDuocGiao = () => {
                     </button>
                   </div>
 
-                  {/* Hiển thị tất cả DateSlots */}
+                  {/* Nút cập nhật trạng thái tour */}
                   <div className="mt-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Quản lý các ngày khởi hành:</h3>
-                    {tourDateSlots[tour._id] && tourDateSlots[tour._id].length > 0 ? (
-                      <div className="space-y-3">
-                        {tourDateSlots[tour._id].map((dateSlot) => (
-                          <div key={dateSlot._id} className="bg-gray-50 rounded-lg p-4 border">
-                            <div className="flex justify-between items-start mb-3">
-                              <div>
-                                <h4 className="font-medium text-gray-900">
-                                  Ngày {new Date(dateSlot.dateTour).toLocaleDateString('vi-VN')}
-                                </h4>
-                                <p className="text-sm text-gray-600">
-                                  Số chỗ: {dateSlot.availableSeats} | Đã đặt: {dateSlot.bookedSeats}
-                                </p>
-                                {dateSlot.statusNote && (
-                                  <p className="text-sm text-gray-500 mt-1">
-                                    Ghi chú: {dateSlot.statusNote}
-                                  </p>
-                                )}
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTourStatusColor(dateSlot.tourStatus)}`}>
-                                  {getTourStatusText(dateSlot.tourStatus)}
-                                </span>
-                                <select
-                                  value={dateSlot.tourStatus}
-                                  onChange={(e) => handleStatusChange(tour._id, dateSlot._id, e.target.value)}
-                                  disabled={updatingTours[tour._id]}
-                                  className={`text-sm border rounded px-2 py-1 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${getSelectBgColor(dateSlot.tourStatus)}`}
-                                >
-                                  <option value="preparing">Chuẩn bị diễn ra</option>
-                                  <option value="ongoing">Đang diễn ra</option>
-                                  <option value="completed">Hoàn thành</option>
-                                  <option value="postponed">Hoãn tour</option>
-                                </select>
-                              </div>
-                            </div>
-
-                            {/* Thông tin bổ sung */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-600">
-                              <div>
-                                <span className="font-medium">Doanh thu:</span>
-                                <div>{dateSlot.totalRevenue?.toLocaleString() || 0} VNĐ</div>
-                              </div>
-                              <div>
-                                <span className="font-medium">Tiền cọc:</span>
-                                <div>{dateSlot.depositAmount?.toLocaleString() || 0} VNĐ</div>
-                              </div>
-                              <div>
-                                <span className="font-medium">Hoàn trả:</span>
-                                <div>{dateSlot.refundAmount?.toLocaleString() || 0} VNĐ</div>
-                              </div>
-                              <div>
-                                <span className="font-medium">Cập nhật:</span>
-                                <div>{dateSlot.statusUpdatedAt ? new Date(dateSlot.statusUpdatedAt).toLocaleDateString('vi-VN') : 'N/A'}</div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                    <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4 border">
+                      <div className="flex items-center space-x-4">
+                        <span className="text-sm font-medium text-gray-700">Trạng thái tour:</span>
+                        <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getTourStatusColor(getTourStatusFromDateSlots(tour._id))}`}>
+                          {getTourStatusText(getTourStatusFromDateSlots(tour._id))}
+                        </span>
                       </div>
-                    ) : (
-                      <div className="text-center py-4 text-gray-500">
-                        <p>Chưa có lịch trình tour</p>
+                      <div className="flex items-center space-x-3">
+                        {(() => {
+                          const dateSlots = tourDateSlots[tour._id];
+                          const canUpdate = dateSlots && dateSlots.length > 0 && dateSlots[0]._id && !dateSlots[0]._id.startsWith('default-');
+                          
+                          if (!canUpdate) {
+                            return (
+                              <div className="text-sm text-gray-500 italic">
+                                Chưa thể cập nhật: Tour chưa có lịch trình cụ thể được phân công
+                              </div>
+                            );
+                          }
+                          
+                          return (
+                            <>
+                              <select
+                                value={getTourStatusFromDateSlots(tour._id)}
+                                onChange={(e) => {
+                                  console.log('Dropdown changed:', e.target.value);
+                                  console.log('Date slots for tour:', dateSlots);
+                                  console.log('Updating status for dateSlot:', dateSlots[0]._id);
+                                  handleStatusChange(tour._id, dateSlots[0]._id, e.target.value);
+                                }}
+                                disabled={updatingTours[tour._id]}
+                                className={`text-sm border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${getSelectBgColor(getTourStatusFromDateSlots(tour._id))}`}
+                              >
+                                <option value="preparing">Chuẩn bị diễn ra</option>
+                                <option value="ongoing">Đang diễn ra</option>
+                                <option value="completed">Hoàn thành</option>
+                                <option value="postponed">Hoãn tour</option>
+                              </select>
+                              {updatingTours[tour._id] && (
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               </div>

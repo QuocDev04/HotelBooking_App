@@ -359,23 +359,82 @@ const getAssignedTours = async (req, res) => {
         const employeeId = req.employee.employeeId;
         
         console.log("Getting assigned tours for employee:", employeeId);
+        console.log("Employee object from token:", req.employee);
         
-        // Tìm tất cả tour được phân công cho nhân viên này
-        const assignedTours = await TourModel.find({ 
-            assignedEmployee: employeeId 
+        // Tìm Employee để lấy ObjectId
+        const employee = await Employee.findById(employeeId);
+        console.log("Found employee:", employee ? employee._id : "Not found");
+        
+        if (!employee) {
+            console.log("Employee not found with ID:", employeeId);
+            return res.status(StatusCodes.NOT_FOUND).json({
+                success: false,
+                message: "Không tìm thấy thông tin nhân viên"
+            });
+        }
+        
+        // Tìm tất cả DateSlot được phân công cho nhân viên này
+        const DateTour = require('../../models/Tour/DateTour');
+        const assignedDateSlots = await DateTour.find({ 
+            assignedEmployee: employee._id 
         })
-        .populate("itemTransport.TransportId", "transportName transportNumber transportType")
-        .populate("destination", "locationName country")
-        .populate("assignedEmployee", "firstName lastName full_name email employee_id position")
-        .sort({ createdAt: -1 });
+        .populate({
+            path: 'tour',
+            populate: [
+                {
+                    path: 'itemTransport.TransportId',
+                    select: 'transportName transportNumber transportType'
+                },
+                {
+                    path: 'destination',
+                    select: 'locationName country'
+                }
+            ]
+        })
+        .populate('assignedEmployee', 'firstName lastName full_name email employee_id position')
+        .sort({ dateTour: 1 });
 
-        console.log("Found assigned tours:", assignedTours.length);
+        console.log("Found assigned date slots:", assignedDateSlots.length);
+        
+        // Lấy danh sách tour unique từ các DateSlot
+        const tourIds = [...new Set(assignedDateSlots.map(slot => slot.tour._id.toString()))];
+        const uniqueTours = [];
+        
+        for (const tourId of tourIds) {
+            const tourSlots = assignedDateSlots.filter(slot => slot.tour._id.toString() === tourId);
+            if (tourSlots.length > 0) {
+                const tour = tourSlots[0].tour;
+                // Thêm thông tin về các ngày được phân công
+                tour.assignedDates = tourSlots.map(slot => ({
+                    dateSlotId: slot._id,
+                    dateTour: slot.dateTour,
+                    status: slot.status,
+                    tourStatus: slot.tourStatus,
+                    availableSeats: slot.availableSeats,
+                    bookedSeats: slot.bookedSeats,
+                    totalRevenue: slot.totalRevenue,
+                    depositAmount: slot.depositAmount,
+                    refundAmount: slot.refundAmount,
+                    statusNote: slot.statusNote,
+                    statusUpdatedAt: slot.statusUpdatedAt
+                }));
+                uniqueTours.push(tour);
+            }
+        }
+
+        console.log("Found unique assigned tours:", uniqueTours.length);
+        console.log("Tours with assignedDates:", uniqueTours.map(tour => ({
+            tourId: tour._id,
+            tourName: tour.nameTour,
+            assignedDatesCount: tour.assignedDates ? tour.assignedDates.length : 0,
+            assignedDates: tour.assignedDates
+        })));
 
         return res.status(StatusCodes.OK).json({
             success: true,
             message: "Lấy danh sách tour được phân công thành công",
-            tours: assignedTours,
-            total: assignedTours.length
+            tours: uniqueTours,
+            total: uniqueTours.length
         });
 
     } catch (error) {

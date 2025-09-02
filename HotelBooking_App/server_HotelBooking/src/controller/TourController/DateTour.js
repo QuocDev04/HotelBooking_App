@@ -322,6 +322,10 @@ const GetAllDateSlots = async (req, res) => {
                     select: 'locationName country',
                 }
             })
+            .populate({
+                path: 'assignedEmployee',
+                select: 'firstName lastName full_name email employee_id position department status'
+            })
             .sort({ dateTour: 1 }); // Sắp xếp theo ngày
 
         console.log(`Found ${slots.length} date slots`);
@@ -618,22 +622,7 @@ const getNoShowCustomers = async (req, res) => {
     }
 };
 
-module.exports = {
-    PostdateTour,
-    GetDateTour,
-    GetAllSlotsByTourId,
-    GetAllDateSlots,
-    UpdateDateSlot,
-    DeleteDateSlot,
-    getTourStats,
-    getToursByStatus,
-    updateTourBookingStatsAPI,
-    updateTourStatus,
-    updateTourBookingStats,
-    markCustomerNoShow,
-    getNoShowCustomers,
-    processNoShowCustomers
-};
+// Removed duplicate module.exports - keeping the one at the end of file
 
 // Lấy thông tin chi tiết của một slot
 const getSlotDetail = async (req, res) => {
@@ -681,6 +670,112 @@ const getSlotDetail = async (req, res) => {
     }
 };
 
+// API phân công HDV cho DateSlot cụ thể
+const assignEmployeeToDateSlot = async (req, res) => {
+    try {
+        const { dateSlotId } = req.params;
+        const { employeeId } = req.body;
+
+        console.log('Assign employee request:', { dateSlotId, employeeId });
+
+        // Kiểm tra DateSlot tồn tại
+        const dateSlot = await DateTour.findById(dateSlotId).populate('tour');
+        console.log('Found dateSlot:', dateSlot ? dateSlot._id : 'Not found');
+        if (!dateSlot) {
+            console.log('DateSlot not found with ID:', dateSlotId);
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy slot ngày tour'
+            });
+        }
+
+        // Kiểm tra Employee tồn tại
+        const Employee = require('../../models/People/EmployeeModel');
+        const employee = await Employee.findById(employeeId);
+        console.log('Found employee:', employee ? employee._id : 'Not found');
+        if (!employee) {
+            console.log('Employee not found with ID:', employeeId);
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy nhân viên'
+            });
+        }
+
+        // Kiểm tra xung đột lịch trình (chỉ trong cùng ngày)
+        const slotDate = new Date(dateSlot.dateTour);
+        const startOfDay = new Date(slotDate);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(slotDate);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        console.log('Checking conflicts for employee:', employeeId, 'on date:', slotDate.toDateString());
+
+        const conflictingSlots = await DateTour.find({
+            _id: { $ne: dateSlotId },
+            assignedEmployee: employeeId,
+            dateTour: {
+                $gte: startOfDay,
+                $lte: endOfDay
+            }
+        }).populate('tour', 'nameTour');
+
+        console.log('Found conflicting slots:', conflictingSlots.length);
+        if (conflictingSlots.length > 0) {
+            console.log('Conflicts:', conflictingSlots.map(slot => ({
+                tourName: slot.tour.nameTour,
+                date: slot.dateTour,
+                departureTime: slot.departureTime,
+                returnTime: slot.returnTime
+            })));
+            return res.status(400).json({
+                success: false,
+                message: 'Nhân viên đã được phân công cho tour khác trong khoảng thời gian này',
+                conflicts: conflictingSlots.map(slot => ({
+                    tourName: slot.tour.nameTour,
+                    date: slot.dateTour,
+                    departureTime: slot.departureTime,
+                    returnTime: slot.returnTime
+                }))
+            });
+        }
+
+        // Cập nhật phân công
+        dateSlot.assignedEmployee = employeeId;
+        await dateSlot.save();
+
+        // Populate thông tin employee để trả về
+        await dateSlot.populate('assignedEmployee', 'full_name firstName lastName email phone_number department position');
+        
+        console.log('Assignment successful for dateSlot:', dateSlot._id, 'employee:', employeeId);
+
+        res.status(200).json({
+            success: true,
+            message: 'Phân công HDV thành công',
+            data: {
+                dateSlot: {
+                    _id: dateSlot._id,
+                    dateTour: dateSlot.dateTour,
+                    departureTime: dateSlot.departureTime,
+                    returnTime: dateSlot.returnTime,
+                    availableSeats: dateSlot.availableSeats,
+                    assignedEmployee: dateSlot.assignedEmployee,
+                    tour: {
+                        _id: dateSlot.tour._id,
+                        nameTour: dateSlot.tour.nameTour
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Lỗi phân công HDV cho DateSlot:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi server',
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     PostdateTour,
     GetDateTour,
@@ -696,5 +791,6 @@ module.exports = {
     markCustomerNoShow,
     getNoShowCustomers,
     processNoShowCustomers,
-    getSlotDetail
+    getSlotDetail,
+    assignEmployeeToDateSlot
 };

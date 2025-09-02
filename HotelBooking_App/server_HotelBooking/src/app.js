@@ -43,6 +43,11 @@ connectDB();
 
 app.get('/', (req, res) => res.send("API is working"));
 
+// Employee routes - positioned before other API routes to avoid conflicts
+
+// Employee router - MOVED UP BEFORE OTHER ROUTERS
+app.use('/api/employee', EmployeeRouter);
+
 app.use('/api', UserRouter);
 
 app.use('/api/', TourRouter);
@@ -50,8 +55,6 @@ app.use('/api/', TransportRouter);
 app.use('/api/', TransportScheduleRouter);
 app.use('/api/', TourSchedule);
 app.use('/api/', AdminRouter);
-
-app.use('/api/employee', EmployeeRouter);
 
 app.use('/api/vnpay', Vnpay);
 app.use('/api/', RouterBookingTour);
