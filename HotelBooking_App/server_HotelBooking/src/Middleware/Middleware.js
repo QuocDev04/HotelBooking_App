@@ -1,5 +1,4 @@
 const { verifyToken } = require("@clerk/clerk-sdk-node");
-
 const jwt = require("jsonwebtoken");
 
 const Admin = require('../models/People/AdminModel.js');
@@ -66,52 +65,62 @@ const verifyClerkTokenAndAdmin = async (req, res, next) => {
     }
 };
 
+// Middleware xác thực JWT token cho nhân viên
 const verifyEmployeeToken = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        if (!authHeader) {
             return res.status(401).json({
                 success: false,
-                message: "Bạn cần đăng nhập để thực hiện hành động này",
+                message: "Bạn cần đăng nhập để thực hiện hành động này"
             });
         }
 
         const token = authHeader.split(" ")[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: "Token không hợp lệ"
+            });
+        }
 
+        // Verify JWT token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || "hdv_secret_key");
+        
+        // Kiểm tra nhân viên có tồn tại và active không
         const employee = await Employee.findById(decoded.employeeId);
         if (!employee) {
             return res.status(401).json({
                 success: false,
-                message: "Tài khoản không tồn tại",
+                message: "Tài khoản không tồn tại"
             });
         }
 
-        if (employee.status !== "active") {
+        if (employee.status !== 'active') {
             return res.status(401).json({
                 success: false,
-                message: "Tài khoản đã bị vô hiệu hóa",
+                message: "Tài khoản đã bị vô hiệu hóa"
             });
         }
 
         req.employee = decoded;
         req.employeeData = employee;
         next();
+
     } catch (error) {
-        console.error("Verify token error:", error);
-        if (error.name === "TokenExpiredError") {
+        console.error("Verify employee token error:", error);
+        if (error.name === 'TokenExpiredError') {
             return res.status(401).json({
                 success: false,
-                message: "Access token đã hết hạn. Vui lòng làm mới bằng refresh token",
+                message: "Token đã hết hạn. Vui lòng đăng nhập lại"
             });
         }
         return res.status(401).json({
             success: false,
-            message: "Token không hợp lệ",
+            message: "Token không hợp lệ"
         });
     }
 };
-
 
 module.exports = { 
     verifyClerkToken, 

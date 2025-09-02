@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }) => {
         const savedToken = localStorage.getItem("hdv_token");
         const savedUser = localStorage.getItem("hdv_user");
 
-        if (savedToken && savedUser) {
+        if (savedToken && savedUser && savedUser !== "undefined" && savedUser !== "null") {
           setToken(savedToken);
           setUser(JSON.parse(savedUser));
         }

@@ -643,7 +643,7 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
 
                   {/* Hiển thị tất cả DateSlots */}
                   <div className="mt-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Lịch trình tour:</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Quản lý các ngày khởi hành:</h3>
                     {tourDateSlots[tour._id] && tourDateSlots[tour._id].length > 0 ? (
                       <div className="space-y-3">
                         {tourDateSlots[tour._id].map((dateSlot, index) => (

@@ -32,3 +32,9 @@
 {"level":"info","message":"AmenityController.getAllAmenities - Lấy thành công 0 tiện ích","service":"hotel-booking-api","timestamp":"2025-08-29 10:53:17"}
 {"level":"info","message":"AmenityController.getAllAmenities - Bắt đầu lấy danh sách tiện ích","service":"hotel-booking-api","timestamp":"2025-08-29 11:15:17"}
 {"level":"info","message":"AmenityController.getAllAmenities - Lấy thành công 0 tiện ích","service":"hotel-booking-api","timestamp":"2025-08-29 11:15:17"}
+{"level":"info","message":"AmenityController.getAllAmenities - Bắt đầu lấy danh sách tiện ích","service":"hotel-booking-api","timestamp":"2025-09-01 10:02:27"}
+{"level":"info","message":"AmenityController.getAllAmenities - Lấy thành công 0 tiện ích","service":"hotel-booking-api","timestamp":"2025-09-01 10:02:27"}
+{"category":"Tiện ích trong phòng (cá nhân)","icon":"bed","isActive":true,"level":"info","message":"AmenityController.createAmenity - Bắt đầu tạo tiện ích mới:","name":"Giường ngủ thoải mái","service":"hotel-booking-api","timestamp":"2025-09-01 10:02:45"}
+{"level":"info","message":"AmenityController.createAmenity - Tạo thành công tiện ích: Giường ngủ thoải mái","service":"hotel-booking-api","timestamp":"2025-09-01 10:02:45"}
+{"level":"info","message":"AmenityController.getAllAmenities - Bắt đầu lấy danh sách tiện ích","service":"hotel-booking-api","timestamp":"2025-09-01 10:02:45"}
+{"level":"info","message":"AmenityController.getAllAmenities - Lấy thành công 1 tiện ích","service":"hotel-booking-api","timestamp":"2025-09-01 10:02:45"}

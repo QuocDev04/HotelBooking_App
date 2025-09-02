@@ -34,7 +34,7 @@ const Login = ({ onLogin }) => {
       });
 
       if (response.data.success) {
-        const { accessToken, refreshToken: rToken, employee } = response.data;
+        const { accessToken, refreshToken: rToken, employee } = response.data.data;
 
         // Lưu token và user
         localStorage.setItem("hdv_token", accessToken);
