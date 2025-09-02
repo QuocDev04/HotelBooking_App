@@ -127,6 +127,52 @@ const EmployeeAssignment: React.FC = () => {
       const employeeId = assignments[tourId];
       if (!employeeId) return;
       
+      // Kiểm tra xung đột lịch trình HDV
+      const selectedEmployee = employees.find(emp => emp._id === employeeId);
+      if (!selectedEmployee) {
+        alert('Không tìm thấy thông tin HDV!');
+        return;
+      }
+      
+      // Kiểm tra HDV đã được phân công cho tour khác trong cùng thời gian chưa
+      const now = new Date();
+      const sevenDaysLater = new Date();
+      sevenDaysLater.setDate(now.getDate() + 7);
+      
+      const tourSlots = dateSlots.filter(slot => {
+        const slotTourId = typeof slot.tour === 'string' ? slot.tour : slot.tour?._id;
+        if (slotTourId !== tourId) return false;
+        const slotDate = new Date(slot.dateTour);
+        return slotDate >= now && slotDate <= sevenDaysLater && slot.status === 'upcoming';
+      });
+      
+      // Kiểm tra xung đột với các tour khác
+      const conflictingTours = tours.filter(otherTour => {
+        if (otherTour._id === tourId || !otherTour.assignedEmployee) return false;
+        if (otherTour.assignedEmployee._id !== employeeId) return false;
+        
+        const otherTourSlots = dateSlots.filter(slot => {
+          const slotTourId = typeof slot.tour === 'string' ? slot.tour : slot.tour?._id;
+          if (slotTourId !== otherTour._id) return false;
+          const slotDate = new Date(slot.dateTour);
+          return slotDate >= now && slotDate <= sevenDaysLater && slot.status === 'upcoming';
+        });
+        
+        // Kiểm tra có ngày trùng không
+        return tourSlots.some(slot1 => 
+          otherTourSlots.some(slot2 => 
+            new Date(slot1.dateTour).toDateString() === new Date(slot2.dateTour).toDateString()
+          )
+        );
+      });
+      
+      if (conflictingTours.length > 0) {
+        const conflictNames = conflictingTours.map(t => t.nameTour).join(', ');
+        if (!confirm(`HDV ${selectedEmployee.full_name} đã được phân công cho tour: ${conflictNames} trong cùng thời gian. Bạn có muốn tiếp tục không?`)) {
+          return;
+        }
+      }
+      
       const token = await getToken();
       
       // Gọi API để lưu phân công
@@ -368,39 +414,62 @@ const EmployeeAssignment: React.FC = () => {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4">
                     <div className="text-sm text-gray-900">
-                      {/* Hiển thị thông tin thời gian tour gần nhất trong 7 ngày tới */}
+                      {/* Hiển thị tất cả thời gian tour trong 7 ngày tới */}
                       {(() => {
                         const now = new Date();
                         const sevenDaysLater = new Date();
                         sevenDaysLater.setDate(now.getDate() + 7);
                         
-                        const upcomingSlot = dateSlots
+                        const upcomingSlots = dateSlots
                           .filter(slot => {
                             const slotTourId = typeof slot.tour === 'string' ? slot.tour : slot.tour?._id;
                             if (slotTourId !== tour._id) return false;
                             const slotDate = new Date(slot.dateTour);
                             return slotDate >= now && slotDate <= sevenDaysLater && slot.status === 'upcoming';
                           })
-                          .sort((a, b) => new Date(a.dateTour).getTime() - new Date(b.dateTour).getTime())[0];
+                          .sort((a, b) => new Date(a.dateTour).getTime() - new Date(b.dateTour).getTime());
                         
-                        if (upcomingSlot) {
+                        if (upcomingSlots.length > 0) {
                           const departureTime = tour.departure_time || "06:00";
                           const returnTime = tour.return_time || "18:00";
-                          const tourDate = new Date(upcomingSlot.dateTour);
                           
                           return (
-                            <div className="space-y-1">
-                              <div className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
-                                🚀 Bắt đầu: {tourDate.toLocaleDateString('vi-VN')} - {departureTime}
+                            <div className="space-y-2">
+                              <div className="text-xs font-medium text-gray-700 mb-1">
+                                📅 Lịch trình 7 ngày tới ({upcomingSlots.length} ngày):
                               </div>
-                              <div className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
-                                🏁 Kết thúc: {tour.duration === "1 ngày" ? 
-                                  tourDate.toLocaleDateString('vi-VN') : 
-                                  "Tính theo duration"} - {returnTime}
-                              </div>
-                              <div className="text-xs text-gray-500">
+                              {upcomingSlots.slice(0, 3).map((slot, index) => {
+                                const tourDate = new Date(slot.dateTour);
+                                const isToday = tourDate.toDateString() === new Date().toDateString();
+                                const isTomorrow = tourDate.toDateString() === new Date(Date.now() + 86400000).toDateString();
+                                
+                                let dateLabel = tourDate.toLocaleDateString('vi-VN');
+                                if (isToday) dateLabel += " (Hôm nay)";
+                                else if (isTomorrow) dateLabel += " (Ngày mai)";
+                                
+                                return (
+                                  <div key={slot._id} className={`text-xs px-2 py-1 rounded border ${
+                                    isToday ? 'bg-red-50 border-red-200 text-red-700' :
+                                    isTomorrow ? 'bg-orange-50 border-orange-200 text-orange-700' :
+                                    'bg-blue-50 border-blue-200 text-blue-700'
+                                  }`}>
+                                    <div className="font-medium">{dateLabel}</div>
+                                    <div className="flex justify-between mt-1">
+                                      <span>🚀 {departureTime}</span>
+                                      <span>🏁 {returnTime}</span>
+                                      <span>👥 {slot.availableSeats - slot.bookedSeats}/{slot.availableSeats}</span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                              {upcomingSlots.length > 3 && (
+                                <div className="text-xs text-gray-500 italic">
+                                  ... và {upcomingSlots.length - 3} ngày khác
+                                </div>
+                              )}
+                              <div className="text-xs text-gray-600 mt-1">
                                 ⏱️ Thời lượng: {tour.duration}
                               </div>
                             </div>
@@ -412,7 +481,7 @@ const EmployeeAssignment: React.FC = () => {
                             </div>
                           );
                         }
-                      })()}
+                      })()} 
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -446,11 +515,47 @@ const EmployeeAssignment: React.FC = () => {
                         className="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="">Chọn HDV</option>
-                        {employees.map(employee => (
-                          <option key={employee._id} value={employee._id}>
-                            {employee.full_name} - {employee.position === 'tour_guide' ? 'HDV' : employee.position} ({employee.employee_id})
-                          </option>
-                        ))}
+                        {employees
+                          .filter(emp => emp.position === 'tour_guide' && emp.department === 'tour')
+                          .map(employee => {
+                            // Kiểm tra HDV có bị xung đột lịch không
+                            const now = new Date();
+                            const sevenDaysLater = new Date();
+                            sevenDaysLater.setDate(now.getDate() + 7);
+                            
+                            const tourSlots = dateSlots.filter(slot => {
+                              const slotTourId = typeof slot.tour === 'string' ? slot.tour : slot.tour?._id;
+                              if (slotTourId !== tour._id) return false;
+                              const slotDate = new Date(slot.dateTour);
+                              return slotDate >= now && slotDate <= sevenDaysLater && slot.status === 'upcoming';
+                            });
+                            
+                            const hasConflict = tours.some(otherTour => {
+                              if (otherTour._id === tour._id || !otherTour.assignedEmployee) return false;
+                              if (otherTour.assignedEmployee._id !== employee._id) return false;
+                              
+                              const otherTourSlots = dateSlots.filter(slot => {
+                                const slotTourId = typeof slot.tour === 'string' ? slot.tour : slot.tour?._id;
+                                if (slotTourId !== otherTour._id) return false;
+                                const slotDate = new Date(slot.dateTour);
+                                return slotDate >= now && slotDate <= sevenDaysLater && slot.status === 'upcoming';
+                              });
+                              
+                              return tourSlots.some(slot1 => 
+                                otherTourSlots.some(slot2 => 
+                                  new Date(slot1.dateTour).toDateString() === new Date(slot2.dateTour).toDateString()
+                                )
+                              );
+                            });
+                            
+                            const displayName = `${employee.full_name || `${employee.firstName} ${employee.lastName}`} (${employee.employee_id})`;
+                            
+                            return (
+                              <option key={employee._id} value={employee._id}>
+                                {displayName} {hasConflict ? '⚠️ Xung đột lịch' : ''}
+                              </option>
+                            );
+                          })}
                       </select>
                       {assignments[tour._id] && (
                         <button

@@ -29,7 +29,8 @@ const generateRefreshToken = (employee) => {
     );
 };
 
-// Đăng nhập cho nhân viên HDV
+// Đăng nhập
+
 const loginEmployee = async (req, res) => {
     try {
         const { email, password } = req.body;
