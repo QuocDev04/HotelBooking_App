@@ -223,8 +223,6 @@ Vnpay.get('/payment-callback', async (req, res) => {
     }
 });
 
-
-
 // Kiểm tra trạng thái booking
 Vnpay.get('/booking-status/:bookingId', async (req, res) => {
     try {

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import axiosGuide from "../../config/axios";
 
 // Component Accordion cho lịch trình tour
 const TourScheduleAccordion = ({ schedules, description }) => {
@@ -290,27 +291,7 @@ const TourDuocGiao = () => {
       setLoadingCustomers(false);
     }
   };
-const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
-  try {
-    const validStatuses = ['preparing', 'ongoing', 'completed', 'postponed'];
-    if (!validStatuses.includes(status)) {
-      throw new Error("Trạng thái không hợp lệ");
-    }
-    if (status === 'postponed' && (!note || !note.trim())) {
-      throw new Error("Vui lòng nhập lý do hoãn ngày tour");
-    }
-    const response = await axios.put(
-      `http://localhost:8080/api/tour/status/${id}`,
-      { status, note, updatedBy }
-    );
-    return response.data;
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || error.message
-    };
-  }
-};
+
   const showCustomerList = async (tour) => {
     setSelectedTour(tour);
     setShowCustomerModal(true);
@@ -329,7 +310,7 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
 
     // Fetch tour schedule từ API
     try {
-      const response = await axios.get(`http://localhost:8080/api/tour/${tour._id}`);
+      const response = await axiosGuide.get(`/tour/${tour._id}`);
       if (response.data.success) {
         setSelectedTour({
           ...tour,
@@ -357,8 +338,8 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
       setUpdatingTours(prev => ({ ...prev, [tourId]: true }));
 
       try {
-        const response = await axios.put(
-          `http://localhost:8080/api/tour/status/${dateSlotId}`,
+        const response = await axiosGuide.put(
+          `/tour/status/${dateSlotId}`,
           {
             status: newStatus,
             note: reason,
@@ -391,8 +372,8 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
       setUpdatingTours(prev => ({ ...prev, [tourId]: true }));
 
       try {
-        const response = await axios.put(
-          `http://localhost:8080/api/tour/status/${dateSlotId}`,
+        const response = await axiosGuide.put(
+          `/tour/status/${dateSlotId}`,
           {
             status: newStatus,
             note: `Trạng thái đã được cập nhật thành ${getTourStatusText(newStatus)}`,
@@ -430,10 +411,7 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
     }).format(price);
   };
 
-  const getStatusColor = (status) => {
-    if (status) return 'bg-green-100 text-green-800';
-    return 'bg-red-100 text-red-800';
-  };
+
 
   const getTourStatusColor = (status) => {
     switch (status) {
@@ -465,54 +443,6 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
       case 'completed': return 'bg-green-50 border-green-200';
       case 'postponed': return 'bg-red-50 border-red-200';
       default: return 'bg-white border-gray-300';
-    }
-  };
-
-  const getPaymentStatusColor = (status) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'deposit_paid': return 'bg-blue-100 text-blue-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      case 'pending_cancel': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getPaymentStatusText = (status) => {
-    switch (status) {
-      case 'pending': return 'Chờ thanh toán';
-      case 'deposit_paid': return 'Đã đặt cọc';
-      case 'completed': return 'Đã thanh toán';
-      case 'cancelled': return 'Đã hủy';
-      case 'pending_cancel': return 'Chờ xác nhận hủy';
-      default: return 'Không xác định';
-    }
-  };
-
-  // Function để clean HTML và format text đẹp
-  const cleanHtmlDescription = (htmlString) => {
-    if (!htmlString) return '';
-
-    try {
-      // Tạo temporary div để parse HTML
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = htmlString;
-
-      // Lấy text content
-      let textContent = tempDiv.textContent || tempDiv.innerText || '';
-
-      // Clean up và format
-      textContent = textContent
-        .replace(/\s+/g, ' ')  // Replace multiple spaces với single space
-        .replace(/\n\s*\n/g, '\n\n')  // Keep paragraph breaks
-        .trim();
-
-      return textContent;
-    } catch (error) {
-      console.error('Error cleaning HTML:', error);
-      // Fallback: simple regex clean
-      return htmlString.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
     }
   };
 
@@ -646,7 +576,7 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">Quản lý các ngày khởi hành:</h3>
                     {tourDateSlots[tour._id] && tourDateSlots[tour._id].length > 0 ? (
                       <div className="space-y-3">
-                        {tourDateSlots[tour._id].map((dateSlot, index) => (
+                        {tourDateSlots[tour._id].map((dateSlot) => (
                           <div key={dateSlot._id} className="bg-gray-50 rounded-lg p-4 border">
                             <div className="flex justify-between items-start mb-3">
                               <div>

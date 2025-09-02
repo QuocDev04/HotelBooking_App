@@ -5,6 +5,30 @@ const Employee = require("../../models/People/EmployeeModel");
 const Admin = require("../../models/People/AdminModel");
 const TourModel = require("../../models/Tour/TourModel");
 
+// Tạo Access Token
+const generateAccessToken = (employee) => {
+    return jwt.sign(
+        {
+            employeeId: employee._id,
+            email: employee.email,
+            employee_id: employee.employee_id,
+            position: employee.position,
+            department: employee.department,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "15m" }
+    );
+};
+
+// Tạo Refresh Token
+const generateRefreshToken = (employee) => {
+    return jwt.sign(
+        { employeeId: employee._id },
+        process.env.JWT_REFRESH_SECRET,
+        { expiresIn: "1y" }
+    );
+};
+
 // Đăng nhập cho nhân viên HDV
 const loginEmployee = async (req, res) => {
     try {

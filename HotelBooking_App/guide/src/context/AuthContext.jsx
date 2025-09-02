@@ -88,6 +88,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem("hdv_token");
     localStorage.removeItem("hdv_user");
+    localStorage.removeItem("hdv_refresh_token")
   };
 
   const updateUser = (updatedUserData) => {
