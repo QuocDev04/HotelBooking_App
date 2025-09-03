@@ -375,6 +375,8 @@ const getAssignedTours = async (req, res) => {
         
         // Tìm tất cả DateSlot được phân công cho nhân viên này
         const DateTour = require('../../models/Tour/DateTour');
+        const TourScheduleModel = require('../../models/Tour/TourScheduleModel');
+        
         const assignedDateSlots = await DateTour.find({ 
             assignedEmployee: employee._id 
         })
@@ -404,6 +406,15 @@ const getAssignedTours = async (req, res) => {
             const tourSlots = assignedDateSlots.filter(slot => slot.tour._id.toString() === tourId);
             if (tourSlots.length > 0) {
                 const tour = tourSlots[0].tour;
+                
+                // Lấy schedules cho tour này
+                const tourSchedule = await TourScheduleModel.findOne({ Tour: tour._id });
+                if (tourSchedule) {
+                    tour.schedules = tourSchedule.schedules || [];
+                } else {
+                    tour.schedules = [];
+                }
+                
                 // Thêm thông tin về các ngày được phân công
                 tour.assignedDates = tourSlots.map(slot => ({
                     dateSlotId: slot._id,

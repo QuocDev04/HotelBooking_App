@@ -1,14 +1,25 @@
 import axios from 'axios'
 
 // Force reload for axios config - Updated at 2025-01-03
-const base = import.meta.env.DEV
+const defaultBase = import.meta.env.DEV
     ? 'http://localhost:8080/api/'
     : 'https://hotel-booking-app-server-eight.vercel.app/api/';
 
-console.log('Axios baseURL:', base);
+// Normalize custom base URL to always end with /api/
+const rawBase = import.meta.env.VITE_BASE_URL || defaultBase;
+let normalizedBase = rawBase;
+if (!/\/api\/?$/.test(rawBase)) {
+    if (rawBase.endsWith('/')) {
+        normalizedBase = rawBase + 'api/';
+    } else {
+        normalizedBase = rawBase + '/api/';
+    }
+}
+
+console.log('Axios baseURL (normalized):', normalizedBase);
 
 const axiosGuide = axios.create({
-    baseURL: import.meta.env.VITE_BASE_URL || base
+    baseURL: normalizedBase
 });
 
 // Add request interceptor to include token
