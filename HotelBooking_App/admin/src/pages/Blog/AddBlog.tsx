@@ -43,7 +43,7 @@ const AddBlog = () => {
     onSuccess: () => {
       message.success("Tạo blog thành công!");
       queryClient.invalidateQueries({ queryKey: ["blogs"] }); // ✅ refresh list
-      navigate("/admin/list-blogs"); // ✅ chuyển về list đúng
+      navigate("/admin/list-blog"); // ✅ chuyển về list đúng
     },
     onError: (error: any) => {
       message.error(error.response?.data?.message || "Có lỗi khi tạo blog!");
@@ -80,7 +80,7 @@ const AddBlog = () => {
       <Card
         title="Thêm Blog Mới"
         extra={
-          <Button onClick={() => navigate("/admin/list-blogs")}>
+          <Button onClick={() => navigate("/admin/list-blog")}>
             Quay lại
           </Button>
         }

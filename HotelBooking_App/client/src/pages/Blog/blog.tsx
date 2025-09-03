@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import instanceClient from "../../../configs/instance";
 import { Link } from "react-router-dom";
@@ -24,128 +24,143 @@ export default function Blog() {
 
   const blogs: Blog[] = data?.posts || [];
 
-  // 📌 State phân trang
+  // 📌 Phân trang
   const [currentPage, setCurrentPage] = useState(1);
-  const blogsPerPage = 4; // số blog mỗi trang
-
+  const blogsPerPage = 6;
   const totalPages = Math.ceil(blogs.length / blogsPerPage);
 
-  // Tính index
   const startIndex = (currentPage - 1) * blogsPerPage;
   const currentBlogs = blogs.slice(startIndex, startIndex + blogsPerPage);
 
-  if (isLoading) return <p className="text-center">Đang tải...</p>;
-  if (isError) return <p className="text-center text-red-500">Lỗi khi tải dữ liệu</p>;
+  // 📌 Random 5 bài nổi bật mỗi lần load
+  const featuredBlogs = useMemo(() => {
+    return blogs
+      .slice()
+      .sort(() => Math.random() - 0.5) // shuffle
+      .slice(0, 5);
+  }, [blogs]);
+
+  if (isLoading) return <p className="text-center">⏳ Đang tải...</p>;
+  if (isError) return <p className="text-center text-red-500">❌ Lỗi khi tải dữ liệu</p>;
 
   return (
-    <div className="min-h-screen py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
+    <div className="min-h-screen bg-gray-50">
+      {/* 🔹 Hero Banner */}
+      <div
+        className="relative bg-cover bg-center h-72 md:h-96"
+        style={{
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e')",
+        }}
+      >
+        <div className="absolute inset-0 bg-black/50 flex flex-col justify-center items-center text-center text-white px-4">
+          <h1 className="text-3xl md:text-5xl font-extrabold drop-shadow-lg">
             Khám Phá Blog Du Lịch
           </h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Những câu chuyện, kinh nghiệm, và cẩm nang du lịch hữu ích từ khắp mọi miền đất nước và thế giới.
+          <p className="mt-3 max-w-2xl text-sm md:text-lg text-gray-200">
+            Những câu chuyện, kinh nghiệm và cẩm nang du lịch từ khắp mọi miền.
           </p>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
-          {/* Sidebar */}
-          <aside className="md:col-span-1 space-y-6">
-            <div className="bg-white border border-gray-200 shadow-lg rounded-2xl overflow-hidden">
-              <div className="px-5 py-3 font-bold text-gray-800 bg-gray-100">
-                Cẩm nang du lịch
-              </div>
-              <ul className="divide-y divide-gray-100">
-                {blogs.slice(0, 5).map((blog) => (
-                  <li
-                    key={blog._id}
-                    className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition"
+      {/* 🔹 Main Layout */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12 grid grid-cols-1 lg:grid-cols-4 gap-10">
+        {/* 🔹 Content */}
+        <main className="lg:col-span-3 space-y-10">
+          <div className="grid sm:grid-cols-2 gap-8">
+            {currentBlogs.map((blog) => (
+              <article
+                key={blog._id}
+                className="group bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition transform hover:-translate-y-1"
+              >
+                <Link to={`/blog/${blog.slug}`} className="block relative">
+                  <img
+                    src={blog.image_url || "https://via.placeholder.com/600x300"}
+                    alt={blog.title}
+                    className="object-cover w-full h-56 group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+                </Link>
+                <div className="p-6">
+                  <p className="text-xs uppercase text-gray-500 mb-2">
+                    {new Date(blog.createdAt).toLocaleDateString("vi-VN")} •{" "}
+                    {blog.author_name}
+                  </p>
+                  <Link
+                    to={`/blog/${blog.slug}`}
+                    className="block text-lg font-bold text-gray-800 hover:text-blue-600 transition"
                   >
-                    <Link to={`/blog/${blog.slug}`} className="flex items-center gap-4">
-                      <img
-                        src={blog.image_url || "https://via.placeholder.com/60"}
-                        alt={blog.title}
-                        className="w-16 h-12 rounded object-cover"
-                      />
-                      <p className="text-sm font-medium text-gray-700 line-clamp-2">
-                        {blog.title}
-                      </p>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </aside>
-
-          {/* Main */}
-          <main className="md:col-span-3 space-y-8">
-            <div className="grid gap-8 sm:grid-cols-2">
-              {currentBlogs.map((blog) => (
-                <div
-                  key={blog._id}
-                  className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow transition transform hover:scale-[1.01] hover:shadow-md"
-                >
-                  <Link to={`/blog/${blog.slug}`}>
-                    <img
-                      src={blog.image_url || "https://via.placeholder.com/600x300"}
-                      alt={blog.title}
-                      className="object-cover w-full h-48"
-                    />
+                    {blog.title}
                   </Link>
-                  <div className="p-5">
-                    <p className="text-sm text-gray-400 mb-1">
-                      {new Date(blog.createdAt).toLocaleDateString("vi-VN")} -{" "}
-                      {blog.author_name}
-                    </p>
-                    <Link
-                      to={`/blog/${blog.slug}`}
-                      className="block text-lg font-semibold text-gray-800 hover:text-blue-600 cursor-pointer transition"
-                    >
-                      {blog.title}
-                    </Link>
-                    <p className="mt-3 text-sm text-gray-600 line-clamp-2">
-                      {blog.content.replace(/<[^>]+>/g, "").slice(0, 120)}...
-                    </p>
-                  </div>
+                  <p className="mt-3 text-gray-600 text-sm line-clamp-3">
+                    {blog.content.replace(/<[^>]+>/g, "").slice(0, 160)}...
+                  </p>
                 </div>
-              ))}
-            </div>
+              </article>
+            ))}
+          </div>
 
-            {/* Pagination */}
-            <div className="flex justify-center items-center gap-2 mt-6">
+          {/* 🔹 Pagination */}
+          <div className="flex justify-center items-center gap-3 pt-8">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+              className="px-4 py-2 border rounded-full disabled:opacity-40 hover:bg-gray-100"
+            >
+              ← Trước
+            </button>
+
+            {Array.from({ length: totalPages }).map((_, idx) => (
               <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-                className="px-4 py-2 border rounded-lg disabled:opacity-50"
+                key={idx}
+                onClick={() => setCurrentPage(idx + 1)}
+                className={`w-10 h-10 flex items-center justify-center border rounded-full transition ${
+                  currentPage === idx + 1
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "bg-white text-gray-700 hover:bg-gray-100"
+                }`}
               >
-                Trước
+                {idx + 1}
               </button>
+            ))}
 
-              {Array.from({ length: totalPages }).map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentPage(idx + 1)}
-                  className={`px-4 py-2 border rounded-lg ${
-                    currentPage === idx + 1
-                      ? "bg-blue-600 text-white"
-                      : "bg-white text-gray-700"
-                  }`}
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+              className="px-4 py-2 border rounded-full disabled:opacity-40 hover:bg-gray-100"
+            >
+              Sau →
+            </button>
+          </div>
+        </main>
+
+        {/* 🔹 Sidebar */}
+        <aside className="space-y-6">
+          <div className="bg-white border border-gray-200 shadow-sm rounded-2xl overflow-hidden">
+            <div className="px-5 py-3 font-bold text-gray-800 bg-gradient-to-r from-blue-50 to-blue-100 border-b">
+              Bài viết nổi bật
+            </div>
+            <ul className="divide-y divide-gray-100">
+              {featuredBlogs.map((blog) => (
+                <li
+                  key={blog._id}
+                  className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition"
                 >
-                  {idx + 1}
-                </button>
+                  <Link to={`/blog/${blog.slug}`} className="flex items-center gap-4">
+                    <img
+                      src={blog.image_url || "https://via.placeholder.com/60"}
+                      alt={blog.title}
+                      className="w-16 h-12 rounded-lg object-cover"
+                    />
+                    <p className="text-sm font-medium text-gray-700 line-clamp-2">
+                      {blog.title}
+                    </p>
+                  </Link>
+                </li>
               ))}
-
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}
-                className="px-4 py-2 border rounded-lg disabled:opacity-50"
-              >
-                Sau
-              </button>
-            </div>
-          </main>
-        </div>
+            </ul>
+          </div>
+        </aside>
       </div>
     </div>
   );
