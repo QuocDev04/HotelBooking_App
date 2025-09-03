@@ -130,7 +130,7 @@ const EditBlog = () => {
       <Card
         title="Chỉnh sửa Blog"
         extra={
-          <Button onClick={() => navigate("/admin/list-blogs")}>Quay lại</Button>
+          <Button onClick={() => navigate("/admin/list-blog")}>Quay lại</Button>
         }
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
