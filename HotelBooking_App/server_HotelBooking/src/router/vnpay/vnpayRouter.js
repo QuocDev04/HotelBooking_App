@@ -62,7 +62,7 @@ Vnpay.post('/create-payment', async (req, res) => {
             vnp_ExpireDate: dateFormat(new Date(Date.now() + 24 * 60 * 60 * 1000)),
         });
         console.log("VNPAY", Vnpays);
-        
+
         return res.status(200).json({ success: true, Vnpays, bookingId: booking._id, type });
     } catch (error) {
         console.error('Lỗi tạo thanh toán:', error);
@@ -169,30 +169,98 @@ Vnpay.get('/payment-callback', async (req, res) => {
                 </div>
             `;
                     } else {
-                        // giữ nguyên phần email tour
+                        // ========== TẠO DANH SÁCH KHÁCH ==========
+                        const allGuests = [
+                            ...(updatedBooking.adultPassengers || []),
+                            ...(updatedBooking.childPassengers || []),
+                            ...(updatedBooking.toddlerPassengers || []),
+                            ...(updatedBooking.infantPassengers || [])
+                        ];
+                        const tourDate = updatedBooking.slotId?.dateTour
+                            ? new Date(updatedBooking.slotId.dateTour).toLocaleDateString('vi-VN')
+                            : 'N/A';
+                        // Tách khách chọn singleRoom và khách ghép
+                        const singleRoomGuests = allGuests.filter(g => g.singleRoom);
+                        const guestsToCombine = allGuests.filter(g => !g.singleRoom);
+
+                        // ========== GHÉP PHÒNG ==========
+                        let remainingGuests = [...guestsToCombine];
+                        let roomInfoList = [];
+
+                        while (remainingGuests.length > 0) {
+                            let roomGuests = [];
+                            if (remainingGuests.length >= 4) {
+                                roomGuests = remainingGuests.splice(0, 4);
+                                roomInfoList.push(`1 phòng (4 khách) - Flamingo Đại Lải – Forest In The Sky Resort - Deluxe Sky Residence (2 phòng ngủ)<br/>
+            Khách: ${roomGuests.map(g => g.fullName).join(', ')}`);
+                            } else if (remainingGuests.length === 3) {
+                                roomGuests = remainingGuests.splice(0, 3);
+                                roomInfoList.push(`1 phòng (3 khách) - Flamingo Đại Lải – Forest In The Sky Resort - Premier Sky Residence<br/>
+            Khách: ${roomGuests.map(g => g.fullName).join(', ')}`);
+                            } else if (remainingGuests.length === 2) {
+                                roomGuests = remainingGuests.splice(0, 2);
+                                roomInfoList.push(`1 phòng (2 khách) - Flamingo Đại Lải – Forest In The Sky Resort - Deluxe Sky Residence<br/>
+            Khách: ${roomGuests.map(g => g.fullName).join(', ')}`);
+                            } else if (remainingGuests.length === 1) {
+                                roomGuests = remainingGuests.splice(0, 1);
+                                roomInfoList.push(`1 phòng (1 khách) - Flamingo Đại Lải – Forest In The Sky Resort - Deluxe Sky Residence<br/>
+            Khách: ${roomGuests.map(g => g.fullName).join(', ')}`);
+                            }
+                        }
+
+                        const roomInfo = roomInfoList.length > 0 ? roomInfoList.join('<br/><br/>') : '0 khách - Không có phòng ghép';
+
+                        // Thông báo khách chọn singleRoom
+                        let singleRoomInfo = '';
+                        if (singleRoomGuests.length > 0) {
+                            singleRoomInfo = `<p><strong>Lưu ý:</strong> Những khách đã chọn phòng đơn riêng: ${singleRoomGuests.map(g => g.fullName).join(', ')}</p>`;
+                        }
+
+                        // ========== EMAIL ==========
                         emailHtml = `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h2 style="color: #28a745;">Thanh toán thành công!</h2>
-                    <p>Xin chào <strong>${updatedBooking.fullNameUser}</strong>,</p>
-                    <p>Bạn đã <b>thanh toán thành công</b> cho tour <b>${updatedBooking.slotId?.tour?.nameTour || 'N/A'}</b>.</p>
-                    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                        <h3>Thông tin đặt chỗ:</h3>
-                        <ul style="list-style: none; padding: 0;">
-                            <li><strong>Mã đặt chỗ:</strong> ${bookingId}</li>
-                            <li><strong>Ngày đi:</strong> ${updatedBooking.slotId?.dateTour || 'N/A'}</li>
-                            <li><strong>Người lớn:</strong> ${updatedBooking.adultsTour} người</li>
-                            <li><strong>Trẻ em:</strong> ${updatedBooking.childrenTour || 0} người</li>
-                            <li><strong>Trẻ nhỏ:</strong> ${updatedBooking.toddlerTour || 0} người</li>
-                            <li><strong>Em bé:</strong> ${updatedBooking.infantTour || 0} người</li>
-                            <li><strong>Tổng giá:</strong> ${totalPriceVN} VNĐ</li>
-                            <li><strong>Loại thanh toán:</strong> ${updatedBooking.paymentType || 'Không xác định'}</li>
-                        </ul>
-                    </div>
-                    <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi!</p>
-                    <p>Nếu có thắc mắc, vui lòng liên hệ: <strong>support@example.com</strong></p>
-                </div>
-            `;
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <h2 style="color: #28a745;">Thanh toán thành công!</h2>
+    <p>Xin chào <strong>${updatedBooking.fullNameUser}</strong>,</p>
+    <p>Bạn đã <b>thanh toán thành công</b> cho tour 
+        <b>${updatedBooking.slotId?.tour?.nameTour || 'N/A'}</b>.
+    </p>
+    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <h3>Thông tin đặt chỗ:</h3>
+        <ul style="list-style: none; padding: 0;">
+            <li><strong>Mã đặt chỗ:</strong> ${bookingId}</li>
+            <li><strong>Ngày đi:</strong> ${tourDate}</li>
+            <li><strong>Người lớn:</strong> ${updatedBooking.adultsTour} người</li>
+            <li><strong>Trẻ em:</strong> ${updatedBooking.childrenTour || 0} người</li>
+            <li><strong>Trẻ nhỏ:</strong> ${updatedBooking.toddlerTour || 0} người</li>
+            <li><strong>Em bé:</strong> ${updatedBooking.infantTour || 0} người</li>
+            <li><strong>Tổng giá:</strong> ${totalPriceVN} VNĐ</li>
+            <li><strong>Loại thanh toán:</strong> ${updatedBooking.paymentType || 'Không xác định'}</li>
+        </ul>
+
+        <h3>Thông tin phòng khách sạn:</h3>
+        <p>${roomInfo}</p>
+        ${singleRoomInfo}
+
+        <h3>🛏️ Các hạng phòng tiêu biểu:</h3>
+        <ul style="list-style: none; padding: 0;">
+            <li><b>Deluxe Sky Residence</b> - 60 m², 2 người lớn + 2 trẻ em, Phòng ngủ riêng, phòng khách, sofa, ban công, bồn tắm, view Rừng.</li>
+            <li><b>Premier Sky Residence</b> - 66 m², 2 người lớn + 2 trẻ em, Phòng ngủ riêng, phòng khách, sofa, ban công, bồn tắm, view Toàn cảnh.</li>
+            <li><b>Executive Sky Residence</b> - 75 m², 2 người lớn + 2 trẻ em, Phòng ngủ riêng, phòng khách, sofa, ban công, bồn tắm, view Toàn cảnh.</li>
+            <li><b>Deluxe Sky Residence (2 phòng ngủ)</b> - 103 m², 4 người lớn + 4 trẻ em, 2 phòng ngủ, phòng khách, sofa, ban công, bồn tắm, view Toàn cảnh.</li>
+            <li><b>Premier Sky Residence (2 phòng ngủ)</b> - 134 m², 4 người lớn + 4 trẻ em, 2 phòng ngủ, phòng khách, sofa, ban công, bồn tắm, view Toàn cảnh.</li>
+            <li><b>Executive Sky Residence (2 phòng ngủ)</b> - 165 m², 4 người lớn + 4 trẻ em, 2 phòng ngủ, phòng khách, sofa, ban công, bồn tắm, view Toàn cảnh.</li>
+        </ul>
+    </div>
+    <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi!</p>
+    <p>Nếu có thắc mắc, vui lòng liên hệ: <strong>support@example.com</strong></p>
+</div>
+`;
                     }
+
+
+
+
+
 
                     await sendMail({
                         email: updatedBooking.email,
@@ -227,9 +295,9 @@ Vnpay.get('/payment-callback', async (req, res) => {
 Vnpay.get('/booking-status/:bookingId', async (req, res) => {
     try {
         const { bookingId } = req.params;
-        
+
         const booking = await TourBookingSchema.findById(bookingId);
-        
+
         if (!booking) {
             return res.status(404).json({
                 success: false,
@@ -311,18 +379,18 @@ Vnpay.put('/update-status/:bookingId', async (req, res) => {
 Vnpay.post('/process-payment', async (req, res) => {
     try {
         console.log('Body nhận được:', req.body);
-        
+
         const bookingData = req.body;
 
         if (!bookingData) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Thiếu dữ liệu booking' 
+            return res.status(400).json({
+                success: false,
+                message: 'Thiếu dữ liệu booking'
             });
         }
 
         let existingBooking = null;
-        
+
         // Nếu có bookingId, tìm booking hiện tại
         if (bookingData.bookingId) {
             existingBooking = await TourBookingSchema.findById(bookingData.bookingId);
@@ -337,7 +405,7 @@ Vnpay.post('/process-payment', async (req, res) => {
 
         // Sử dụng giá từ request hoặc tính tổng giá nếu không có
         let totalAmount = 0;
-        
+
         if (bookingData.tourPrice) {
             // Sử dụng giá tour từ request
             totalAmount = bookingData.tourPrice;
@@ -351,7 +419,7 @@ Vnpay.post('/process-payment', async (req, res) => {
             const toddlerPrice = 1000000; // 1 triệu/trẻ nhỏ
             const infantPrice = 0; // Em bé miễn phí
 
-            totalAmount = 
+            totalAmount =
                 (bookingData.adultsTour || 0) * adultPrice +
                 (bookingData.childrenTour || 0) * childPrice +
                 (bookingData.toddlerTour || 0) * toddlerPrice +
@@ -371,12 +439,12 @@ Vnpay.post('/process-payment', async (req, res) => {
             isFullyPaid: false,
             createdAt: new Date()
         });
-        
+
         if (!existingBooking) {
             await bookingToUse.save();
             console.log('Booking mới đã được tạo:', bookingToUse._id);
         }
-        
+
         console.log('Tổng giá tour:', totalAmount);
         console.log('Loại thanh toán:', bookingData.paymentType);
 
@@ -435,14 +503,14 @@ Vnpay.post('/process-payment', async (req, res) => {
 Vnpay.get('/test-callback', async (req, res) => {
     try {
         console.log('Test callback được gọi với query:', req.query);
-        
+
         const responseCode = req.query.vnp_ResponseCode;
         const txnRef = req.query.vnp_TxnRef;
         const bookingId = txnRef ? txnRef.split('-')[0] : null;
-        
+
         console.log('Response Code:', responseCode);
         console.log('Booking ID:', bookingId);
-        
+
         if (responseCode === '00' && bookingId) {
             const updatedBooking = await TourBookingSchema.findByIdAndUpdate(
                 bookingId,
@@ -453,12 +521,12 @@ Vnpay.get('/test-callback', async (req, res) => {
                 },
                 { new: true }
             );
-            
+
             console.log('Booking đã được cập nhật:', updatedBooking);
         }
-        
+
         return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=00&success=true');
-        
+
     } catch (error) {
         console.error('Lỗi test callback:', error);
         return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Test error');
@@ -469,14 +537,14 @@ Vnpay.get('/test-callback', async (req, res) => {
 Vnpay.get('/frontend-callback', async (req, res) => {
     try {
         console.log('Frontend callback được gọi với query:', req.query);
-        
+
         const responseCode = req.query.vnp_ResponseCode;
         const txnRef = req.query.vnp_TxnRef;
         const bookingId = txnRef ? txnRef.split('-')[0] : null;
-        
+
         console.log('Response Code:', responseCode);
         console.log('Booking ID:', bookingId);
-        
+
         if (responseCode === '00' && bookingId) {
             // Thanh toán thành công
             const updatedBooking = await TourBookingSchema.findByIdAndUpdate(
@@ -488,15 +556,15 @@ Vnpay.get('/frontend-callback', async (req, res) => {
                 },
                 { new: true }
             );
-            
+
             if (updatedBooking) {
                 console.log('Booking đã được cập nhật thành công:', updatedBooking._id);
-                
+
                 // Gửi email xác nhận
                 if (updatedBooking.email) {
                     try {
                         const totalPriceVN = updatedBooking.totalPriceTour.toLocaleString('vi-VN');
-                        
+
                         await sendMail({
                             email: updatedBooking.email,
                             subject: 'Xác nhận thanh toán tour thành công',
@@ -522,13 +590,13 @@ Vnpay.get('/frontend-callback', async (req, res) => {
                                 </div>
                       `,
                         });
-                        
+
                         console.log('Email xác nhận đã gửi tới:', updatedBooking.email);
                     } catch (mailErr) {
                         console.error('Lỗi gửi email:', mailErr);
                     }
                 }
-                
+
                 return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=00&success=true&bookingId=' + bookingId);
             } else {
                 console.error('Không tìm thấy booking:', bookingId);
@@ -542,10 +610,10 @@ Vnpay.get('/frontend-callback', async (req, res) => {
                     { payment_status: 'cancelled' }
                 );
             }
-            
+
             return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Payment failed');
         }
-        
+
     } catch (error) {
         console.error('Lỗi frontend callback:', error);
         return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=System error');
@@ -556,9 +624,9 @@ Vnpay.get('/frontend-callback', async (req, res) => {
 Vnpay.get('/manual-update/:bookingId', async (req, res) => {
     try {
         const { bookingId } = req.params;
-        
+
         console.log('Manual update cho booking:', bookingId);
-        
+
         const updatedBooking = await TourBookingSchema.findByIdAndUpdate(
             bookingId,
             {
@@ -568,7 +636,7 @@ Vnpay.get('/manual-update/:bookingId', async (req, res) => {
             },
             { new: true }
         );
-        
+
         if (updatedBooking) {
             console.log('Booking đã được cập nhật:', updatedBooking._id);
             return res.json({
@@ -587,7 +655,7 @@ Vnpay.get('/manual-update/:bookingId', async (req, res) => {
                 message: 'Booking không tồn tại'
             });
         }
-        
+
     } catch (error) {
         console.error('Lỗi manual update:', error);
         return res.status(500).json({
@@ -601,9 +669,9 @@ Vnpay.get('/manual-update/:bookingId', async (req, res) => {
 Vnpay.get('/test-payment-callback/:bookingId', async (req, res) => {
     try {
         const { bookingId } = req.params;
-        
+
         console.log('Test payment callback cho booking:', bookingId);
-        
+
         // Giả lập dữ liệu callback từ VNPay
         const mockCallbackData = {
             vnp_ResponseCode: '00',
@@ -615,15 +683,15 @@ Vnpay.get('/test-payment-callback/:bookingId', async (req, res) => {
             vnp_PayDate: '20250802101732',
             vnp_SecureHash: 'test_hash'
         };
-        
+
         // Xử lý như callback thật
         const responseCode = mockCallbackData.vnp_ResponseCode;
         const txnRef = mockCallbackData.vnp_TxnRef;
         const extractedBookingId = txnRef.split('-')[0];
-        
+
         console.log('Response Code:', responseCode);
         console.log('Booking ID:', extractedBookingId);
-        
+
         if (responseCode === '00' && extractedBookingId) {
             const updatedBooking = await TourBookingSchema.findByIdAndUpdate(
                 extractedBookingId,
@@ -634,7 +702,7 @@ Vnpay.get('/test-payment-callback/:bookingId', async (req, res) => {
                 },
                 { new: true }
             );
-            
+
             if (updatedBooking) {
                 console.log('Booking đã được cập nhật thành công:', updatedBooking._id);
                 return res.json({
@@ -659,7 +727,7 @@ Vnpay.get('/test-payment-callback/:bookingId', async (req, res) => {
                 message: 'Response code không hợp lệ'
             });
         }
-        
+
     } catch (error) {
         console.error('Lỗi test callback:', error);
         return res.status(500).json({
@@ -675,9 +743,9 @@ Vnpay.get('/test-payment-callback/:bookingId', async (req, res) => {
 Vnpay.post('/process-refund', async (req, res) => {
     try {
         const { bookingId, refundReason, refundAmount, refundType } = req.body;
-        
+
         console.log('Xử lý hoàn tiền cho booking:', bookingId);
-        
+
         // Tìm booking
         const booking = await TourBookingSchema.findById(bookingId);
         if (!booking) {
@@ -686,7 +754,7 @@ Vnpay.post('/process-refund', async (req, res) => {
                 message: 'Không tìm thấy booking'
             });
         }
-        
+
         // Kiểm tra trạng thái booking
         if (booking.payment_status !== 'completed') {
             return res.status(400).json({
@@ -694,7 +762,7 @@ Vnpay.post('/process-refund', async (req, res) => {
                 message: 'Booking chưa thanh toán hoàn tất'
             });
         }
-        
+
         // Kiểm tra xem booking có bị hủy không
         if (!booking.cancel_status || booking.cancel_status !== 'approved') {
             return res.status(400).json({
@@ -702,7 +770,7 @@ Vnpay.post('/process-refund', async (req, res) => {
                 message: 'Chỉ có thể hoàn tiền cho booking đã được hủy'
             });
         }
-        
+
         // Tính toán số tiền hoàn
         let refundAmountToProcess = refundAmount;
         if (!refundAmountToProcess) {
@@ -710,7 +778,7 @@ Vnpay.post('/process-refund', async (req, res) => {
             const tourDate = new Date(booking.slotId?.dateTour);
             const currentDate = new Date();
             const daysUntilTour = Math.ceil((tourDate - currentDate) / (1000 * 60 * 60 * 24));
-            
+
             if (refundType === 'customer_cancellation') {
                 if (daysUntilTour > 14) {
                     refundAmountToProcess = booking.totalPriceTour; // 100%
@@ -730,7 +798,7 @@ Vnpay.post('/process-refund', async (req, res) => {
                 });
             }
         }
-        
+
         // Cấu hình VNPay
         const vnpay = new VNPay({
             tmnCode: 'LH54Z11C',
@@ -740,7 +808,7 @@ Vnpay.post('/process-refund', async (req, res) => {
             hashAlgorithm: 'SHA512',
             loggerFn: ignoreLogger,
         });
-        
+
         // Tạo URL hoàn tiền VNPay
         const refundUrl = await vnpay.buildRefundUrl({
             vnp_Amount: refundAmountToProcess * 100, // VNPay yêu cầu số tiền tính bằng xu
@@ -750,7 +818,7 @@ Vnpay.post('/process-refund', async (req, res) => {
             vnp_TransactionType: '02', // Refund
             vnp_CreateDate: dateFormat(new Date()),
         });
-        
+
         // Cập nhật trạng thái hoàn tiền
         await TourBookingSchema.findByIdAndUpdate(bookingId, {
             refund_status: 'processing',
@@ -761,9 +829,9 @@ Vnpay.post('/process-refund', async (req, res) => {
             cancel_status: 'approved',
             cancelledAt: new Date()
         });
-        
+
         console.log('URL hoàn tiền đã tạo:', refundUrl);
-        
+
         return res.status(200).json({
             success: true,
             refundUrl,
@@ -772,7 +840,7 @@ Vnpay.post('/process-refund', async (req, res) => {
             refundReason,
             refundType
         });
-        
+
     } catch (error) {
         console.error('Lỗi xử lý hoàn tiền:', error);
         return res.status(500).json({
@@ -786,9 +854,9 @@ Vnpay.post('/process-refund', async (req, res) => {
 Vnpay.post('/create-hotel-payment', async (req, res) => {
     try {
         const { bookingId, amount, orderInfo, orderType, locale, returnUrl, ipAddr } = req.body;
-        
+
         console.log('Tạo thanh toán hotel với dữ liệu:', req.body);
-        
+
         // Kiểm tra booking tồn tại
         const booking = await HotelBooking.findById(bookingId);
         if (!booking) {
@@ -797,7 +865,7 @@ Vnpay.post('/create-hotel-payment', async (req, res) => {
                 message: 'Không tìm thấy booking'
             });
         }
-        
+
         // Cấu hình VNPay
         const vnpay = new VNPay({
             tmnCode: 'LH54Z11C',
@@ -807,7 +875,7 @@ Vnpay.post('/create-hotel-payment', async (req, res) => {
             hashAlgorithm: 'SHA512',
             loggerFn: ignoreLogger,
         });
-        
+
         // Tạo URL thanh toán
         const paymentUrl = await vnpay.buildPaymentUrl({
             vnp_Amount: amount * 100, // VNPay yêu cầu số tiền tính bằng xu
@@ -820,15 +888,15 @@ Vnpay.post('/create-hotel-payment', async (req, res) => {
             vnp_CreateDate: dateFormat(new Date()),
             vnp_ExpireDate: dateFormat(new Date(Date.now() + 24 * 60 * 60 * 1000)), // 24 giờ
         });
-        
+
         console.log('URL thanh toán hotel đã tạo:', paymentUrl);
-        
+
         return res.status(200).json({
             success: true,
             paymentUrl,
             bookingId: booking._id
         });
-        
+
     } catch (error) {
         console.error('Lỗi tạo thanh toán hotel:', error);
         return res.status(500).json({
@@ -842,9 +910,9 @@ Vnpay.post('/create-hotel-payment', async (req, res) => {
 Vnpay.post('/process-hotel-refund', async (req, res) => {
     try {
         const { bookingId, refundType, refundReason } = req.body;
-        
+
         console.log('Xử lý hoàn tiền hotel với dữ liệu:', req.body);
-        
+
         // Kiểm tra booking tồn tại
         const booking = await HotelBooking.findById(bookingId);
         if (!booking) {
@@ -853,13 +921,13 @@ Vnpay.post('/process-hotel-refund', async (req, res) => {
                 message: 'Không tìm thấy booking'
             });
         }
-        
+
         // Tính toán số tiền hoàn
         let refundAmountToProcess = 0;
         const checkInDate = new Date(booking.checkInDate);
         const currentDate = new Date();
         const daysUntilCheckIn = Math.ceil((checkInDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
-        
+
         if (refundType === 'customer_cancellation') {
             if (daysUntilCheckIn > 7) {
                 refundAmountToProcess = booking.totalPrice * 0.8; // 80%
@@ -873,7 +941,7 @@ Vnpay.post('/process-hotel-refund', async (req, res) => {
         } else if (refundType === 'hotel_cancellation') {
             refundAmountToProcess = booking.totalPrice; // 100%
         }
-        
+
         // Cấu hình VNPay
         const vnpay = new VNPay({
             tmnCode: 'LH54Z11C',
@@ -883,7 +951,7 @@ Vnpay.post('/process-hotel-refund', async (req, res) => {
             hashAlgorithm: 'SHA512',
             loggerFn: ignoreLogger,
         });
-        
+
         // Tạo URL hoàn tiền VNPay
         const refundUrl = await vnpay.buildRefundUrl({
             vnp_Amount: refundAmountToProcess * 100, // VNPay yêu cầu số tiền tính bằng xu
@@ -893,7 +961,7 @@ Vnpay.post('/process-hotel-refund', async (req, res) => {
             vnp_TransactionType: '02', // Refund
             vnp_CreateDate: dateFormat(new Date()),
         });
-        
+
         // Cập nhật trạng thái hoàn tiền
         await HotelBooking.findByIdAndUpdate(bookingId, {
             refund_status: 'processing',
@@ -904,9 +972,9 @@ Vnpay.post('/process-hotel-refund', async (req, res) => {
             booking_status: 'cancelled',
             cancelledAt: new Date()
         });
-        
+
         console.log('URL hoàn tiền hotel đã tạo:', refundUrl);
-        
+
         return res.status(200).json({
             success: true,
             refundUrl,
@@ -915,7 +983,7 @@ Vnpay.post('/process-hotel-refund', async (req, res) => {
             refundReason,
             refundType
         });
-        
+
     } catch (error) {
         console.error('Lỗi xử lý hoàn tiền hotel:', error);
         return res.status(500).json({
@@ -929,18 +997,18 @@ Vnpay.post('/process-hotel-refund', async (req, res) => {
 Vnpay.get('/refund-callback', async (req, res) => {
     try {
         console.log('Nhận callback hoàn tiền từ VNPay:', req.query);
-        
+
         const responseCode = req.query.vnp_ResponseCode;
         const txnRef = req.query.vnp_TxnRef;
         const bookingId = txnRef.split('-')[0];
-        
+
         console.log('Response Code:', responseCode);
         console.log('Booking ID:', bookingId);
 
         if (responseCode === '00') {
             // Hoàn tiền thành công
             console.log('Hoàn tiền thành công cho booking:', bookingId);
-            
+
             const updatedBooking = await TourBookingSchema.findByIdAndUpdate(
                 bookingId,
                 {
@@ -957,19 +1025,19 @@ Vnpay.get('/refund-callback', async (req, res) => {
                     select: 'nameTour',
                 },
             });
-            
+
             if (!updatedBooking) {
                 console.error('Không tìm thấy booking:', bookingId);
                 return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Booking not found');
             }
-            
+
             console.log('Booking đã được cập nhật hoàn tiền:', updatedBooking._id);
-            
+
             // Gửi email thông báo hoàn tiền
             if (updatedBooking.email) {
                 try {
                     const refundAmountVN = updatedBooking.refund_amount.toLocaleString('vi-VN');
-                    
+
                     await sendMail({
                         email: updatedBooking.email,
                         subject: 'Xác nhận hoàn tiền tour',
@@ -994,7 +1062,7 @@ Vnpay.get('/refund-callback', async (req, res) => {
                             </div>
             `,
                     });
-                    
+
                     console.log('Email thông báo hoàn tiền đã gửi tới:', updatedBooking.email);
                 } catch (mailErr) {
                     console.error('Lỗi gửi email hoàn tiền:', mailErr);
@@ -1002,22 +1070,22 @@ Vnpay.get('/refund-callback', async (req, res) => {
             }
 
             return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=00&success=true&type=refund');
-            
+
         } else {
             // Hoàn tiền thất bại
             console.log('Hoàn tiền thất bại cho booking:', bookingId);
-            
+
             await TourBookingSchema.findByIdAndUpdate(
                 bookingId,
-                { 
+                {
                     refund_status: 'pending',
                     cancel_status: 'pending'
                 }
             );
-            
+
             return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Refund failed');
         }
-        
+
     } catch (error) {
         console.error('Lỗi xử lý callback hoàn tiền:', error);
         return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=System error');
@@ -1056,15 +1124,15 @@ Vnpay.get('/hotel-payment-callback', async (req, res) => {
         if (responseCode === '00') {
             // Thanh toán thành công
             console.log('Thanh toán hotel thành công cho booking:', bookingId);
-            
+
             // Lấy thông tin booking để xác định loại thanh toán
             const booking = await HotelBooking.findById(bookingId);
-            
+
             let updateData = {
                 booking_status: 'confirmed',
                 paidAt: new Date(),
             };
-            
+
             // Xác định payment_status dựa trên loại thanh toán
             if (booking.isDeposit) {
                 if (booking.payment_status === 'pending') {
@@ -1080,16 +1148,16 @@ Vnpay.get('/hotel-payment-callback', async (req, res) => {
                 updateData.payment_status = 'confirmed';
                 updateData.isFullyPaid = true;
             }
-            
+
             const updatedBooking = await HotelBooking.findByIdAndUpdate(
                 bookingId,
                 updateData,
                 { new: true }
             );
-            
+
             if (updatedBooking) {
                 console.log('Hotel booking đã được cập nhật thành công:', updatedBooking._id);
-                
+
                 // Gửi email xác nhận
                 if (updatedBooking.guestInfo && updatedBooking.guestInfo.email) {
                     try {
@@ -1120,10 +1188,10 @@ Vnpay.get('/hotel-payment-callback', async (req, res) => {
         } else {
             // Thanh toán thất bại
             console.log('Thanh toán hotel thất bại cho booking:', bookingId);
-            
+
             await HotelBooking.findByIdAndUpdate(
                 bookingId,
-                { 
+                {
                     payment_status: 'failed',
                     booking_status: 'cancelled'
                 }

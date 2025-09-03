@@ -327,7 +327,7 @@ const RefundManagement: React.FC = () => {
         const cancelDate = record.cancelledAt || record.cancellation_date;
         const baseAmount = record.payment_status === 'completed' ? record.totalPriceTour : (record.depositAmount || 0);
         
-        if (!cancelDate || !record.slotId.dateTour || !baseAmount) {
+        if (!cancelDate || !record?.slotId?.dateTour || !baseAmount) {
           return <span style={{ color: '#999' }}>Không đủ thông tin</span>;
         }
         
@@ -357,8 +357,8 @@ const RefundManagement: React.FC = () => {
         const baseAmount = record.payment_status === 'completed' ? record.totalPriceTour : (record.depositAmount || 0);
         
         let calculatedAmount = 0;
-        if (cancelDate && record.slotId.dateTour && baseAmount) {
-          const policy = calculateRefundPolicy(cancelDate, record.slotId.dateTour, baseAmount);
+        if (cancelDate && record?.slotId?.dateTour && baseAmount) {
+          const policy = calculateRefundPolicy(cancelDate, record?.slotId?.dateTour, baseAmount);
           calculatedAmount = policy.calculatedRefund;
         }
         

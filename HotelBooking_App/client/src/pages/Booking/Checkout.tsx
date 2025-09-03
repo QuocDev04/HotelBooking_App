@@ -106,6 +106,15 @@ const Checkout = () => {
   }, []);
 
   const handleAdultCountChange = (newCount: any) => {
+    const availableSeats = tours?.availableSeats as number | undefined;
+    if (typeof availableSeats === 'number') {
+      const prospectiveTotal = newCount + childCount + kidCount;
+      if (prospectiveTotal > availableSeats) {
+        const remaining = Math.max(0, availableSeats - (adultCount + childCount + kidCount));
+        message.warning(`Chỉ còn ${remaining} chỗ, không thể thêm người lớn nữa`);
+        return;
+      }
+    }
     setAdultCount(newCount);
     setSingleRoom((prev) => {
       const newArray = [...prev];
@@ -175,13 +184,9 @@ const Checkout = () => {
     0
   );
 
-  const requiredLabel = (text: string) => (
-    <>
-      {text} <span className="text-red-500">*</span>
-    </>
-  );
+  //
 
-  const { mutate, isLoading } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: async (data: any) => {
       try {
         const userId = localStorage.getItem("userId");
@@ -307,6 +312,20 @@ const Checkout = () => {
     // Chuyển đổi isFullPayment từ chuỗi sang boolean
     const isFullPayment = values.isFullPayment === "true";
 
+    // Kiểm tra tổng số khách (không tính em bé) không vượt quá số chỗ
+    const availableSeats = tours?.availableSeats as number | undefined;
+    const totalNonInfants = adultCount + kidCount + childCount;
+    if (typeof availableSeats === 'number' && totalNonInfants > availableSeats) {
+      message.error(`Tổng số khách (không tính em bé) vượt quá số chỗ còn lại (${availableSeats}). Vui lòng giảm số lượng.`);
+      return;
+    }
+
+    // Giới hạn số lượng em bé (<2 tuổi) tối đa 15
+    if (babyCount > 15) {
+      message.error('Số lượng em bé (dưới 2 tuổi) không được vượt quá 15.');
+      return;
+    }
+
     // Kiểm tra nếu chọn thanh toán tiền mặt, hiển thị CashDepositModal
     if (values.payment_method === 'cash') {
       setPendingFormValues(values);
@@ -376,7 +395,7 @@ const Checkout = () => {
 
   const handleDepositConfirm = () => {
     // Ngăn chặn multiple clicks
-    if (isLoading) return;
+    if (isPending) return;
 
     setCashDepositModalVisible(false);
 
@@ -414,7 +433,7 @@ const Checkout = () => {
 
   const handleCashPayment = () => {
     // Ngăn chặn multiple clicks
-    if (isLoading) return;
+    if (isPending) return;
 
     setCashDepositModalVisible(false);
 
@@ -742,7 +761,18 @@ const Checkout = () => {
                       <button
                         type="button"
                         className="flex items-center justify-center w-10 h-10 font-bold text-white transition-colors duration-200 bg-purple-500 rounded-full hover:bg-purple-600"
-                        onClick={() => setChildCount(childCount + 1)}
+                        onClick={() => {
+                          const availableSeats = tours?.availableSeats as number | undefined;
+                          if (typeof availableSeats === 'number') {
+                            const prospectiveTotal = adultCount + kidCount + (childCount + 1);
+                            if (prospectiveTotal > availableSeats) {
+                              const remaining = Math.max(0, availableSeats - (adultCount + kidCount + childCount));
+                              message.warning(`Chỉ còn ${remaining} chỗ, không thể thêm trẻ nhỏ nữa`);
+                              return;
+                            }
+                          }
+                          setChildCount(childCount + 1);
+                        }}
                       >
                         +
                       </button>
@@ -777,7 +807,18 @@ const Checkout = () => {
                       <button
                         type="button"
                         className="flex items-center justify-center w-10 h-10 font-bold text-white transition-colors duration-200 bg-green-500 rounded-full hover:bg-green-600"
-                        onClick={() => setKidCount(kidCount + 1)}
+                        onClick={() => {
+                          const availableSeats = tours?.availableSeats as number | undefined;
+                          if (typeof availableSeats === 'number') {
+                            const prospectiveTotal = adultCount + (kidCount + 1) + childCount;
+                            if (prospectiveTotal > availableSeats) {
+                              const remaining = Math.max(0, availableSeats - (adultCount + kidCount + childCount));
+                              message.warning(`Chỉ còn ${remaining} chỗ, không thể thêm trẻ em nữa`);
+                              return;
+                            }
+                          }
+                          setKidCount(kidCount + 1);
+                        }}
                       >
                         +
                       </button>
@@ -812,7 +853,13 @@ const Checkout = () => {
                       <button
                         type="button"
                         className="flex items-center justify-center w-10 h-10 font-bold text-white transition-colors duration-200 bg-pink-500 rounded-full hover:bg-pink-600"
-                        onClick={() => setBabyCount(babyCount + 1)}
+                        onClick={() => {
+                          if (babyCount + 1 > 15) {
+                            message.warning('Tối đa 15 em bé (dưới 2 tuổi) cho mỗi đơn.');
+                            return;
+                          }
+                          setBabyCount(babyCount + 1);
+                        }}
                       >
                         +
                       </button>
@@ -837,9 +884,7 @@ const Checkout = () => {
                             <Row gutter={24}>
                               <Col span={10}>
                                 <Form.Item
-                                  key={field.key + "_fullName"}
                                   name={[field.name, 'fullName']}
-                                  fieldKey={[field.fieldKey, 'fullName']}
                                   rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
                                 >
                                   <Input placeholder="Nhập họ tên" size="large" />
@@ -847,9 +892,7 @@ const Checkout = () => {
                               </Col>
                               <Col span={4}>
                                 <Form.Item
-                                  key={field.key + "_gender"}
                                   name={[field.name, 'gender']}
-                                  fieldKey={[field.fieldKey, 'gender']}
                                   rules={[{ required: true, message: 'Vui lòng chọn giới tính' }]}
                                 >
                                   <Select
@@ -931,9 +974,7 @@ const Checkout = () => {
                             <Row gutter={24}>
                               <Col span={10}>
                                 <Form.Item
-                                  key={field.key + "_fullName"}
                                   name={[field.name, 'fullName']}
-                                  fieldKey={[field.fieldKey, 'fullName']}
                                   rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
                                 >
                                   <Input placeholder="Nhập họ tên" size="large" />
@@ -941,9 +982,7 @@ const Checkout = () => {
                               </Col>
                               <Col span={4}>
                                 <Form.Item
-                                  key={field.key + "_gender"}
                                   name={[field.name, 'gender']}
-                                  fieldKey={[field.fieldKey, 'gender']}
                                   rules={[{ required: true }]}
                                 >
                                   <Select
@@ -1001,9 +1040,7 @@ const Checkout = () => {
                             <Row gutter={24}>
                               <Col span={10}>
                                 <Form.Item
-                                  key={field.key + "_fullName"}
                                   name={[field.name, 'fullName']}
-                                  fieldKey={[field.fieldKey, 'fullName']}
                                   rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
                                 >
                                   <Input placeholder="Nhập họ tên" size="large" />
@@ -1011,9 +1048,7 @@ const Checkout = () => {
                               </Col>
                               <Col span={4}>
                                 <Form.Item
-                                  key={field.key + "_gender"}
                                   name={[field.name, 'gender']}
-                                  fieldKey={[field.fieldKey, 'gender']}
                                   rules={[{ required: true }]}
                                 >
                                   <Select
@@ -1071,9 +1106,7 @@ const Checkout = () => {
                             <Row gutter={24}>
                               <Col span={10}>
                                 <Form.Item
-                                  key={field.key + "_fullName"}
                                   name={[field.name, 'fullName']}
-                                  fieldKey={[field.fieldKey, 'fullName']}
                                   rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
                                 >
                                   <Input placeholder="Nhập họ tên" size="large" />
@@ -1081,9 +1114,7 @@ const Checkout = () => {
                               </Col>
                               <Col span={4}>
                                 <Form.Item
-                                  key={field.key + "_gender"}
                                   name={[field.name, 'gender']}
-                                  fieldKey={[field.fieldKey, 'gender']}
                                   rules={[{ required: true }]}
                                 >
                                   <Select
@@ -1236,19 +1267,26 @@ const Checkout = () => {
                           });
                           
                           // Add checked class to selected card
-                          const card = e.target.closest('label').querySelector('[data-payment-method]');
-                          card.classList.remove('border-gray-200');
-                          card.classList.add('border-green-500', 'shadow-lg', 'shadow-green-100');
+                          const container = e.target.closest('label');
+                          const card = container ? container.querySelector('[data-payment-method]') : null;
+                          if (card) {
+                            card.classList.remove('border-gray-200');
+                            card.classList.add('border-green-500', 'shadow-lg', 'shadow-green-100');
+                          }
                           
                           // Add checked class to selected radio indicator
-                          const indicator = e.target.closest('label').querySelector('[data-radio-indicator]');
-                          indicator.classList.remove('border-gray-300');
-                          indicator.classList.add('border-green-500', 'bg-green-500');
+                          const indicator = container ? container.querySelector('[data-radio-indicator]') : null;
+                          if (indicator) {
+                            indicator.classList.remove('border-gray-300');
+                            indicator.classList.add('border-green-500', 'bg-green-500');
+                          }
                           
                           // Add checked class to selected check icon
-                          const checkIcon = e.target.closest('label').querySelector('[data-check-icon]');
-                          checkIcon.classList.remove('opacity-0');
-                          checkIcon.classList.add('opacity-100');
+                          const checkIcon = container ? container.querySelector('[data-check-icon]') : null;
+                          if (checkIcon) {
+                            checkIcon.classList.remove('opacity-0');
+                            checkIcon.classList.add('opacity-100');
+                          }
                         }}
                       />
                       <div data-payment-method className="p-8 transition-all duration-300 bg-white border-2 border-gray-200 rounded-3xl hover:shadow-xl hover:border-green-300 group-hover:-translate-y-1">
@@ -1295,19 +1333,26 @@ const Checkout = () => {
                           });
                           
                           // Add checked class to selected card
-                          const card = e.target.closest('label').querySelector('[data-payment-method]');
-                          card.classList.remove('border-gray-200');
-                          card.classList.add('border-blue-500', 'shadow-lg', 'shadow-blue-100');
+                          const container = e.target.closest('label');
+                          const card = container ? container.querySelector('[data-payment-method]') : null;
+                          if (card) {
+                            card.classList.remove('border-gray-200');
+                            card.classList.add('border-blue-500', 'shadow-lg', 'shadow-blue-100');
+                          }
                           
                           // Add checked class to selected radio indicator
-                          const indicator = e.target.closest('label').querySelector('[data-radio-indicator]');
-                          indicator.classList.remove('border-gray-300');
-                          indicator.classList.add('border-blue-500', 'bg-blue-500');
+                          const indicator = container ? container.querySelector('[data-radio-indicator]') : null;
+                          if (indicator) {
+                            indicator.classList.remove('border-gray-300');
+                            indicator.classList.add('border-blue-500', 'bg-blue-500');
+                          }
                           
                           // Add checked class to selected check icon
-                          const checkIcon = e.target.closest('label').querySelector('[data-check-icon]');
-                          checkIcon.classList.remove('opacity-0');
-                          checkIcon.classList.add('opacity-100');
+                          const checkIcon = container ? container.querySelector('[data-check-icon]') : null;
+                          if (checkIcon) {
+                            checkIcon.classList.remove('opacity-0');
+                            checkIcon.classList.add('opacity-100');
+                          }
                         }}
                       />
                       <div data-payment-method className="p-8 transition-all duration-300 bg-white border-2 border-gray-200 rounded-3xl hover:shadow-xl hover:border-blue-300 group-hover:-translate-y-1">
@@ -1367,19 +1412,26 @@ const Checkout = () => {
                             });
                             
                             // Add checked class to selected card
-                            const card = e.target.closest('label').querySelector('[data-payment-option]');
-                            card.classList.remove('border-gray-200', 'bg-gradient-to-br', 'from-orange-50', 'to-red-50');
-                            card.classList.add('border-orange-500', 'bg-gradient-to-br', 'from-orange-100', 'to-red-100');
+                            const container = e.target.closest('label');
+                            const card = container ? container.querySelector('[data-payment-option]') : null;
+                            if (card) {
+                              card.classList.remove('border-gray-200', 'bg-gradient-to-br', 'from-orange-50', 'to-red-50');
+                              card.classList.add('border-orange-500', 'bg-gradient-to-br', 'from-orange-100', 'to-red-100');
+                            }
                             
                             // Add checked class to selected radio indicator
-                            const indicator = e.target.closest('label').querySelector('[data-payment-radio-indicator]');
-                            indicator.classList.remove('border-gray-300');
-                            indicator.classList.add('border-orange-500', 'bg-orange-500');
+                            const indicator = container ? container.querySelector('[data-payment-radio-indicator]') : null;
+                            if (indicator) {
+                              indicator.classList.remove('border-gray-300');
+                              indicator.classList.add('border-orange-500', 'bg-orange-500');
+                            }
                             
                             // Add checked class to selected check icon
-                            const checkIcon = e.target.closest('label').querySelector('[data-payment-check-icon]');
-                            checkIcon.classList.remove('opacity-0');
-                            checkIcon.classList.add('opacity-100');
+                            const checkIcon = container ? container.querySelector('[data-payment-check-icon]') : null;
+                            if (checkIcon) {
+                              checkIcon.classList.remove('opacity-0');
+                              checkIcon.classList.add('opacity-100');
+                            }
                           }}
                         />
                         <div data-payment-option className="p-6 transition-all duration-300 border-2 border-gray-200 bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl hover:shadow-lg group-hover:border-orange-300">
@@ -1427,19 +1479,26 @@ const Checkout = () => {
                             });
                             
                             // Add checked class to selected card
-                            const card = e.target.closest('label').querySelector('[data-payment-option]');
-                            card.classList.remove('border-gray-200', 'bg-gradient-to-br', 'from-orange-50', 'to-red-50');
-                            card.classList.add('border-emerald-500', 'bg-gradient-to-br', 'from-emerald-100', 'to-green-100');
+                            const container = e.target.closest('label');
+                            const card = container ? container.querySelector('[data-payment-option]') : null;
+                            if (card) {
+                              card.classList.remove('border-gray-200', 'bg-gradient-to-br', 'from-orange-50', 'to-red-50');
+                              card.classList.add('border-emerald-500', 'bg-gradient-to-br', 'from-emerald-100', 'to-green-100');
+                            }
                             
                             // Add checked class to selected radio indicator
-                            const indicator = e.target.closest('label').querySelector('[data-payment-radio-indicator]');
-                            indicator.classList.remove('border-gray-300');
-                            indicator.classList.add('border-emerald-500', 'bg-emerald-500');
+                            const indicator = container ? container.querySelector('[data-payment-radio-indicator]') : null;
+                            if (indicator) {
+                              indicator.classList.remove('border-gray-300');
+                              indicator.classList.add('border-emerald-500', 'bg-emerald-500');
+                            }
                             
                             // Add checked class to selected check icon
-                            const checkIcon = e.target.closest('label').querySelector('[data-payment-check-icon]');
-                            checkIcon.classList.remove('opacity-0');
-                            checkIcon.classList.add('opacity-100');
+                            const checkIcon = container ? container.querySelector('[data-payment-check-icon]') : null;
+                            if (checkIcon) {
+                              checkIcon.classList.remove('opacity-0');
+                              checkIcon.classList.add('opacity-100');
+                            }
                           }}
                         />
                         <div data-payment-option className="p-6 transition-all duration-300 border-2 border-gray-200 bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl hover:shadow-lg group-hover:border-emerald-300">
@@ -1479,12 +1538,12 @@ const Checkout = () => {
                 type="primary"
                 htmlType="submit"
                 className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold text-lg rounded-2xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl border-0"
-                loading={isLoading}
-                disabled={isLoading}
+                loading={isPending}
+                disabled={isPending}
                 size="large"
               >
                 <div className="flex items-center justify-center gap-3">
-                  {isLoading ? (
+                  {isPending ? (
                     <>
                       <div className="w-5 h-5 border-b-2 border-white rounded-full animate-spin"></div>
                       <span>Đang xử lý...</span>
@@ -1508,9 +1567,9 @@ const Checkout = () => {
       <Modal
         title={<div className="text-xl font-bold text-blue-700">Lựa chọn phương thức đặt cọc</div>}
         open={cashDepositModalVisible}
-        onCancel={isLoading ? undefined : () => setCashDepositModalVisible(false)}
-        closable={!isLoading}
-        maskClosable={!isLoading}
+        onCancel={isPending ? undefined : () => setCashDepositModalVisible(false)}
+        closable={!isPending}
+        maskClosable={!isPending}
         footer={null}
         width={600}
         centered
@@ -1528,7 +1587,7 @@ const Checkout = () => {
           <div className="space-y-4">
             {/* Tùy chọn thanh toán VNPay */}
             <div
-              className={`bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4 ${!isLoading ? 'hover:bg-blue-100' : 'opacity-50'}`}
+              className={`bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4 ${!isPending ? 'hover:bg-blue-100' : 'opacity-50'}`}
             >
               <div className="flex items-center mb-2">
                 <span className="mr-2 text-xl">💳</span>
@@ -1545,17 +1604,17 @@ const Checkout = () => {
                   type="primary"
                   onClick={handleDepositConfirm}
                   className="bg-blue-600"
-                  loading={isLoading}
-                  disabled={isLoading}
+                  loading={isPending}
+                  disabled={isPending}
                 >
-                  {isLoading ? "Đang xử lý..." : "Tiếp tục với VNPay"}
+                  {isPending ? "Đang xử lý..." : "Tiếp tục với VNPay"}
                 </Button>
               </div>
             </div>
 
             {/* Tùy chọn thanh toán tiền mặt */}
             <div
-              className={`bg-green-50 p-4 rounded-lg border border-green-200 ${!isLoading ? 'hover:bg-green-100' : 'opacity-50'}`}
+              className={`bg-green-50 p-4 rounded-lg border border-green-200 ${!isPending ? 'hover:bg-green-100' : 'opacity-50'}`}
             >
               <div className="flex items-center mb-2">
                 <span className="mr-2 text-xl">💵</span>
@@ -1572,10 +1631,10 @@ const Checkout = () => {
                   type="default"
                   onClick={handleCashPayment}
                   className="text-white bg-green-600 hover:bg-green-700"
-                  loading={isLoading}
-                  disabled={isLoading}
+                  loading={isPending}
+                  disabled={isPending}
                 >
-                  {isLoading ? "Đang xử lý..." : "Thanh toán tiền mặt"}
+                  {isPending ? "Đang xử lý..." : "Thanh toán tiền mặt"}
                 </Button>
               </div>
             </div>
@@ -1584,7 +1643,7 @@ const Checkout = () => {
           <div className="mt-4 text-center">
             <Button
               onClick={() => setCashDepositModalVisible(false)}
-              disabled={isLoading}
+              disabled={isPending}
             >
               Quay lại chỉnh sửa
             </Button>
@@ -1595,12 +1654,12 @@ const Checkout = () => {
       {/* Cash Deposit Modal */}
       <CashDepositModal
         visible={cashDepositModalVisible}
-        onClose={() => setCashDepositModalVisible(false)}
+        onCancel={() => setCashDepositModalVisible(false)}
         onConfirmCash={handleCashDepositConfirm}
         onChooseVNPay={handleCashDepositChooseVNPay}
-        bookingCode={tours?.tour?.nameTour || ''}
         totalAmount={totalPrice}
         depositAmount={calculateDepositAmount()}
+        loading={isPending}
       />
 
     </div>
