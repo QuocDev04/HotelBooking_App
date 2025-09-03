@@ -160,7 +160,6 @@ const EditBlog = () => {
               <Card title="Cài đặt xuất bản" className="mb-6">
                 <Form.Item name="status" label="Trạng thái">
                   <Select size="large">
-                    <Option value="draft">Bản nháp</Option>
                     <Option value="published">Xuất bản ngay</Option>
                   </Select>
                 </Form.Item>
