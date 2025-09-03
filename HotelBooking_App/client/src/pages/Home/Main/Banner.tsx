@@ -103,7 +103,7 @@ const Banner = () => {
               </p>
               <a href="">
                 <button
-                onClick={() => navigate("/introduce")}
+                onClick={() => navigate("/destinations")}
                  className="hidden md:inline-block bg-white text-blue-900 px-6 py-3 rounded-full font-semibold hover:bg-blue-50 transition-all duration-300">
                   Tìm hiểu ngay
                 </button>
