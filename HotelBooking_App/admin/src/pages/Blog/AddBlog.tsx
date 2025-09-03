@@ -90,7 +90,7 @@ const AddBlog = () => {
           layout="vertical"
           onFinish={handleSubmit}
           initialValues={{
-            status: "draft",
+            status: "published",
             author_name: "Admin",
           }}
         >
