@@ -112,10 +112,17 @@ const BannerWithAboutUs = () => {
         setShowSuggestions(false);
     };
 
+    const handleInputChange = (e: any) => {
+        setSearchQuery(e.target.value);
+        if (e.target.value.trim()) {
+            setShowSuggestions(true);
+        }
+    };
+
     return (
         <div className="relative">
             {/* Banner Section */}
-            <div className="relative">
+            <div className="relative z-10">
                 <div className="w-full h-[400px] sm:h-[400px] md:h-[500px] lg:h-[600px] 
             bg-gradient-to-r from-[#00CFFF] to-[#001BFF]" />
                 <img
@@ -145,19 +152,20 @@ const BannerWithAboutUs = () => {
                     </div>
                 </div>
 
-                {/* Search Form */}
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-full px-4 mb-20 md:mb-0">
-                    <div className="w-full max-w-7xl mx-auto relative">
-                        <div className="bg-white rounded-2xl p-6 shadow-xl relative z-50">
-                            <form onSubmit={handleSubmit} className="flex gap-4 relative z-50">
+                {/* Search Form Container */}
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-full px-4 mb-20 md:mb-0 z-20">
+                    <div className="w-full max-w-7xl mx-auto">
+                        {/* Search Form */}
+                        <div className="bg-white rounded-2xl p-6 shadow-xl relative">
+                            <form onSubmit={handleSubmit} className="flex gap-4">
                                 {/* Input tìm kiếm */}
                                 <div className="relative flex-1">
                                     <MapPinIcon className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                                     <input
                                         type="text"
                                         value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        onClick={handleSearchBarClick}
+                                        onChange={handleInputChange}
+                                        onFocus={handleSearchBarClick}
                                         placeholder="Bạn muốn đi đâu?"
                                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
                                         required
@@ -177,115 +185,114 @@ const BannerWithAboutUs = () => {
                                     <span>{isLoading ? 'Đang tải...' : 'Tìm kiếm'}</span>
                                 </button>
                             </form>
+                        </div>
 
-                            {/* Search Suggestions Dropdown */}
-                            {showSuggestions && (
-                                <>
-                                    {/* Overlay click ngoài */}
-                                    <div
-                                        className="fixed inset-0 z-45 flex items-center justify-center bg-opacity-60"
-                                        onClick={handleCloseSuggestions}
-                                    />
+                        {/* Search Suggestions Dropdown - Right under search form */}
+                        {showSuggestions && (
+                            <div className="relative">
+                                {/* Overlay để đóng dropdown khi click ngoài */}
+                                <div
+                                    className="fixed inset-0 z-[998]"
+                                    onClick={handleCloseSuggestions}
+                                />
 
-                                    <div className="fixed top-[120px] left-1/2 transform -translate-x-1/2 
-                        w-full max-w-7xl bg-white rounded-xl shadow-2xl border border-gray-200 
-                        z-100">
-                                        <div className="p-6">
-                                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                                {/* Tour được tìm nhiều nhất */}
-                                                <div>
-                                                    <h3 className="text-xl font-bold text-gray-900 mb-4">Tour được tìm nhiều nhất</h3>
-                                                    <div className="space-y-4">
-                                                        {popularTours.map((tour: any) => (
-                                                            <div
-                                                                key={tour._id}
-                                                                onClick={() => handleTourClick(tour._id)}
-                                                                className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                                                            >
-                                                                <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                                                                    <img
-                                                                        src={tour.imageTour?.[0] || 'https://via.placeholder.com/64x64?text=Tour'}
-                                                                        alt={tour.nameTour}
-                                                                        className="w-full h-full object-cover"
-                                                                    />
+                                {/* Dropdown content */}
+                                <div className="absolute top-4 left-0 right-0 bg-white rounded-xl shadow-2xl border border-gray-200 z-[999] max-h-[500px] overflow-y-auto">
+                                    <div className="p-6">
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                            {/* Tour được tìm nhiều nhất */}
+                                            <div>
+                                                <h3 className="text-xl font-bold text-gray-900 mb-4">Tour được tìm nhiều nhất</h3>
+                                                <div className="space-y-4">
+                                                    {popularTours.map((tour: any) => (
+                                                        <div
+                                                            key={tour._id}
+                                                            onClick={() => handleTourClick(tour._id)}
+                                                            className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                                                        >
+                                                            <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                                                                <img
+                                                                    src={tour.imageTour?.[0] || 'https://via.placeholder.com/64x64?text=Tour'}
+                                                                    alt={tour.nameTour}
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <h4 className="font-semibold text-gray-900 text-sm line-clamp-2">
+                                                                    {tour.nameTour}
+                                                                </h4>
+                                                                <div className="flex items-center text-xs text-gray-600 mt-1">
+                                                                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                    </svg>
+                                                                    {tour.duration || 'Chưa có thông tin'}
                                                                 </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <h4 className="font-semibold text-gray-900 text-sm line-clamp-2">
-                                                                        {tour.nameTour}
-                                                                    </h4>
-                                                                    <div className="flex items-center text-xs text-gray-600 mt-1">
-                                                                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                        </svg>
-                                                                        {tour.duration || 'Chưa có thông tin'}
-                                                                    </div>
-                                                                    <div className="text-sm font-bold text-red-600 mt-1">
-                                                                        Chỉ từ {tour.finalPrice ? tour.finalPrice.toLocaleString() : tour.price ? tour.price.toLocaleString() : 'Liên hệ'} ₫
-                                                                    </div>
+                                                                <div className="text-sm font-bold text-red-600 mt-1">
+                                                                    Chỉ từ {tour.finalPrice ? tour.finalPrice.toLocaleString() : tour.price ? tour.price.toLocaleString() : 'Liên hệ'} ₫
                                                                 </div>
                                                             </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-
-                                                {/* Điểm đến nổi bật */}
-                                                <div>
-                                                    <h3 className="text-xl font-bold text-gray-900 mb-4">Điểm đến nổi bật</h3>
-                                                    <div className="space-y-4">
-                                                        {featuredTours.map((tour: any) => (
-                                                            <div
-                                                                key={tour._id}
-                                                                onClick={() => handleTourClick(tour._id)}
-                                                                className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                                                            >
-                                                                <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                                                                    <img
-                                                                        src={tour.imageTour?.[0] || 'https://via.placeholder.com/64x64?text=Tour'}
-                                                                        alt={tour.nameTour}
-                                                                        className="w-full h-full object-cover"
-                                                                    />
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <h4 className="text-sm font-semibold text-gray-900 line-clamp-2">
-                                                                        {tour.nameTour}
-                                                                    </h4>
-                                                                    <div className="flex items-center text-xs text-gray-600 mt-1">
-                                                                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                        </svg>
-                                                                        {tour.duration || 'Chưa có thông tin'}
-                                                                    </div>
-                                                                    <div className="text-sm font-bold text-red-600 mt-1">
-                                                                        Chỉ từ {tour.finalPrice ? tour.finalPrice.toLocaleString() : tour.price ? tour.price.toLocaleString() : 'Liên hệ'} ₫
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             </div>
 
-                                            {/* Nút đóng */}
-                                            <div className="mt-6 text-center">
-                                                <button
-                                                    onClick={handleCloseSuggestions}
-                                                    className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                                                >
-                                                    Đóng
-                                                </button>
+                                            {/* Điểm đến nổi bật */}
+                                            <div>
+                                                <h3 className="text-xl font-bold text-gray-900 mb-4">Điểm đến nổi bật</h3>
+                                                <div className="space-y-4">
+                                                    {featuredTours.map((tour: any) => (
+                                                        <div
+                                                            key={tour._id}
+                                                            onClick={() => handleTourClick(tour._id)}
+                                                            className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                                                        >
+                                                            <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                                                                <img
+                                                                    src={tour.imageTour?.[0] || 'https://via.placeholder.com/64x64?text=Tour'}
+                                                                    alt={tour.nameTour}
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <h4 className="text-sm font-semibold text-gray-900 line-clamp-2">
+                                                                    {tour.nameTour}
+                                                                </h4>
+                                                                <div className="flex items-center text-xs text-gray-600 mt-1">
+                                                                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                    </svg>
+                                                                    {tour.duration || 'Chưa có thông tin'}
+                                                                </div>
+                                                                <div className="text-sm font-bold text-red-600 mt-1">
+                                                                    Chỉ từ {tour.finalPrice ? tour.finalPrice.toLocaleString() : tour.price ? tour.price.toLocaleString() : 'Liên hệ'} ₫
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
+
+                                        {/* Nút đóng */}
+                                        <div className="mt-6 text-center">
+                                            <button
+                                                onClick={handleCloseSuggestions}
+                                                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                                            >
+                                                Đóng
+                                            </button>
+                                        </div>
                                     </div>
-                                </>
-                            )}
-                        </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
 
             {/* Search Results Modal */}
             {showResults && (
-                <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-opacity-60">
+                <div className="fixed inset-0 z-[99997] flex items-center justify-center bg-black/30">
                     <div className="bg-white rounded-2xl p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-2xl font-bold text-gray-900">
@@ -357,8 +364,9 @@ const BannerWithAboutUs = () => {
                     </div>
                 </div>
             )}
-            {/* About Us Section */}
-            <div className="mt-20 min-h-[700px] py-16">
+
+            {/* About Us Section - Lower z-index */}
+            <div className="mt-20 min-h-[700px] py-16 relative z-0">
                 <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
                     <div className="flex flex-col md:flex-row items-start justify-between gap-8">
                         {/* Text Section */}
@@ -397,12 +405,11 @@ const BannerWithAboutUs = () => {
                             </div>
                         </motion.div>
 
-                        {/* Image Section - Adjusted z-index */}
                         <motion.div
                             initial="hidden"
                             whileInView="visible"
                             viewport={{ once: true }}
-                            className="w-full md:w-1/2 relative h-[400px] sm:h-[500px] md:h-[600px] z-50" 
+                            className="w-full md:w-1/2 relative h-[400px] sm:h-[500px] md:h-[600px] z-50"
                         >
                             <motion.img
                                 custom={0}
@@ -433,13 +440,13 @@ const BannerWithAboutUs = () => {
                 </div>
 
                 {/* Feature boxes section */}
-                <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 mt-16 pb-16 relative z-20">
+                <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 mt-16 pb-16 relative z-5">
                     <div className="flex flex-wrap items-center justify-center gap-6">
                         {/* Box 1 */}
-                        <div className="w-80 border border-gray-500/30 pb-6 rounded-lg bg-white shadow-[0px_4px_15px_0px] shadow-black/5 relative z-30">
+                        <div className="w-80 border border-gray-500/30 pb-6 rounded-lg bg-white shadow-[0px_4px_15px_0px] shadow-black/5 relative z-6">
                             <div className="flex flex-col items-center px-5 py-4 relative">
                                 <img
-                                    className="h-24 w-24 absolute -top-14 rounded-full object-cover border-4 border-white shadow z-40"
+                                    className="h-24 w-24 absolute -top-14 rounded-full object-cover border-4 border-white shadow z-7"
                                     src="https://i.pinimg.com/736x/a0/fa/cd/a0facd0bfff2ebbc27ebfb66cf66b272.jpg"
                                     alt="tourInfo"
                                 />
@@ -455,10 +462,10 @@ const BannerWithAboutUs = () => {
                         </div>
 
                         {/* Box 2 */}
-                        <div className="w-80 border border-gray-500/30 pb-6 rounded-lg bg-white shadow-[0px_4px_15px_0px] shadow-black/5 relative z-30">
+                        <div className="w-80 border border-gray-500/30 pb-6 rounded-lg bg-white shadow-[0px_4px_15px_0px] shadow-black/5 relative z-6">
                             <div className="flex flex-col items-center px-5 py-4 relative">
                                 <img
-                                    className="h-24 w-24 absolute -top-14 rounded-full object-cover border-4 border-white shadow z-40"
+                                    className="h-24 w-24 absolute -top-14 rounded-full object-cover border-4 border-white shadow z-7"
                                     src="https://bizweb.dktcdn.net/100/489/447/themes/912592/assets/why_2.png?1743654439525"
                                     alt="consultant"
                                 />
@@ -474,10 +481,10 @@ const BannerWithAboutUs = () => {
                         </div>
 
                         {/* Box 3 */}
-                        <div className="w-80 border border-gray-500/30 pb-6 rounded-lg bg-white shadow-[0px_4px_15px_0px] shadow-black/5 relative z-30">
+                        <div className="w-80 border border-gray-500/30 pb-6 rounded-lg bg-white shadow-[0px_4px_15px_0px] shadow-black/5 relative z-6">
                             <div className="flex flex-col items-center px-5 py-4 relative">
                                 <img
-                                    className="h-24 w-24 absolute -top-14 rounded-full object-cover border-4 border-white shadow z-40"
+                                    className="h-24 w-24 absolute -top-14 rounded-full object-cover border-4 border-white shadow z-7"
                                     src="https://bizweb.dktcdn.net/100/489/447/themes/912592/assets/why_3.png?1743654439525"
                                     alt="promotion"
                                 />
