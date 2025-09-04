@@ -3,7 +3,7 @@ const Hotel = require("../../models/Hotel/HotelModel.js");
 const DateHotel = require("../../models/Hotel/DateHotel.js");
 const { checkHotelAvailability } = require('./HotelController.js');
 const { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } = require('vnpay');
-// Lấy thông tin booking theo ID
+const { sendMailHotelBookingCashSuccess } = require("../mail/sendMail.js");
 const getByIdHotelBooking = async (req, res) => {
     try {
         const booking = await HotelBooking.findById(req.params.id)
@@ -196,7 +196,9 @@ const bookHotel = async (req, res) => {
                 });
             }
         }
-
+        if (payment_method === 'cash') {
+            await sendMailHotelBookingCashSuccess(newBooking);
+        }
         const populatedBooking = await HotelBooking.findById(newBooking._id)
             .populate('userId', 'username email')
             .populate({
