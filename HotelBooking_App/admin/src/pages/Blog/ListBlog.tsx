@@ -31,7 +31,7 @@ const BlogListAdmin = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["blogs"],
     queryFn: async () => {
-      const res = await instanceAdmin.get("/blog");
+      const res = await instanceAdmin.get("/admin/blog");
       return res.data; // ✅ { posts: [...] }
     },
   });
