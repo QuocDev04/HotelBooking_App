@@ -143,7 +143,7 @@ const Introduce = () => {
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center gap-3">
                     <img
-                      src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/FARES_logo.svg/512px-FARES_logo.svg.png"
+                      src="	https://www.wikimedia.org/static/images/wmf-logo-2x.png"
                       alt="FARES logo"
                       className="w-20"
                     />
@@ -190,7 +190,7 @@ const Introduce = () => {
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center gap-3">
                     <img
-                      src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Zestif_logo.svg/512px-Zestif_logo.svg.png"
+                      src="	https://www.wikimedia.org/static/images/wmf-logo-2x.png"
                       alt="Zestif logo"
                       className="w-20"
                     />

@@ -1153,15 +1153,6 @@ const Checkout = () => {
                 <div className="mb-1 font-semibold">THÔNG TIN DI CHUYỂN</div>
                 <div className="flex justify-between mb-1">
                   <span>Ngày đi - {dayjs(tours?.dateTour).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY")}</span>
-                  <span>17:05</span>
-                  <span className="text-gray-400">✈️</span>
-                  <span>18:50</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Ngày về - 14/07/2025</span>
-                  <span>19:55</span>
-                  <span className="text-gray-400">✈️</span>
-                  <span>21:40</span>
                 </div>
               </div>
               {/* Giá */}

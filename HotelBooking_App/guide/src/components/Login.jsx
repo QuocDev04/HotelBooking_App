@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+// import axiosGuide from './../../config/axios.ts';
+
+// Create axios instance directly to bypass cache
+const axiosGuide = axios.create({
+  baseURL: 'http://localhost:8080/api/'
+});
 
 const Login = ({ onLogin }) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -27,14 +33,15 @@ const Login = ({ onLogin }) => {
     }
 
     try {
-      const response = await axios.post("http://localhost:8080/api/employee/login", {
+      console.log('Making login request to:', axiosGuide.defaults.baseURL + 'employee/login');
+      const response = await axiosGuide.post("/employee/login", {
         email: formData.email.trim(),
         password: formData.password,
         portal: "hdv",
       });
 
       if (response.data.success) {
-        const { accessToken, refreshToken: rToken, employee } = response.data;
+        const { accessToken, refreshToken: rToken, employee } = response.data.data;
 
         // Lưu token và user
         localStorage.setItem("hdv_token", accessToken);

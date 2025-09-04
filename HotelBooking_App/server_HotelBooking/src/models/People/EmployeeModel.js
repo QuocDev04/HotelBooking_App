@@ -68,10 +68,6 @@ const EmployeeSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Admin',
         required: true
-    },
-    refresh_token: {
-        type: String,
-        default: null
     }
 }, { 
     timestamps: true 
@@ -94,8 +90,6 @@ EmployeeSchema.pre('save', function (next) {
 });
 
 // Index để tìm kiếm nhanh
-EmployeeSchema.index({ email: 1 });
-EmployeeSchema.index({ employee_id: 1 });
 EmployeeSchema.index({ status: 1 });
 EmployeeSchema.index({ position: 1 });
 EmployeeSchema.index({ department: 1 });

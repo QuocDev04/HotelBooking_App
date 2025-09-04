@@ -30,7 +30,14 @@ const DateSlotSchema = new mongoose.Schema({
     bookedSeats: { type: Number, default: 0 },
     totalRevenue: { type: Number, default: 0 },
     depositAmount: { type: Number, default: 0 },
-    refundAmount: { type: Number, default: 0 }
+    refundAmount: { type: Number, default: 0 },
+    assignedEmployee: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Employee",
+        default: null
+    },
+    departureTime: { type: String, default: "08:00" },
+    returnTime: { type: String, default: "18:00" }
 }, { timestamps: true });
 
 module.exports = mongoose.model("DateSlot", DateSlotSchema);

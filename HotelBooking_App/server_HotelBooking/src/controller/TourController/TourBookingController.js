@@ -1085,6 +1085,16 @@ const updateRefundStatus = async (req, res) => {
         booking.refund_note = refund_note;
         booking.refund_image = refund_image;
         
+        // Đồng bộ payment_status với refund_status để client hiển thị đúng
+        if (refund_status === 'pending') {
+            booking.payment_status = 'refund_pending';
+        } else if (refund_status === 'processing') {
+            booking.payment_status = 'refund_processing';
+        } else if (refund_status === 'completed') {
+            booking.payment_status = 'refund_completed';
+            booking.refund_date = new Date();
+        }
+        
         // Nếu đã hoàn tiền xong, cập nhật ngày hoàn tiền
         if (refund_status === 'completed') {
             booking.refund_date = new Date();

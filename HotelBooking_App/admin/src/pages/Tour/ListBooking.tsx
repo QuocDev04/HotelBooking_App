@@ -620,7 +620,7 @@ const ListBooking = () => {
                                                                     <div className="space-y-4">
                                                                         <div>
                                                                             <label className="text-sm font-medium text-gray-600">Họ và tên</label>
-                                                                            <p className="text-gray-900 font-semibold">{selectedBooking.fullNameUser}</p>
+                                                                            <p className="text-gray-900 font-semibold break-words whitespace-normal">{selectedBooking.fullNameUser}</p>
                                                                         </div>
                                                                         <div>
                                                                             <label className="text-sm font-medium text-gray-600">Email</label>
@@ -632,7 +632,7 @@ const ListBooking = () => {
                                                                         </div>
                                                                         <div>
                                                                             <label className="text-sm font-medium text-gray-600">Địa chỉ</label>
-                                                                            <p className="text-gray-900">{selectedBooking.address || 'Chưa cung cấp'}</p>
+                                                                            <p className="text-gray-900 font-semibold break-words whitespace-normal">{selectedBooking.address || 'Chưa cung cấp'}</p>
                                                                         </div>
                                                                         {selectedBooking.note && (
                                                                             <div>
@@ -657,7 +657,7 @@ const ListBooking = () => {
                                                                     <div className="space-y-4">
                                                                         <div>
                                                                             <label className="text-sm font-medium text-gray-600">Tên tour</label>
-                                                                            <p className="text-gray-900 font-semibold">{selectedBooking?.slotId?.tour?.nameTour}</p>
+                                                                            <p className="text-gray-900 font-semibold break-words whitespace-normal">{selectedBooking?.slotId?.tour?.nameTour}</p>
                                                                         </div>
                                                                         <div>
                                                                             <label className="text-sm font-medium text-gray-600">Điểm khởi hành</label>
@@ -843,11 +843,11 @@ const ListBooking = () => {
                                                                                                 </div>
                                                                                                 <div className="relative group mb-4">
                                                                                                     <img
-                                                                                                        src={`http://localhost:3002/uploads/payment-confirmations/${selectedBooking.paymentImage}`}
+                                                                                                        src={`http://localhost:8080/uploads/payment-confirmations/${selectedBooking.paymentImage}`}
                                                                                                         alt="Hình ảnh xác nhận thanh toán cọc"
                                                                                                         className="w-full h-64 object-cover rounded-xl border border-gray-200 cursor-pointer hover:opacity-95 hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-xl"
                                                                                                         onClick={() => {
-                                                                                                            setSelectedImageUrl(`http://localhost:3002/uploads/payment-confirmations/${selectedBooking.paymentImage}`);
+                                                                                                            setSelectedImageUrl(`http://localhost:8080/uploads/payment-confirmations/${selectedBooking.paymentImage}`);
                                                                                                             setShowImageModal(true);
                                                                                                         }}
                                                                                                     />
@@ -875,11 +875,11 @@ const ListBooking = () => {
                                                                                                 </div>
                                                                                                 <div className="relative group">
                                                                                                     <img
-                                                                                                        src={`http://localhost:3002/uploads/payment-confirmations/${selectedBooking.fullPaymentImage}`}
+                                                                                                        src={`http://localhost:8080/uploads/payment-confirmations/${selectedBooking.fullPaymentImage}`}
                                                                                                         alt="Hình ảnh xác nhận thanh toán toàn bộ"
                                                                                                         className="w-full h-88 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-95 hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg"
                                                                                                         onClick={() => {
-                                                                                                            setSelectedImageUrl(`http://localhost:3002/uploads/payment-confirmations/${selectedBooking.fullPaymentImage}`);
+                                                                                                            setSelectedImageUrl(`http://localhost:8080/uploads/payment-confirmations/${selectedBooking.fullPaymentImage}`);
                                                                                                             setShowImageModal(true);
                                                                                                         }}
                                                                                                     />
@@ -921,7 +921,7 @@ const ListBooking = () => {
                                                                                 {selectedBooking.adultPassengers?.map((passenger, index) => (
                                                                                     <div key={index} className="bg-white p-4 rounded-lg border border-blue-200">
                                                                                         <div className="text-xs font-medium text-blue-600 mb-2">NGƯỜI LỚN #{index + 1}</div>
-                                                                                        <div className="font-semibold text-gray-900">{passenger.fullName}</div>
+                                                                                        <div className="text-gray-900 font-semibold break-words whitespace-normal">{passenger.fullName}</div>
                                                                                         <div className="text-sm text-gray-600">{passenger.gender === 'male' ? 'Nam' : 'Nữ'}</div>
                                                                                         <div className="text-sm text-gray-600">
                                                                                             {passenger.birthDate ? new Date(passenger.birthDate).toLocaleDateString('vi-VN') : 'Chưa cung cấp'}
@@ -1577,4 +1577,8 @@ const ListBooking = () => {
 };
 
 
+
+
+
 export default ListBooking
+

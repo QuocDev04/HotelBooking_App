@@ -12,7 +12,8 @@ const {
     updateTourBookingStatsAPI,
     markCustomerNoShow,
     getNoShowCustomers,
-    getSlotDetail
+    getSlotDetail,
+    assignEmployeeToDateSlot
 } = require('../../controller/TourController/DateTour');
 const { verifyToken, verifyTokenAndAdmin } = require("../../Middleware/verifyToken");
 const { verifyClerkTokenAndAdmin } = require("../../Middleware/Middleware");
@@ -37,6 +38,9 @@ dateRouter.post('/update-stats', verifyTokenAndAdmin, updateTourBookingStatsAPI)
 // API quản lý khách hàng không tham gia tour
 dateRouter.post('/booking/:bookingId/mark-no-show', verifyClerkTokenAndAdmin, markCustomerNoShow);
 dateRouter.get('/slot/:slotId/no-show-customers', verifyClerkTokenAndAdmin, getNoShowCustomers);
+
+// API phân công HDV theo ngày
+dateRouter.post('/dateslot/:dateSlotId/assign-employee', verifyClerkTokenAndAdmin, assignEmployeeToDateSlot);
 
 module.exports = {
     dateRouter

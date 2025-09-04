@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 const Employee = require("../../models/People/EmployeeModel");
 const Admin = require("../../models/People/AdminModel");
 const TourModel = require("../../models/Tour/TourModel");
-const HotelAssignment = require("../../models/Hotel/HotelAssignmentModel");
 
 // Tạo Access Token
 const generateAccessToken = (employee) => {
@@ -26,190 +25,202 @@ const generateRefreshToken = (employee) => {
     return jwt.sign(
         { employeeId: employee._id },
         process.env.JWT_REFRESH_SECRET,
-        { expiresIn: "7d" }
+        { expiresIn: "1y" }
     );
 };
 
 // Đăng nhập
+
 const loginEmployee = async (req, res) => {
     try {
-        const { email, password, portal, hotelId } = req.body;
+        const { email, password } = req.body;
+
+        // Validation
         if (!email || !password) {
             return res.status(StatusCodes.BAD_REQUEST).json({
                 success: false,
-                message: "Email và mật khẩu là bắt buộc",
+                message: "Email và mật khẩu là bắt buộc"
             });
         }
 
-        const employee = await Employee.findOne({ email: email.toLowerCase().trim() });
+        // Tìm nhân viên theo email
+        const employee = await Employee.findOne({ 
+            email: email.toLowerCase().trim() 
+        });
+
         if (!employee) {
             return res.status(StatusCodes.UNAUTHORIZED).json({
                 success: false,
-                message: "Email không tồn tại trong hệ thống",
+                message: "Email không tồn tại trong hệ thống"
             });
         }
 
-        if (employee.status !== "active") {
+        // Kiểm tra trạng thái tài khoản
+        if (employee.status !== 'active') {
             return res.status(StatusCodes.UNAUTHORIZED).json({
                 success: false,
-                message: "Tài khoản đã bị vô hiệu hóa",
+                message: "Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên"
             });
         }
 
+        // So sánh mật khẩu
         const isMatch = await bcrypt.compare(password, employee.password_hash);
         if (!isMatch) {
             return res.status(StatusCodes.UNAUTHORIZED).json({
                 success: false,
-                message: "Mật khẩu không chính xác",
+                message: "Mật khẩu không chính xác"
             });
         }
 
-        // Kiểm tra ràng buộc portal theo phòng ban/position
-        // Mapping mặc định: hdv -> department 'tour'; qtks -> department 'hotel'
-        if (portal) {
-            const normalizedPortal = String(portal).toLowerCase().trim();
-            const departmentByPortal = {
-                hdv: 'tour',
-                qtks: 'hotel',
-            };
-
-            const requiredDepartment = departmentByPortal[normalizedPortal];
-            if (requiredDepartment && employee.department !== requiredDepartment) {
-                return res.status(StatusCodes.FORBIDDEN).json({
-                    success: false,
-                    message: `Tài khoản không thuộc phòng ban phù hợp để đăng nhập portal '${normalizedPortal}'`,
-                });
-            }
-
-            // Với QTKS bắt buộc phải có hotelId và có phân công active
-            if (normalizedPortal === 'qtks') {
-                if (!hotelId) {
-                    return res.status(StatusCodes.BAD_REQUEST).json({
-                        success: false,
-                        message: "Thiếu hotelId khi đăng nhập QTKS",
-                    });
-                }
-
-                const assignment = await HotelAssignment.findOne({
-                    employeeId: employee._id,
-                    hotelId: hotelId,
-                    status: 'active',
-                });
-
-                if (!assignment) {
-                    return res.status(StatusCodes.FORBIDDEN).json({
-                        success: false,
-                        message: "Tài khoản không được phân quyền khách sạn này",
-                    });
-                }
-            }
-        }
-
+        // Cập nhật last_login
         employee.last_login = new Date();
+        await employee.save();
 
-        const accessToken = generateAccessToken(employee);
-        const refreshToken = generateRefreshToken(employee);
+        // Tạo tokens
+        const accessToken = jwt.sign(
+            { 
+                employeeId: employee._id,
+                email: employee.email,
+                role: 'employee'
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '15m' }
+        );
 
+        const refreshToken = jwt.sign(
+            { 
+                employeeId: employee._id,
+                email: employee.email,
+                role: 'employee'
+            },
+            process.env.JWT_REFRESH_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        // Lưu refresh token vào database
         employee.refresh_token = refreshToken;
         await employee.save();
 
-        return res.status(StatusCodes.OK).json({
+        res.status(StatusCodes.OK).json({
             success: true,
             message: "Đăng nhập thành công",
-            accessToken,
-            refreshToken,
-            employee: {
-                id: employee._id,
-                email: employee.email,
-                employee_id: employee.employee_id,
-                full_name: employee.full_name,
-                firstName: employee.firstName,
-                lastName: employee.lastName,
-                position: employee.position,
-                department: employee.department,
-                profile_picture: employee.profile_picture,
-            },
-            hotelId: hotelId || null,
+            data: {
+                employee: {
+                    id: employee._id,
+                    email: employee.email,
+                    full_name: employee.full_name,
+                    phone_number: employee.phone_number,
+                    role: employee.role,
+                    status: employee.status
+                },
+                accessToken,
+                refreshToken
+            }
         });
+
     } catch (error) {
-        console.error("Login error:", error);
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        console.error('Login error:', error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: "Lỗi server: " + error.message,
+            message: "Lỗi server",
+            error: error.message
         });
     }
 };
 
-// Refresh Token
+// Đăng xuất cho nhân viên HDV
+const logoutEmployee = async (req, res) => {
+    try {
+        const { employeeId } = req.employee;
+
+        // Xóa refresh token khỏi database
+        await Employee.findByIdAndUpdate(
+            employeeId,
+            { $unset: { refresh_token: 1 } }
+        );
+
+        res.status(StatusCodes.OK).json({
+            success: true,
+            message: "Đăng xuất thành công"
+        });
+
+    } catch (error) {
+        console.error('Logout error:', error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Lỗi server",
+            error: error.message
+        });
+    }
+};
+
+// Refresh token cho nhân viên HDV
 const refreshToken = async (req, res) => {
     try {
         const { refreshToken } = req.body;
+
         if (!refreshToken) {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                success: false,
+                message: "Refresh token là bắt buộc"
+            });
+        }
+
+        // Verify refresh token
+        const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+        
+        // Tìm nhân viên và kiểm tra refresh token
+        const employee = await Employee.findById(decoded.employeeId);
+        if (!employee || employee.refresh_token !== refreshToken) {
             return res.status(StatusCodes.UNAUTHORIZED).json({
                 success: false,
-                message: "Thiếu refresh token",
+                message: "Refresh token không hợp lệ"
             });
         }
 
-        jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, async (err, decoded) => {
-            if (err) {
-                return res.status(StatusCodes.FORBIDDEN).json({
-                    success: false,
-                    message: "Refresh token không hợp lệ hoặc đã hết hạn",
-                });
-            }
-
-            const employee = await Employee.findById(decoded.employeeId);
-            if (!employee || employee.refresh_token !== refreshToken) {
-                return res.status(StatusCodes.UNAUTHORIZED).json({
-                    success: false,
-                    message: "Refresh token không khớp",
-                });
-            }
-
-            const newAccessToken = generateAccessToken(employee);
-            return res.status(StatusCodes.OK).json({
-                success: true,
-                accessToken: newAccessToken,
-            });
-        });
-    } catch (error) {
-        console.error("Refresh token error:", error);
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: "Lỗi server: " + error.message,
-        });
-    }
-};
-
-// Logout
-const logoutEmployee = async (req, res) => {
-    try {
-        const { employeeId } = req.body;
-        const employee = await Employee.findById(employeeId);
-        if (!employee) {
-            return res.status(StatusCodes.NOT_FOUND).json({
+        // Kiểm tra trạng thái tài khoản
+        if (employee.status !== 'active') {
+            return res.status(StatusCodes.UNAUTHORIZED).json({
                 success: false,
-                message: "Không tìm thấy nhân viên",
+                message: "Tài khoản đã bị vô hiệu hóa"
             });
         }
 
-        employee.refresh_token = null;
-        await employee.save();
+        // Tạo access token mới
+        const newAccessToken = jwt.sign(
+            { 
+                employeeId: employee._id,
+                email: employee.email,
+                role: 'employee'
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '15m' }
+        );
 
-        return res.status(StatusCodes.OK).json({
+        res.status(StatusCodes.OK).json({
             success: true,
-            message: "Đăng xuất thành công",
+            message: "Token được làm mới thành công",
+            data: {
+                accessToken: newAccessToken
+            }
         });
+
     } catch (error) {
-        console.error("Logout error:", error);
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        console.error('Refresh token error:', error);
+        if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+            return res.status(StatusCodes.UNAUTHORIZED).json({
+                success: false,
+                message: "Refresh token không hợp lệ hoặc đã hết hạn"
+            });
+        }
+        
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: "Lỗi server: " + error.message,
+            message: "Lỗi server",
+            error: error.message
         });
     }
 };
-
 
 // Lấy thông tin profile nhân viên
 const getEmployeeProfile = async (req, res) => {
@@ -348,23 +359,93 @@ const getAssignedTours = async (req, res) => {
         const employeeId = req.employee.employeeId;
         
         console.log("Getting assigned tours for employee:", employeeId);
+        console.log("Employee object from token:", req.employee);
         
-        // Tìm tất cả tour được phân công cho nhân viên này
-        const assignedTours = await TourModel.find({ 
-            assignedEmployee: employeeId 
+        // Tìm Employee để lấy ObjectId
+        const employee = await Employee.findById(employeeId);
+        console.log("Found employee:", employee ? employee._id : "Not found");
+        
+        if (!employee) {
+            console.log("Employee not found with ID:", employeeId);
+            return res.status(StatusCodes.NOT_FOUND).json({
+                success: false,
+                message: "Không tìm thấy thông tin nhân viên"
+            });
+        }
+        
+        // Tìm tất cả DateSlot được phân công cho nhân viên này
+        const DateTour = require('../../models/Tour/DateTour');
+        const TourScheduleModel = require('../../models/Tour/TourScheduleModel');
+        
+        const assignedDateSlots = await DateTour.find({ 
+            assignedEmployee: employee._id 
         })
-        .populate("itemTransport.TransportId", "transportName transportNumber transportType")
-        .populate("destination", "locationName country")
-        .populate("assignedEmployee", "firstName lastName full_name email employee_id position")
-        .sort({ createdAt: -1 });
+        .populate({
+            path: 'tour',
+            populate: [
+                {
+                    path: 'itemTransport.TransportId',
+                    select: 'transportName transportNumber transportType'
+                },
+                {
+                    path: 'destination',
+                    select: 'locationName country'
+                }
+            ]
+        })
+        .populate('assignedEmployee', 'firstName lastName full_name email employee_id position')
+        .sort({ dateTour: 1 });
 
-        console.log("Found assigned tours:", assignedTours.length);
+        console.log("Found assigned date slots:", assignedDateSlots.length);
+        
+        // Lấy danh sách tour unique từ các DateSlot
+        const tourIds = [...new Set(assignedDateSlots.map(slot => slot.tour._id.toString()))];
+        const uniqueTours = [];
+        
+        for (const tourId of tourIds) {
+            const tourSlots = assignedDateSlots.filter(slot => slot.tour._id.toString() === tourId);
+            if (tourSlots.length > 0) {
+                const tour = tourSlots[0].tour;
+                
+                // Lấy schedules cho tour này
+                const tourSchedule = await TourScheduleModel.findOne({ Tour: tour._id });
+                if (tourSchedule) {
+                    tour.schedules = tourSchedule.schedules || [];
+                } else {
+                    tour.schedules = [];
+                }
+                
+                // Thêm thông tin về các ngày được phân công
+                tour.assignedDates = tourSlots.map(slot => ({
+                    dateSlotId: slot._id,
+                    dateTour: slot.dateTour,
+                    status: slot.status,
+                    tourStatus: slot.tourStatus,
+                    availableSeats: slot.availableSeats,
+                    bookedSeats: slot.bookedSeats,
+                    totalRevenue: slot.totalRevenue,
+                    depositAmount: slot.depositAmount,
+                    refundAmount: slot.refundAmount,
+                    statusNote: slot.statusNote,
+                    statusUpdatedAt: slot.statusUpdatedAt
+                }));
+                uniqueTours.push(tour);
+            }
+        }
+
+        console.log("Found unique assigned tours:", uniqueTours.length);
+        console.log("Tours with assignedDates:", uniqueTours.map(tour => ({
+            tourId: tour._id,
+            tourName: tour.nameTour,
+            assignedDatesCount: tour.assignedDates ? tour.assignedDates.length : 0,
+            assignedDates: tour.assignedDates
+        })));
 
         return res.status(StatusCodes.OK).json({
             success: true,
             message: "Lấy danh sách tour được phân công thành công",
-            tours: assignedTours,
-            total: assignedTours.length
+            tours: uniqueTours,
+            total: uniqueTours.length
         });
 
     } catch (error) {
@@ -631,12 +712,13 @@ const resetEmployeePassword = async (req, res) => {
 module.exports = {
     // Employee functions
     loginEmployee,
+    logoutEmployee,
+    refreshToken,
     getEmployeeProfile,
     updateEmployeeProfile,
     changePassword,
     getAssignedTours,
-    refreshToken,
-    logoutEmployee,
+    
     // Admin functions
     createEmployee,
     getAllEmployees,

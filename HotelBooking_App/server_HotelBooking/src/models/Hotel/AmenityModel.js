@@ -38,7 +38,6 @@ const AmenitySchema = new mongoose.Schema({
 });
 
 // Index để tối ưu tìm kiếm
-AmenitySchema.index({ name: 1 });
 AmenitySchema.index({ category: 1 });
 AmenitySchema.index({ isActive: 1 });
 

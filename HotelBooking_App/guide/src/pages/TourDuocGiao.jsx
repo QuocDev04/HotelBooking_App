@@ -2,21 +2,23 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import axiosGuide from "../../config/axios";
 
-// Component Accordion cho lịch trình tour
-const TourScheduleAccordion = ({ schedules, description }) => {
+// Component Accordion cho lịch trình tour (only from schedules)
+const TourScheduleAccordion = ({ schedules }) => {
   const [openDays, setOpenDays] = useState({ 0: true }); // Mở ngày đầu tiên mặc định
   const [scheduleData, setScheduleData] = useState([]);
 
   useEffect(() => {
+    console.log('TourScheduleAccordion received schedules:', schedules);
     if (schedules && schedules.length > 0) {
       // Sử dụng data từ TourSchedule API
       parseScheduleFromAPI(schedules);
-    } else if (description) {
-      // Fallback: parse từ description HTML nếu không có schedules
-      parseScheduleFromDescription(description);
+    } else {
+      // Nếu không có data gì, hiển thị thông báo
+      setScheduleData([]);
     }
-  }, [schedules, description]);
+  }, [schedules]);
 
   const parseScheduleFromAPI = (apiSchedules) => {
     try {
@@ -32,9 +34,13 @@ const TourScheduleAccordion = ({ schedules, description }) => {
 
       setScheduleData(formattedSchedules);
 
-      // Set ngày đầu tiên mở mặc định
+      // Mở TẤT CẢ các ngày mặc định
       if (formattedSchedules.length > 0) {
-        setOpenDays({ 0: true });
+        const allOpen = formattedSchedules.reduce((acc, _item, idx) => {
+          acc[idx] = true;
+          return acc;
+        }, {});
+        setOpenDays(allOpen);
       }
 
       console.log("Formatted schedules:", formattedSchedules);
@@ -44,79 +50,7 @@ const TourScheduleAccordion = ({ schedules, description }) => {
     }
   };
 
-  const parseScheduleFromDescription = (htmlDescription) => {
-    try {
-      // Parse HTML để tách lịch trình từng ngày
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = htmlDescription;
-
-      const textContent = tempDiv.textContent || tempDiv.innerText || '';
-
-      // Tách theo pattern "Ngày X:" hoặc "Day X:"
-      const dayPattern = /(?:Ngày|Day)\s*(\d+):\s*([^]*?)(?=(?:Ngày|Day)\s*\d+:|$)/gi;
-      const matches = [];
-      let match;
-
-      console.log("Parsing schedule from:", textContent.substring(0, 200) + "...");
-
-      while ((match = dayPattern.exec(textContent)) !== null) {
-        const dayNumber = match[1];
-        const content = match[2].trim();
-
-        console.log(`Found Day ${dayNumber}:`, content.substring(0, 100) + "...");
-
-        // Parse title từ content - lấy phần đầu tiên trước dấu phẩy hoặc dấu chấm
-        let title = "Chi tiết hoạt động";
-        const lines = content.split('\n').filter(line => line.trim());
-        if (lines.length > 0) {
-          const firstLine = lines[0].trim();
-          // Lấy phần đầu tiên của dòng đầu tiên làm title
-          const titleMatch = firstLine.match(/^([^,.]+)/);
-          if (titleMatch) {
-            title = titleMatch[1].trim();
-          }
-        }
-
-        matches.push({
-          day: parseInt(dayNumber),
-          title: title,
-          content: content,
-          isExpanded: parseInt(dayNumber) === 1
-        });
-      }
-
-      console.log("Parsed", matches.length, "days from schedule");
-
-      // Nếu không parse được theo pattern, tạo fallback
-      if (matches.length === 0) {
-        const lines = textContent.split('\n').filter(line => line.trim());
-        if (lines.length > 0) {
-          matches.push({
-            day: 1,
-            title: 'Lịch trình tour',
-            content: textContent,
-            isExpanded: true
-          });
-        }
-      }
-
-      setScheduleData(matches);
-
-      // Set ngày đầu tiên mở mặc định
-      if (matches.length > 0) {
-        setOpenDays({ 0: true });
-      }
-
-    } catch (error) {
-      console.error('Error parsing schedule:', error);
-      setScheduleData([{
-        day: 1,
-        title: 'Lịch trình tour',
-        content: description.replace(/<[^>]*>/g, ''),
-        isExpanded: true
-      }]);
-    }
-  };
+  // Removed parsing from description to avoid mixing with overview content
 
   const toggleDay = (index) => {
     setOpenDays(prev => ({
@@ -125,30 +59,59 @@ const TourScheduleAccordion = ({ schedules, description }) => {
     }));
   };
 
+  const getDayColor = (dayNumber) => {
+    const colors = [
+      'bg-red-500', // Ngày 1
+      'bg-blue-500', // Ngày 2
+      'bg-green-500', // Ngày 3
+      'bg-orange-500', // Ngày 4
+      'bg-purple-500', // Ngày 5
+      'bg-pink-500', // Ngày 6
+      'bg-indigo-500', // Ngày 7
+      'bg-yellow-500', // Ngày 8
+    ];
+    return colors[(dayNumber - 1) % colors.length];
+  };
+
   if (scheduleData.length === 0) {
     return (
-      <div className="bg-gray-50 rounded-lg p-4 border">
-        <p className="text-gray-500">Không có thông tin lịch trình chi tiết</p>
+      <div className="bg-gray-50 rounded-lg p-6 border">
+        <div className="text-center">
+          <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          </svg>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có thông tin lịch trình</h3>
+          <p className="text-gray-500">Lịch trình chi tiết sẽ được cập nhật sớm nhất.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {scheduleData.map((dayInfo, index) => (
         <div key={index} className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
           {/* Header - Clickable */}
           <button
             onClick={() => toggleDay(index)}
-            className="w-full px-4 py-3 bg-blue-50 hover:bg-blue-100 transition-colors duration-200 flex items-center justify-between text-left"
+            className="w-full px-6 py-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between text-left"
           >
-            <div className="flex items-center">
-              <span className="font-medium text-blue-700">
-                Ngày {dayInfo.day}: {dayInfo.title}
+            <div className="flex items-center space-x-4">
+              <span className={`inline-flex items-center justify-center w-8 h-8 ${getDayColor(dayInfo.day)} text-white rounded-full text-sm font-bold`}>
+                {dayInfo.day}
               </span>
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span className="font-semibold text-gray-900">
+                  Ngày {dayInfo.day}: {dayInfo.title}
+                </span>
+              </div>
             </div>
             <svg
-              className={`w-5 h-5 text-blue-600 transition-transform duration-200 ${openDays[index] ? 'rotate-180' : ''}`}
+              className={`w-5 h-5 text-gray-600 transition-transform duration-200 ${openDays[index] ? 'rotate-180' : ''}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -159,34 +122,58 @@ const TourScheduleAccordion = ({ schedules, description }) => {
 
           {/* Content - Collapsible */}
           {openDays[index] && (
-            <div className="px-4 py-3 border-t border-gray-100">
-              <div className="text-gray-700 leading-relaxed whitespace-pre-line">
-                {dayInfo.content}
-              </div>
+            <div className="px-6 py-4 border-t border-gray-100">
+              <div className="space-y-4">
+                {/* Hoạt động trong ngày */}
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+                    <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Hoạt động trong ngày
+                  </h4>
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-line bg-gray-50 rounded-lg p-4">
+                    {dayInfo.content}
+                  </div>
+                </div>
 
-              {/* Ảnh minh họa từ API hoặc placeholder */}
-              <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-2">
-                {dayInfo.images && dayInfo.images.length > 0 ? (
-                  dayInfo.images.slice(0, 3).map((image, imgIndex) => (
-                    <div key={imgIndex} className="aspect-video rounded overflow-hidden">
-                      <img
-                        src={image}
-                        alt={`${dayInfo.title} - Ảnh ${imgIndex + 1}`}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iI2Y3ZjdmNyIvPjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkFuaCBsb2k8L3RleHQ+PC9zdmc+';
-                        }}
-                      />
-                    </div>
-                  ))
-                ) : (
-                  // Placeholder khi không có ảnh
-                  Array.from({ length: 3 }, (_, imgIndex) => (
-                    <div key={imgIndex} className="aspect-video bg-gray-100 rounded border-2 border-dashed border-gray-300 flex items-center justify-center">
-                      <span className="text-gray-400 text-sm">Ảnh minh họa</span>
-                    </div>
-                  ))
-                )}
+                {/* Ảnh minh họa */}
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+                    <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Hình ảnh minh họa
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {dayInfo.images && dayInfo.images.length > 0 ? (
+                      dayInfo.images.slice(0, 3).map((image, imgIndex) => (
+                        <div key={imgIndex} className="aspect-video rounded-lg overflow-hidden border">
+                          <img
+                            src={image}
+                            alt={`${dayInfo.title} - Ảnh ${imgIndex + 1}`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iI2Y3ZjdmNyIvPjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkFuaCBsb2k8L3RleHQ+PC9zdmc+';
+                            }}
+                          />
+                        </div>
+                      ))
+                    ) : (
+                      // Placeholder khi không có ảnh
+                      Array.from({ length: 3 }, (_, imgIndex) => (
+                        <div key={imgIndex} className="aspect-video bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                          <div className="text-center">
+                            <svg className="mx-auto h-8 w-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span className="text-gray-400 text-sm">Ảnh minh họa</span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -207,6 +194,10 @@ const TourDuocGiao = () => {
   const [loadingCustomers, setLoadingCustomers] = useState(false);
   const [updatingTours, setUpdatingTours] = useState({}); // Track which tours are being updated
   const [tourDateSlots, setTourDateSlots] = useState({}); // Track dateSlots for each tour
+  // removed create-slot modal state
+  const [creatingForTour, setCreatingForTour] = useState(null);
+  const [newSlotDate, setNewSlotDate] = useState('');
+  const [newSlotSeats, setNewSlotSeats] = useState(25);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -216,29 +207,90 @@ const TourDuocGiao = () => {
   const fetchAssignedTours = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:8080/api/employee/assigned-tours");
+      const response = await axiosGuide.get("employee/assigned-tours");
 
       console.log("Assigned tours response:", response.data);
+      console.log("Raw API response tours:", JSON.stringify(response.data.tours, null, 2));
 
       if (response.data.success) {
         console.log("Tours data:", response.data.tours);
         const toursData = response.data.tours;
 
-        // Lấy thông tin DateSlot cho mỗi tour
+        // Sử dụng assignedDates từ API response thay vì lấy tất cả dateSlots
         const dateSlotsData = {};
         for (const tour of toursData) {
-          try {
-            const dateSlotsResponse = await axios.get(`http://localhost:8080/api/date/tour/${tour._id}`);
-            if (dateSlotsResponse.data.success && dateSlotsResponse.data.data.length > 0) {
-              dateSlotsData[tour._id] = dateSlotsResponse.data.data;
+          console.log(`Processing tour ${tour._id}:`, {
+            name: tour.nameTour,
+            assignedDates: tour.assignedDates
+          });
+          
+          if (tour.assignedDates && tour.assignedDates.length > 0) {
+             // Chỉ hiển thị những ngày được phân công với đầy đủ thông tin
+             dateSlotsData[tour._id] = tour.assignedDates.map(assignedDate => ({
+               _id: assignedDate.dateSlotId,
+               dateTour: assignedDate.dateTour,
+               tourStatus: assignedDate.tourStatus,
+               status: assignedDate.status,
+               availableSeats: assignedDate.availableSeats,
+               bookedSeats: assignedDate.bookedSeats,
+               totalRevenue: assignedDate.totalRevenue,
+               depositAmount: assignedDate.depositAmount,
+               refundAmount: assignedDate.refundAmount,
+               statusNote: assignedDate.statusNote,
+               statusUpdatedAt: assignedDate.statusUpdatedAt
+             }));
+             console.log(`Tour ${tour._id} dateSlots:`, dateSlotsData[tour._id]);
+          } else {
+            console.log(`Tour ${tour._id} has no assignedDates. Fallback: fetch DateSlots by tourId and filter by assignedEmployee`);
+            try {
+              const slotResp = await axiosGuide.get(`date/tour/${tour._id}`);
+              const employeeId = user?.employeeId || user?._id || user?.employee_id;
+              const raw = slotResp?.data;
+              const list = Array.isArray(raw?.dates)
+                ? raw.dates
+                : Array.isArray(raw)
+                  ? raw
+                  : (Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw?.dateSlots) ? raw.dateSlots : []));
+              const slots = Array.isArray(list)
+                ? list.filter((s) => {
+                    const assigned = s.assignedEmployee;
+                    return assigned === employeeId || assigned?._id === employeeId;
+                  })
+                : [];
+              if (slots.length > 0) {
+                dateSlotsData[tour._id] = slots.map(s => ({
+                  _id: s._id,
+                  dateTour: s.dateTour,
+                  tourStatus: s.tourStatus || 'preparing',
+                  status: s.status || 'active',
+                  availableSeats: s.availableSeats,
+                  bookedSeats: s.bookedSeats || 0,
+                  totalRevenue: s.totalRevenue || 0,
+                  depositAmount: s.depositAmount || 0,
+                  refundAmount: s.refundAmount || 0,
+                  statusNote: s.statusNote || '',
+                  statusUpdatedAt: s.statusUpdatedAt || s.updatedAt
+                }));
+                console.log(`Tour ${tour._id} dateSlots via fallback:`, dateSlotsData[tour._id]);
+              } else {
+                // Vẫn không có slot phân công cho HDV này -> giữ trống để hiển thị nút tạo slot
+                dateSlotsData[tour._id] = [];
+              }
+            } catch (e) {
+              console.warn('Fallback fetch DateSlots error for tour', tour._id, e);
+              dateSlotsData[tour._id] = [];
             }
-          } catch (error) {
-            console.error(`Error fetching date slots for tour ${tour._id}:`, error);
           }
         }
 
+        console.log('Final dateSlotsData:', dateSlotsData);
         setTourDateSlots(dateSlotsData);
         setTours(toursData);
+        
+        // Debug log sau khi set state
+        setTimeout(() => {
+          console.log('tourDateSlots state after setting:', dateSlotsData);
+        }, 100);
 
         response.data.tours.forEach((tour, index) => {
           console.log(`Tour ${index + 1}:`, {
@@ -261,17 +313,16 @@ const TourDuocGiao = () => {
   const fetchCustomerBookings = async (tourId) => {
     try {
       setLoadingCustomers(true);
-      // Cần tìm các dateSlot của tour này trước
-      const dateSlotsResponse = await axios.get(`http://localhost:8080/api/date/tour/${tourId}`);
-      const dateSlots = dateSlotsResponse.data.data || [];
+      // Chỉ lấy dateSlots được phân công từ tourDateSlots state
+      const assignedDateSlots = tourDateSlots[tourId] || [];
 
-      console.log(`Tour ${tourId} có ${dateSlots.length} dateSlots:`, dateSlots.map(s => ({ id: s._id, date: s.dateTour })));
+      console.log(`Tour ${tourId} có ${assignedDateSlots.length} dateSlots được phân công:`, assignedDateSlots.map(s => ({ id: s._id, date: s.dateTour })));
 
-      // Lấy bookings cho tất cả dateSlots của tour
+      // Lấy bookings cho các dateSlots được phân công
       const allBookings = [];
-      for (const slot of dateSlots) {
+      for (const slot of assignedDateSlots) {
         try {
-          const bookingResponse = await axios.get(`http://localhost:8080/api/admin/bookings?slotId=${slot._id}`);
+          const bookingResponse = await axiosGuide.get(`admin/bookings?slotId=${slot._id}`);
           if (bookingResponse.data.success) {
             console.log(`Slot ${slot._id} có ${bookingResponse.data.bookings.length} bookings`);
             allBookings.push(...bookingResponse.data.bookings);
@@ -290,27 +341,7 @@ const TourDuocGiao = () => {
       setLoadingCustomers(false);
     }
   };
-const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
-  try {
-    const validStatuses = ['preparing', 'ongoing', 'completed', 'postponed'];
-    if (!validStatuses.includes(status)) {
-      throw new Error("Trạng thái không hợp lệ");
-    }
-    if (status === 'postponed' && (!note || !note.trim())) {
-      throw new Error("Vui lòng nhập lý do hoãn ngày tour");
-    }
-    const response = await axios.put(
-      `http://localhost:8080/api/tour/status/${id}`,
-      { status, note, updatedBy }
-    );
-    return response.data;
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || error.message
-    };
-  }
-};
+
   const showCustomerList = async (tour) => {
     setSelectedTour(tour);
     setShowCustomerModal(true);
@@ -327,17 +358,37 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
     setSelectedTour(tour);
     setShowScheduleModal(true);
 
-    // Fetch tour schedule từ API
+    // Luôn fetch chi tiết tour để lấy schedules giống như Client
     try {
-      const response = await axios.get(`http://localhost:8080/api/tour/${tour._id}`);
+      console.log('Fetching tour schedule for tour ID:', tour._id);
+      const response = await axiosGuide.get(`tour/${tour._id}`);
+      console.log('Tour schedule response:', response.data);
+
       if (response.data.success) {
+        const tourData = response.data.tour;
+        const schedules = Array.isArray(tourData.schedules) ? tourData.schedules : [];
+
         setSelectedTour({
           ...tour,
-          schedules: response.data.tour.schedules || []
+          ...tourData,
+          schedules,
+          descriptionTour: tourData.descriptionTour || tour.descriptionTour
+        });
+      } else {
+        console.error('API response not successful:', response.data);
+        setSelectedTour({
+          ...tour,
+          schedules: [],
+          descriptionTour: tour.descriptionTour
         });
       }
     } catch (error) {
       console.error('Error fetching tour schedule:', error);
+      setSelectedTour({
+        ...tour,
+        schedules: [],
+        descriptionTour: tour.descriptionTour
+      });
     }
   };
 
@@ -347,6 +398,13 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
   };
 
   const handleStatusChange = async (tourId, dateSlotId, newStatus) => {
+    // Kiểm tra xem dateSlotId có phải là ID thật không (không phải default-xxx)
+    if (!dateSlotId || dateSlotId.startsWith('default-')) {
+      alert('Không thể cập nhật trạng thái: Tour này chưa có lịch trình cụ thể được phân công');
+      console.error('Invalid dateSlotId:', dateSlotId);
+      return;
+    }
+
     // Special handling for postponed status
     if (newStatus === 'postponed') {
       const reason = prompt('Vui lòng nhập lý do hoãn tour:');
@@ -357,8 +415,8 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
       setUpdatingTours(prev => ({ ...prev, [tourId]: true }));
 
       try {
-        const response = await axios.put(
-          `http://localhost:8080/api/tour/status/${dateSlotId}`,
+        const response = await axiosGuide.put(
+          `/tour/status/${dateSlotId}`,
           {
             status: newStatus,
             note: reason,
@@ -370,11 +428,11 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
           // Update tourDateSlots with new status
           setTourDateSlots(prev => ({
             ...prev,
-            [tourId]: prev[tourId]?.map(slot =>
+            [tourId]: (prev[tourId] || []).map(slot =>
               slot._id === dateSlotId
-                ? { ...slot, tourStatus: newStatus, statusNote: reason }
+                ? { ...slot, tourStatus: newStatus, statusNote: reason, statusUpdatedAt: new Date().toISOString() }
                 : slot
-            ) || []
+            )
           }));
           alert('Cập nhật trạng thái tour thành công!');
         } else {
@@ -391,8 +449,8 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
       setUpdatingTours(prev => ({ ...prev, [tourId]: true }));
 
       try {
-        const response = await axios.put(
-          `http://localhost:8080/api/tour/status/${dateSlotId}`,
+        const response = await axiosGuide.put(
+          `/tour/status/${dateSlotId}`,
           {
             status: newStatus,
             note: `Trạng thái đã được cập nhật thành ${getTourStatusText(newStatus)}`,
@@ -404,11 +462,11 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
           // Update tourDateSlots with new status
           setTourDateSlots(prev => ({
             ...prev,
-            [tourId]: prev[tourId]?.map(slot =>
+            [tourId]: (prev[tourId] || []).map(slot =>
               slot._id === dateSlotId
-                ? { ...slot, tourStatus: newStatus, statusNote: `Trạng thái đã được cập nhật thành ${getTourStatusText(newStatus)}` }
+                ? { ...slot, tourStatus: newStatus, statusNote: `Trạng thái đã được cập nhật thành ${getTourStatusText(newStatus)}`, statusUpdatedAt: new Date().toISOString() }
                 : slot
-            ) || []
+            )
           }));
           alert('Cập nhật trạng thái tour thành công!');
         } else {
@@ -430,10 +488,7 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
     }).format(price);
   };
 
-  const getStatusColor = (status) => {
-    if (status) return 'bg-green-100 text-green-800';
-    return 'bg-red-100 text-red-800';
-  };
+
 
   const getTourStatusColor = (status) => {
     switch (status) {
@@ -468,54 +523,6 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
     }
   };
 
-  const getPaymentStatusColor = (status) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'deposit_paid': return 'bg-blue-100 text-blue-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      case 'pending_cancel': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getPaymentStatusText = (status) => {
-    switch (status) {
-      case 'pending': return 'Chờ thanh toán';
-      case 'deposit_paid': return 'Đã đặt cọc';
-      case 'completed': return 'Đã thanh toán';
-      case 'cancelled': return 'Đã hủy';
-      case 'pending_cancel': return 'Chờ xác nhận hủy';
-      default: return 'Không xác định';
-    }
-  };
-
-  // Function để clean HTML và format text đẹp
-  const cleanHtmlDescription = (htmlString) => {
-    if (!htmlString) return '';
-
-    try {
-      // Tạo temporary div để parse HTML
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = htmlString;
-
-      // Lấy text content
-      let textContent = tempDiv.textContent || tempDiv.innerText || '';
-
-      // Clean up và format
-      textContent = textContent
-        .replace(/\s+/g, ' ')  // Replace multiple spaces với single space
-        .replace(/\n\s*\n/g, '\n\n')  // Keep paragraph breaks
-        .trim();
-
-      return textContent;
-    } catch (error) {
-      console.error('Error cleaning HTML:', error);
-      // Fallback: simple regex clean
-      return htmlString.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
-    }
-  };
-
   const getTourStatusFromDateSlots = (tourId) => {
     const dateSlots = tourDateSlots[tourId];
     if (!dateSlots || dateSlots.length === 0) {
@@ -527,6 +534,65 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
     }, dateSlots[0]);
 
     return latestDateSlot.tourStatus || 'preparing';
+  };
+
+  const openCreateSlotModal = (tour) => {
+    setCreatingForTour(tour);
+    setNewSlotDate('');
+    setNewSlotSeats(tour?.maxPeople || 25);
+    setShowCreateSlotModal(true);
+  };
+
+  const closeCreateSlotModal = () => {
+    setShowCreateSlotModal(false);
+    setCreatingForTour(null);
+  };
+
+  const createAndAssignDateSlot = async () => {
+    if (!creatingForTour || !newSlotDate) {
+      alert('Vui lòng chọn ngày cho mốc thời gian');
+      return;
+    }
+    try {
+      // 1) Tạo DateSlot
+      const createResp = await axiosGuide.post('date', {
+        tourId: creatingForTour._id,
+        slots: [{ date: newSlotDate, seats: newSlotSeats }]
+      });
+      const created = createResp?.data?.createdSlots?.[0];
+      if (!created?._id) throw new Error('Tạo slot không thành công');
+
+      // 2) Gán HDV (employeeId lấy từ user trong context)
+      const employeeId = user?.employeeId || user?._id || user?.employee_id;
+      await axiosGuide.post(`dateslot/${created._id}/assign-employee`, { employeeId });
+
+      // 3) Cập nhật state cục bộ để dropdown hoạt động ngay
+      setTourDateSlots(prev => ({
+        ...prev,
+        [creatingForTour._id]: [
+          ...(prev[creatingForTour._id] || []).filter(s => !(s._id && s._id.startsWith('default-'))),
+          {
+            _id: created._id,
+            dateTour: created.dateTour || newSlotDate,
+            tourStatus: 'preparing',
+            status: 'active',
+            availableSeats: created.availableSeats || newSlotSeats,
+            bookedSeats: 0,
+            totalRevenue: 0,
+            depositAmount: 0,
+            refundAmount: 0,
+            statusNote: '',
+            statusUpdatedAt: new Date().toISOString()
+          }
+        ]
+      }));
+
+      closeCreateSlotModal();
+      alert('Tạo và phân công mốc thời gian thành công!');
+    } catch (e) {
+      console.error('Create/assign slot error:', e);
+      alert('Lỗi khi tạo/phan công mốc thời gian: ' + (e.response?.data?.message || e.message));
+    }
   };
 
   if (loading) {
@@ -641,72 +707,51 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
                     </button>
                   </div>
 
-                  {/* Hiển thị tất cả DateSlots */}
+                  {/* Nút cập nhật trạng thái tour */}
                   <div className="mt-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Lịch trình tour:</h3>
-                    {tourDateSlots[tour._id] && tourDateSlots[tour._id].length > 0 ? (
-                      <div className="space-y-3">
-                        {tourDateSlots[tour._id].map((dateSlot, index) => (
-                          <div key={dateSlot._id} className="bg-gray-50 rounded-lg p-4 border">
-                            <div className="flex justify-between items-start mb-3">
-                              <div>
-                                <h4 className="font-medium text-gray-900">
-                                  Ngày {new Date(dateSlot.dateTour).toLocaleDateString('vi-VN')}
-                                </h4>
-                                <p className="text-sm text-gray-600">
-                                  Số chỗ: {dateSlot.availableSeats} | Đã đặt: {dateSlot.bookedSeats}
-                                </p>
-                                {dateSlot.statusNote && (
-                                  <p className="text-sm text-gray-500 mt-1">
-                                    Ghi chú: {dateSlot.statusNote}
-                                  </p>
-                                )}
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTourStatusColor(dateSlot.tourStatus)}`}>
-                                  {getTourStatusText(dateSlot.tourStatus)}
-                                </span>
-                                <select
-                                  value={dateSlot.tourStatus}
-                                  onChange={(e) => handleStatusChange(tour._id, dateSlot._id, e.target.value)}
-                                  disabled={updatingTours[tour._id]}
-                                  className={`text-sm border rounded px-2 py-1 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${getSelectBgColor(dateSlot.tourStatus)}`}
-                                >
-                                  <option value="preparing">Chuẩn bị diễn ra</option>
-                                  <option value="ongoing">Đang diễn ra</option>
-                                  <option value="completed">Hoàn thành</option>
-                                  <option value="postponed">Hoãn tour</option>
-                                </select>
-                              </div>
-                            </div>
-
-                            {/* Thông tin bổ sung */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-600">
-                              <div>
-                                <span className="font-medium">Doanh thu:</span>
-                                <div>{dateSlot.totalRevenue?.toLocaleString() || 0} VNĐ</div>
-                              </div>
-                              <div>
-                                <span className="font-medium">Tiền cọc:</span>
-                                <div>{dateSlot.depositAmount?.toLocaleString() || 0} VNĐ</div>
-                              </div>
-                              <div>
-                                <span className="font-medium">Hoàn trả:</span>
-                                <div>{dateSlot.refundAmount?.toLocaleString() || 0} VNĐ</div>
-                              </div>
-                              <div>
-                                <span className="font-medium">Cập nhật:</span>
-                                <div>{dateSlot.statusUpdatedAt ? new Date(dateSlot.statusUpdatedAt).toLocaleDateString('vi-VN') : 'N/A'}</div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                    <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4 border">
+                      <div className="flex items-center space-x-4">
+                        <span className="text-sm font-medium text-gray-700">Trạng thái tour:</span>
+                        <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getTourStatusColor(getTourStatusFromDateSlots(tour._id))}`}>
+                          {getTourStatusText(getTourStatusFromDateSlots(tour._id))}
+                        </span>
                       </div>
-                    ) : (
-                      <div className="text-center py-4 text-gray-500">
-                        <p>Chưa có lịch trình tour</p>
+                      <div className="flex items-center space-x-3">
+                        {(() => {
+                          const dateSlots = (tourDateSlots[tour._id] || [])
+                            .filter(s => s._id && !s._id.startsWith('default-'))
+                            .sort((a, b) => new Date(b.dateTour) - new Date(a.dateTour));
+                          const firstRealSlot = dateSlots[0];
+                          if (!firstRealSlot) {
+                            return (
+                              <div className="text-sm text-gray-500 italic">
+                                Chưa thể cập nhật: Tour chưa có lịch trình cụ thể được phân công
+                              </div>
+                            );
+                          }
+                          return (
+                            <>
+                              <select
+                                value={getTourStatusFromDateSlots(tour._id)}
+                                onChange={(e) => {
+                                  handleStatusChange(tour._id, firstRealSlot._id, e.target.value);
+                                }}
+                                disabled={updatingTours[tour._id]}
+                                className={`text-sm border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${getSelectBgColor(getTourStatusFromDateSlots(tour._id))}`}
+                              >
+                                <option value="preparing">Chuẩn bị diễn ra</option>
+                                <option value="ongoing">Đang diễn ra</option>
+                                <option value="completed">Hoàn thành</option>
+                                <option value="postponed">Hoãn tour</option>
+                              </select>
+                              {updatingTours[tour._id] && (
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -868,7 +913,7 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
       {/* Modal Lịch trình Tour */}
       {showScheduleModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden">
             {/* Header */}
             <div className="bg-green-600 text-white p-4 flex justify-between items-center">
               <div>
@@ -883,17 +928,32 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
               </button>
             </div>
 
+            {/* Removed tab navigation to simplify UI */}
+
             {/* Body */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+              {/* Header với icon */}
+              <div className="mb-6">
+                <div className="flex items-center space-x-3 mb-2">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <h1 className="text-2xl font-bold text-gray-900">Lịch trình tour</h1>
+                  <div className="w-4 h-4 bg-green-500 rounded"></div>
+                </div>
+                <p className="text-gray-600">Chi tiết hoạt động từng ngày trong chuyến du lịch</p>
+              </div>
+
               {/* Thông tin tổng quan */}
-              <div className="bg-green-50 rounded-lg p-4 mb-6">
+              <div className="bg-green-50 rounded-lg p-6 mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông tin tổng quan</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <h3 className="text-sm font-medium text-green-600 mb-1">Điểm khởi hành</h3>
+                    <h4 className="text-sm font-medium text-green-600 mb-1">Điểm khởi hành</h4>
                     <p className="text-lg font-semibold text-green-700">{selectedTour?.departure_location}</p>
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-green-600 mb-1">Điểm đến</h3>
+                    <h4 className="text-sm font-medium text-green-600 mb-1">Điểm đến</h4>
                     <p className="text-lg font-semibold text-green-700">
                       {selectedTour?.destination ?
                         (typeof selectedTour.destination === 'object' ?
@@ -905,11 +965,11 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
                     </p>
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-green-600 mb-1">Thời gian</h3>
+                    <h4 className="text-sm font-medium text-green-600 mb-1">Thời gian</h4>
                     <p className="text-lg font-semibold text-green-700">{selectedTour?.duration}</p>
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-green-600 mb-1">Số lượng tối đa</h3>
+                    <h4 className="text-sm font-medium text-green-600 mb-1">Số lượng tối đa</h4>
                     <p className="text-lg font-semibold text-green-700">{selectedTour?.maxPeople} người</p>
                   </div>
                 </div>
@@ -920,13 +980,13 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {selectedTour?.departure_time && (
                         <div>
-                          <h3 className="text-sm font-medium text-green-600 mb-1">Giờ khởi hành</h3>
+                          <h4 className="text-sm font-medium text-green-600 mb-1">Giờ khởi hành</h4>
                           <p className="text-lg font-semibold text-green-700">{selectedTour.departure_time}</p>
                         </div>
                       )}
                       {selectedTour?.return_time && (
                         <div>
-                          <h3 className="text-sm font-medium text-green-600 mb-1">Giờ kết thúc</h3>
+                          <h4 className="text-sm font-medium text-green-600 mb-1">Giờ kết thúc</h4>
                           <p className="text-lg font-semibold text-green-700">{selectedTour.return_time}</p>
                         </div>
                       )}
@@ -972,24 +1032,21 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
               )}
 
               {/* Lịch trình từng ngày */}
-              {selectedTour?.descriptionTour && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Chi tiết lịch trình
-                  </h3>
-                  <TourScheduleAccordion
-                    schedules={selectedTour?.schedules}
-                    description={selectedTour?.descriptionTour}
-                  />
-                </div>
-              )}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Chi tiết lịch trình
+                </h3>
+                <TourScheduleAccordion
+                  schedules={selectedTour?.schedules}
+                />
+              </div>
 
               {/* Giá tour */}
-              <div className="bg-blue-50 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-blue-900 mb-3">Thông tin giá</h3>
+              <div className="bg-blue-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-blue-900 mb-4">Thông tin giá</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-blue-600">Giá người lớn:</span>
@@ -1019,6 +1076,58 @@ const updateTourStatusAPI = async ({ id, status, note, updatedBy }) => {
           </div>
         </div>
       )}
+
+      {/* Modal tạo DateSlot */}
+      {false && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto p-6">
+            <h2 className="text-xl font-bold mb-4">Tạo mốc thời gian cho tour</h2>
+            <p className="text-gray-700 mb-4">
+              Bạn đang tạo mốc thời gian cho tour: <span className="font-semibold">{creatingForTour?.nameTour}</span>
+            </p>
+            <div className="mb-4">
+              <label htmlFor="newSlotDate" className="block text-sm font-medium text-gray-700 mb-1">
+                Ngày phân công:
+              </label>
+              <input
+                type="date"
+                id="newSlotDate"
+                value={newSlotDate}
+                onChange={(e) => setNewSlotDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="newSlotSeats" className="block text-sm font-medium text-gray-700 mb-1">
+                Số chỗ có sẵn:
+              </label>
+              <input
+                type="number"
+                id="newSlotSeats"
+                value={newSlotSeats}
+                onChange={(e) => setNewSlotSeats(parseInt(e.target.value) || 0)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={closeCreateSlotModal}
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={createAndAssignDateSlot}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Tạo và phân công
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* removed create-slot modal */}
 
 
     </div>

@@ -4,7 +4,7 @@ const nodemailer = require("nodemailer");
 const moment = require("moment-timezone");
 const Booking = require("../../models/Tour/TourBooking");
 const Slot = require("../../models/Tour/DateTour");
-const HotelBooking = require("../../models/Hotel/HotelBooking"); // thêm model hotel
+const HotelBooking = require("../../models/Hotel/HotelBooking");
 
 // Hàm gửi mail chung
 const sendMail = async ({ email, subject, html }) => {

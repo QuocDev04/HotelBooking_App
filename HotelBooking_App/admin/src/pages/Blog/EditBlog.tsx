@@ -71,7 +71,7 @@ const EditBlog = () => {
       }
     } else if (data && !data.post) {
       message.error("Không tìm thấy bài viết!");
-      navigate("/admin/list-blogs");
+      navigate("/admin/list-blog");
     }
   }, [data, form, navigate]);
 
@@ -79,7 +79,7 @@ const EditBlog = () => {
   useEffect(() => {
     if (isError) {
       message.error("Lỗi khi tải dữ liệu bài viết!");
-      navigate("/admin/list-blogs");
+      navigate("/admin/list-blog");
     }
   }, [isError, navigate]);
 
@@ -90,7 +90,7 @@ const EditBlog = () => {
     onSuccess: () => {
       message.success("Cập nhật blog thành công!");
       queryClient.invalidateQueries({ queryKey: ["blogs"] });
-      navigate("/admin/list-blogs");
+      navigate("/admin/list-blog");
     },
     onError: (error: any) => {
       message.error(error.response?.data?.message || "Có lỗi khi cập nhật!");
@@ -130,7 +130,7 @@ const EditBlog = () => {
       <Card
         title="Chỉnh sửa Blog"
         extra={
-          <Button onClick={() => navigate("/admin/list-blogs")}>Quay lại</Button>
+          <Button onClick={() => navigate("/admin/list-blog")}>Quay lại</Button>
         }
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
@@ -160,7 +160,6 @@ const EditBlog = () => {
               <Card title="Cài đặt xuất bản" className="mb-6">
                 <Form.Item name="status" label="Trạng thái">
                   <Select size="large">
-                    <Option value="draft">Bản nháp</Option>
                     <Option value="published">Xuất bản ngay</Option>
                   </Select>
                 </Form.Item>

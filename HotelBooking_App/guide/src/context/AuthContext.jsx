@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }) => {
         const savedToken = localStorage.getItem("hdv_token");
         const savedUser = localStorage.getItem("hdv_user");
 
-        if (savedToken && savedUser) {
+        if (savedToken && savedUser && savedUser !== "undefined" && savedUser !== "null") {
           setToken(savedToken);
           setUser(JSON.parse(savedUser));
         }
@@ -88,6 +88,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem("hdv_token");
     localStorage.removeItem("hdv_user");
+    localStorage.removeItem("hdv_refresh_token")
   };
 
   const updateUser = (updatedUserData) => {
