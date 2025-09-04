@@ -49,7 +49,6 @@ interface Hotel {
     country: string;
   };
   starRating: number;
-  floorsCount?: number;
   hotelImages: string[];
   roomTypes: Array<{
     _id: string;
@@ -61,6 +60,7 @@ interface Hotel {
     images: string[];
     totalRooms: number;
     discountPercentage: number;
+    floorNumber?: number;
   }>;
   hotelAmenities: Array<{
     name: string;
@@ -410,9 +410,6 @@ const HotelDetailRefactored: React.FC = () => {
           <Rate disabled defaultValue={hotel.starRating} />
           <Text><EnvironmentOutlined /> {hotel.location.locationName}, {hotel.location.country}</Text>
           <Text>({hotel.totalReviews} đánh giá)</Text>
-          {typeof hotel.floorsCount === 'number' && (
-            <Text><strong>Số tầng:</strong> {hotel.floorsCount}</Text>
-          )}
         </div>
       </div>
 

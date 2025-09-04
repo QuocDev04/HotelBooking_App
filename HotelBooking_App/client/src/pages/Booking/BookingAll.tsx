@@ -388,14 +388,12 @@ const BookingTour = () => {
                   validateTrigger="onBlur"
                   name="fullName"
                   rules={[
-                    { required: true, message: "Vui lòng nhập tên" },
+                    { required: true, message: "Vui lòng nhập họ và tên" },
+                    { min: 3, message: "Họ và tên phải có ít nhất 3 ký tự" },
+                    { max: 30, message: "Họ và tên không được vượt quá 30 ký tự" },
                     {
                       pattern: /^[a-zA-ZÀ-ỹ\s]+$/,
-                      message: "Tên chỉ chứa chữ cái và khoảng trắng"
-                    },
-                    {
-                      max: 50,
-                      message: "Tên không được vượt quá 50 ký tự"
+                      message: "Họ và tên chỉ được chứa chữ cái và khoảng trắng"
                     }
                   ]}
                 >

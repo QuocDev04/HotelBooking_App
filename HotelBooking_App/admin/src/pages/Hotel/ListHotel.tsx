@@ -37,6 +37,7 @@ interface Hotel {
     maxOccupancy: number;
     bedType: string;
     totalRooms: number;
+    floorNumber?: number;
   }[];
   status: boolean;
   createdAt: string;
@@ -591,6 +592,14 @@ const ListHotel: React.FC = () => {
                           rules={[{ required: true, message: 'Vui lòng nhập số phòng!' }]}
                         >
                           <InputNumber min={1} placeholder="Số phòng" style={{ width: '100%' }} />
+                        </Form.Item>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'floorNumber']}
+                          label="Số tầng"
+                          rules={[{ required: true, message: 'Vui lòng nhập số tầng!' }]}
+                        >
+                          <InputNumber min={1} placeholder="Tầng" style={{ width: '100%' }} />
                         </Form.Item>
                         <div className="flex justify-end">
                           <Button type="link" danger onClick={() => remove(name)}>

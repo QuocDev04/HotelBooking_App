@@ -840,7 +840,15 @@ const Checkout = () => {
                                   key={field.key + "_fullName"}
                                   name={[field.name, 'fullName']}
                                   fieldKey={[field.fieldKey, 'fullName']}
-                                  rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
+                                  rules={[
+                                    { required: true, message: 'Vui lòng nhập họ và tên' },
+                                    { min: 3, message: 'Họ và tên phải có ít nhất 3 ký tự' },
+                                    { max: 30, message: 'Họ và tên không được vượt quá 30 ký tự' },
+                                    {
+                                      pattern: /^[a-zA-ZÀ-ỹ\s]+$/,
+                                      message: 'Họ và tên chỉ được chứa chữ cái và khoảng trắng'
+                                    }
+                                  ]}
                                 >
                                   <Input placeholder="Nhập họ tên" size="large" />
                                 </Form.Item>
@@ -934,7 +942,15 @@ const Checkout = () => {
                                   key={field.key + "_fullName"}
                                   name={[field.name, 'fullName']}
                                   fieldKey={[field.fieldKey, 'fullName']}
-                                  rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
+                                  rules={[
+                                    { required: true, message: 'Vui lòng nhập họ và tên' },
+                                    { min: 3, message: 'Họ và tên phải có ít nhất 3 ký tự' },
+                                    { max: 30, message: 'Họ và tên không được vượt quá 30 ký tự' },
+                                    {
+                                      pattern: /^[a-zA-ZÀ-ỹ\s]+$/,
+                                      message: 'Họ và tên chỉ được chứa chữ cái và khoảng trắng'
+                                    }
+                                  ]}
                                 >
                                   <Input placeholder="Nhập họ tên" size="large" />
                                 </Form.Item>

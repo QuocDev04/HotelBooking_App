@@ -285,6 +285,10 @@ const GetAllSlotsByTourId = async (req, res) => {
                         select: 'locationName country',
                     },
                 ],
+            })
+            .populate({
+                path: 'assignedEmployee',
+                select: 'firstName lastName full_name email employee_id position department status'
             });
 
         if (!slots || slots.length === 0) {

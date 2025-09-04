@@ -14,6 +14,7 @@ interface RoomAvailability {
     finalPrice: number;
     maxOccupancy: number;
     totalRooms: number;
+    floorNumber?: number;
   };
   availableRooms: number;
 }
@@ -273,6 +274,11 @@ export const AvailabilityChecker: React.FC<AvailabilityCheckerProps> = ({
                         <Tag color="green">
                           Tối đa {room.roomType.maxOccupancy} khách
                         </Tag>
+                        {room.roomType.floorNumber && (
+                          <Tag color="orange">
+                            Tầng {room.roomType.floorNumber}
+                          </Tag>
+                        )}
                       </Space>
                     </div>
                     

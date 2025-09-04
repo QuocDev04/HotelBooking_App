@@ -266,7 +266,12 @@ const HotelGuestInfo = () => {
                         name="userName"
                         rules={[
                           { required: true, message: "Vui lòng nhập họ và tên" },
-                          { min: 2, message: "Tên phải có ít nhất 2 ký tự" }
+                          { min: 3, message: "Họ và tên phải có ít nhất 3 ký tự" },
+                          { max: 30, message: "Họ và tên không được vượt quá 30 ký tự" },
+                          {
+                            pattern: /^[a-zA-ZÀ-ỹ\s]+$/,
+                            message: "Họ và tên chỉ được chứa chữ cái và khoảng trắng"
+                          }
                         ]}
                       >
                         <Input placeholder="Nhập họ và tên" />
@@ -377,7 +382,15 @@ const HotelGuestInfo = () => {
                           <Form.Item
                             label="Họ và tên"
                             name={['guests', 1, 'fullName']}
-                            rules={[{ required: true, message: 'Vui lòng nhập họ và tên khách 2!' }]}
+                            rules={[
+                              { required: true, message: 'Vui lòng nhập họ và tên khách 2!' },
+                              { min: 3, message: 'Họ và tên phải có ít nhất 3 ký tự' },
+                              { max: 30, message: 'Họ và tên không được vượt quá 30 ký tự' },
+                              {
+                                pattern: /^[a-zA-ZÀ-ỹ\s]+$/,
+                                message: 'Họ và tên chỉ được chứa chữ cái và khoảng trắng'
+                              }
+                            ]}
                           >
                             <Input placeholder="Nhập họ và tên khách 2" />
                           </Form.Item>

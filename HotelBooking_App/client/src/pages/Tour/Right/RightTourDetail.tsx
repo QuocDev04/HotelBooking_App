@@ -11,6 +11,14 @@ interface Slot {
     availableSeats: number;
     _id: string;
     dateTourId: string;
+    assignedEmployee?: {
+        firstName?: string;
+        lastName?: string;
+        full_name?: string;
+        email?: string;
+        employee_id?: string;
+        position?: string;
+    };
 }
 
 interface RightTourDetailProps {
@@ -29,7 +37,14 @@ interface RightTourDetailProps {
         code?: string;
         departure_location?: string;
         duration?: string;
-
+        assignedEmployee?: {
+            firstName?: string;
+            lastName?: string;
+            full_name?: string;
+            email?: string;
+            employee_id?: string;
+            position?: string;
+        };
     };
     slots?: Slot[];
 }
@@ -202,6 +217,19 @@ const RightTourDetail = ({
                                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                                     <span className="text-gray-600 font-medium">⏰ Thời gian:</span>
                                     <span className="font-semibold">{tour?.duration || "..."}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <span className="text-gray-600 font-medium">👨‍🏫 HDV phụ trách:</span>
+                                    <span className="font-semibold text-blue-600">
+                                        {/* Ưu tiên lấy từ selectedSlot, nếu không có thì lấy từ tour */}
+                                        {selectedSlot?.assignedEmployee?.full_name || 
+                                         (selectedSlot?.assignedEmployee?.firstName && selectedSlot?.assignedEmployee?.lastName 
+                                          ? `${selectedSlot.assignedEmployee.firstName} ${selectedSlot.assignedEmployee.lastName}` 
+                                          : tour?.assignedEmployee?.full_name ||
+                                            (tour?.assignedEmployee?.firstName && tour?.assignedEmployee?.lastName 
+                                             ? `${tour.assignedEmployee.firstName} ${tour.assignedEmployee.lastName}` 
+                                             : "Chưa phân công"))}
+                                    </span>
                                 </div>
                                 <div className="flex justify-between items-center py-2">
                                     <span className="text-gray-600 font-medium">👥 Chỗ còn:</span>

@@ -7,16 +7,58 @@ const DateSlot = require("../../models/Tour/DateTour.js");
 
 const getAllTours = async (req, res) => {
     try {
-        const tour = await TourModel.find()
-        .populate("itemTransport.TransportId", "transportName transportNumber transportType")
+        const { page = 1, limit = 12, search, destination, minPrice, maxPrice, tourType } = req.query;
+        
+        // Tạo filter object
+        let filter = {};
+        
+        // Tìm kiếm theo tên tour
+        if (search) {
+            filter.$or = [
+                { nameTour: { $regex: search, $options: 'i' } },
+                { departure_location: { $regex: search, $options: 'i' } }
+            ];
+        }
+        
+        // Lọc theo loại tour
+        if (tourType) {
+            filter.tourType = tourType;
+        }
+        
+        // Lọc theo giá
+        if (minPrice || maxPrice) {
+            filter.finalPrice = {};
+            if (minPrice) filter.finalPrice.$gte = parseInt(minPrice);
+            if (maxPrice) filter.finalPrice.$lte = parseInt(maxPrice);
+        }
+        
+        // Tính toán phân trang
+        const pageNumber = parseInt(page);
+        const limitNumber = parseInt(limit);
+        const skip = (pageNumber - 1) * limitNumber;
+        
+        // Lấy tổng số tour
+        const total = await TourModel.countDocuments(filter);
+        
+        // Lấy danh sách tour với phân trang
+        const tours = await TourModel.find(filter)
+            .populate("itemTransport.TransportId", "transportName transportNumber transportType")
             .populate("destination", "locationName country")
-
-
             .populate("assignedEmployee", "firstName lastName full_name email employee_id position")
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limitNumber);
+            
         return res.status(StatusCodes.OK).json({
             success: true,
             message: "Get all tours successfully",
-            tours: tour,
+            tours: tours,
+            pagination: {
+                currentPage: pageNumber,
+                totalPages: Math.ceil(total / limitNumber),
+                totalTours: total,
+                limit: limitNumber
+            }
         });
     } catch (error) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -106,7 +148,10 @@ const UpdateTour = async (req, res) => {
 
 const GetTourById = async (req, res) => {
     try {
-        const tour = await TourModel.findById(req.params.id).populate("itemTransport.TransportId", "transportName transportNumber transportType").populate("destination", "locationName country")
+        const tour = await TourModel.findById(req.params.id)
+            .populate("itemTransport.TransportId", "transportName transportNumber transportType")
+            .populate("destination", "locationName country")
+            .populate("assignedEmployee", "firstName lastName full_name email employee_id position")
         if (!tour) {
             return res.status(404).json({ success: false, message: "Không tìm thấy tour" });
         }

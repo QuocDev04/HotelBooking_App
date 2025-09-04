@@ -110,10 +110,16 @@ const GetByIdUser = async (req, res) => {
 
 const PutUser = async (req, res) => {
     try {
-        const user = await UserModel.findById(req.params.id, req.body);
+        const user = await UserModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!user) {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                success: false,
+                message: "User not found"
+            });
+        }
         return res.status(StatusCodes.OK).json({
             success: true,
-            message: "User put successfully",
+            message: "User updated successfully",
             user: user
         })
     } catch (error) {

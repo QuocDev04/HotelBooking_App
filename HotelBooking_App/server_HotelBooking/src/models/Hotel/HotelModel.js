@@ -15,6 +15,7 @@ const RoomTypeSchema = new mongoose.Schema({
     amenities: [AmenitySchema],
     images: [{ type: String }],
     totalRooms: { type: Number, required: true },
+    floorNumber: { type: Number, required: true },
     discountPercent: { type: Number, default: 0 },
     finalPrice: { type: Number },
     discountExpiryDate: { type: Date }
@@ -29,7 +30,7 @@ const HotelSchema = new mongoose.Schema({
         required: true 
     },
     address: { type: String, required: true },
-    floorsCount: { type: Number, required: true, min: 2 },
+
     coordinates: {
         latitude: { type: Number },
         longitude: { type: Number }
