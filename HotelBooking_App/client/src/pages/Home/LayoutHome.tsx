@@ -1,12 +1,12 @@
 import { useEffect } from "react"
-import AboutUs from "./Main/About"
-import Banner from "./Main/Banner"
+
 import FeaturedDestination from "./Main/FeaturedDestination"
 import Internatinal from "./Main/Internatinal"
 import News from "./Main/News"
 import TourIn from "./Main/TourIn"
 
 import HotelPromotion from "./Main/HotelPromotion"
+import BannerWithAboutUs from "./Main/About"
 
 const LayoutHome = () => {
   useEffect(() => {
@@ -15,8 +15,7 @@ const LayoutHome = () => {
   return (
 
     <div style={{ background: 'transparent' }}>
-      <Banner/>
-      <AboutUs/>
+      <BannerWithAboutUs/>
       <Internatinal/>
       <FeaturedDestination/>
       <HotelPromotion/>

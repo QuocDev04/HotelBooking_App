@@ -256,12 +256,6 @@ Vnpay.get('/payment-callback', async (req, res) => {
 </div>
 `;
                     }
-
-
-
-
-
-
                     await sendMail({
                         email: updatedBooking.email,
                         subject: `Xác nhận thanh toán ${isHotelBooking ? 'khách sạn' : 'tour'} thành công`,
