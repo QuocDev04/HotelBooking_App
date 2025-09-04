@@ -418,14 +418,26 @@ const HotelDetailRefactored: React.FC = () => {
         <Col xs={24} lg={16}>
           {/* Images */}
           {hotel.hotelImages && hotel.hotelImages.length > 0 ? (
-            <Card style={{ marginBottom: '24px' }}>
+            <Card style={{ marginBottom: '24px', padding: 0 }}>
               <Carousel autoplay>
                 {hotel.hotelImages.map((image, index) => (
-                  <div key={index}>
+                  <div
+                    key={index}
+                    style={{
+                      width: '100%',
+                      height: '500px', // chiều cao cố định cho slide
+                      overflow: 'hidden',
+                    }}
+                  >
                     <Image
                       src={image}
                       alt={`${hotel.hotelName} - ${index + 1}`}
-                      style={{ width: '100%', height: '400px', objectFit: 'cover' }}
+                      preview={true}
+                      style={{
+                        width: '900px',
+                        height: '500px',
+                        objectFit: 'cover', // ảnh cover toàn slide, giữ tỉ lệ
+                      }}
                     />
                   </div>
                 ))}
@@ -433,15 +445,17 @@ const HotelDetailRefactored: React.FC = () => {
             </Card>
           ) : (
             <Card style={{ marginBottom: '24px' }}>
-              <div style={{
-                width: '100%',
-                height: '400px',
-                background: '#f5f5f5',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexDirection: 'column'
-              }}>
+              <div
+                style={{
+                  width: '100%',
+                  height: '500px', // bằng với slide carousel
+                  background: '#f5f5f5',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexDirection: 'column',
+                }}
+              >
                 <div style={{ fontSize: '48px', marginBottom: '16px' }}>🏨</div>
                 <Text>Không có hình ảnh khách sạn</Text>
               </div>
