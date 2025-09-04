@@ -88,9 +88,6 @@ const TourItem = ({ tour }: TourItemProps) => {
 
                 {/* Còn chỗ + chi tiết */}
                 <div className="flex justify-between items-center text-sm mb-4 text-gray-600">
-                    <span>
-                        Còn lại: <strong>{tour.remainingSlots} chỗ</strong>
-                    </span>
                     <Link to={`/detailtour/${tour._id}`}>
                         <span className="text-blue-600 hover:underline text-sm cursor-pointer">
                             Chi tiết
