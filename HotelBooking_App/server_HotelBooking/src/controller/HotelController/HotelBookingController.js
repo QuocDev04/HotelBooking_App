@@ -452,6 +452,7 @@ const getAllHotelBookingsForAdmin = async (req, res) => {
                 }
             })
             .populate('cancelledBy', 'username')
+            .select('+paymentImage +fullPaymentImage') // Thêm các trường hình ảnh thanh toán
             .sort({ createdAt: -1 })
             .limit(limit * 1)
             .skip((page - 1) * limit);

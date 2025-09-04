@@ -169,12 +169,18 @@ const RefundManagement: React.FC = () => {
     },
     onSuccess: () => {
       message.success('Cập nhật trạng thái hoàn tiền thành công');
+      // Invalidate các queries liên quan đến refund
       queryClient.invalidateQueries({ queryKey: ['refunds'] });
       queryClient.invalidateQueries({ queryKey: ['refundStats'] });
-        setIsModalVisible(false);
-        form.resetFields();
-        setRefundImage(null);
-      },
+      // Invalidate các queries liên quan đến booking để đồng bộ trạng thái
+      queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['booking-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['tour-bookings'] });
+      setIsModalVisible(false);
+      form.resetFields();
+      setRefundImage(null);
+    },
       onError: (error: any) => {
         message.error(`Lỗi: ${error.response?.data?.message || 'Không thể cập nhật trạng thái hoàn tiền'}`);
       },
@@ -423,12 +429,18 @@ const RefundManagement: React.FC = () => {
       key: 'refundImage',
       render: (image: string | null) => {
         if (image) {
+          const imageUrl = image.startsWith('http') ? image : `http://localhost:8080${image}`;
           return (
-            <a href={image} target="_blank" rel="noopener noreferrer">
+            <a href={imageUrl} target="_blank" rel="noopener noreferrer">
               <img 
-                src={image} 
+                src={imageUrl} 
                 alt="Xác nhận hoàn tiền" 
                 style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  target.parentElement!.innerHTML = '<span style="color: #ff4d4f">Lỗi tải ảnh</span>';
+                }}
               />
             </a>
           );

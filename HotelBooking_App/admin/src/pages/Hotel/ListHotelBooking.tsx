@@ -36,6 +36,8 @@ interface HotelBooking {
   totalPrice: number;
   payment_status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'pending_cancel' | 'deposit_paid';
   payment_method: 'cash' | 'bank_transfer';
+  paymentImage?: string;
+  fullPaymentImage?: string;
   roomBookings: Array<{
     roomTypeName: string;
     numberOfRooms: number;
@@ -378,24 +380,61 @@ const ListHotelBooking: React.FC = () => {
               Modal.info({
                 title: 'Chi tiết đặt phòng',
                 content: (
-                  <div className="space-y-2">
-                    <p><strong>Mã đặt phòng:</strong> {record._id}</p>
-                    <p><strong>Khách sạn:</strong> {record.hotelId?.hotelName}</p>
-                    <p><strong>Địa điểm:</strong> {record.hotelId?.location?.locationName}</p>
-                    <p><strong>Khách hàng:</strong> {record.fullNameUser}</p>
-                    <p><strong>Email:</strong> {record.email}</p>
-                    <p><strong>Điện thoại:</strong> {record.phone}</p>
-                    <p><strong>Loại phòng:</strong></p>
-                    {record.roomBookings?.map((room, index) => (
-                      <div key={index} className="ml-4">
-                        <p>- {room.roomTypeName}: {room.numberOfRooms} phòng × {room.pricePerNight?.toLocaleString('vi-VN')} VNĐ</p>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <p><strong>Mã đặt phòng:</strong> {record._id}</p>
+                      <p><strong>Khách sạn:</strong> {record.hotelId?.hotelName}</p>
+                      <p><strong>Địa điểm:</strong> {record.hotelId?.location?.locationName}</p>
+                      <p><strong>Khách hàng:</strong> {record.fullNameUser}</p>
+                      <p><strong>Email:</strong> {record.email}</p>
+                      <p><strong>Điện thoại:</strong> {record.phone}</p>
+                      <p><strong>Loại phòng:</strong></p>
+                      {record.roomBookings?.map((room, index) => (
+                        <div key={index} className="ml-4">
+                          <p>- {room.roomTypeName}: {room.numberOfRooms} phòng × {room.pricePerNight?.toLocaleString('vi-VN')} VNĐ</p>
+                        </div>
+                      ))}
+                      <p><strong>Số khách:</strong> {record.totalGuests}</p>
+                      <p><strong>Số đêm:</strong> {record.numberOfNights}</p>
+                      <p><strong>Tổng tiền:</strong> {record.totalPrice?.toLocaleString('vi-VN')} VNĐ</p>
+                      <p><strong>Trạng thái:</strong> {getStatusText(record.payment_status)}</p>
+                      <p><strong>Phương thức thanh toán:</strong> {getPaymentStatusText(record.payment_method)}</p>
+                    </div>
+                    
+                    {/* Hiển thị hình ảnh xác nhận thanh toán */}
+                    {(record.paymentImage || record.fullPaymentImage) && (
+                      <div className="border-t pt-4">
+                        <p><strong>Hình ảnh xác nhận thanh toán:</strong></p>
+                        <div className="mt-2 space-y-2">
+                          {record.paymentImage && (
+                            <div>
+                              <p className="text-sm text-gray-600 mb-1">Ảnh xác nhận đặt cọc:</p>
+                              <img 
+                                src={`http://localhost:8080/uploads/payment-confirmations/${record.paymentImage}`}
+                                alt="Ảnh xác nhận đặt cọc"
+                                className="max-w-full h-auto max-h-64 border rounded-lg shadow-sm"
+                                onError={(e) => {
+                                  e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5YTNhZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPktow7RuZyB0aOG7gyBoaeG7g24gdGjhu4sgaOG7i25oIOG6o25oPC90ZXh0Pjwvc3ZnPic=';
+                                }}
+                              />
+                            </div>
+                          )}
+                          {record.fullPaymentImage && (
+                            <div>
+                              <p className="text-sm text-gray-600 mb-1">Ảnh xác nhận thanh toán đầy đủ:</p>
+                              <img 
+                                src={`http://localhost:8080/uploads/payment-confirmations/${record.fullPaymentImage}`}
+                                alt="Ảnh xác nhận thanh toán đầy đủ"
+                                className="max-w-full h-auto max-h-64 border rounded-lg shadow-sm"
+                                onError={(e) => {
+                                  e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5YTNhZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPktow7RuZyB0aOG7gyBoaeG7g24gdGjhu4sgaOG7i25oIOG6o25oPC90ZXh0Pjwvc3ZnPic=';
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    ))}
-                    <p><strong>Số khách:</strong> {record.totalGuests}</p>
-                    <p><strong>Số đêm:</strong> {record.numberOfNights}</p>
-                    <p><strong>Tổng tiền:</strong> {record.totalPrice?.toLocaleString('vi-VN')} VNĐ</p>
-                    <p><strong>Trạng thái:</strong> {getStatusText(record.payment_status)}</p>
-                    <p><strong>Phương thức thanh toán:</strong> {getPaymentStatusText(record.payment_method)}</p>
+                    )}
                   </div>
                 ),
                 width: 600
