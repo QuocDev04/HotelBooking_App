@@ -36,27 +36,26 @@ const AddTour = () => {
     }
   })
   const { mutate, isPending } = useMutation({
-    mutationFn: async (data: any) => {
-      try {
-        return await instance.post("/tour", data)
-      } catch (error) {
-        throw new Error("Failed to add tour")
-      }
-    },
-    onSuccess: () => {
-      messageApi.open({
-        type: "success",
-        content: "Bạn thêm Tour thành công",
-      });
-      form.resetFields();
-    },
-    onError: () => {
-      messageApi.open({
-        type: "error",
-        content: "Bạn thêm Tour thất bại. Vui lòng thử lại sau!",
-      });
-    },
-  })
+  mutationFn: async (data: any) => {
+    return await instance.post("/tour", data);
+  },
+  onSuccess: () => {
+    messageApi.open({
+      type: "success",
+      content: "Bạn thêm Tour thành công",
+    });
+    form.resetFields();
+  },
+  onError: (error: any) => {
+    const errorMessage =
+      error?.response?.data?.message || "Bạn thêm Tour thất bại. Vui lòng thử lại sau!";
+    messageApi.open({
+      type: "error",
+      content: errorMessage,
+    });
+  },
+});
+
 
   const toolbarOptions = [
     ["bold", "italic", "underline", "strike"], // toggled buttons
@@ -151,13 +150,43 @@ const AddTour = () => {
               {/* Cột trái */}
               <Col xs={24} lg={16}>
                 <Form.Item
-                  required={false}
-                  label={requiredLabel("Tên Tour")}
-                  name="nameTour"
-                  rules={[{ required: true, message: "Tên Tour không được để trống" }]}
-                >
-                  <Input placeholder="VD: Tour Hạ Long 3N2Đ" size="large" />
-                </Form.Item>
+  required={false}
+  label={requiredLabel("Tên Tour")}
+  name="nameTour"
+  rules={[
+    { required: true, message: "Tên Tour không được để trống" },
+    {
+      validator: async (_, value) => {
+        if (!value) return Promise.resolve();
+
+        try {
+          // gọi API lấy danh sách tour
+          const res = await instance.get("/tour");
+          const tours = res.data?.tours || [];
+
+          const isDuplicate = tours.some(
+            (tour: any) =>
+              tour.nameTour.trim().toLowerCase() === value.trim().toLowerCase()
+          );
+
+          if (isDuplicate) {
+            return Promise.reject(
+              new Error("Tên tour này đã tồn tại, vui lòng nhập tên khác!")
+            );
+          }
+          return Promise.resolve();
+        } catch (err) {
+          return Promise.reject(
+            new Error("Không thể kiểm tra tên tour, thử lại sau")
+          );
+        }
+      },
+    },
+  ]}
+>
+  <Input placeholder="VD: Tour Hạ Long 3N2Đ" size="large" />
+</Form.Item>
+
 
                 <Row gutter={24}>
                   <Col span={6}>

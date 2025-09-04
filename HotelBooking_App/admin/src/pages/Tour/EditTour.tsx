@@ -201,14 +201,46 @@ const EditTour = () => {
                         <Row gutter={[32, 32]}>
                             {/* Cột trái */}
                             <Col xs={24} lg={16}>
-                                <Form.Item
-                                    required={false}
-                                    label={requiredLabel("Tên Tour")}
-                                    name="nameTour"
-                                    rules={[{ required: true, message: "Tên Tour không được để trống" }]}
-                                >
-                                    <Input placeholder="VD: Tour Hạ Long 3N2Đ" size="large" />
-                                </Form.Item>
+                               <Form.Item
+  required={false}
+  label={requiredLabel("Tên Tour")}
+  name="nameTour"
+  rules={[
+    { required: true, message: "Tên Tour không được để trống" },
+    {
+      validator: async (_, value) => {
+        if (!value) return Promise.resolve();
+
+        try {
+          // gọi API lấy danh sách tour
+          const res = await instance.get("/tour");
+          const tours = res.data?.tours || [];
+
+          // loại trừ tour hiện tại (dựa vào id từ useParams)
+          const isDuplicate = tours.some(
+            (tour: any) =>
+              tour._id !== id && // 👈 bỏ qua tour đang edit
+              tour.nameTour.trim().toLowerCase() === value.trim().toLowerCase()
+          );
+
+          if (isDuplicate) {
+            return Promise.reject(
+              new Error("Tên tour này đã tồn tại, vui lòng nhập tên khác!")
+            );
+          }
+          return Promise.resolve();
+        } catch (err) {
+          return Promise.reject(
+            new Error("Không thể kiểm tra tên tour, thử lại sau")
+          );
+        }
+      },
+    },
+  ]}
+>
+  <Input placeholder="VD: Tour Hạ Long 3N2Đ" size="large" />
+</Form.Item>
+
 
                                 <Row gutter={24}>
                                     <Col span={6}>

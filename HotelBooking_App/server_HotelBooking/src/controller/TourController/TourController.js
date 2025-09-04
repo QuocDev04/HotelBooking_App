@@ -69,33 +69,43 @@ const getAllTours = async (req, res) => {
 }
 
 const AddTour = async (req, res) => {
-    try {
-        const { price, discountPercent = 0, discountExpiryDate } = req.body;
-        const now = new Date();
+  try {
+    const { nameTour, price, discountPercent = 0, discountExpiryDate } = req.body;
+    const now = new Date();
 
-        // Kiểm tra ngày hết hạn giảm giá, nếu chưa có hoặc còn hạn thì áp dụng giảm giá
-        const isDiscountValid = !discountExpiryDate || new Date(discountExpiryDate) > now;
-
-        // Tính giá cuối cùng
-        const finalPrice = isDiscountValid
-            ? Math.round(price * (1 - discountPercent / 100))
-            : price;
-
-        // Tạo tour mới
-        const tour = await TourModel.create({ ...req.body, finalPrice });
-
-        return res.status(StatusCodes.OK).json({
-            success: true,
-            message: "Tour added successfully",
-            tour
-        });
-    } catch (error) {
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: error.message
-        });
+    // 🔎 Kiểm tra trùng tên tour trước khi thêm
+    const existingTour = await TourModel.findOne({ nameTour: nameTour.trim() });
+    if (existingTour) {
+      return res.status(400).json({
+        success: false,
+        message: "Tên tour đã tồn tại!"
+      });
     }
-}
+
+    // Kiểm tra ngày hết hạn giảm giá
+    const isDiscountValid = !discountExpiryDate || new Date(discountExpiryDate) > now;
+
+    // Tính giá cuối cùng
+    const finalPrice = isDiscountValid
+      ? Math.round(price * (1 - discountPercent / 100))
+      : price;
+
+    // Tạo tour mới
+    const tour = await TourModel.create({ ...req.body, finalPrice });
+
+    return res.status(200).json({
+      success: true,
+      message: "Tour added successfully",
+      tour
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
 
 const DeleteTour = async (req, res) => {
     try {
@@ -115,36 +125,71 @@ const DeleteTour = async (req, res) => {
 }
 
 const UpdateTour = async (req, res) => {
-    try {
-        const { price, discountPercent = 0, discountExpiryDate } = req.body;
-        const now = new Date();
+  try {
+    const { price, discountPercent = 0, discountExpiryDate, nameTour } = req.body;
+    const now = new Date();
 
-        const isDiscountValid =
-            discountPercent > 0 &&
-            (!discountExpiryDate || new Date(discountExpiryDate) > now);
-
-        const finalPrice = isDiscountValid
-            ? Math.round(price * (1 - discountPercent / 100))
-            : null;
-
-        const tour = await TourModel.findByIdAndUpdate(
-            req.params.id,
-            { ...req.body, finalPrice },
-            { new: true }
-        );
-
-        return res.status(StatusCodes.OK).json({
-            success: true,
-            message: "Tour updated successfully",
-            tour
+    if (nameTour) {
+      // Lấy tour hiện tại trong DB
+      const tourCurrent = await TourModel.findById(req.params.id);
+      if (!tourCurrent) {
+        return res.status(404).json({
+          success: false,
+          message: "Không tìm thấy tour để cập nhật"
         });
-    } catch (error) {
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      }
+
+      // Nếu tên mới khác tên cũ thì mới check trùng
+      if (tourCurrent.nameTour.trim() !== nameTour.trim()) {
+        const existingTour = await TourModel.findOne({
+          nameTour: nameTour.trim(),
+          _id: { $ne: req.params.id }
+        });
+        if (existingTour) {
+          return res.status(400).json({
             success: false,
-            message: error.message
-        });
+            message: "Tên tour đã tồn tại!"
+          });
+        }
+      }
     }
+
+    // ✅ Tính finalPrice
+    const isDiscountValid =
+      discountPercent > 0 &&
+      (!discountExpiryDate || new Date(discountExpiryDate) > now);
+
+    const finalPrice = isDiscountValid
+      ? Math.round(price * (1 - discountPercent / 100))
+      : price;
+
+    const tour = await TourModel.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body, finalPrice },
+      { new: true }
+    );
+
+    if (!tour) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy tour để cập nhật"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Tour updated successfully",
+      tour
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
 };
+
+
 
 const GetTourById = async (req, res) => {
     try {

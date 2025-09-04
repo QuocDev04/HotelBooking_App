@@ -8,7 +8,7 @@ const TransportItemSchema = new mongoose.Schema({
     }
 }, { _id: false })
 const TourModel = new mongoose.Schema({
-    nameTour: { type: String, required: true },
+    nameTour: { type: String, required: true, unique: true },
     itemTransport: [TransportItemSchema],
     destination: { type: mongoose.Schema.Types.ObjectId, ref: "Location", required: true },
     departure_location: { type: String, required: true },
