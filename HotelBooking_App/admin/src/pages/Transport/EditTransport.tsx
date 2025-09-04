@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Col, Form, Image, Input, message, Row, Select, Upload, type FormProps, type GetProp, type UploadProps } from "antd"
 import instance from "../../configs/axios";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import type { UploadFile } from "antd/lib";
@@ -13,9 +13,11 @@ const EditTransport = () => {
     const [form] = Form.useForm();
     const [messageApi, contextHolder] = message.useMessage();
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState("");
     const [fileList, setFileList] = useState<UploadFile[]>([]);
+    const [transportType, setTransportType] = useState<string>("");
     const {id} = useParams();
     const requiredLabel = (text: string) => (
         <>
@@ -43,6 +45,7 @@ const EditTransport = () => {
             form.setFieldsValue({
                 ...data.data.transport
             });
+            setTransportType(data.data.transport.transportType || "");
         }
     }, [data, form]);
     const { mutate, isPending } = useMutation({
@@ -58,9 +61,21 @@ const EditTransport = () => {
                 type: "success",
                 content: "Bạn Sửa phương tiện thành công",
             });
+            // Invalidate cả danh sách transport và transport cụ thể
             queryClient.invalidateQueries({
                 queryKey: ["transport"],
             });
+            queryClient.invalidateQueries({
+                queryKey: ["transport", id],
+            });
+            // Force refetch để đảm bảo dữ liệu mới
+            queryClient.refetchQueries({
+                queryKey: ["transport"],
+            });
+            // Redirect về trang danh sách sau 1.5 giây
+            setTimeout(() => {
+                navigate("/admin/list-transport");
+            }, 1500);
         },
         onError: () => {
             messageApi.open({
@@ -89,16 +104,17 @@ const EditTransport = () => {
         setFileList(newFileList);
     };
     const onFinish: FormProps<any>["onFinish"] = (values) => {
+        // Lấy tất cả URL ảnh: cả ảnh cũ (có url) và ảnh mới (có response.secure_url)
         const imageUrls = fileList
             .filter((file) => file.status === "done")
-            .map((file) => file.response?.secure_url);
+            .map((file) => file.url || file.response?.secure_url)
+            .filter(Boolean); // Loại bỏ các giá trị null/undefined
 
         const newValues = {
             ...values,
             imageTransport: imageUrls,
         };
 
-        console.log("Data being sent:", newValues);
         mutate(newValues);
     };
     const uploadButton = (
@@ -159,6 +175,18 @@ const EditTransport = () => {
                                             disabled={isPending}
                                             size="large"
                                             placeholder="Chọn loại Phương Tiện"
+                                            onChange={(value) => {
+                                                setTransportType(value);
+                                                // Reset các trường flight price khi thay đổi loại phương tiện
+                                                if (value !== "Máy Bay") {
+                                                    form.setFieldsValue({
+                                                        flightPrice: undefined,
+                                                        flightPriceChildren: undefined,
+                                                        flightPriceLittleBaby: undefined,
+                                                        flightPriceBaby: undefined
+                                                    });
+                                                }
+                                            }}
                                             options={[
                                                 { label: "Máy Bay", value: "Máy Bay" },
                                                 { label: "Tàu Hỏa", value: "Tàu Hỏa" },
@@ -198,6 +226,140 @@ const EditTransport = () => {
                                     </Form.Item>
                                 </Col>
                             </Row>
+                            
+                            {/* Các trường giá vé máy bay - chỉ hiển thị khi transportType là "Máy Bay" */}
+                            {transportType === "Máy Bay" && (
+                                <>
+                                    <div className="mb-4">
+                                        <h3 className="text-lg font-semibold text-blue-600 mb-4">💰 Thông Tin Giá Vé Máy Bay</h3>
+                                    </div>
+                                    <Row gutter={24}>
+                                        <Col span={12}>
+                                            <Form.Item
+                                                label="Giá vé người lớn (VNĐ)"
+                                                name="flightPrice"
+                                                rules={[
+                                                    { 
+                                                        required: transportType === "Máy Bay", 
+                                                        message: "Vui lòng nhập giá vé người lớn" 
+                                                    },
+                                                    {
+                                                        validator: (_, value) => {
+                                                            if (!value || value === '') return Promise.resolve();
+                                                            const num = Number(value);
+                                                            if (isNaN(num) || num < 0) {
+                                                                return Promise.reject(new Error('Giá vé phải là số dương'));
+                                                            }
+                                                            return Promise.resolve();
+                                                        }
+                                                    }
+                                                ]}
+                                            >
+                                                <Input 
+                                                    disabled={isPending} 
+                                                    placeholder="VD: 2500000" 
+                                                    size="large" 
+                                                    type="number"
+                                                    min={0}
+                                                />
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={12}>
+                                            <Form.Item
+                                                label="Giá vé trẻ em (VNĐ)"
+                                                name="flightPriceChildren"
+                                                rules={[
+                                                    { 
+                                                        required: transportType === "Máy Bay", 
+                                                        message: "Vui lòng nhập giá vé trẻ em" 
+                                                    },
+                                                    {
+                                                        validator: (_, value) => {
+                                                            if (!value || value === '') return Promise.resolve();
+                                                            const num = Number(value);
+                                                            if (isNaN(num) || num < 0) {
+                                                                return Promise.reject(new Error('Giá vé phải là số dương'));
+                                                            }
+                                                            return Promise.resolve();
+                                                        }
+                                                    }
+                                                ]}
+                                            >
+                                                <Input 
+                                                    disabled={isPending} 
+                                                    placeholder="VD: 2000000" 
+                                                    size="large" 
+                                                    type="number"
+                                                    min={0}
+                                                />
+                                            </Form.Item>
+                                        </Col>
+                                    </Row>
+                                    <Row gutter={24}>
+                                        <Col span={12}>
+                                            <Form.Item
+                                                label="Giá vé trẻ nhỏ (VNĐ)"
+                                                name="flightPriceLittleBaby"
+                                                rules={[
+                                                    { 
+                                                        required: transportType === "Máy Bay", 
+                                                        message: "Vui lòng nhập giá vé trẻ nhỏ" 
+                                                    },
+                                                    {
+                                                        validator: (_, value) => {
+                                                            if (!value || value === '') return Promise.resolve();
+                                                            const num = Number(value);
+                                                            if (isNaN(num) || num < 0) {
+                                                                return Promise.reject(new Error('Giá vé phải là số dương'));
+                                                            }
+                                                            return Promise.resolve();
+                                                        }
+                                                    }
+                                                ]}
+                                            >
+                                                <Input 
+                                                    disabled={isPending} 
+                                                    placeholder="VD: 1500000" 
+                                                    size="large" 
+                                                    type="number"
+                                                    min={0}
+                                                />
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={12}>
+                                            <Form.Item
+                                                label="Giá vé em bé (VNĐ)"
+                                                name="flightPriceBaby"
+                                                rules={[
+                                                    { 
+                                                        required: transportType === "Máy Bay", 
+                                                        message: "Vui lòng nhập giá vé em bé" 
+                                                    },
+                                                    {
+                                                        validator: (_, value) => {
+                                                            if (!value || value === '') return Promise.resolve();
+                                                            const num = Number(value);
+                                                            if (isNaN(num) || num < 0) {
+                                                                return Promise.reject(new Error('Giá vé phải là số dương'));
+                                                            }
+                                                            return Promise.resolve();
+                                                        }
+                                                    }
+                                                ]}
+                                            >
+                                                <Input 
+                                                    disabled={isPending} 
+                                                    placeholder="VD: 500000" 
+                                                    size="large" 
+                                                    type="number"
+                                                    min={0}
+                                                />
+                                            </Form.Item>
+                                        </Col>
+                                    </Row>
+                                </>
+                            )}
+                            
                             <Form.Item
                                 required={false}
                                 label={requiredLabel("Ảnh Phương Tiện")}

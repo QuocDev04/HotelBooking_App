@@ -39,7 +39,6 @@ const UpdateTransport = async (req, res) => {
     try {
         const transport = await TransportModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
         return res.status(StatusCodes.OK).json({
-
             success: true,
             message: "Tour update successfully",
             transport: transport

@@ -120,6 +120,14 @@ const RightTourDetail = ({
         return tour?.finalPrice ?? tour?.price ?? 0;
     };
 
+    const getFlightPrice = (tour: any) => {
+        return tour?.includesFlight ? (tour?.flightPrice ?? 0) : 0;
+    };
+
+    const getTotalPrice = (tour: any) => {
+        return getTourPrice(tour) + getFlightPrice(tour);
+    };
+
     return (
         <>
             <div className="w-full bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
@@ -143,11 +151,34 @@ const RightTourDetail = ({
                             {/* Price Display */}
                             <div className="text-center mb-6">
                                 <div className="text-gray-600 text-sm mb-2">Giá khởi điểm từ</div>
-                                <div className="text-4xl font-bold bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">
-                                    {getTourPrice(tour).toLocaleString("vi-VN")}
-                                    <span className="text-2xl">đ</span>
+                                
+                                {/* Giá tour */}
+                                <div className="mb-2">
+                                    <div className="text-sm text-gray-600 mb-1">Giá tour</div>
+                                    <div className="text-2xl font-bold text-blue-600">
+                                        {getTourPrice(tour).toLocaleString("vi-VN")} đ
+                                    </div>
                                 </div>
-                                <div className="text-gray-500 text-sm mt-1">/ người</div>
+                                
+                                {/* Giá vé máy bay (nếu có) */}
+                                {tour?.includesFlight && getFlightPrice(tour) > 0 && (
+                                    <div className="mb-2">
+                                        <div className="text-sm text-gray-600 mb-1">Vé máy bay</div>
+                                        <div className="text-2xl font-bold text-orange-600">
+                                            {getFlightPrice(tour).toLocaleString("vi-VN")} đ
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {/* Tổng giá */}
+                                <div className="border-t pt-2 mt-2">
+                                    <div className="text-sm text-gray-600 mb-1">Tổng cộng</div>
+                                    <div className="text-4xl font-bold bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">
+                                        {getTotalPrice(tour).toLocaleString("vi-VN")}
+                                        <span className="text-2xl">đ</span>
+                                    </div>
+                                    <div className="text-gray-500 text-sm mt-1">/ người</div>
+                                </div>
                             </div>
 
                             {/* Features */}
@@ -193,11 +224,33 @@ const RightTourDetail = ({
 
                             {/* Price Display */}
                             <div className="text-center mb-6">
-                                <div className="text-4xl font-bold bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">
-                                    {getTourPrice(tour).toLocaleString("vi-VN")}
-                                    <span className="text-2xl">đ</span>
+                                {/* Giá tour */}
+                                <div className="mb-2">
+                                    <div className="text-sm text-gray-600 mb-1">Giá tour</div>
+                                    <div className="text-2xl font-bold text-blue-600">
+                                        {getTourPrice(tour).toLocaleString("vi-VN")} đ
+                                    </div>
                                 </div>
-                                <div className="text-gray-500 text-sm mt-1">/ người</div>
+                                
+                                {/* Giá vé máy bay (nếu có) */}
+                                {tour?.includesFlight && getFlightPrice(tour) > 0 && (
+                                    <div className="mb-2">
+                                        <div className="text-sm text-gray-600 mb-1">Vé máy bay</div>
+                                        <div className="text-2xl font-bold text-orange-600">
+                                            {getFlightPrice(tour).toLocaleString("vi-VN")} đ
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {/* Tổng giá */}
+                                <div className="border-t pt-2 mt-2">
+                                    <div className="text-sm text-gray-600 mb-1">Tổng cộng</div>
+                                    <div className="text-4xl font-bold bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">
+                                        {getTotalPrice(tour).toLocaleString("vi-VN")}
+                                        <span className="text-2xl">đ</span>
+                                    </div>
+                                    <div className="text-gray-500 text-sm mt-1">/ người</div>
+                                </div>
                             </div>
 
                             {/* Tour Details */}

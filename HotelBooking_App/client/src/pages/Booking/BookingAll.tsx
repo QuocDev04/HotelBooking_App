@@ -40,7 +40,7 @@ const BookingTour = () => {
   
   const { data, refetch } = useQuery({
     queryKey: ['bookingTour', id],
-    queryFn: () => instanceClient.get(`/bookingTour/${id}`)
+    queryFn: () => instanceClient.get(`bookingTour/${id}`)
   });
   
   // Tự động tải lại dữ liệu khi quay lại từ VNPay

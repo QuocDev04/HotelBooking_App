@@ -474,22 +474,34 @@ const BookingTour = async (req, res) => {
         const tour = slot.tour;
         if (!tour) return res.status(404).json({ success: false, message: "Không tìm thấy tour" });
 
-        // Giá vé
-        const priceAdult = tour.finalPrice || tour.price || 0;
-        const priceChild = tour.priceChildren || 0;
-        const priceToddler = tour.priceLittleBaby || 0;
-        const priceInfant = tour.pricebaby || 0;
+        // Giá tour (không bao gồm vé máy bay)
+        const tourPriceAdult = tour.finalPrice || tour.price || 0;
+        const tourPriceChild = tour.priceChildren || 0;
+        const tourPriceToddler = tour.priceLittleBaby || 0;
+        const tourPriceInfant = tour.pricebaby || 0;
         const priceSingleRoom = tour.priceSingleRoom || 0;
+
+        // Giá vé máy bay (nếu tour bao gồm vé máy bay)
+        const flightPriceAdult = tour.includesFlight ? (tour.flightPrice || 0) : 0;
+        const flightPriceChild = tour.includesFlight ? (tour.flightPriceChildren || 0) : 0;
+        const flightPriceToddler = tour.includesFlight ? (tour.flightPriceLittleBaby || 0) : 0;
+        const flightPriceInfant = tour.includesFlight ? (tour.flightPriceBaby || 0) : 0;
+
+        // Tổng giá cho mỗi loại khách (tour + vé máy bay)
+        const totalPriceAdult = tourPriceAdult + flightPriceAdult;
+        const totalPriceChild = tourPriceChild + flightPriceChild;
+        const totalPriceToddler = tourPriceToddler + flightPriceToddler;
+        const totalPriceInfant = tourPriceInfant + flightPriceInfant;
 
         // Số phòng đơn
         const singleRoomCount = (adultPassengers || []).filter(p => p.singleRoom === true).length;
 
-        // Tổng tiền
+        // Tổng tiền (bao gồm cả vé máy bay nếu có)
         const totalFinalPriceTour =
-            Number(adultsTour) * priceAdult +
-            Number(childrenTour || 0) * priceChild +
-            Number(toddlerTour || 0) * priceToddler +
-            Number(infantTour || 0) * priceInfant +
+            Number(adultsTour) * totalPriceAdult +
+            Number(childrenTour || 0) * totalPriceChild +
+            Number(toddlerTour || 0) * totalPriceToddler +
+            Number(infantTour || 0) * totalPriceInfant +
             singleRoomCount * priceSingleRoom;
 
         // Đặt cọc
