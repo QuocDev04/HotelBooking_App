@@ -11,6 +11,7 @@ interface Blog {
   author_name: string;
   createdAt: string;
   slug: string;
+  likes?: number; 
 }
 
 export default function Blog() {
@@ -24,7 +25,7 @@ export default function Blog() {
 
   const blogs: Blog[] = data?.posts || [];
 
-  // 📌 Phân trang
+  //  Phân trang
   const [currentPage, setCurrentPage] = useState(1);
   const blogsPerPage = 6;
   const totalPages = Math.ceil(blogs.length / blogsPerPage);
@@ -32,11 +33,11 @@ export default function Blog() {
   const startIndex = (currentPage - 1) * blogsPerPage;
   const currentBlogs = blogs.slice(startIndex, startIndex + blogsPerPage);
 
-  // 📌 Random 5 bài nổi bật mỗi lần load
+  //  Top 5 bài nổi bật theo lượt tim
   const featuredBlogs = useMemo(() => {
     return blogs
       .slice()
-      .sort(() => Math.random() - 0.5) // shuffle
+      .sort((a, b) => (b.likes || 0) - (a.likes || 0)) // sắp xếp giảm dần theo likes
       .slice(0, 5);
   }, [blogs]);
 
@@ -152,9 +153,12 @@ export default function Blog() {
                       alt={blog.title}
                       className="w-16 h-12 rounded-lg object-cover"
                     />
-                    <p className="text-sm font-medium text-gray-700 line-clamp-2">
-                      {blog.title}
-                    </p>
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 line-clamp-2">
+                        {blog.title}
+                      </p>
+                      <span className="text-xs text-gray-500">{blog.likes || 0} ❤️</span>
+                    </div>
                   </Link>
                 </li>
               ))}
