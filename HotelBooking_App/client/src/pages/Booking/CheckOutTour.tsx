@@ -364,13 +364,6 @@ const CheckOutTour = () => {
             {/* Chuyen di */}
             <div className="flex items-center gap-2 text-xs mt-1">
               <span className="text-gray-700">Ngay di - {dayjs(booking?.slotId?.dateTour).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY")}</span>
-              <span className="flex items-center gap-1">
-                <svg width="16" height="16" fill="currentColor" className="text-blue-500" viewBox="0 0 24 24"><path d="M2.5 19.5l19-7.5-19-7.5v6l15 1.5-15 1.5z" /></svg>
-                <span className="font-semibold text-blue-700">VU303</span>
-              </span>
-              <span className="text-gray-700">17:05</span>
-              <span className="mx-1 text-gray-400">-</span>
-              <span className="text-gray-700">18:10</span>
             </div>
 
             <div className="flex items-center gap-1 text-xs text-blue-500 mt-1">
