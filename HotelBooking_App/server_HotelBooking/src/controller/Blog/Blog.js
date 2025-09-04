@@ -134,7 +134,7 @@ const likePost = async (req, res) => {
   try {
     const post = await Post.findByIdAndUpdate(
       req.params.id,
-      { $inc: { likes: 1 } }, // tăng 1 lượt like
+      { $inc: { likes: 1 } }, 
       { new: true }
     );
 
@@ -155,6 +155,25 @@ const likePost = async (req, res) => {
     });
   }
 };
+//  Lấy tất cả bài viết (admin)
+const listAll = async (req, res) => {
+  try {
+    const posts = await Post.find().sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      message: "Lấy danh sách bài viết (admin) thành công",
+      posts,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Lỗi server khi lấy danh sách bài viết",
+      error: error.message,
+    });
+  }
+};
+
 
 module.exports = {
   listPublished,
@@ -163,5 +182,6 @@ module.exports = {
   create,
   update,
   destroy,
+  listAll,
   likePost, // ✅ export thêm
 };

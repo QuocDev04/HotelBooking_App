@@ -8,6 +8,7 @@ const {
   showById,
   create,
   update,
+  listAll,
   destroy,
   likePost
 } = require("../../controller/Blog/Blog.js");
@@ -15,6 +16,7 @@ const {
 // Public (User)
 router.get("/blog", listPublished);        // GET danh sách bài viết published
 router.get("/blog/:slug", show);           // GET chi tiết bài viết theo slug
+router.get("/admin/blog",listAll);         // tất cả danh sách bài viết
 
 // Admin (CRUD)
 router.get("/posts/:id", showById);

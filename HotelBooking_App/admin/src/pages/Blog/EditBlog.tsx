@@ -161,6 +161,7 @@ const EditBlog = () => {
                 <Form.Item name="status" label="Trạng thái">
                   <Select size="large">
                     <Option value="published">Xuất bản ngay</Option>
+                    <Option value="draft">Lưu nháp</Option>
                   </Select>
                 </Form.Item>
 
