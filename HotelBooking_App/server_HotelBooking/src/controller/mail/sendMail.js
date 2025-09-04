@@ -178,6 +178,7 @@ const sendMailBookingCashSuccess = async (booking, depositAmount, isFullPayment)
         console.error("❌ Lỗi khi gửi mail cash booking:", error.message);
     }
 };
+
 const sendMailHotelBookingCashSuccess = async (booking) => {
     try {
         // Populate hotelId để lấy tên khách sạn và địa chỉ
@@ -244,7 +245,6 @@ const sendMailHotelBookingCashSuccess = async (booking) => {
         console.error("❌ Lỗi gửi mail cash booking khách sạn:", error.message);
     }
 };
-
 
 // Cron job chạy 8h sáng mỗi ngày
 cron.schedule("0 8 * * *", async () => {
