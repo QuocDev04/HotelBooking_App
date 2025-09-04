@@ -9,7 +9,7 @@ import "react-quill/dist/quill.snow.css";
 import instance from "../../configs/axios";
 import { useParams } from "react-router-dom";
 import moment from "moment";
-
+import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
@@ -23,6 +23,7 @@ const EditTour = () => {
     const queryClient = useQueryClient();
     const discountPercent = Form.useWatch('discountPercent', form);
     const { id } = useParams();
+    const navigate = useNavigate();
     const { data } = useQuery({
         queryKey: ['tour', id],
         queryFn: async () => instance.get(`/tour/${id}`)
@@ -44,30 +45,25 @@ const EditTour = () => {
         queryFn: () => instance.get('/transport')
     })
     const transports = transport?.data?.transport;
-    const { mutate, isPending } = useMutation({
-        mutationFn: async (data: any) => {
-            try {
-                return await instance.put(`/tour/${id}`, data)
-            } catch (error) {
-                throw new Error("Failed to add tour")
-            }
-        },
-        onSuccess: () => {
-            messageApi.open({
-                type: "success",
-                content: "Bạn Sửa Tour thành công",
-            });
-            queryClient.invalidateQueries({
-                queryKey: ["tour"],
-            });
-        },
-        onError: () => {
-            messageApi.open({
-                type: "error",
-                content: "Bạn Sửa Tour thất bại. Vui lòng thử lại sau!",
-            });
-        },
-    })
+   const { mutate, isPending } = useMutation({
+  mutationFn: async (data: any) => {
+    return await instance.put(`/tour/${id}`, data);
+  },
+  onSuccess: () => {
+    // Chuyển sang trang list tour trước
+    navigate("/admin/list-tour"); 
+
+    // Sau đó hiện thông báo (vẫn hiển thị ở trang list)
+    message.success("Bạn đã sửa Tour thành công 🎉", 2);
+
+    // Làm mới dữ liệu cache của react-query
+    queryClient.invalidateQueries({ queryKey: ["tour"] });
+  },
+  onError: () => {
+    message.error("Bạn sửa Tour thất bại. Vui lòng thử lại sau!");
+  },
+});
+
     useEffect(() => {
         if (data?.data?.tour && transports?.length > 0) {
             const tour = data.data.tour;

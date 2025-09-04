@@ -8,6 +8,7 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import instance from "../../configs/axios";
 import { Option } from "antd/lib/mentions";
+import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
@@ -19,6 +20,7 @@ const AddTour = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   const discountPercent = Form.useWatch('discountPercent', form);
+  const navigate = useNavigate();
   const requiredLabel = (text: string) => (
     <>
       {text} <span className="text-red-500">*</span>
@@ -40,21 +42,19 @@ const AddTour = () => {
     return await instance.post("/tour", data);
   },
   onSuccess: () => {
-    messageApi.open({
-      type: "success",
-      content: "Bạn thêm Tour thành công",
-    });
-    form.resetFields();
+    // Điều hướng sang trang list tour trước
+    navigate("/admin/list-tour"); // đổi đúng path list tour của bạn
+    // Rồi hiển thị thông báo ở trang list
+    message.success("Bạn đã thêm Tour thành công 🎉");
   },
   onError: (error: any) => {
     const errorMessage =
-      error?.response?.data?.message || "Bạn thêm Tour thất bại. Vui lòng thử lại sau!";
-    messageApi.open({
-      type: "error",
-      content: errorMessage,
-    });
+      error?.response?.data?.message ||
+      "Bạn thêm Tour thất bại. Vui lòng thử lại sau!";
+    message.error(errorMessage);
   },
 });
+
 
 
   const toolbarOptions = [
