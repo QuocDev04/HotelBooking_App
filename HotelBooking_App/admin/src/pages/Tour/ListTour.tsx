@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { QuestionCircleOutlined } from '@ant-design/icons';
+import { QuestionCircleOutlined, SearchOutlined } from '@ant-design/icons'; // ✅ thêm SearchOutlined
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, notification, Popconfirm, Space, Table, Tag, type TableColumnsType } from 'antd';
+import { Button, Input, notification, Popconfirm, Table, type TableColumnsType } from 'antd'; // ✅ thêm Input
 import { AiFillEdit, AiTwotoneDelete } from 'react-icons/ai';
 import { Link } from 'react-router-dom';
 import instance from '../../configs/axios';
 import { createStyles } from 'antd-style';
+import { useState } from 'react';
 
 const ListTour = () => {
   const { data } = useQuery({
@@ -15,6 +16,10 @@ const ListTour = () => {
   })
   const queryClient = useQueryClient();
   console.log(data?.data?.tours);
+
+  // ✅ Thêm state tìm kiếm
+  const [searchText, setSearchText] = useState("");
+
   const [api, contextHolder] = notification.useNotification();
   const openNotification =
     (pauseOnHover: boolean) =>
@@ -27,6 +32,7 @@ const ListTour = () => {
           pauseOnHover,
         });
       };
+
   const { mutate } = useMutation({
     mutationFn: async (id: any) => {
       try {
@@ -52,6 +58,8 @@ const ListTour = () => {
         "Bạn Đã Xóa Thất Bại",
       ),
   });
+  const { Search } = Input;
+
   const columns: TableColumnsType = [
     {
       title: 'Tên Tour',
@@ -103,51 +111,6 @@ const ListTour = () => {
       render: (price: number) => price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }),
     },    
     {
-      title: 'Số Lượng',
-      dataIndex: 'maxPeople',
-      key: 'maxPeople',
-    },
-    {
-      title: 'Loại Tour',
-      dataIndex: 'tourType',
-      key: 'tourType',
-      render: (_: any, tour: any) => {
-        const tourTypeMap: { [key: string]: string } = {
-          "noidia": "Nội Địa",
-          "quocte": "Quốc Tế",
-        };
-        return tourTypeMap[tour.tourType] || "Không xác định";
-      }
-    },
-    {
-      title: 'Phương Tiện',
-      dataIndex: 'itemTransport',
-      key: 'itemTransport',
-      render: (_: any, record: any) => {
-        const transports = record.itemTransport;
-
-        if (!Array.isArray(transports)) return null;
-
-        return (
-          <Space direction="vertical">
-            {transports.map((t: any, index: number) => {
-              const transport = t.TransportId;
-              return transport ? (
-                <Tag color="blue" key={index}>
-                  {transport.transportName} - {transport.transportType}
-                </Tag>
-              ) : null;
-            })}
-          </Space>
-        );
-      }
-    },
-    {
-      title: 'Trạng Thái Tour',
-      dataIndex: 'status',
-      key: 'status',
-    },
-    {
       title: 'Mô Tả Tour',
       dataIndex: 'descriptionTour',
       key: 'descriptionTour',
@@ -184,8 +147,8 @@ const ListTour = () => {
             </Link>
             <Popconfirm
               onConfirm={() => mutate(tour._id)}
-              title="Xóa Sản Phẩm"
-              description="Bạn có chắc chắn muốn xóa sản phẩm này không?"
+              title="Xóa Tour"
+              description="Bạn có chắc chắn muốn xóa tour này không?"
               okText="Có"
               cancelText="Không"
               icon={
@@ -203,10 +166,17 @@ const ListTour = () => {
       },
     },
   ]
+
   const dataSource = data?.data?.tours.map((tours: any) => ({
     key: tours._id,
     ...tours,
   }));
+
+  // ✅ Lọc danh sách theo từ khóa nhập vào
+  const filteredData = dataSource?.filter((tour: any) =>
+    tour?.nameTour?.toLowerCase().includes(searchText.toLowerCase())
+  );
+
   const useStyle = createStyles(({ css, token }) => {
     const { antCls } = token;
     return {
@@ -225,14 +195,28 @@ const ListTour = () => {
     };
   });
   const { styles } = useStyle();
+
   return (
     <>
       {contextHolder}
+
+      {/* ✅ Thanh tìm kiếm bên phải */}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
+  <Search
+    placeholder="Tìm kiếm theo tên tour..."
+    allowClear
+    enterButton="Tìm kiếm"
+    size="middle"
+    style={{ width: 350 }}
+    onChange={(e) => setSearchText(e.target.value)}
+  />
+</div>
+
       <div>
         <Table
           className={styles.customTable}
           columns={columns}
-          dataSource={dataSource}
+          dataSource={filteredData} // ✅ dùng filteredData thay vì dataSource gốc
           pagination={{ pageSize: 50 }}
           scroll={{ x: 'max-content' }}
         />

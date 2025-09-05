@@ -12,7 +12,7 @@ const getAllTours = async (req, res) => {
         // Tạo filter object
         let filter = {};
         
-        // Tìm kiếm theo tên tour
+        // Tìm kiếm theo tên tour hoặc địa điểm khởi hành
         if (search) {
             filter.$or = [
                 { nameTour: { $regex: search, $options: 'i' } },
@@ -42,7 +42,7 @@ const getAllTours = async (req, res) => {
         
         // Lấy danh sách tour với phân trang
         const tours = await TourModel.find(filter)
-            .populate("itemTransport.TransportId", "transportName transportNumber transportType")
+            // ❌ Bỏ populate itemTransport vì đã xóa trong model
             .populate("destination", "locationName country")
             .populate("assignedEmployee", "firstName lastName full_name email employee_id position")
             .sort({ createdAt: -1 })
@@ -67,6 +67,7 @@ const getAllTours = async (req, res) => {
         });
     }
 }
+
 
 const AddTour = async (req, res) => {
   try {

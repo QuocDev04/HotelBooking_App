@@ -8,38 +8,30 @@ const TransportItemSchema = new mongoose.Schema({
     }
 }, { _id: false })
 const TourModel = new mongoose.Schema({
-    nameTour: { type: String, required: true, unique: true },
-    itemTransport: [TransportItemSchema],
-    destination: { type: mongoose.Schema.Types.ObjectId, ref: "Location", required: true },
-    departure_location: { type: String, required: true },
-    duration: { type: String, required: true },
-    departure_time: { type: String }, // Thời gian khởi hành (VD: "06:00")
-    return_time: { type: String },    // Thời gian kết thúc (VD: "18:00")
+    nameTour: { type: String, required: true, unique: true }, // Tên tour
+    destination: { type: mongoose.Schema.Types.ObjectId, ref: "Location", required: true }, // điểm đến
+    departure_location: { type: String, required: true }, // Địa điểm khởi hành
+    duration: { type: String, required: true }, // Thời gian tour   // Thời gian kết thúc (VD: "18:00")
     price: { type: Number, required: true },             // Giá gốc tour (không bao gồm vé máy bay)
     discountPercent: { type: Number },                     // Giá khuyến mãi (nếu có)
     finalPrice: { type: Number },                    // Giá cuối cùng sau áp dụng phiếu giảm giá
     discountExpiryDate: { type: Date },                    // Thời hạn phiếu giảm giá
     
-    // Thông tin vé máy bay
-    includesFlight: { type: Boolean, default: false },     // Tour có bao gồm vé máy bay không
+    // Thông tin vé máy bay     
     flightPrice: { type: Number, default: 0 },             // Giá vé máy bay người lớn
     flightPriceChildren: { type: Number, default: 0 },     // Giá vé máy bay trẻ em
     flightPriceLittleBaby: { type: Number, default: 0 },   // Giá vé máy bay trẻ nhỏ
     flightPriceBaby: { type: Number, default: 0 },         // Giá vé máy bay em bé
-    imageTour: [{ type: String, required: true }],
-    Address:{type:String,required:true},
-    maxPeople:{type:Number,required:true},
-    tourType: { type: String, required: true },
-    status: { type: Boolean, default: true },
-    descriptionTour: { type: String },
+    imageTour: [{ type: String, required: true }], 
+
+    descriptionTour: { type: String }, 
     featured: { type: Boolean, default: false },
     priceChildren: { type: Number, required: true },
     priceLittleBaby: { type: Number, required: true },
     pricebaby: { type: Number, default: 0 },
-    singleRoom: { type: Boolean },
-
-    priceSingleRoom: { type: Number, required: true },
+    singleRoom: { type: Boolean }, 
     assignedEmployee: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
+    itemTransport: [TransportItemSchema],
     
     // Trạng thái tour HDV
     tourStatus: { 
