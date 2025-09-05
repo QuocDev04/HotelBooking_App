@@ -5,9 +5,11 @@ const Chat = express.Router();
 // Danh sách câu hỏi và trả lời mẫu
 const FAQ = {
   "chính sách hủy tour": `Quy Định Hủy Tour\n\n
-  Hủy trước 15 ngày so với ngày khởi hành: Hoàn 100% giá trị tour (trừ phí ngân hàng, phí dịch vụ nếu có).\n\n
-  Hủy từ 14 - 7 ngày trước ngày khởi hành: Hoàn 50% giá trị tour.\n\n
-  Hủy dưới 7 ngày hoặc không tham gia: Không hoàn tiền.\n\n
+  Hủy trước 30 ngày so với ngày khởi hành: Hoàn 100% số tiền (trừ phí ngân hàng, phí dịch vụ nếu có).\n\n
+  Hủy từ 15 - 29 ngày trước ngày khởi hành: Hoàn 70% số tiền.\n\n
+  Hủy từ 7 - 14 ngày trước ngày khởi hành: Hoàn 50% số tiền.\n\n
+  Hủy từ 4 - 6 ngày trước ngày khởi hành: Hoàn 30% số tiền.\n\n
+  Hủy dưới 3 ngày hoặc không tham gia: Không hoàn tiền.\n\n
   Lưu ý: Thời gian hủy được tính từ lúc nhận được thông báo chính thức của khách hàng qua email hoặc hệ thống đặt tour.`,
 
   "điều khoản đặt tour": `Điều khoản đặt tour\n\n
