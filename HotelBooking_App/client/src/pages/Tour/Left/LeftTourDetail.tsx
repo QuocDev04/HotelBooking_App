@@ -149,17 +149,17 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                 <div className="space-y-6">
                     {/* Main Image */}
                     <div className="relative group">
-                        <div className="aspect-video w-full overflow-hidden rounded-2xl shadow-2xl">
+                        <div className="w-full overflow-hidden shadow-2xl aspect-video rounded-2xl">
                             <img
                                 src={mainImage || ""}
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
                                 alt="Main tour image"
                             />
                             {/* Overlay gradient */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <div className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-gradient-to-t from-black/20 to-transparent group-hover:opacity-100"></div>
 
                             {/* Image counter */}
-                            <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-medium">
+                            <div className="absolute px-3 py-1 text-sm font-medium text-white rounded-full top-4 right-4 bg-black/60 backdrop-blur-sm">
                                 {tours?.imageTour?.length || 0} ảnh
                             </div>
                         </div>
@@ -170,10 +170,10 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                         {tours?.imageTour?.slice(0, 5).map((src: string, index: number) => (
                             <div
                                 key={index}
-                                className="relative group cursor-pointer"
+                                className="relative cursor-pointer group"
                                 onClick={() => handleThumbnailClick(src)}
                             >
-                                <div className="aspect-video overflow-hidden rounded-xl shadow-md">
+                                <div className="overflow-hidden shadow-md aspect-video rounded-xl">
                                     <img
                                         src={src}
                                         className={`w-full h-full object-cover transition-all duration-300 ${mainImage === src
@@ -184,11 +184,11 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                     />
                                 </div>
                                 {/* Hover overlay */}
-                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-xl"></div>
+                                <div className="absolute inset-0 transition-opacity duration-200 opacity-0 bg-black/20 group-hover:opacity-100 rounded-xl"></div>
 
                                 {/* Active indicator */}
                                 {mainImage === src && (
-                                    <div className="absolute top-1 right-1 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                                    <div className="absolute flex items-center justify-center w-6 h-6 text-xs text-white bg-blue-500 rounded-full top-1 right-1">
                                         ✓
                                     </div>
                                 )}
@@ -200,9 +200,9 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
 
             {/* Calendar Section */}
             <div ref={refDiv} className="p-6 border-t border-gray-100">
-                <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl p-8 shadow-lg">
-                    <div className="text-center mb-6">
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                <div className="p-8 shadow-lg bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl">
+                    <div className="mb-6 text-center">
+                        <h2 className="mb-2 text-3xl font-bold text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
                             📅 Lịch Tour Du Lịch
                         </h2>
                         <p className="text-gray-600">Chọn ngày khởi hành phù hợp với lịch trình của bạn</p>
@@ -218,14 +218,14 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                 <span className="text-gray-500">Đã hết hạn</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="w-4 h-4 bg-gray-200 rounded border border-gray-300"></div>
+                                <div className="w-4 h-4 bg-gray-200 border border-gray-300 rounded"></div>
                                 <span className="text-gray-400">Không thể chọn</span>
                             </div>
                         </div>
                     </div>
 
                     {selectedDate == null ? (
-                        <div className="bg-white rounded-2xl shadow-xl p-6">
+                        <div className="p-6 bg-white shadow-xl rounded-2xl">
                             <FullCalendar
                                 plugins={[dayGridPlugin, interactionPlugin]}
                                 initialView="dayGridMonth"
@@ -254,12 +254,12 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                             />
                         </div>
                     ) : (
-                        <div className="bg-white rounded-3xl shadow-xl p-8 animate-fade-in">
+                        <div className="p-8 bg-white shadow-xl rounded-3xl animate-fade-in">
                             {/* Header với ngày đã chọn */}
-                            <div className="flex justify-between items-center mb-8">
+                            <div className="flex items-center justify-between mb-8">
                                 <button
                                     onClick={() => setSelectedDate(null)}
-                                    className="flex items-center gap-2 px-4 py-2 text-blue-600 font-semibold hover:bg-blue-50 rounded-xl transition-all duration-200"
+                                    className="flex items-center gap-2 px-4 py-2 font-semibold text-blue-600 transition-all duration-200 hover:bg-blue-50 rounded-xl"
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
@@ -267,8 +267,8 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                     Quay lại lịch
                                 </button>
                                 <div className="text-center">
-                                    <div className="text-sm text-gray-500 mb-1">Ngày đã chọn</div>
-                                    <div className="text-2xl font-bold bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">
+                                    <div className="mb-1 text-sm text-gray-500">Ngày đã chọn</div>
+                                    <div className="text-2xl font-bold text-transparent bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text">
                                         {selectedDate ? dayjs(selectedDate).format("DD/MM/YYYY") : ""}
                                     </div>
                                 </div>
@@ -277,16 +277,16 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                             {/* Pricing Section */}
                             <div className="space-y-6">
                                 <div className="text-center">
-                                    <h3 className="text-2xl font-bold text-gray-800 mb-2">💰 Bảng giá chi tiết</h3>
+                                    <h3 className="mb-2 text-2xl font-bold text-gray-800">💰 Bảng giá chi tiết</h3>
                                     <p className="text-gray-600">Giá tour cho ngày đã chọn</p>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                     {/* Người lớn */}
-                                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
+                                    <div className="p-6 border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl">
                                         <div className="flex items-center justify-between mb-3">
                                             <div className="flex items-center gap-3">
-                                                <div className="bg-blue-500 text-white rounded-full p-2">
+                                                <div className="p-2 text-white bg-blue-500 rounded-full">
                                                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                                         <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                                                     </svg>
@@ -306,10 +306,10 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                     </div>
 
                                     {/* Trẻ em */}
-                                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200">
+                                    <div className="p-6 border border-green-200 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl">
                                         <div className="flex items-center justify-between mb-3">
                                             <div className="flex items-center gap-3">
-                                                <div className="bg-green-500 text-white rounded-full p-2">
+                                                <div className="p-2 text-white bg-green-500 rounded-full">
                                                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                                         <path fillRule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zM8 6V5a2 2 0 114 0v1H8z" clipRule="evenodd" />
                                                     </svg>
@@ -329,10 +329,10 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                     </div>
 
                                     {/* Em bé */}
-                                    <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl p-6 border border-yellow-200">
+                                    <div className="p-6 border border-yellow-200 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl">
                                         <div className="flex items-center justify-between mb-3">
                                             <div className="flex items-center gap-3">
-                                                <div className="bg-yellow-500 text-white rounded-full p-2">
+                                                <div className="p-2 text-white bg-yellow-500 rounded-full">
                                                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
@@ -351,32 +351,11 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                         </div>
                                     </div>
 
-                                    {/* Phụ thu phòng đơn */}
-                                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <div className="flex items-center gap-3">
-                                                <div className="bg-purple-500 text-white rounded-full p-2">
-                                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <div className="font-bold text-gray-800">Phụ thu phòng đơn</div>
-                                                    <div className="text-sm text-gray-600">(Nếu ở một mình)</div>
-                                                </div>
-                                            </div>
-                                            <div className="text-right">
-                                                <div className="text-2xl font-bold text-red-600">
-                                                    {selectedSlot?.tour?.priceSingleRoom?.toLocaleString('vi-VN')}
-                                                </div>
-                                                <div className="text-sm text-gray-600">VNĐ</div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                   
                                 </div>
 
                                 {/* Note */}
-                                <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
+                                <div className="p-4 border border-blue-200 bg-blue-50 rounded-2xl">
                                     <div className="flex items-start gap-3">
                                         <div className="bg-blue-500 text-white rounded-full p-1 mt-0.5">
                                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -384,7 +363,7 @@ const LeftTourDetail = ({ refDiv, selectedDate, setSelectedDate }: LeftTourDetai
                                             </svg>
                                         </div>
                                         <div className="text-sm text-blue-800">
-                                            <div className="font-semibold mb-1">Lưu ý về giá tour:</div>
+                                            <div className="mb-1 font-semibold">Lưu ý về giá tour:</div>
                                             <ul className="space-y-1 text-blue-700">
                                                 <li>• Giá đã bao gồm VAT và các phí dịch vụ</li>
                                                 <li>• Trẻ em dưới 2 tuổi được miễn phí (không chiếm ghế, giường)</li>

@@ -176,12 +176,12 @@ const EditTour = () => {
     );
     return (
         <div className="min-h-screen p-6">
-            <div className="max-w-7xl mx-auto">
+            <div className="mx-auto max-w-7xl">
                 <div className="flex items-center justify-between mb-8">
                     <h1 className="text-3xl font-bold text-blue-600">➕ Sửa Tour Mới</h1>
                 </div>
                 {contextHolder}
-                <div className="bg-white p-8 rounded-xl shadow-md">
+                <div className="p-8 bg-white shadow-md rounded-xl">
                     <Form layout="vertical" name="add-tour" validateTrigger="onBlur"
                         onFinish={onFinish}
                         initialValues={data?.data?.tour}
@@ -521,37 +521,6 @@ const EditTour = () => {
                                     <Col span={6}>
                                         <Form.Item
                                             required={false}
-                                            label={requiredLabel("Giá Phụ Thu Phòng Đơn")}
-                                            name="priceSingleRoom"
-                                            rules={[
-                                                {
-                                                    validator(_, value) {
-                                                        const num = Number(value);
-                                                        if (!value) return Promise.reject("Vui lòng nhập giá");
-                                                        if (isNaN(num) || !Number.isInteger(num)) return Promise.reject("Giá phải là số nguyên");
-                                                        if (num <= 0) return Promise.reject("Giá phải lớn hơn 0");
-                                                        return Promise.resolve();
-                                                    },
-                                                },
-                                            ]}
-                                        >
-                                            <InputNumber
-                                                placeholder="VD: 2000000"
-                                                size="large"
-                                                style={{ width: "100%" }}
-                                                min={0}
-                                                formatter={(value) =>
-                                                    value ? `${Number(value).toLocaleString("vi-VN")} ₫` : ""
-                                                }
-                                                parser={(value) =>
-                                                    value ? value.replace(/[₫\s,.]/g, "") : ""
-                                                }
-                                            />
-                                        </Form.Item>
-                                    </Col>
-                                    <Col span={6}>
-                                        <Form.Item
-                                            required={false}
                                             label={requiredLabel("Loại Tour")}
                                             name="tourType"
                                             rules={[{ required: true, message: "Vui lòng chọn loại tour" }]}
@@ -561,7 +530,6 @@ const EditTour = () => {
                                                 placeholder="Chọn loại tour"
                                                 options={[
                                                     { label: "Nội địa", value: "noidia" },
-                                                    { label: "Quốc tế", value: "quocte" },
                                                 ]}
                                             />
                                         </Form.Item></Col>
@@ -668,7 +636,7 @@ const EditTour = () => {
                                         type="primary"
                                         htmlType="submit"
                                         size="large"
-                                        className="w-full bg-blue-600 hover:bg-blue-700 transition duration-200 mt-10"
+                                        className="w-full mt-10 transition duration-200 bg-blue-600 hover:bg-blue-700"
                                     >
                                         ✅ Xác Nhận Sửa Tour
                                     </Button>
