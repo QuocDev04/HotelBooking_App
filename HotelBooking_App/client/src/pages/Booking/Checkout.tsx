@@ -34,6 +34,8 @@ const Checkout = () => {
   // Lấy id từ params và kiểm tra
   const { id } = useParams();
 
+
+
   //Hàm tính tuổi
   const calculateAge = (birtdate: moment.Moment) => {
     if (!birtdate) return 0;
@@ -67,7 +69,7 @@ const Checkout = () => {
       const card = cashRadio.closest('label')?.querySelector('[data-payment-method]');
       const indicator = cashRadio.closest('label')?.querySelector('[data-radio-indicator]');
       const checkIcon = cashRadio.closest('label')?.querySelector('[data-check-icon]');
-      
+
       if (card) {
         card.classList.remove('border-gray-200');
         card.classList.add('border-green-500', 'shadow-lg', 'shadow-green-100');
@@ -89,7 +91,7 @@ const Checkout = () => {
       const card = depositRadio.closest('label')?.querySelector('[data-payment-option]');
       const indicator = depositRadio.closest('label')?.querySelector('[data-payment-radio-indicator]');
       const checkIcon = depositRadio.closest('label')?.querySelector('[data-payment-check-icon]');
-      
+
       if (card) {
         card.classList.remove('border-gray-200', 'bg-gradient-to-br', 'from-orange-50', 'to-red-50');
         card.classList.add('border-orange-500', 'bg-gradient-to-br', 'from-orange-100', 'to-red-100');
@@ -169,6 +171,8 @@ const Checkout = () => {
 
   const tours = data?.data?.data;
   console.log(tours);
+
+  console.log(tours?.tour)
 
   const totalSingleRoomPrice = singleRoom.reduce(
     (sum, val) => (val ? sum + (tours?.tour?.priceSingleRoom || 0) : sum),
@@ -369,10 +373,10 @@ const Checkout = () => {
 
   // Hàm lấy tổng giá cho mỗi loại khách (tour + vé máy bay)
   const getTotalPriceByAge = (tour: any, ageGroup: 'adult' | 'child' | 'toddler' | 'infant') => {
-    const tourPrice = ageGroup === 'adult' ? getTourPrice(tour) : 
-                     ageGroup === 'child' ? (tour?.priceChildren || 0) :
-                     ageGroup === 'toddler' ? (tour?.priceLittleBaby || 0) :
-                     (tour?.pricebaby || 0);
+    const tourPrice = ageGroup === 'adult' ? getTourPrice(tour) :
+      ageGroup === 'child' ? (tour?.priceChildren || 0) :
+        ageGroup === 'toddler' ? (tour?.priceLittleBaby || 0) :
+          (tour?.pricebaby || 0);
     const flightPrice = getFlightPrice(tour, ageGroup);
     return tourPrice + flightPrice;
   };
@@ -481,7 +485,7 @@ const Checkout = () => {
   const handleCashDepositConfirm = () => {
     if (!pendingFormValues) return;
     setCashDepositModalVisible(false);
-    
+
     // Xử lý các trường ngày tháng
     const processPassengers = (passengers: any[]) => {
       if (!passengers) return [];
@@ -492,7 +496,7 @@ const Checkout = () => {
     };
 
     const isFullPayment = pendingFormValues.isFullPayment === "true";
-    
+
     mutate({
       ...pendingFormValues,
       tourPrice: getTotalPriceByAge(tours?.tour, 'adult'), // Thêm giá tour
@@ -512,13 +516,13 @@ const Checkout = () => {
   const handleCashDepositChooseVNPay = () => {
     if (!pendingFormValues) return;
     setCashDepositModalVisible(false);
-    
+
     // Cập nhật phương thức thanh toán thành VNPay
     const updatedValues = {
       ...pendingFormValues,
       payment_method: 'bank_transfer'
     };
-    
+
     // Xử lý các trường ngày tháng
     const processPassengers = (passengers: any[]) => {
       if (!passengers) return [];
@@ -529,7 +533,7 @@ const Checkout = () => {
     };
 
     const isFullPayment = updatedValues.isFullPayment === "true";
-    
+
     mutate({
       ...updatedValues,
       tourPrice: getTotalPriceByAge(tours?.tour, 'adult'), // Thêm giá tour
@@ -544,6 +548,11 @@ const Checkout = () => {
       infantPassengers: processPassengers(updatedValues.infantPassengers)
     });
   };
+
+  const startDate = tours?.dateTour ? dayjs(tours.dateTour).valueOf() : null;
+  const endDate = startDate && tours?.duration
+    ? startDate + Number(tours.duration) * 24 * 60 * 60 * 1000
+    : null;
 
   return (
     <div className="min-h-screen px-2 py-8 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 md:px-8">
@@ -848,9 +857,9 @@ const Checkout = () => {
               {/* Thông tin hành khách - Trẻ nhỏ */}
 
               {/* Thông tin hành khách - Trẻ em */}
-              
+
               {/* Thông tin hành khách - Em bé */}
-              
+
 
               {/* Ghi chú */}
               <div>
@@ -878,15 +887,36 @@ const Checkout = () => {
               <div className="p-3 text-sm rounded bg-gray-50">
                 <div className="mb-1 font-semibold">THÔNG TIN DI CHUYỂN</div>
                 <div className="flex justify-between mb-1">
-                  <span>Ngày đi - {dayjs(tours?.dateTour).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY")}</span>
+                  <span>
+                    Ngày đi:{" "}
+                    {dayjs(tours?.dateTour)
+                      .tz("Asia/Ho_Chi_Minh")
+                      .format("DD/MM/YYYY")}
+                  </span>
                 </div>
+                <div className="flex justify-between mb-1">
+                  <span>
+                    Ngày về:{" "}
+                    {tours?.tour?.duration
+                      ? dayjs(tours?.dateTour)
+                        .add(
+                          Number(tours?.tour?.duration.split(" ")[0]), // lấy số ngày ở đầu chuỗi
+                          "day"
+                        )
+                        .tz("Asia/Ho_Chi_Minh")
+                        .format("DD/MM/YYYY")
+                      : "--"}
+                  </span>
+                </div>
+
               </div>
+
               {/* Giá */}
               <div className="flex items-center justify-between text-sm">
                 <span className="font-semibold">Giá Combo </span>
                 <span className="text-lg font-bold text-red-600">{getTotalPriceByAge(tours?.tour, 'adult').toLocaleString()} ₫</span>
               </div>
-              
+
               {/* Chi tiết giá tour và vé máy bay */}
               {tours?.tour?.includesFlight && (
                 <div className="p-3 text-sm rounded-lg bg-blue-50">
@@ -990,17 +1020,17 @@ const Checkout = () => {
                             icon.classList.remove('opacity-100');
                             icon.classList.add('opacity-0');
                           });
-                          
+
                           // Add checked class to selected card
                           const card = e.target.closest('label').querySelector('[data-payment-method]');
                           card.classList.remove('border-gray-200');
                           card.classList.add('border-green-500', 'shadow-lg', 'shadow-green-100');
-                          
+
                           // Add checked class to selected radio indicator
                           const indicator = e.target.closest('label').querySelector('[data-radio-indicator]');
                           indicator.classList.remove('border-gray-300');
                           indicator.classList.add('border-green-500', 'bg-green-500');
-                          
+
                           // Add checked class to selected check icon
                           const checkIcon = e.target.closest('label').querySelector('[data-check-icon]');
                           checkIcon.classList.remove('opacity-0');
@@ -1049,17 +1079,17 @@ const Checkout = () => {
                             icon.classList.remove('opacity-100');
                             icon.classList.add('opacity-0');
                           });
-                          
+
                           // Add checked class to selected card
                           const card = e.target.closest('label').querySelector('[data-payment-method]');
                           card.classList.remove('border-gray-200');
                           card.classList.add('border-blue-500', 'shadow-lg', 'shadow-blue-100');
-                          
+
                           // Add checked class to selected radio indicator
                           const indicator = e.target.closest('label').querySelector('[data-radio-indicator]');
                           indicator.classList.remove('border-gray-300');
                           indicator.classList.add('border-blue-500', 'bg-blue-500');
-                          
+
                           // Add checked class to selected check icon
                           const checkIcon = e.target.closest('label').querySelector('[data-check-icon]');
                           checkIcon.classList.remove('opacity-0');
@@ -1121,17 +1151,17 @@ const Checkout = () => {
                               icon.classList.remove('opacity-100');
                               icon.classList.add('opacity-0');
                             });
-                            
+
                             // Add checked class to selected card
                             const card = e.target.closest('label').querySelector('[data-payment-option]');
                             card.classList.remove('border-gray-200', 'bg-gradient-to-br', 'from-orange-50', 'to-red-50');
                             card.classList.add('border-orange-500', 'bg-gradient-to-br', 'from-orange-100', 'to-red-100');
-                            
+
                             // Add checked class to selected radio indicator
                             const indicator = e.target.closest('label').querySelector('[data-payment-radio-indicator]');
                             indicator.classList.remove('border-gray-300');
                             indicator.classList.add('border-orange-500', 'bg-orange-500');
-                            
+
                             // Add checked class to selected check icon
                             const checkIcon = e.target.closest('label').querySelector('[data-payment-check-icon]');
                             checkIcon.classList.remove('opacity-0');
@@ -1181,17 +1211,17 @@ const Checkout = () => {
                               icon.classList.remove('opacity-100');
                               icon.classList.add('opacity-0');
                             });
-                            
+
                             // Add checked class to selected card
                             const card = e.target.closest('label').querySelector('[data-payment-option]');
                             card.classList.remove('border-gray-200', 'bg-gradient-to-br', 'from-orange-50', 'to-red-50');
                             card.classList.add('border-emerald-500', 'bg-gradient-to-br', 'from-emerald-100', 'to-green-100');
-                            
+
                             // Add checked class to selected radio indicator
                             const indicator = e.target.closest('label').querySelector('[data-payment-radio-indicator]');
                             indicator.classList.remove('border-gray-300');
                             indicator.classList.add('border-emerald-500', 'bg-emerald-500');
-                            
+
                             // Add checked class to selected check icon
                             const checkIcon = e.target.closest('label').querySelector('[data-payment-check-icon]');
                             checkIcon.classList.remove('opacity-0');
@@ -1211,7 +1241,7 @@ const Checkout = () => {
                               <p className="text-sm text-gray-600">Thanh toán toàn bộ chi phí ngay bây giờ</p>
                             </div>
                             <div data-payment-radio-indicator className="flex items-center justify-center w-6 h-6 transition-all duration-200 border-2 border-gray-300 rounded-full">
-                              <svg data-payment-check-icon className="w-3 h-3 text-white opacity-0" fill="currentColor" viewBox="0 0 20 20">
+                              <svg data-check-icon className="w-3 h-3 text-white opacity-0" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                               </svg>
                             </div>
