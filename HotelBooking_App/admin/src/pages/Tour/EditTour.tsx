@@ -239,40 +239,90 @@ const EditTour = () => {
                 </Row>
 
                 <Row gutter={24}>
-                  <Col span={8}>
-                    <Form.Item label="Giá Tour" name="price">
-                      <InputNumber
-                        size="large"
-                        style={{ width: "100%" }}
-                        min={0}
-                        formatter={(v) =>
-                          v ? `${Number(v).toLocaleString("vi-VN")} ₫` : ""
-                        }
-                        parser={(v) => v?.replace(/[₫\s,.]/g, "") || ""}
-                      />
-                    </Form.Item>
-                  </Col>
+  <Col span={8}>
+    <Form.Item label="Giá Tour" name="price">
+      <InputNumber
+        size="large"
+        style={{ width: "100%" }}
+        min={0}
+        formatter={(v) => (v ? `${Number(v).toLocaleString("vi-VN")} ₫` : "")}
+        parser={(v) => v?.replace(/[₫\s,.]/g, "") || ""}
+      />
+    </Form.Item>
+  </Col>
 
-                  <Col span={8}>
-                    <Form.Item label="Giá Trẻ Em" name="priceChildren">
-                      <InputNumber
-                        size="large"
-                        style={{ width: "100%" }}
-                        min={0}
-                      />
-                    </Form.Item>
-                  </Col>
+  <Col span={8}>
+    <Form.Item label="Giá Trẻ Em" name="priceChildren">
+      <InputNumber size="large" style={{ width: "100%" }} min={0} />
+    </Form.Item>
+  </Col>
 
-                  <Col span={8}>
-                    <Form.Item label="Giá Trẻ Nhỏ" name="priceLittleBaby">
-                      <InputNumber
-                        size="large"
-                        style={{ width: "100%" }}
-                        min={0}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
+  <Col span={8}>
+    <Form.Item label="Giá Trẻ Nhỏ" name="priceLittleBaby">
+      <InputNumber size="large" style={{ width: "100%" }} min={0} />
+    </Form.Item>
+  </Col>
+</Row>
+
+{/* 🟢 Thêm giảm giá */}
+<Row gutter={24}>
+  <Col span={8}>
+    <Form.Item
+      label="Phần trăm giảm giá (%)"
+      name="discountPercent"
+      rules={[
+        {
+          type: "number",
+          min: 1,
+          max: 100,
+          message: "Phần trăm phải từ 1 đến 100",
+        },
+      ]}
+    >
+      <InputNumber
+        min={1}
+        max={100}
+        placeholder="VD: 15 (15%)"
+        size="large"
+        style={{ width: "100%" }}
+      />
+    </Form.Item>
+  </Col>
+
+  <Col span={8}>
+    <Form.Item
+      label="Ngày hết hạn giảm giá"
+      name="discountExpiryDate"
+      rules={[
+        ({ getFieldValue }) => ({
+          validator(_, value) {
+            const discount = getFieldValue("discountPercent");
+            if (!discount || discount <= 0) return Promise.resolve();
+            if (!value)
+              return Promise.reject(new Error("Vui lòng chọn ngày hết hạn"));
+            if (value.isBefore(dayjs())) {
+              return Promise.reject(
+                new Error("Ngày hết hạn phải lớn hơn hiện tại")
+              );
+            }
+            return Promise.resolve();
+          },
+        }),
+      ]}
+    >
+      <DatePicker
+        showTime
+        size="large"
+        style={{ width: "100%" }}
+        placeholder="Chọn ngày giờ hết hạn"
+        disabledDate={(current) =>
+          current && current < dayjs().startOf("day")
+        }
+      />
+    </Form.Item>
+  </Col>
+</Row>
+
 
                 <Form.Item label="Mô tả Tour" name="descriptionTour">
                   <ReactQuill
@@ -323,6 +373,13 @@ const EditTour = () => {
 
               <Col span={24}>
                 <Form.Item>
+                  <Button
+                    onClick={() => navigate("/admin/list-tour")}
+                    size="large"
+                    className="w-full bg-blue-600 hover:bg-blue-700 transition duration-200 mt-10"
+                  >
+                    ⬅ Quay lại
+                  </Button>
                   <Button
                     type="primary"
                     htmlType="submit"

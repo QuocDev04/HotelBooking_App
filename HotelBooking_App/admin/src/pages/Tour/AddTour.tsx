@@ -59,7 +59,7 @@ const AddTour = () => {
       return await instance.post("/tour", data);
     },
     onSuccess: () => {
-      navigate("/admin/list-tour"); 
+      navigate("/admin/list-tour");
       message.success("Bạn đã thêm Tour thành công 🎉");
     },
     onError: (error: any) => {
@@ -498,7 +498,15 @@ const AddTour = () => {
 
               {/* Nút Submit */}
               <Col span={24}>
+
                 <Form.Item>
+                  <Button
+                    onClick={() => navigate("/admin/list-tour")}
+                    size="large"
+                    className="w-full bg-blue-600 hover:bg-blue-700 transition duration-200 mt-10"
+                  >
+                    ⬅ Quay lại
+                  </Button>
                   <Button
                     type="primary"
                     htmlType="submit"

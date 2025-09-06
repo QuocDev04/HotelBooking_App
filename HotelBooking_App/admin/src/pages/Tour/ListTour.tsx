@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { QuestionCircleOutlined, SearchOutlined } from '@ant-design/icons'; // ✅ thêm SearchOutlined
+import { QuestionCircleOutlined, SearchOutlined, PlusOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Input, notification, Popconfirm, Table, type TableColumnsType } from 'antd'; // ✅ thêm Input
+import { Button, Input, notification, Popconfirm, Table, Card, type TableColumnsType } from 'antd';
 import { AiFillEdit, AiTwotoneDelete } from 'react-icons/ai';
 import { Link } from 'react-router-dom';
 import instance from '../../configs/axios';
@@ -15,9 +15,7 @@ const ListTour = () => {
     queryFn: async () => instance.get('/tour')
   })
   const queryClient = useQueryClient();
-  console.log(data?.data?.tours);
 
-  // ✅ Thêm state tìm kiếm
   const [searchText, setSearchText] = useState("");
 
   const [api, contextHolder] = notification.useNotification();
@@ -66,15 +64,14 @@ const ListTour = () => {
       dataIndex: 'nameTour',
       key: 'nameTour',
       fixed: 'left',
-      width: 350,
+      width: 250,
     },
     {
       title: 'Điểm Đến',
       dataIndex: 'destination',
       key: 'destination',
-      render:(_:any, tour:any) => {
-        return tour?.destination?.locationName + " - " + tour?.destination?.country
-      }
+      render: (_: any, tour: any) =>
+        tour?.destination?.locationName + " - " + tour?.destination?.country
     },
     {
       title: 'Nơi Xuất Phát',
@@ -86,16 +83,15 @@ const ListTour = () => {
       dataIndex: 'imageTour',
       key: 'imageTour',
       render: (image: string[]) => {
-        const firstImage =
-          image && image.length > 0 ? image[0] : "";
+        const firstImage = image && image.length > 0 ? image[0] : "";
         return firstImage ? (
           <img
             src={firstImage}
-            style={{ width: "100px", height: "auto" }}
-            alt="Ảnh phụ"
+            style={{ width: "90px", height: "60px", objectFit: "cover", borderRadius: 6 }}
+            alt="Ảnh Tour"
           />
         ) : (
-          "Không có ảnh nào"
+          "Không có ảnh"
         );
       },
     },
@@ -108,8 +104,9 @@ const ListTour = () => {
       title: 'Giá Tour',
       dataIndex: 'price',
       key: 'price',
-      render: (price: number) => price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }),
-    },    
+      render: (price: number) =>
+        price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }),
+    },
     {
       title: 'Mô Tả Tour',
       dataIndex: 'descriptionTour',
@@ -122,7 +119,6 @@ const ListTour = () => {
             ? words.slice(0, wordLimit).join(' ') + '...'
             : text;
         };
-
         return (
           <div
             dangerouslySetInnerHTML={{
@@ -137,33 +133,27 @@ const ListTour = () => {
       key: "operation",
       fixed: 'right',
       width: 150,
-      render: (_: any, tour: any) => {
-        return (
-          <div>
-            <Link to={`/admin/edit-tour/${tour._id}`}>
-              <Button type="primary" className="mr-2">
-                <AiFillEdit className="text-xl" />
-              </Button>
-            </Link>
-            <Popconfirm
-              onConfirm={() => mutate(tour._id)}
-              title="Xóa Tour"
-              description="Bạn có chắc chắn muốn xóa tour này không?"
-              okText="Có"
-              cancelText="Không"
-              icon={
-                <QuestionCircleOutlined
-                  style={{ color: "red" }}
-                />
-              }
-            >
-              <Button danger>
-                <AiTwotoneDelete className="text-lg" />
-              </Button>
-            </Popconfirm>
-          </div>
-        );
-      },
+      render: (_: any, tour: any) => (
+        <div className="flex gap-2">
+          <Link to={`/admin/edit-tour/${tour._id}`}>
+            <Button type="primary">
+              <AiFillEdit className="text-lg" />
+            </Button>
+          </Link>
+          <Popconfirm
+            onConfirm={() => mutate(tour._id)}
+            title="Xóa Tour"
+            description="Bạn có chắc chắn muốn xóa tour này không?"
+            okText="Có"
+            cancelText="Không"
+            icon={<QuestionCircleOutlined style={{ color: "red" }} />}
+          >
+            <Button danger>
+              <AiTwotoneDelete className="text-lg" />
+            </Button>
+          </Popconfirm>
+        </div>
+      ),
     },
   ]
 
@@ -172,7 +162,6 @@ const ListTour = () => {
     ...tours,
   }));
 
-  // ✅ Lọc danh sách theo từ khóa nhập vào
   const filteredData = dataSource?.filter((tour: any) =>
     tour?.nameTour?.toLowerCase().includes(searchText.toLowerCase())
   );
@@ -182,14 +171,8 @@ const ListTour = () => {
     return {
       customTable: css`
         ${antCls}-table {
-          ${antCls}-table-container {
-            ${antCls}-table-body,
-            ${antCls}-table-content {
-              scrollbar-width: thin;
-              scrollbar-color: #eaeaea transparent;
-              scrollbar-gutter: stable;
-            }
-          }
+          border-radius: 12px;
+          overflow: hidden;
         }
       `,
     };
@@ -199,30 +182,33 @@ const ListTour = () => {
   return (
     <>
       {contextHolder}
-
-      {/* ✅ Thanh tìm kiếm bên phải */}
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
-  <Search
-    placeholder="Tìm kiếm theo tên tour..."
-    allowClear
-    enterButton="Tìm kiếm"
-    size="middle"
-    style={{ width: 350 }}
-    onChange={(e) => setSearchText(e.target.value)}
-  />
-</div>
-
-      <div>
+      <Card
+        title={<h2 className="text-xl font-bold text-blue-600">Danh sách Tour</h2>}
+        extra={
+          <div className="flex gap-3">
+            <Search
+              placeholder="Tìm kiếm theo tên tour..."
+              allowClear
+              enterButton={<SearchOutlined />}
+              size="middle"
+              style={{ width: 250 }}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+            
+          </div>
+        }
+        className="shadow-md rounded-xl"
+      >
         <Table
           className={styles.customTable}
           columns={columns}
-          dataSource={filteredData} // ✅ dùng filteredData thay vì dataSource gốc
-          pagination={{ pageSize: 50 }}
+          dataSource={filteredData}
+          pagination={{ pageSize: 10 }}
           scroll={{ x: 'max-content' }}
         />
-      </div>
+      </Card>
     </>
   )
 }
 
-export default ListTour
+export default ListTour;
