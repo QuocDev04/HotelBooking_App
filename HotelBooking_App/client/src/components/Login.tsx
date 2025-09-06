@@ -92,25 +92,7 @@ const Login = ({ onClose = () => { }, openRegister = () => { }, onLoginSuccess =
                         <span className="text-indigo-600">Elite Travel</span>
                     </h2>
 
-                    {/* Google login */}
-                    <button
-                        type="button"
-                        className="w-full flex items-center gap-2 justify-center mb-5 bg-white border border-gray-300 py-2.5 rounded-full shadow-sm hover:bg-gray-50 transition"
-                    >
-                        <img
-                            className="h-4 w-4"
-                            src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/login/googleFavicon.png"
-                            alt="googleFavicon"
-                        />
-                        Đăng nhập với Google
-                    </button>
 
-                    {/* Divider */}
-                    <div className="flex items-center gap-3 w-full my-4">
-                        <div className="flex-1 h-px bg-gray-200" />
-                        <p className="text-xs text-gray-400">Hoặc đăng nhập bằng email</p>
-                        <div className="flex-1 h-px bg-gray-200" />
-                    </div>
 
                     {/* Form */}
                     <Form layout="vertical" onFinish={onFinish} requiredMark={false}>
@@ -120,6 +102,23 @@ const Login = ({ onClose = () => { }, openRegister = () => { }, onLoginSuccess =
                             rules={[
                                 { required: true, message: "Vui lòng nhập email" },
                                 { type: "email", message: "Email không hợp lệ" },
+                                {
+                                    validator: (_, value) => {
+                                        if (!value) return Promise.resolve();
+                                        const allowedDomains = [
+                                            "gmail.com",
+                                            "yahoo.com",
+                                            "outlook.com",
+                                            "hotmail.com",
+                                            "icloud.com"
+                                        ];
+                                        const domain = value.split("@")[1]?.toLowerCase();
+                                        if (!domain || !allowedDomains.includes(domain)) {
+                                            return Promise.reject(new Error("Email phải sử dụng domain hợp lệ (gmail.com, yahoo.com, outlook.com, hotmail.com, icloud.com)"));
+                                        }
+                                        return Promise.resolve();
+                                    }
+                                }
                             ]}
                         >
                             <Input
@@ -134,7 +133,9 @@ const Login = ({ onClose = () => { }, openRegister = () => { }, onLoginSuccess =
                         {/* Password */}
                         <Form.Item
                             name="password"
-                            rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
+                            rules={[
+                                { required: true, message: "Vui lòng nhập mật khẩu" }
+                            ]}
                         >
                             <Input
                                 prefix={<AiOutlineLock className="text-gray-400" />}

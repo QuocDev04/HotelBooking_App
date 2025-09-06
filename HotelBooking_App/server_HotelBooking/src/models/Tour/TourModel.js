@@ -8,17 +8,24 @@ const TransportItemSchema = new mongoose.Schema({
     }
 }, { _id: false })
 const TourModel = new mongoose.Schema({
-    nameTour: { type: String, required: true },
+    nameTour: { type: String, required: true, unique: true },
     itemTransport: [TransportItemSchema],
     destination: { type: mongoose.Schema.Types.ObjectId, ref: "Location", required: true },
     departure_location: { type: String, required: true },
     duration: { type: String, required: true },
     departure_time: { type: String }, // Thời gian khởi hành (VD: "06:00")
     return_time: { type: String },    // Thời gian kết thúc (VD: "18:00")
-    price: { type: Number, required: true },             // Giá gốc
+    price: { type: Number, required: true },             // Giá gốc tour (không bao gồm vé máy bay)
     discountPercent: { type: Number },                     // Giá khuyến mãi (nếu có)
     finalPrice: { type: Number },                    // Giá cuối cùng sau áp dụng phiếu giảm giá
     discountExpiryDate: { type: Date },                    // Thời hạn phiếu giảm giá
+    
+    // Thông tin vé máy bay
+    includesFlight: { type: Boolean, default: false },     // Tour có bao gồm vé máy bay không
+    flightPrice: { type: Number, default: 0 },             // Giá vé máy bay người lớn
+    flightPriceChildren: { type: Number, default: 0 },     // Giá vé máy bay trẻ em
+    flightPriceLittleBaby: { type: Number, default: 0 },   // Giá vé máy bay trẻ nhỏ
+    flightPriceBaby: { type: Number, default: 0 },         // Giá vé máy bay em bé
     imageTour: [{ type: String, required: true }],
     Address:{type:String,required:true},
     maxPeople:{type:Number,required:true},

@@ -79,25 +79,7 @@ const Register = ({ onClose = () => { }, openLogin = () => { } }) => {
                         <span className="text-indigo-600">Elite Travel</span>
                     </h2>
 
-                    {/* Google login */}
-                    <button
-                        type="button"
-                        className="w-full flex items-center gap-2 justify-center mb-5 bg-white border border-gray-300 py-2.5 rounded-full shadow-sm hover:bg-gray-50 transition"
-                    >
-                        <img
-                            className="h-4 w-4"
-                            src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/login/googleFavicon.png"
-                            alt="googleFavicon"
-                        />
-                        Đăng nhập với Google
-                    </button>
 
-                    {/* Divider */}
-                    <div className="flex items-center gap-3 w-full my-4">
-                        <div className="flex-1 h-px bg-gray-200" />
-                        <p className="text-xs text-gray-400">Hoặc đăng ký bằng email</p>
-                        <div className="flex-1 h-px bg-gray-200" />
-                    </div>
 
                     {/* Form */}
                     <Form layout="vertical" onFinish={onFinish} requiredMark={false}>
@@ -106,10 +88,24 @@ const Register = ({ onClose = () => { }, openLogin = () => { } }) => {
                             name="email"
                             rules={[
                                 { required: true, message: "Vui lòng nhập email" },
+                                { type: "email", message: "Email không hợp lệ" },
                                 {
-                                    type: "email",
-                                    message: "Email không hợp lệ",
-                                },
+                                    validator: (_, value) => {
+                                        if (!value) return Promise.resolve();
+                                        const allowedDomains = [
+                                            "gmail.com",
+                                            "yahoo.com",
+                                            "outlook.com",
+                                            "hotmail.com",
+                                            "icloud.com"
+                                        ];
+                                        const domain = value.split("@")[1]?.toLowerCase();
+                                        if (!domain || !allowedDomains.includes(domain)) {
+                                            return Promise.reject(new Error("Email phải sử dụng domain hợp lệ (gmail.com, yahoo.com, outlook.com, hotmail.com, icloud.com)"));
+                                        }
+                                        return Promise.resolve();
+                                    }
+                                }
                             ]}
                         >
                             <Input
@@ -125,17 +121,18 @@ const Register = ({ onClose = () => { }, openLogin = () => { } }) => {
                         <Form.Item
                             name="username"
                             rules={[
-                                { required: true, message: "Vui lòng nhập tên đăng nhập" },
+                                { required: true, message: "Vui lòng nhập họ và tên" },
+                                { min: 3, message: "Họ và tên phải có ít nhất 3 ký tự" },
+                                { max: 30, message: "Họ và tên không được vượt quá 30 ký tự" },
                                 {
-                                    pattern: /^[a-zA-Z0-9._]{4,20}$/,
-                                    message:
-                                        "Tên đăng nhập từ 4–20 ký tự, không khoảng trắng, chỉ gồm chữ, số, _ hoặc .",
-                                },
+                                    pattern: /^[a-zA-ZÀ-ỹ\s]+$/,
+                                    message: "Họ và tên chỉ được chứa chữ cái và khoảng trắng"
+                                }
                             ]}
                         >
                             <Input
                                 prefix={<AiOutlineUser className="text-gray-400" />}
-                                placeholder="Tên đăng nhập"
+                                placeholder="Họ và tên"
                                 size="large"
                                 disabled={isPending}
                                 className="rounded-full"
@@ -149,9 +146,19 @@ const Register = ({ onClose = () => { }, openLogin = () => { } }) => {
                                 { required: true, message: "Vui lòng nhập số điện thoại" },
                                 {
                                     pattern: /^0\d{9}$/,
-                                    message:
-                                        "Số điện thoại phải bắt đầu bằng 0 và gồm đúng 10 chữ số",
+                                    message: "Số điện thoại phải bắt đầu bằng 0 và gồm đúng 10 chữ số"
                                 },
+                                {
+                                    validator: (_, value) => {
+                                        if (!value) return Promise.resolve();
+                                        const validPrefixes = ['03', '05', '07', '08', '09'];
+                                        const prefix = value.substring(0, 2);
+                                        if (!validPrefixes.includes(prefix)) {
+                                            return Promise.reject(new Error("Số điện thoại phải bắt đầu bằng 03, 05, 07, 08 hoặc 09"));
+                                        }
+                                        return Promise.resolve();
+                                    }
+                                }
                             ]}
                         >
                             <Input
@@ -166,7 +173,9 @@ const Register = ({ onClose = () => { }, openLogin = () => { } }) => {
                         {/* Password */}
                         <Form.Item
                             name="password"
-                            rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
+                            rules={[
+                                { required: true, message: "Vui lòng nhập mật khẩu" }
+                            ]}
                         >
                             <Input
                                 prefix={<AiOutlineLock className="text-gray-400" />}

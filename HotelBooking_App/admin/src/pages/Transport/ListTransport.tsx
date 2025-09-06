@@ -104,6 +104,78 @@ const ListTransport = () => {
       width: 150,
     },
     {
+      title: 'Giá vé người lớn',
+      dataIndex: 'flightPrice',
+      key: 'flightPrice',
+      width: 150,
+      render: (price: number, record: any) => {
+        if (record.transportType === 'Máy Bay') {
+          if (price && price > 0) {
+            return new Intl.NumberFormat('vi-VN', {
+              style: 'currency',
+              currency: 'VND'
+            }).format(price);
+          }
+          return 'Chưa cập nhật';
+        }
+        return 'N/A';
+      },
+    },
+    {
+      title: 'Giá vé trẻ em',
+      dataIndex: 'flightPriceChildren',
+      key: 'flightPriceChildren',
+      width: 150,
+      render: (price: number, record: any) => {
+        if (record.transportType === 'Máy Bay') {
+          if (price && price > 0) {
+            return new Intl.NumberFormat('vi-VN', {
+              style: 'currency',
+              currency: 'VND'
+            }).format(price);
+          }
+          return 'Chưa cập nhật';
+        }
+        return 'N/A';
+      },
+    },
+    {
+      title: 'Giá vé trẻ nhỏ',
+      dataIndex: 'flightPriceLittleBaby',
+      key: 'flightPriceLittleBaby',
+      width: 150,
+      render: (price: number, record: any) => {
+        if (record.transportType === 'Máy Bay') {
+          if (price && price > 0) {
+            return new Intl.NumberFormat('vi-VN', {
+              style: 'currency',
+              currency: 'VND'
+            }).format(price);
+          }
+          return 'Chưa cập nhật';
+        }
+        return 'N/A';
+      },
+    },
+    {
+      title: 'Giá vé em bé',
+      dataIndex: 'flightPriceBaby',
+      key: 'flightPriceBaby',
+      width: 150,
+      render: (price: number, record: any) => {
+        if (record.transportType === 'Máy Bay') {
+          if (price && price > 0) {
+            return new Intl.NumberFormat('vi-VN', {
+              style: 'currency',
+              currency: 'VND'
+            }).format(price);
+          }
+          return 'Chưa cập nhật';
+        }
+        return 'N/A';
+      },
+    },
+    {
       title: "Hành động",
       key: "operation",
       fixed: 'right',

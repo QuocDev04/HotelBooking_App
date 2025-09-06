@@ -261,25 +261,30 @@ const InfoUser = () => {
 
     const handleSaveEdit = async () => {
         try {
-            // Here you would typically make an API call to update user data
-            // For now, we'll simulate updating the user data locally
-            if (users) {
-                // Update the user object with new data
-                const updatedUser = {
-                    ...users,
-                    username: editFormData.username,
-                    email: editFormData.email,
-                    phone_number: editFormData.phone_number,
-                    address: editFormData.address,
-                    birthDate: editFormData.birthDate ? new Date(editFormData.birthDate).toISOString() : users.birthDate
-                };
-                
-                // Update the query cache with new data
-                queryClient.setQueryData(['user', userId], updatedUser);
-            }
+            // Make API call to update user data
+            const updateData = {
+                username: editFormData.username,
+                email: editFormData.email,
+                phone_number: editFormData.phone_number,
+                address: editFormData.address,
+                birthDate: editFormData.birthDate ? new Date(editFormData.birthDate).toISOString() : users.birthDate
+            };
             
-            alert('Thông tin đã được cập nhật thành công!');
-            setIsEditing(false);
+            const response = await instanceClient.put(`user/${userId}`, updateData);
+            
+            if (response.data.success) {
+                // Update the query cache with new data from server
+                queryClient.setQueryData(['user', userId], {
+                    data: {
+                        user: response.data.user
+                    }
+                });
+                
+                alert('Thông tin đã được cập nhật thành công!');
+                setIsEditing(false);
+            } else {
+                alert('Có lỗi xảy ra khi cập nhật thông tin. Vui lòng thử lại!');
+            }
         } catch (error) {
             console.error('Error updating user info:', error);
             alert('Có lỗi xảy ra khi cập nhật thông tin. Vui lòng thử lại!');
@@ -1971,7 +1976,14 @@ const InfoUser = () => {
                                             {selectedHotel.roomBookings.map((room: any, index: number) => (
                                                 <div key={index} className="bg-gray-50 rounded-lg p-4">
                                                     <div className="flex items-center justify-between mb-2">
-                                                        <h6 className="font-semibold text-gray-900">{room.roomTypeName || 'Loại phòng'}</h6>
+                                                        <div>
+                                                            <h6 className="font-semibold text-gray-900">{room.roomTypeName || 'Loại phòng'}</h6>
+                                                            {room.floorNumber && (
+                                                                <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full mt-1 inline-block">
+                                                                    Tầng {room.floorNumber}
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                         <span className="text-sm text-gray-600">{room.numberOfRooms || 1} phòng</span>
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-2 text-sm">

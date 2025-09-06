@@ -194,7 +194,7 @@ const Checkout = () => {
         const payload = {
           userId,
           slotId: id,
-          tourPrice: getDisplayPrice(tours?.tour), // Thêm giá tour vào payload
+          tourPrice: getTotalPriceByAge(tours?.tour, 'adult'), // Thêm giá tour vào payload
           ...restData,
         };
 
@@ -335,7 +335,7 @@ const Checkout = () => {
     // Bổ sung adultsTour và isFullPayment vào payload
     mutate({
       ...values,
-      tourPrice: getDisplayPrice(tours?.tour), // Thêm giá tour
+      tourPrice: getTotalPriceByAge(tours?.tour, 'adult'), // Thêm giá tour
       isFullPayment,
       adultsTour: adultCount,
       childrenTour: kidCount,
@@ -349,16 +349,38 @@ const Checkout = () => {
   };
 
 
-  // Hàm lấy giá hiển thị: ưu tiên finalPrice, nếu không có thì dùng price
-  const getDisplayPrice = (tour: any) => {
+  // Hàm lấy giá tour (không bao gồm vé máy bay)
+  const getTourPrice = (tour: any) => {
     if (!tour) return 0;
     return tour.finalPrice || tour.price || 0;
   };
 
-  const totalPrice = (adultCount * getDisplayPrice(tours?.tour) +
+  // Hàm lấy giá vé máy bay
+  const getFlightPrice = (tour: any, ageGroup: 'adult' | 'child' | 'toddler' | 'infant') => {
+    if (!tour || !tour.includesFlight) return 0;
+    switch (ageGroup) {
+      case 'adult': return tour.flightPrice || 0;
+      case 'child': return tour.flightPriceChildren || 0;
+      case 'toddler': return tour.flightPriceLittleBaby || 0;
+      case 'infant': return tour.flightPriceBaby || 0;
+      default: return 0;
+    }
+  };
+
+  // Hàm lấy tổng giá cho mỗi loại khách (tour + vé máy bay)
+  const getTotalPriceByAge = (tour: any, ageGroup: 'adult' | 'child' | 'toddler' | 'infant') => {
+    const tourPrice = ageGroup === 'adult' ? getTourPrice(tour) : 
+                     ageGroup === 'child' ? (tour?.priceChildren || 0) :
+                     ageGroup === 'toddler' ? (tour?.priceLittleBaby || 0) :
+                     (tour?.pricebaby || 0);
+    const flightPrice = getFlightPrice(tour, ageGroup);
+    return tourPrice + flightPrice;
+  };
+
+  const totalPrice = (adultCount * getTotalPriceByAge(tours?.tour, 'adult') +
     totalSingleRoomPrice +
-    kidCount * (tours?.tour?.priceChildren || 0) +
-    childCount * (tours?.tour?.priceLittleBaby || 0));
+    kidCount * getTotalPriceByAge(tours?.tour, 'child') +
+    childCount * getTotalPriceByAge(tours?.tour, 'toddler'));
   const onGenderChange = (index: number, newGender: string) => {
     const currentValues = form.getFieldValue('adultPassengers') || [];
     const updated = [...currentValues];
@@ -399,7 +421,7 @@ const Checkout = () => {
     // Gọi API với phương thức thanh toán đã cập nhật
     mutate({
       ...formValues,
-      tourPrice: getDisplayPrice(tours?.tour), // Thêm giá tour
+      tourPrice: getTotalPriceByAge(tours?.tour, 'adult'), // Thêm giá tour
       isFullPayment: formValues.isFullPayment,
       adultsTour: adultCount,
       childrenTour: kidCount,
@@ -437,7 +459,7 @@ const Checkout = () => {
     // Gọi API với phương thức thanh toán tiền mặt
     mutate({
       ...formValues,
-      tourPrice: getDisplayPrice(tours?.tour), // Thêm giá tour
+      tourPrice: getTotalPriceByAge(tours?.tour, 'adult'), // Thêm giá tour
       isFullPayment: formValues.isFullPayment,
       adultsTour: adultCount,
       childrenTour: kidCount,
@@ -473,7 +495,7 @@ const Checkout = () => {
     
     mutate({
       ...pendingFormValues,
-      tourPrice: getDisplayPrice(tours?.tour), // Thêm giá tour
+      tourPrice: getTotalPriceByAge(tours?.tour, 'adult'), // Thêm giá tour
       isFullPayment,
       adultsTour: adultCount,
       childrenTour: kidCount,
@@ -510,7 +532,7 @@ const Checkout = () => {
     
     mutate({
       ...updatedValues,
-      tourPrice: getDisplayPrice(tours?.tour), // Thêm giá tour
+      tourPrice: getTotalPriceByAge(tours?.tour, 'adult'), // Thêm giá tour
       isFullPayment,
       adultsTour: adultCount,
       childrenTour: kidCount,
@@ -840,7 +862,15 @@ const Checkout = () => {
                                   key={field.key + "_fullName"}
                                   name={[field.name, 'fullName']}
                                   fieldKey={[field.fieldKey, 'fullName']}
-                                  rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
+                                  rules={[
+                                    { required: true, message: 'Vui lòng nhập họ và tên' },
+                                    { min: 3, message: 'Họ và tên phải có ít nhất 3 ký tự' },
+                                    { max: 30, message: 'Họ và tên không được vượt quá 30 ký tự' },
+                                    {
+                                      pattern: /^[a-zA-ZÀ-ỹ\s]+$/,
+                                      message: 'Họ và tên chỉ được chứa chữ cái và khoảng trắng'
+                                    }
+                                  ]}
                                 >
                                   <Input placeholder="Nhập họ tên" size="large" />
                                 </Form.Item>
@@ -934,7 +964,15 @@ const Checkout = () => {
                                   key={field.key + "_fullName"}
                                   name={[field.name, 'fullName']}
                                   fieldKey={[field.fieldKey, 'fullName']}
-                                  rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
+                                  rules={[
+                                    { required: true, message: 'Vui lòng nhập họ và tên' },
+                                    { min: 3, message: 'Họ và tên phải có ít nhất 3 ký tự' },
+                                    { max: 30, message: 'Họ và tên không được vượt quá 30 ký tự' },
+                                    {
+                                      pattern: /^[a-zA-ZÀ-ỹ\s]+$/,
+                                      message: 'Họ và tên chỉ được chứa chữ cái và khoảng trắng'
+                                    }
+                                  ]}
                                 >
                                   <Input placeholder="Nhập họ tên" size="large" />
                                 </Form.Item>
@@ -1158,19 +1196,60 @@ const Checkout = () => {
               {/* Giá */}
               <div className="flex items-center justify-between text-sm">
                 <span className="font-semibold">Giá Combo </span>
-                <span className="text-lg font-bold text-red-600">{getDisplayPrice(tours?.tour).toLocaleString()} ₫</span>
+                <span className="text-lg font-bold text-red-600">{getTotalPriceByAge(tours?.tour, 'adult').toLocaleString()} ₫</span>
               </div>
+              
+              {/* Chi tiết giá tour và vé máy bay */}
+              {tours?.tour?.includesFlight && (
+                <div className="p-3 text-sm bg-blue-50 rounded-lg">
+                  <div className="mb-2 font-semibold text-blue-800">Chi tiết giá bao gồm vé máy bay:</div>
+                  <div className="space-y-1 text-blue-700">
+                    <div className="flex justify-between">
+                      <span>• Giá tour người lớn:</span>
+                      <span>{getTourPrice(tours?.tour).toLocaleString()} ₫</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>• Vé máy bay người lớn:</span>
+                      <span>{getFlightPrice(tours?.tour, 'adult').toLocaleString()} ₫</span>
+                    </div>
+                    {kidCount > 0 && (
+                      <>
+                        <div className="flex justify-between">
+                          <span>• Giá tour trẻ em:</span>
+                          <span>{(tours?.tour?.priceChildren || 0).toLocaleString()} ₫</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>• Vé máy bay trẻ em:</span>
+                          <span>{getFlightPrice(tours?.tour, 'child').toLocaleString()} ₫</span>
+                        </div>
+                      </>
+                    )}
+                    {childCount > 0 && (
+                      <>
+                        <div className="flex justify-between">
+                          <span>• Giá tour trẻ nhỏ:</span>
+                          <span>{(tours?.tour?.priceLittleBaby || 0).toLocaleString()} ₫</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>• Vé máy bay trẻ nhỏ:</span>
+                          <span>{getFlightPrice(tours?.tour, 'toddler').toLocaleString()} ₫</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
               <div className="flex justify-between text-sm">
                 <span>Người lớn</span>
-                <span>{adultCount} x {getDisplayPrice(tours?.tour).toLocaleString()} ₫</span>
+                <span>{adultCount} x {getTotalPriceByAge(tours?.tour, 'adult').toLocaleString()} ₫</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Trẻ em</span>
-                <span>{kidCount} x {tours?.tour?.priceChildren.toLocaleString()} ₫</span>
+                <span>{kidCount} x {getTotalPriceByAge(tours?.tour, 'child').toLocaleString()} ₫</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Trẻ nhỏ</span>
-                <span>{childCount} x {tours?.tour?.priceLittleBaby.toLocaleString()} ₫</span>
+                <span>{childCount} x {getTotalPriceByAge(tours?.tour, 'toddler').toLocaleString()} ₫</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Em bé</span>

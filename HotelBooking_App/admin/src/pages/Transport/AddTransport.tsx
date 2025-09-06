@@ -14,6 +14,7 @@ const AddTransport = () => {
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState("");
     const [fileList, setFileList] = useState<UploadFile[]>([]);
+    const [transportType, setTransportType] = useState<string>("");
     const requiredLabel = (text: string) => (
         <>
             {text} <span className="text-red-500">*</span>
@@ -130,6 +131,7 @@ const AddTransport = () => {
                                             disabled={isPending}
                                             size="large"
                                             placeholder="Chọn loại Phương Tiện"
+                                            onChange={(value) => setTransportType(value)}
                                             options={[
                                                 { label: "Máy Bay", value: "Máy Bay" },
                                                 { label: "Tàu Hỏa", value: "Tàu Hỏa" },
@@ -169,6 +171,80 @@ const AddTransport = () => {
                                     </Form.Item>
                                 </Col>
                             </Row>
+                            
+                            {/* Các trường giá vé máy bay - chỉ hiển thị khi transportType là "Máy Bay" */}
+                            {transportType === "Máy Bay" && (
+                                <>
+                                    <div className="mb-4">
+                                        <h3 className="text-lg font-semibold text-blue-600 mb-4">💰 Thông Tin Giá Vé Máy Bay</h3>
+                                    </div>
+                                    <Row gutter={24}>
+                                        <Col span={12}>
+                                            <Form.Item
+                                                label="Giá vé người lớn (VNĐ)"
+                                                name="flightPrice"
+                                                rules={[{ required: true, message: "Vui lòng nhập giá vé người lớn" }]}
+                                            >
+                                                <Input 
+                                                    disabled={isPending} 
+                                                    placeholder="VD: 2500000" 
+                                                    size="large" 
+                                                    type="number"
+                                                    min={0}
+                                                />
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={12}>
+                                            <Form.Item
+                                                label="Giá vé trẻ em (VNĐ)"
+                                                name="flightPriceChildren"
+                                                rules={[{ required: true, message: "Vui lòng nhập giá vé trẻ em" }]}
+                                            >
+                                                <Input 
+                                                    disabled={isPending} 
+                                                    placeholder="VD: 2000000" 
+                                                    size="large" 
+                                                    type="number"
+                                                    min={0}
+                                                />
+                                            </Form.Item>
+                                        </Col>
+                                    </Row>
+                                    <Row gutter={24}>
+                                        <Col span={12}>
+                                            <Form.Item
+                                                label="Giá vé trẻ nhỏ (VNĐ)"
+                                                name="flightPriceLittleBaby"
+                                                rules={[{ required: true, message: "Vui lòng nhập giá vé trẻ nhỏ" }]}
+                                            >
+                                                <Input 
+                                                    disabled={isPending} 
+                                                    placeholder="VD: 1500000" 
+                                                    size="large" 
+                                                    type="number"
+                                                    min={0}
+                                                />
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={12}>
+                                            <Form.Item
+                                                label="Giá vé em bé (VNĐ)"
+                                                name="flightPriceBaby"
+                                                rules={[{ required: true, message: "Vui lòng nhập giá vé em bé" }]}
+                                            >
+                                                <Input 
+                                                    disabled={isPending} 
+                                                    placeholder="VD: 500000" 
+                                                    size="large" 
+                                                    type="number"
+                                                    min={0}
+                                                />
+                                            </Form.Item>
+                                        </Col>
+                                    </Row>
+                                </>
+                            )}
+                            
                             <Form.Item
                                 required={false}
                                 label={requiredLabel("Ảnh Phương Tiện")}

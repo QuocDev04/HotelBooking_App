@@ -7,16 +7,58 @@ const DateSlot = require("../../models/Tour/DateTour.js");
 
 const getAllTours = async (req, res) => {
     try {
-        const tour = await TourModel.find()
-        .populate("itemTransport.TransportId", "transportName transportNumber transportType")
+        const { page = 1, limit = 12, search, destination, minPrice, maxPrice, tourType } = req.query;
+        
+        // Tạo filter object
+        let filter = {};
+        
+        // Tìm kiếm theo tên tour
+        if (search) {
+            filter.$or = [
+                { nameTour: { $regex: search, $options: 'i' } },
+                { departure_location: { $regex: search, $options: 'i' } }
+            ];
+        }
+        
+        // Lọc theo loại tour
+        if (tourType) {
+            filter.tourType = tourType;
+        }
+        
+        // Lọc theo giá
+        if (minPrice || maxPrice) {
+            filter.finalPrice = {};
+            if (minPrice) filter.finalPrice.$gte = parseInt(minPrice);
+            if (maxPrice) filter.finalPrice.$lte = parseInt(maxPrice);
+        }
+        
+        // Tính toán phân trang
+        const pageNumber = parseInt(page);
+        const limitNumber = parseInt(limit);
+        const skip = (pageNumber - 1) * limitNumber;
+        
+        // Lấy tổng số tour
+        const total = await TourModel.countDocuments(filter);
+        
+        // Lấy danh sách tour với phân trang
+        const tours = await TourModel.find(filter)
+            .populate("itemTransport.TransportId", "transportName transportNumber transportType")
             .populate("destination", "locationName country")
-
-
             .populate("assignedEmployee", "firstName lastName full_name email employee_id position")
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limitNumber);
+            
         return res.status(StatusCodes.OK).json({
             success: true,
             message: "Get all tours successfully",
-            tours: tour,
+            tours: tours,
+            pagination: {
+                currentPage: pageNumber,
+                totalPages: Math.ceil(total / limitNumber),
+                totalTours: total,
+                limit: limitNumber
+            }
         });
     } catch (error) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -27,33 +69,43 @@ const getAllTours = async (req, res) => {
 }
 
 const AddTour = async (req, res) => {
-    try {
-        const { price, discountPercent = 0, discountExpiryDate } = req.body;
-        const now = new Date();
+  try {
+    const { nameTour, price, discountPercent = 0, discountExpiryDate } = req.body;
+    const now = new Date();
 
-        // Kiểm tra ngày hết hạn giảm giá, nếu chưa có hoặc còn hạn thì áp dụng giảm giá
-        const isDiscountValid = !discountExpiryDate || new Date(discountExpiryDate) > now;
-
-        // Tính giá cuối cùng
-        const finalPrice = isDiscountValid
-            ? Math.round(price * (1 - discountPercent / 100))
-            : price;
-
-        // Tạo tour mới
-        const tour = await TourModel.create({ ...req.body, finalPrice });
-
-        return res.status(StatusCodes.OK).json({
-            success: true,
-            message: "Tour added successfully",
-            tour
-        });
-    } catch (error) {
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: error.message
-        });
+    // 🔎 Kiểm tra trùng tên tour trước khi thêm
+    const existingTour = await TourModel.findOne({ nameTour: nameTour.trim() });
+    if (existingTour) {
+      return res.status(400).json({
+        success: false,
+        message: "Tên tour đã tồn tại!"
+      });
     }
-}
+
+    // Kiểm tra ngày hết hạn giảm giá
+    const isDiscountValid = !discountExpiryDate || new Date(discountExpiryDate) > now;
+
+    // Tính giá cuối cùng
+    const finalPrice = isDiscountValid
+      ? Math.round(price * (1 - discountPercent / 100))
+      : price;
+
+    // Tạo tour mới
+    const tour = await TourModel.create({ ...req.body, finalPrice });
+
+    return res.status(200).json({
+      success: true,
+      message: "Tour added successfully",
+      tour
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
 
 const DeleteTour = async (req, res) => {
     try {
@@ -73,40 +125,78 @@ const DeleteTour = async (req, res) => {
 }
 
 const UpdateTour = async (req, res) => {
-    try {
-        const { price, discountPercent = 0, discountExpiryDate } = req.body;
-        const now = new Date();
+  try {
+    const { price, discountPercent = 0, discountExpiryDate, nameTour } = req.body;
+    const now = new Date();
 
-        const isDiscountValid =
-            discountPercent > 0 &&
-            (!discountExpiryDate || new Date(discountExpiryDate) > now);
-
-        const finalPrice = isDiscountValid
-            ? Math.round(price * (1 - discountPercent / 100))
-            : null;
-
-        const tour = await TourModel.findByIdAndUpdate(
-            req.params.id,
-            { ...req.body, finalPrice },
-            { new: true }
-        );
-
-        return res.status(StatusCodes.OK).json({
-            success: true,
-            message: "Tour updated successfully",
-            tour
+    if (nameTour) {
+      // Lấy tour hiện tại trong DB
+      const tourCurrent = await TourModel.findById(req.params.id);
+      if (!tourCurrent) {
+        return res.status(404).json({
+          success: false,
+          message: "Không tìm thấy tour để cập nhật"
         });
-    } catch (error) {
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      }
+
+      // Nếu tên mới khác tên cũ thì mới check trùng
+      if (tourCurrent.nameTour.trim() !== nameTour.trim()) {
+        const existingTour = await TourModel.findOne({
+          nameTour: nameTour.trim(),
+          _id: { $ne: req.params.id }
+        });
+        if (existingTour) {
+          return res.status(400).json({
             success: false,
-            message: error.message
-        });
+            message: "Tên tour đã tồn tại!"
+          });
+        }
+      }
     }
+
+    // ✅ Tính finalPrice
+    const isDiscountValid =
+      discountPercent > 0 &&
+      (!discountExpiryDate || new Date(discountExpiryDate) > now);
+
+    const finalPrice = isDiscountValid
+      ? Math.round(price * (1 - discountPercent / 100))
+      : price;
+
+    const tour = await TourModel.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body, finalPrice },
+      { new: true }
+    );
+
+    if (!tour) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy tour để cập nhật"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Tour updated successfully",
+      tour
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
 };
+
+
 
 const GetTourById = async (req, res) => {
     try {
-        const tour = await TourModel.findById(req.params.id).populate("itemTransport.TransportId", "transportName transportNumber transportType").populate("destination", "locationName country")
+        const tour = await TourModel.findById(req.params.id)
+            .populate("itemTransport.TransportId", "transportName transportNumber transportType")
+            .populate("destination", "locationName country")
+            .populate("assignedEmployee", "firstName lastName full_name email employee_id position")
         if (!tour) {
             return res.status(404).json({ success: false, message: "Không tìm thấy tour" });
         }

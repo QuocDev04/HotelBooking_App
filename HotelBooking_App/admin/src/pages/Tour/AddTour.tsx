@@ -8,6 +8,7 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import instance from "../../configs/axios";
 import { Option } from "antd/lib/mentions";
+import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
@@ -19,6 +20,7 @@ const AddTour = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   const discountPercent = Form.useWatch('discountPercent', form);
+  const navigate = useNavigate();
   const requiredLabel = (text: string) => (
     <>
       {text} <span className="text-red-500">*</span>
@@ -36,27 +38,24 @@ const AddTour = () => {
     }
   })
   const { mutate, isPending } = useMutation({
-    mutationFn: async (data: any) => {
-      try {
-        return await instance.post("/tour", data)
-      } catch (error) {
-        throw new Error("Failed to add tour")
-      }
-    },
-    onSuccess: () => {
-      messageApi.open({
-        type: "success",
-        content: "Bạn thêm Tour thành công",
-      });
-      form.resetFields();
-    },
-    onError: () => {
-      messageApi.open({
-        type: "error",
-        content: "Bạn thêm Tour thất bại. Vui lòng thử lại sau!",
-      });
-    },
-  })
+  mutationFn: async (data: any) => {
+    return await instance.post("/tour", data);
+  },
+  onSuccess: () => {
+    // Điều hướng sang trang list tour trước
+    navigate("/admin/list-tour"); // đổi đúng path list tour của bạn
+    // Rồi hiển thị thông báo ở trang list
+    message.success("Bạn đã thêm Tour thành công 🎉");
+  },
+  onError: (error: any) => {
+    const errorMessage =
+      error?.response?.data?.message ||
+      "Bạn thêm Tour thất bại. Vui lòng thử lại sau!";
+    message.error(errorMessage);
+  },
+});
+
+
 
   const toolbarOptions = [
     ["bold", "italic", "underline", "strike"], // toggled buttons
@@ -151,13 +150,43 @@ const AddTour = () => {
               {/* Cột trái */}
               <Col xs={24} lg={16}>
                 <Form.Item
-                  required={false}
-                  label={requiredLabel("Tên Tour")}
-                  name="nameTour"
-                  rules={[{ required: true, message: "Tên Tour không được để trống" }]}
-                >
-                  <Input placeholder="VD: Tour Hạ Long 3N2Đ" size="large" />
-                </Form.Item>
+  required={false}
+  label={requiredLabel("Tên Tour")}
+  name="nameTour"
+  rules={[
+    { required: true, message: "Tên Tour không được để trống" },
+    {
+      validator: async (_, value) => {
+        if (!value) return Promise.resolve();
+
+        try {
+          // gọi API lấy danh sách tour
+          const res = await instance.get("/tour");
+          const tours = res.data?.tours || [];
+
+          const isDuplicate = tours.some(
+            (tour: any) =>
+              tour.nameTour.trim().toLowerCase() === value.trim().toLowerCase()
+          );
+
+          if (isDuplicate) {
+            return Promise.reject(
+              new Error("Tên tour này đã tồn tại, vui lòng nhập tên khác!")
+            );
+          }
+          return Promise.resolve();
+        } catch (err) {
+          return Promise.reject(
+            new Error("Không thể kiểm tra tên tour, thử lại sau")
+          );
+        }
+      },
+    },
+  ]}
+>
+  <Input placeholder="VD: Tour Hạ Long 3N2Đ" size="large" />
+</Form.Item>
+
 
                 <Row gutter={24}>
                   <Col span={6}>
@@ -532,8 +561,114 @@ const AddTour = () => {
                       />
                     </Form.Item></Col>
                 </Row>
+
+                {/* Checkbox bao gồm vé máy bay */}
+                <Row gutter={24}>
+                  <Col span={24}>
+                    <Form.Item name="includesFlight" valuePropName="checked">
+                      <Checkbox>
+                        <span className="text-lg font-semibold text-blue-600">✈️ Tour bao gồm vé máy bay</span>
+                      </Checkbox>
+                    </Form.Item>
+                  </Col>
+                </Row>
+
+                {/* Các trường giá vé máy bay - chỉ hiển thị khi includesFlight được chọn */}
+                <Form.Item shouldUpdate={(prevValues, currentValues) => prevValues.includesFlight !== currentValues.includesFlight}>
+                  {({ getFieldValue }) => {
+                    const includesFlight = getFieldValue('includesFlight');
+                    return includesFlight ? (
+                      <>
+                        <div className="mb-4">
+                          <h3 className="text-lg font-semibold text-blue-600 mb-4">💰 Thông Tin Giá Vé Máy Bay</h3>
+                        </div>
+                        <Row gutter={24}>
+                          <Col span={6}>
+                            <Form.Item
+                              label="Giá vé người lớn (VNĐ)"
+                              name="flightPrice"
+                              rules={[{ required: true, message: "Vui lòng nhập giá vé người lớn" }]}
+                            >
+                              <InputNumber
+                                placeholder="VD: 2500000"
+                                size="large"
+                                style={{ width: "100%" }}
+                                min={0}
+                                formatter={(value) =>
+                                  value ? `${Number(value).toLocaleString("vi-VN")} ₫` : ""
+                                }
+                                parser={(value) =>
+                                  value ? value.replace(/[₫\s,.]/g, "") : ""
+                                }
+                              />
+                            </Form.Item>
+                          </Col>
+                          <Col span={6}>
+                            <Form.Item
+                              label="Giá vé trẻ em (VNĐ)"
+                              name="flightPriceChildren"
+                              rules={[{ required: true, message: "Vui lòng nhập giá vé trẻ em" }]}
+                            >
+                              <InputNumber
+                                placeholder="VD: 2000000"
+                                size="large"
+                                style={{ width: "100%" }}
+                                min={0}
+                                formatter={(value) =>
+                                  value ? `${Number(value).toLocaleString("vi-VN")} ₫` : ""
+                                }
+                                parser={(value) =>
+                                  value ? value.replace(/[₫\s,.]/g, "") : ""
+                                }
+                              />
+                            </Form.Item>
+                          </Col>
+                          <Col span={6}>
+                            <Form.Item
+                              label="Giá vé trẻ nhỏ (VNĐ)"
+                              name="flightPriceLittleBaby"
+                              rules={[{ required: true, message: "Vui lòng nhập giá vé trẻ nhỏ" }]}
+                            >
+                              <InputNumber
+                                placeholder="VD: 1500000"
+                                size="large"
+                                style={{ width: "100%" }}
+                                min={0}
+                                formatter={(value) =>
+                                  value ? `${Number(value).toLocaleString("vi-VN")} ₫` : ""
+                                }
+                                parser={(value) =>
+                                  value ? value.replace(/[₫\s,.]/g, "") : ""
+                                }
+                              />
+                            </Form.Item>
+                          </Col>
+                          <Col span={6}>
+                            <Form.Item
+                              label="Giá vé em bé (VNĐ)"
+                              name="flightPriceBaby"
+                              rules={[{ required: true, message: "Vui lòng nhập giá vé em bé" }]}
+                            >
+                              <InputNumber
+                                placeholder="VD: 1000000"
+                                size="large"
+                                style={{ width: "100%" }}
+                                min={0}
+                                formatter={(value) =>
+                                  value ? `${Number(value).toLocaleString("vi-VN")} ₫` : ""
+                                }
+                                parser={(value) =>
+                                  value ? value.replace(/[₫\s,.]/g, "") : ""
+                                }
+                              />
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                      </>
+                    ) : null;
+                  }}
+                </Form.Item>
                
-                 
                 <Form.Item label="📝 Mô tả Tour" name="descriptionTour" className="mt-6">
                   <ReactQuill className="h-[300px]"
                     theme="snow"

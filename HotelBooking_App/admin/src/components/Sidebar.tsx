@@ -83,6 +83,15 @@ const Sidebar = () => {
         },
 
         {
+            name: 'Quản lý Phương tiện',
+            icon: '🚌',
+            children: [
+                { name: 'Danh sách Phương tiện', path: '/admin/list-transport', icon: '📋' },
+                { name: 'Thêm Phương tiện', path: '/admin/add-transport', icon: '🆕' },
+            ],
+        },
+
+        {
             name: 'Quản lý Tài Khoản',
             icon: '👥',
             children: [

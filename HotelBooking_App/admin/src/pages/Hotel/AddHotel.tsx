@@ -14,7 +14,6 @@ interface HotelFormData {
   location: string;
   description: string;
   starRating: number;
-  floorsCount: number;
   hotelImages: string[];
   hotelAmenities: { name: string; icon?: string }[];
   contactInfo: {
@@ -35,6 +34,7 @@ interface HotelFormData {
     maxOccupancy: number;
     bedType: string;
     totalRooms: number;
+    floorNumber: number;
   }[];
   status: boolean;
 }
@@ -212,7 +212,6 @@ const AddHotel: React.FC = () => {
           initialValues={{
             status: true,
             starRating: 5,
-            floorsCount: 2,
             policies: {
               checkIn: '14:00',
               checkOut: '12:00',
@@ -229,7 +228,8 @@ const AddHotel: React.FC = () => {
               basePrice: 0,
               maxOccupancy: 2,
               bedType: 'Double',
-              totalRooms: 1
+              totalRooms: 1,
+              floorNumber: 1
             }],
             hotelAmenities: []
           }}
@@ -304,16 +304,6 @@ const AddHotel: React.FC = () => {
                   className="text-2xl"
                 />
               </Form.Item>
-
-              <Form.Item
-                label="Số tầng"
-                name="floorsCount"
-                rules={[{ required: true, message: 'Vui lòng nhập số tầng!' }]}
-              >
-                <InputNumber min={2} placeholder="Số tầng" style={{ width: '100%' }} />
-              </Form.Item>
-
-
 
               <Form.Item
                 label="Trạng thái"
@@ -402,6 +392,14 @@ const AddHotel: React.FC = () => {
                             rules={[{ required: true, message: 'Vui lòng nhập số phòng!' }]}
                           >
                             <InputNumber min={1} placeholder="Số phòng" style={{ width: '100%' }} />
+                          </Form.Item>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'floorNumber']}
+                            label="Số tầng"
+                            rules={[{ required: true, message: 'Vui lòng nhập số tầng!' }]}
+                          >
+                            <InputNumber min={1} placeholder="Tầng" style={{ width: '100%' }} />
                           </Form.Item>
                           <div className="flex justify-end">
                             <Button type="link" danger onClick={() => remove(name)}>

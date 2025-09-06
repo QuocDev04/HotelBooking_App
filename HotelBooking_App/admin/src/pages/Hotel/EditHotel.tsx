@@ -19,7 +19,7 @@ interface Hotel {
   };
   description: string;
   starRating: number;
-  floorsCount?: number;
+
   hotelImages: string[];
   hotelAmenities: { name: string; icon?: string }[];
   contactInfo: {
@@ -39,6 +39,7 @@ interface Hotel {
     maxOccupancy: number;
     bedType: string;
     totalRooms: number;
+    floorNumber?: number;
   }[];
   status: boolean;
   createdAt: string;
@@ -51,7 +52,6 @@ interface HotelFormData {
   location: string;
   description: string;
   starRating: number;
-  floorsCount: number;
   hotelImages: string[];
   hotelAmenities: { name: string; icon?: string }[];
   contactInfo: {
@@ -72,6 +72,7 @@ interface HotelFormData {
     maxOccupancy: number;
     bedType: string;
     totalRooms: number;
+    floorNumber: number;
   }[];
   status: boolean;
 }
@@ -143,7 +144,7 @@ const EditHotel: React.FC = () => {
         location: hotel.location?.locationName,
         description: hotel.description,
         starRating: hotel.starRating,
-        floorsCount: hotel.floorsCount ?? 2,
+
         contactInfo: {
           phone: hotel.contactInfo?.phone,
           email: hotel.contactInfo?.email
@@ -179,7 +180,7 @@ const EditHotel: React.FC = () => {
       location: hotel?.location?._id || '',
       description: values.description,
       starRating: values.starRating,
-      floorsCount: values.floorsCount,
+
       hotelImages: fileList.map(file => {
         if (file.url) return file.url;
         if (file.response?.url) return file.response.url;
@@ -375,14 +376,6 @@ const EditHotel: React.FC = () => {
               </Form.Item>
 
               <Form.Item
-                label="Số tầng"
-                name="floorsCount"
-                rules={[{ required: true, message: 'Vui lòng nhập số tầng!' }]}
-              >
-                <InputNumber min={2} placeholder="Số tầng" style={{ width: '100%' }} />
-              </Form.Item>
-
-              <Form.Item
                 label="Trạng thái"
                 name="status"
                 rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
@@ -574,6 +567,14 @@ const EditHotel: React.FC = () => {
                           rules={[{ required: true, message: 'Vui lòng nhập số phòng!' }]}
                         >
                           <InputNumber min={1} placeholder="Số phòng" style={{ width: '100%' }} />
+                        </Form.Item>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'floorNumber']}
+                          label="Số tầng"
+                          rules={[{ required: true, message: 'Vui lòng nhập số tầng!' }]}
+                        >
+                          <InputNumber min={1} placeholder="Tầng" style={{ width: '100%' }} />
                         </Form.Item>
                         <div className="flex justify-end">
                           <Button type="link" danger onClick={() => remove(name)}>

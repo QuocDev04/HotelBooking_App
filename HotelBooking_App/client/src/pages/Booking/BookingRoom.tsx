@@ -272,10 +272,12 @@ const BookingRoom = () => {
                     validateTrigger="onBlur"
                     name="userName"
                     rules={[
-                      { required: true, message: "Vui lòng nhập tên" },
+                      { required: true, message: "Vui lòng nhập họ và tên" },
+                      { min: 3, message: "Họ và tên phải có ít nhất 3 ký tự" },
+                      { max: 30, message: "Họ và tên không được vượt quá 30 ký tự" },
                       {
-                        pattern: /^[a-zA-Z0-9._]{4,20}$/,
-                        message: "Tên phải từ 4–20 ký tự, không chứa khoảng trắng và chỉ gồm chữ, số, dấu _ hoặc ."
+                        pattern: /^[a-zA-ZÀ-ỹ\s]+$/,
+                        message: "Họ và tên chỉ được chứa chữ cái và khoảng trắng"
                       }
                     ]}
                   >
@@ -434,7 +436,15 @@ const BookingRoom = () => {
                     </label>
                     <Form.Item
                       name={['guests', 0, 'fullName']}
-                      rules={[{ required: true, message: 'Vui lòng nhập họ và tên khách 1!' }]}
+                      rules={[
+                        { required: true, message: 'Vui lòng nhập họ và tên khách 1!' },
+                        { min: 3, message: 'Họ và tên phải có ít nhất 3 ký tự' },
+                        { max: 30, message: 'Họ và tên không được vượt quá 30 ký tự' },
+                        {
+                          pattern: /^[a-zA-ZÀ-ỹ\s]+$/,
+                          message: 'Họ và tên chỉ được chứa chữ cái và khoảng trắng'
+                        }
+                      ]}
                       initialValue={form.getFieldValue('userName')}
                     >
                       <Input placeholder="Nhập họ và tên khách 1" />
@@ -547,7 +557,15 @@ const BookingRoom = () => {
                           </label>
                           <Form.Item
                             name={['guests', index + 2, 'fullName']}
-                            rules={[{ required: true, message: `Vui lòng nhập họ và tên khách ${index + 3}!` }]}
+                            rules={[
+                              { required: true, message: `Vui lòng nhập họ và tên khách ${index + 3}!` },
+                              { min: 3, message: 'Họ và tên phải có ít nhất 3 ký tự' },
+                              { max: 30, message: 'Họ và tên không được vượt quá 30 ký tự' },
+                              {
+                                pattern: /^[a-zA-ZÀ-ỹ\s]+$/,
+                                message: 'Họ và tên chỉ được chứa chữ cái và khoảng trắng'
+                              }
+                            ]}
                           >
                             <Input placeholder={`Nhập họ và tên khách ${index + 3}`} />
                           </Form.Item>

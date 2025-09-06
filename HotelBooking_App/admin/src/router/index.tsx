@@ -40,6 +40,9 @@ import AddTourSchedule from "../pages/TourSchedule/AddTourSchedule"
 import EditTourSchedule from "../pages/TourSchedule/EditTourSchedule"
 import Detail from "../pages/Blog/Detail"
 import HotelAssignment from "../pages/Account/HotelAssignment"
+import ListTransport from "../pages/Transport/ListTransport"
+import AddTransport from "../pages/Transport/AddTransport"
+import EditTransport from "../pages/Transport/EditTransport"
 
 
 
@@ -78,9 +81,9 @@ const Router = () => {
                     <Route path="/admin/refund-management" element={<RefundManagement />} />
                     <Route path="/admin/tour/participants/:slotId" element={<TourParticipants />} />
 
-                    {/* <Route path="/admin/list-transport" element={<ListTransport />} />
+                    <Route path="/admin/list-transport" element={<ListTransport />} />
                     <Route path="/admin/add-transport" element={<AddTransport />} />
-                    <Route path="/admin/edit-transport/:id" element={<EditTransport />} /> */}
+                    <Route path="/admin/edit-transport/:id" element={<EditTransport />} />
 
 
                     <Route path="/admin/list-Transport_Schedule" element={<ListTSchedule />} />

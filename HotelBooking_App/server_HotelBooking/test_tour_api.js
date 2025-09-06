@@ -1,34 +1,59 @@
-// Test script để kiểm tra tour data
 const axios = require('axios');
 
-async function testTourAPI() {
-  try {
-    // Test 1: Kiểm tra server có chạy không
-    console.log('Testing server connection...');
-    const serverResponse = await axios.get('http://localhost:8080/');
-    console.log('Server response:', serverResponse.data);
-
-    // Test 2: Kiểm tra có tour nào trong database không
-    console.log('\nTesting tour list...');
-    const toursResponse = await axios.get('http://localhost:8080/api/tour');
-    console.log('Tours response:', toursResponse.data);
-
-    if (toursResponse.data.tours && toursResponse.data.tours.length > 0) {
-      const firstTour = toursResponse.data.tours[0];
-      console.log('First tour ID:', firstTour._id);
-      console.log('First tour name:', firstTour.nameTour);
-
-      // Test 3: Kiểm tra tour detail
-      console.log('\nTesting tour detail...');
-      const tourDetailResponse = await axios.get(`http://localhost:8080/api/tour/${firstTour._id}`);
-      console.log('Tour detail response:', tourDetailResponse.data);
-    } else {
-      console.log('No tours found in database');
+const testTourAPI = async () => {
+    try {
+        // Lấy danh sách tour trước
+        console.log('Getting tour list...');
+        const toursResponse = await axios.get('http://localhost:8080/api/tour');
+        
+        if (!toursResponse.data.tours || toursResponse.data.tours.length === 0) {
+            console.log('No tours found in database');
+            return;
+        }
+        
+        const firstTour = toursResponse.data.tours[0];
+        const tourId = firstTour._id;
+        
+        console.log('\n=== USING TOUR ===');
+        console.log('Tour ID:', tourId);
+        console.log('Tour Name:', firstTour.nameTour);
+        
+        // Test tour detail API
+        console.log('\n=== TESTING TOUR DETAIL API ===');
+        const response = await axios.get(`http://localhost:8080/api/tour/${tourId}`);
+        
+        console.log('Success:', response.data.success);
+        console.log('Message:', response.data.message);
+        
+        if (response.data.tour) {
+            const tour = response.data.tour;
+            console.log('\n=== TOUR DETAILS ===');
+            console.log('Tour ID:', tour._id);
+            console.log('Tour Name:', tour.nameTour);
+            console.log('Assigned Employee:', tour.assignedEmployee);
+            
+            if (tour.assignedEmployee) {
+                console.log('\n=== ASSIGNED EMPLOYEE DETAILS ===');
+                console.log('Employee ID:', tour.assignedEmployee._id);
+                console.log('First Name:', tour.assignedEmployee.firstName);
+                console.log('Last Name:', tour.assignedEmployee.lastName);
+                console.log('Full Name:', tour.assignedEmployee.full_name);
+                console.log('Email:', tour.assignedEmployee.email);
+                console.log('Employee ID:', tour.assignedEmployee.employee_id);
+                console.log('Position:', tour.assignedEmployee.position);
+            } else {
+                console.log('\n=== NO ASSIGNED EMPLOYEE ===');
+                console.log('assignedEmployee field is null or undefined');
+            }
+        }
+        
+    } catch (error) {
+        console.error('Error testing tour API:', error.message);
+        if (error.response) {
+            console.error('Response status:', error.response.status);
+            console.error('Response data:', error.response.data);
+        }
     }
-
-  } catch (error) {
-    console.error('Error:', error.response?.data || error.message);
-  }
-}
+};
 
 testTourAPI();

@@ -43,6 +43,7 @@ interface HotelBooking {
     numberOfRooms: number;
     pricePerNight: number;
     totalPrice: number;
+    floorNumber?: number;
   }>;
   createdAt: string;
   updatedAt: string;
@@ -391,7 +392,7 @@ const ListHotelBooking: React.FC = () => {
                       <p><strong>Loại phòng:</strong></p>
                       {record.roomBookings?.map((room, index) => (
                         <div key={index} className="ml-4">
-                          <p>- {room.roomTypeName}: {room.numberOfRooms} phòng × {room.pricePerNight?.toLocaleString('vi-VN')} VNĐ</p>
+                          <p>- {room.roomTypeName}{room.floorNumber ? ` (Tầng ${room.floorNumber})` : ''}: {room.numberOfRooms} phòng × {room.pricePerNight?.toLocaleString('vi-VN')} VNĐ</p>
                         </div>
                       ))}
                       <p><strong>Số khách:</strong> {record.totalGuests}</p>
