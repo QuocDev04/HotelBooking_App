@@ -1,22 +1,27 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { QuestionCircleOutlined, SearchOutlined, PlusOutlined } from '@ant-design/icons';
+import { QuestionCircleOutlined, SearchOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Input, notification, Popconfirm, Table, Card, type TableColumnsType } from 'antd';
+import { Button, Input, notification, Popconfirm, Table, Card, Select, type TableColumnsType } from 'antd';
 import { AiFillEdit, AiTwotoneDelete } from 'react-icons/ai';
 import { Link } from 'react-router-dom';
 import instance from '../../configs/axios';
 import { createStyles } from 'antd-style';
 import { useState } from 'react';
 
+const { Search } = Input;
+const { Option } = Select;
+
 const ListTour = () => {
   const { data } = useQuery({
     queryKey: ['tour'],
     queryFn: async () => instance.get('/tour')
-  })
+  });
   const queryClient = useQueryClient();
 
-  const [searchText, setSearchText] = useState("");
+  const [searchName, setSearchName] = useState("");
+  const [searchDeparture, setSearchDeparture] = useState("");
+  const [searchDuration, setSearchDuration] = useState("");
 
   const [api, contextHolder] = notification.useNotification();
   const openNotification =
@@ -34,9 +39,9 @@ const ListTour = () => {
   const { mutate } = useMutation({
     mutationFn: async (id: any) => {
       try {
-        return await instance.delete(`/tour/${id}`)
+        return await instance.delete(`/tour/${id}`);
       } catch (error) {
-        throw new Error('Xóa Tour Thất Bại')
+        throw new Error('Xóa Tour Thất Bại');
       }
     },
     onSuccess: () => {
@@ -44,7 +49,7 @@ const ListTour = () => {
         "success",
         "Bạn Xóa Thành Công",
         "Bạn Đã Xóa Thành Công",
-      )
+      );
       queryClient.invalidateQueries({
         queryKey: ["tour"],
       });
@@ -56,7 +61,6 @@ const ListTour = () => {
         "Bạn Đã Xóa Thất Bại",
       ),
   });
-  const { Search } = Input;
 
   const columns: TableColumnsType = [
     {
@@ -155,15 +159,18 @@ const ListTour = () => {
         </div>
       ),
     },
-  ]
+  ];
 
   const dataSource = data?.data?.tours.map((tours: any) => ({
     key: tours._id,
     ...tours,
   }));
 
+  // ✅ Lọc dữ liệu theo các điều kiện
   const filteredData = dataSource?.filter((tour: any) =>
-    tour?.nameTour?.toLowerCase().includes(searchText.toLowerCase())
+    tour?.nameTour?.toLowerCase().includes(searchName.toLowerCase()) &&
+    (searchDeparture ? tour?.departure_location?.toLowerCase().includes(searchDeparture.toLowerCase()) : true) &&
+    (searchDuration ? tour?.duration?.toString() === searchDuration : true)
   );
 
   const useStyle = createStyles(({ css, token }) => {
@@ -187,14 +194,45 @@ const ListTour = () => {
         extra={
           <div className="flex gap-3">
             <Search
-              placeholder="Tìm kiếm theo tên tour..."
+              placeholder="Tên tour..."
               allowClear
               enterButton={<SearchOutlined />}
               size="middle"
-              style={{ width: 250 }}
-              onChange={(e) => setSearchText(e.target.value)}
+              style={{ width: 220 }}
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
             />
-            
+            <Select
+              placeholder="Nơi xuất phát"
+              allowClear
+              style={{ width: 180 }}
+              value={searchDeparture || undefined}
+              onChange={(value) => setSearchDeparture(value || "")}
+            >
+              {[...new Set(dataSource?.map((t: any) => t.departure_location))].map((loc) => (
+                <Option key={loc} value={loc}>{loc}</Option>
+              ))}
+            </Select>
+            <Select
+              placeholder="Số ngày"
+              allowClear
+              style={{ width: 150 }}
+              value={searchDuration || undefined}
+              onChange={(value) => setSearchDuration(value || "")}
+            >
+              {[...new Set(dataSource?.map((t: any) => t.duration))].map((dur) => (
+                <Option key={dur} value={dur}>{dur}</Option>
+              ))}
+            </Select>
+            <Button
+              onClick={() => {
+                setSearchName("");
+                setSearchDeparture("");
+                setSearchDuration("");
+              }}
+            >
+              Tất cả
+            </Button>
           </div>
         }
         className="shadow-md rounded-xl"
@@ -208,7 +246,7 @@ const ListTour = () => {
         />
       </Card>
     </>
-  )
-}
+  );
+};
 
 export default ListTour;
