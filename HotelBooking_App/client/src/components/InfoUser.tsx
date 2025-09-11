@@ -89,6 +89,12 @@ const InfoUser = () => {
         birthDate: ''
     });
 
+    const getDurationDays = (duration: string) => {
+        if (!duration) return 0;
+        const match = duration.match(/(\d+)\s*ngày/);
+        return match ? Number(match[1]) : 0;
+        };
+
     // Modal states
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
@@ -483,10 +489,10 @@ const InfoUser = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-            <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
+            <div className="px-6 py-8 mx-auto max-w-7xl sm:px-8 lg:px-12">
                 {/* Header Section */}
-                <div className="text-center mb-8">
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                <div className="mb-8 text-center">
+                    <h1 className="mb-4 text-4xl font-bold text-gray-900">
                         Tài khoản của tôi
                     </h1>
                     <p className="text-lg text-gray-600">
@@ -495,7 +501,7 @@ const InfoUser = () => {
                 </div>
 
                 {/* Tab Navigation */}
-                <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 border border-gray-100">
+                <div className="p-8 mb-8 bg-white border border-gray-100 shadow-xl rounded-2xl">
                     <div className="flex space-x-8 border-b border-gray-200">
                         <button
                             onClick={() => setActiveTab('personal')}
@@ -540,7 +546,7 @@ const InfoUser = () => {
                 </div>
 
                 {/* Tab Content */}
-                <div className="bg-white rounded-2xl shadow-xl p-8 mx-2">
+                <div className="p-8 mx-2 bg-white shadow-xl rounded-2xl">
                     {activeTab === 'personal' && (
                         <div>
                             <div className="flex items-center justify-between mb-8">
@@ -548,7 +554,7 @@ const InfoUser = () => {
                                 {!isEditing ? (
                                     <button 
                                         onClick={handleEditClick}
-                                        className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
+                                        className="flex items-center px-4 py-2 space-x-2 text-white transition-colors bg-blue-500 rounded-lg hover:bg-blue-600"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -559,7 +565,7 @@ const InfoUser = () => {
                                     <div className="flex space-x-2">
                                         <button 
                                             onClick={handleSaveEdit}
-                                            className="flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors"
+                                            className="flex items-center px-4 py-2 space-x-2 text-white transition-colors bg-green-500 rounded-lg hover:bg-green-600"
                                         >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -568,7 +574,7 @@ const InfoUser = () => {
                                         </button>
                                         <button 
                                             onClick={handleCancelEdit}
-                                            className="flex items-center space-x-2 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+                                            className="flex items-center px-4 py-2 space-x-2 text-white transition-colors bg-gray-500 rounded-lg hover:bg-gray-600"
                                         >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -581,11 +587,11 @@ const InfoUser = () => {
                             
 
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                                 {/* Left Column */}
                                 <div className="space-y-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Tên đầy đủ</label>
+                                        <label className="block mb-2 text-sm font-medium text-gray-700">Tên đầy đủ</label>
                                         <input
                                             type="text"
                                             value={isEditing ? editFormData.username : (users?.username || '')}
@@ -595,7 +601,7 @@ const InfoUser = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                        <label className="block mb-2 text-sm font-medium text-gray-700">Email</label>
                                         <input
                                             type="email"
                                             value={isEditing ? editFormData.email : (users?.email || '')}
@@ -605,7 +611,7 @@ const InfoUser = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Số điện thoại</label>
+                                        <label className="block mb-2 text-sm font-medium text-gray-700">Số điện thoại</label>
                                         <input
                                             type="tel"
                                             value={isEditing ? editFormData.phone_number : (users?.phone_number || '')}
@@ -619,7 +625,7 @@ const InfoUser = () => {
                                 {/* Right Column */}
                                 <div className="space-y-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Địa chỉ</label>
+                                        <label className="block mb-2 text-sm font-medium text-gray-700">Địa chỉ</label>
                                         <textarea
                                             value={isEditing ? editFormData.address : (users?.address || '')}
                                             onChange={(e) => handleInputChange('address', e.target.value)}
@@ -629,13 +635,13 @@ const InfoUser = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Ngày sinh</label>
+                                        <label className="block mb-2 text-sm font-medium text-gray-700">Ngày sinh</label>
                                         {isEditing ? (
                                             <input
                                                 type="date"
                                                 value={editFormData.birthDate}
                                                 onChange={(e) => handleInputChange('birthDate', e.target.value)}
-                                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                                                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                             />
                                         ) : (
                                             <input
@@ -664,79 +670,79 @@ const InfoUser = () => {
                             </div>
 
                             {/* Tour Stats Section */}
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+                            <div className="grid grid-cols-2 gap-4 mb-8 md:grid-cols-3 lg:grid-cols-5">
                                 {/* Tổng đặt tour */}
-                                <div className="group bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-xl p-4 shadow-md hover:shadow-lg border border-blue-200 transition-all duration-300 transform hover:-translate-y-1">
+                                <div className="p-4 transition-all duration-300 transform border border-blue-200 shadow-md group bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-xl hover:shadow-lg hover:-translate-y-1">
                                     <div className="flex flex-col items-center text-center">
-                                        <div className="p-2 rounded-lg bg-blue-500 text-white shadow-md group-hover:scale-110 transition-transform duration-300 mb-2">
+                                        <div className="p-2 mb-2 text-white transition-transform duration-300 bg-blue-500 rounded-lg shadow-md group-hover:scale-110">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                             </svg>
                                         </div>
-                                        <p className="text-xs font-semibold text-blue-700 mb-1">Tổng tour</p>
-                                        <p className="text-xl font-bold text-blue-900 group-hover:text-blue-800 transition-colors">{totalBookings}</p>
+                                        <p className="mb-1 text-xs font-semibold text-blue-700">Tổng tour</p>
+                                        <p className="text-xl font-bold text-blue-900 transition-colors group-hover:text-blue-800">{totalBookings}</p>
                                     </div>
                                 </div>
 
                                 {/* Đã thanh toán tour */}
-                                <div className="group bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 rounded-xl p-4 shadow-md hover:shadow-lg border border-green-200 transition-all duration-300 transform hover:-translate-y-1">
+                                <div className="p-4 transition-all duration-300 transform border border-green-200 shadow-md group bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 rounded-xl hover:shadow-lg hover:-translate-y-1">
                                     <div className="flex flex-col items-center text-center">
-                                        <div className="p-2 rounded-lg bg-green-500 text-white shadow-md group-hover:scale-110 transition-transform duration-300 mb-2">
+                                        <div className="p-2 mb-2 text-white transition-transform duration-300 bg-green-500 rounded-lg shadow-md group-hover:scale-110">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                             </svg>
                                         </div>
-                                        <p className="text-xs font-semibold text-green-700 mb-1">Đã thanh toán</p>
-                                        <p className="text-xl font-bold text-green-900 group-hover:text-green-800 transition-colors">{paidBookings}</p>
+                                        <p className="mb-1 text-xs font-semibold text-green-700">Đã thanh toán</p>
+                                        <p className="text-xl font-bold text-green-900 transition-colors group-hover:text-green-800">{paidBookings}</p>
                                     </div>
                                 </div>
 
                                 {/* Đã đặt cọc tour */}
-                                <div className="group bg-gradient-to-br from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 rounded-xl p-4 shadow-md hover:shadow-lg border border-yellow-200 transition-all duration-300 transform hover:-translate-y-1">
+                                <div className="p-4 transition-all duration-300 transform border border-yellow-200 shadow-md group bg-gradient-to-br from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 rounded-xl hover:shadow-lg hover:-translate-y-1">
                                     <div className="flex flex-col items-center text-center">
-                                        <div className="p-2 rounded-lg bg-yellow-500 text-white shadow-md group-hover:scale-110 transition-transform duration-300 mb-2">
+                                        <div className="p-2 mb-2 text-white transition-transform duration-300 bg-yellow-500 rounded-lg shadow-md group-hover:scale-110">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                                             </svg>
                                         </div>
-                                        <p className="text-xs font-semibold text-yellow-700 mb-1">Đã đặt cọc</p>
-                                        <p className="text-xl font-bold text-yellow-900 group-hover:text-yellow-800 transition-colors">{depositBookings}</p>
+                                        <p className="mb-1 text-xs font-semibold text-yellow-700">Đã đặt cọc</p>
+                                        <p className="text-xl font-bold text-yellow-900 transition-colors group-hover:text-yellow-800">{depositBookings}</p>
                                     </div>
                                 </div>
 
                                 {/* Chờ xử lý hoàn tiền tour */}
-                                <div className="group bg-gradient-to-br from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 rounded-xl p-4 shadow-md hover:shadow-lg border border-orange-200 transition-all duration-300 transform hover:-translate-y-1">
+                                <div className="p-4 transition-all duration-300 transform border border-orange-200 shadow-md group bg-gradient-to-br from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 rounded-xl hover:shadow-lg hover:-translate-y-1">
                                     <div className="flex flex-col items-center text-center">
-                                        <div className="p-2 rounded-lg bg-orange-500 text-white shadow-md group-hover:scale-110 transition-transform duration-300 mb-2">
+                                        <div className="p-2 mb-2 text-white transition-transform duration-300 bg-orange-500 rounded-lg shadow-md group-hover:scale-110">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                                             </svg>
                                         </div>
-                                        <p className="text-xs font-semibold text-orange-700 mb-1">Chờ hoàn tiền</p>
-                                        <p className="text-xl font-bold text-orange-900 group-hover:text-orange-800 transition-colors">{refundPendingBookings}</p>
+                                        <p className="mb-1 text-xs font-semibold text-orange-700">Chờ hoàn tiền</p>
+                                        <p className="text-xl font-bold text-orange-900 transition-colors group-hover:text-orange-800">{refundPendingBookings}</p>
                                     </div>
                                 </div>
 
                                 {/* Đã hủy tour */}
-                                <div className="group bg-gradient-to-br from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 rounded-xl p-4 shadow-md hover:shadow-lg border border-red-200 transition-all duration-300 transform hover:-translate-y-1">
+                                <div className="p-4 transition-all duration-300 transform border border-red-200 shadow-md group bg-gradient-to-br from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 rounded-xl hover:shadow-lg hover:-translate-y-1">
                                     <div className="flex flex-col items-center text-center">
-                                        <div className="p-2 rounded-lg bg-red-500 text-white shadow-md group-hover:scale-110 transition-transform duration-300 mb-2">
+                                        <div className="p-2 mb-2 text-white transition-transform duration-300 bg-red-500 rounded-lg shadow-md group-hover:scale-110">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                             </svg>
                                         </div>
-                                        <p className="text-xs font-semibold text-red-700 mb-1">Đã hủy</p>
-                                        <p className="text-xl font-bold text-red-900 group-hover:text-red-800 transition-colors">{cancelledBookings}</p>
+                                        <p className="mb-1 text-xs font-semibold text-red-700">Đã hủy</p>
+                                        <p className="text-xl font-bold text-red-900 transition-colors group-hover:text-red-800">{cancelledBookings}</p>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div className="space-y-6 mx-2">
+                            <div className="mx-2 space-y-6">
                                 {currentBills.length > 0 ? (
                                     currentBills.map((bill) => (
-                                        <div key={bill._id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                                        <div key={bill._id} className="overflow-hidden transition-all duration-300 transform bg-white border border-gray-100 shadow-lg rounded-2xl hover:shadow-xl hover:-translate-y-1">
                                             <div className="p-8">
-                                                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-6 lg:space-y-0">
+                                                <div className="flex flex-col space-y-6 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
                                                     {/* Tour Info */}
                                                     <div className="flex-1">
                                                         <div className="flex items-start space-x-4">
@@ -744,18 +750,18 @@ const InfoUser = () => {
                                                                 <img
                                                                     src={bill.slotId?.tour?.imageTour?.[0] || '/default-tour.jpg'}
                                                                     alt={bill.slotId?.tour?.nameTour || 'Tour'}
-                                                                    className="w-20 h-20 rounded-xl object-cover border-2 border-gray-200"
+                                                                    className="object-cover w-20 h-20 border-2 border-gray-200 rounded-xl"
                                                                 />
                                                             </div>
                                                             <div className="flex-1 min-w-0">
-                                                                <h3 className="text-xl font-bold text-gray-900 mb-2 truncate">
+                                                                <h3 className="mb-2 text-xl font-bold text-gray-900 truncate">
                                                                     {bill.slotId?.tour?.nameTour
                                                                         ? bill.slotId.tour.nameTour.split(" ").length > 8
                                                                             ? bill.slotId.tour.nameTour.split(" ").slice(0, 8).join(" ") + "..."
                                                                             : bill.slotId.tour.nameTour
                                                                         : "Tour không xác định"}
                                                                 </h3>
-                                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
+                                                                <div className="grid grid-cols-1 gap-3 text-sm text-gray-600 sm:grid-cols-2">
                                                                     <div className="flex items-center space-x-2">
                                                                         <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -776,15 +782,15 @@ const InfoUser = () => {
                                                     </div>
 
                                                     {/* Status and Actions */}
-                                                    <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                                                    <div className="flex flex-col items-start space-y-4 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
                                                         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(bill.payment_status)}`}>
                                                             {getStatusText(bill.payment_status)}
                                                         </span>
 
-                                                        <div className="flex space-x-2 flex-wrap gap-2">
+                                                        <div className="flex flex-wrap gap-2 space-x-2">
                                                             <button
                                                                 onClick={() => openDetailModal(bill)}
-                                                                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 text-sm font-medium"
+                                                                className="px-4 py-2 text-sm font-medium text-white transition-colors duration-200 bg-blue-500 rounded-lg hover:bg-blue-600"
                                                             >
                                                                 Chi tiết
                                                             </button>
@@ -795,7 +801,7 @@ const InfoUser = () => {
                                                               (bill.payment_status === 'confirmed' || bill.payment_status === 'completed')) && (
                                                                 <button
                                                                     onClick={() => openCancelModal(bill)}
-                                                                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 text-sm font-medium"
+                                                                    className="px-4 py-2 text-sm font-medium text-white transition-colors duration-200 bg-red-500 rounded-lg hover:bg-red-600"
                                                                 >
                                                                     Hủy đặt chỗ
                                                                 </button>
@@ -803,19 +809,19 @@ const InfoUser = () => {
 
                                                             {/* Hiển thị trạng thái chờ thanh toán và chờ xác nhận đặt cọc */}
                                                             {bill.payment_status === 'pending' && (
-                                                                <span className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg text-sm font-medium">
+                                                                <span className="px-4 py-2 text-sm font-medium text-gray-800 bg-gray-100 rounded-lg">
                                                                     Chờ thanh toán
                                                                 </span>
                                                             )}
                                                             
                                                             {(bill.payment_status === 'deposit_paid' && !bill.depositPaidAt) && (
-                                                                <span className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg text-sm font-medium">
+                                                                <span className="px-4 py-2 text-sm font-medium text-yellow-800 bg-yellow-100 rounded-lg">
                                                                     Chờ admin xác nhận
                                                                 </span>
                                                             )}
 
                                                             {bill.payment_status === 'refund_pending' && (
-                                                                <span className="px-4 py-2 bg-orange-100 text-orange-800 rounded-lg text-sm font-medium">
+                                                                <span className="px-4 py-2 text-sm font-medium text-orange-800 bg-orange-100 rounded-lg">
                                                                     Chờ xử lý hoàn tiền
                                                                 </span>
                                                             )}
@@ -826,15 +832,15 @@ const InfoUser = () => {
                                         </div>
                                     ))
                                 ) : (
-                                    <div className="text-center py-12">
-                                        <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="py-12 text-center">
+                                        <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
-                                        <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có đặt chỗ nào</h3>
-                                        <p className="text-gray-600 mb-6">Bạn chưa có lịch sử đặt tour nào. Hãy khám phá các tour du lịch hấp dẫn!</p>
+                                        <h3 className="mb-2 text-lg font-medium text-gray-900">Chưa có đặt chỗ nào</h3>
+                                        <p className="mb-6 text-gray-600">Bạn chưa có lịch sử đặt tour nào. Hãy khám phá các tour du lịch hấp dẫn!</p>
                                         <Link
                                             to="/tours"
-                                            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+                                            className="inline-flex items-center px-6 py-3 font-medium text-white transition-colors duration-200 bg-blue-600 rounded-lg hover:bg-blue-700"
                                         >
                                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -875,79 +881,79 @@ const InfoUser = () => {
                             </div>
 
                             {/* Hotel Stats Section */}
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+                            <div className="grid grid-cols-2 gap-4 mb-8 md:grid-cols-3 lg:grid-cols-5">
                                 {/* Tổng đặt khách sạn */}
-                                <div className="group bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-xl p-4 shadow-md hover:shadow-lg border border-purple-200 transition-all duration-300 transform hover:-translate-y-1">
+                                <div className="p-4 transition-all duration-300 transform border border-purple-200 shadow-md group bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-xl hover:shadow-lg hover:-translate-y-1">
                                     <div className="flex flex-col items-center text-center">
-                                        <div className="p-2 rounded-lg bg-purple-500 text-white shadow-md group-hover:scale-110 transition-transform duration-300 mb-2">
+                                        <div className="p-2 mb-2 text-white transition-transform duration-300 bg-purple-500 rounded-lg shadow-md group-hover:scale-110">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                             </svg>
                                         </div>
-                                        <p className="text-xs font-semibold text-purple-700 mb-1">Tổng khách sạn</p>
-                                        <p className="text-xl font-bold text-purple-900 group-hover:text-purple-800 transition-colors">{totalHotelBookings}</p>
+                                        <p className="mb-1 text-xs font-semibold text-purple-700">Tổng khách sạn</p>
+                                        <p className="text-xl font-bold text-purple-900 transition-colors group-hover:text-purple-800">{totalHotelBookings}</p>
                                     </div>
                                 </div>
 
                                 {/* Đã thanh toán khách sạn */}
-                                <div className="group bg-gradient-to-br from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200 rounded-xl p-4 shadow-md hover:shadow-lg border border-emerald-200 transition-all duration-300 transform hover:-translate-y-1">
+                                <div className="p-4 transition-all duration-300 transform border shadow-md group bg-gradient-to-br from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200 rounded-xl hover:shadow-lg border-emerald-200 hover:-translate-y-1">
                                     <div className="flex flex-col items-center text-center">
-                                        <div className="p-2 rounded-lg bg-emerald-500 text-white shadow-md group-hover:scale-110 transition-transform duration-300 mb-2">
+                                        <div className="p-2 mb-2 text-white transition-transform duration-300 rounded-lg shadow-md bg-emerald-500 group-hover:scale-110">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                             </svg>
                                         </div>
-                                        <p className="text-xs font-semibold text-emerald-700 mb-1">Đã thanh toán</p>
-                                        <p className="text-xl font-bold text-emerald-900 group-hover:text-emerald-800 transition-colors">{paidHotelBookings}</p>
+                                        <p className="mb-1 text-xs font-semibold text-emerald-700">Đã thanh toán</p>
+                                        <p className="text-xl font-bold transition-colors text-emerald-900 group-hover:text-emerald-800">{paidHotelBookings}</p>
                                     </div>
                                 </div>
 
                                 {/* Đã đặt cọc khách sạn */}
-                                <div className="group bg-gradient-to-br from-amber-50 to-amber-100 hover:from-amber-100 hover:to-amber-200 rounded-xl p-4 shadow-md hover:shadow-lg border border-amber-200 transition-all duration-300 transform hover:-translate-y-1">
+                                <div className="p-4 transition-all duration-300 transform border shadow-md group bg-gradient-to-br from-amber-50 to-amber-100 hover:from-amber-100 hover:to-amber-200 rounded-xl hover:shadow-lg border-amber-200 hover:-translate-y-1">
                                     <div className="flex flex-col items-center text-center">
-                                        <div className="p-2 rounded-lg bg-amber-500 text-white shadow-md group-hover:scale-110 transition-transform duration-300 mb-2">
+                                        <div className="p-2 mb-2 text-white transition-transform duration-300 rounded-lg shadow-md bg-amber-500 group-hover:scale-110">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                                             </svg>
                                         </div>
-                                        <p className="text-xs font-semibold text-amber-700 mb-1">Đã đặt cọc</p>
-                                        <p className="text-xl font-bold text-amber-900 group-hover:text-amber-800 transition-colors">{depositHotelBookings}</p>
+                                        <p className="mb-1 text-xs font-semibold text-amber-700">Đã đặt cọc</p>
+                                        <p className="text-xl font-bold transition-colors text-amber-900 group-hover:text-amber-800">{depositHotelBookings}</p>
                                     </div>
                                 </div>
 
                                 {/* Chờ xử lý hoàn tiền khách sạn */}
-                                <div className="group bg-gradient-to-br from-rose-50 to-rose-100 hover:from-rose-100 hover:to-rose-200 rounded-xl p-4 shadow-md hover:shadow-lg border border-rose-200 transition-all duration-300 transform hover:-translate-y-1">
+                                <div className="p-4 transition-all duration-300 transform border shadow-md group bg-gradient-to-br from-rose-50 to-rose-100 hover:from-rose-100 hover:to-rose-200 rounded-xl hover:shadow-lg border-rose-200 hover:-translate-y-1">
                                     <div className="flex flex-col items-center text-center">
-                                        <div className="p-2 rounded-lg bg-rose-500 text-white shadow-md group-hover:scale-110 transition-transform duration-300 mb-2">
+                                        <div className="p-2 mb-2 text-white transition-transform duration-300 rounded-lg shadow-md bg-rose-500 group-hover:scale-110">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                                             </svg>
                                         </div>
-                                        <p className="text-xs font-semibold text-rose-700 mb-1">Chờ hoàn tiền</p>
-                                        <p className="text-xl font-bold text-rose-900 group-hover:text-rose-800 transition-colors">{refundPendingHotelBookings}</p>
+                                        <p className="mb-1 text-xs font-semibold text-rose-700">Chờ hoàn tiền</p>
+                                        <p className="text-xl font-bold transition-colors text-rose-900 group-hover:text-rose-800">{refundPendingHotelBookings}</p>
                                     </div>
                                 </div>
 
                                 {/* Đã hủy khách sạn */}
-                                <div className="group bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 rounded-xl p-4 shadow-md hover:shadow-lg border border-gray-200 transition-all duration-300 transform hover:-translate-y-1">
+                                <div className="p-4 transition-all duration-300 transform border border-gray-200 shadow-md group bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 rounded-xl hover:shadow-lg hover:-translate-y-1">
                                     <div className="flex flex-col items-center text-center">
-                                        <div className="p-2 rounded-lg bg-gray-500 text-white shadow-md group-hover:scale-110 transition-transform duration-300 mb-2">
+                                        <div className="p-2 mb-2 text-white transition-transform duration-300 bg-gray-500 rounded-lg shadow-md group-hover:scale-110">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                             </svg>
                                         </div>
-                                        <p className="text-xs font-semibold text-gray-700 mb-1">Đã hủy</p>
-                                        <p className="text-xl font-bold text-gray-900 group-hover:text-gray-800 transition-colors">{cancelledHotelBookings}</p>
+                                        <p className="mb-1 text-xs font-semibold text-gray-700">Đã hủy</p>
+                                        <p className="text-xl font-bold text-gray-900 transition-colors group-hover:text-gray-800">{cancelledHotelBookings}</p>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div className="space-y-6 mx-2">
+                            <div className="mx-2 space-y-6">
                                 {hotels.length > 0 ? (
                                     hotels.map((hb: any) => (
-                                        <div key={hb._id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                                        <div key={hb._id} className="overflow-hidden transition-all duration-300 transform bg-white border border-gray-100 shadow-lg rounded-2xl hover:shadow-xl hover:-translate-y-1">
                                             <div className="p-8">
-                                                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-6 lg:space-y-0">
+                                                <div className="flex flex-col space-y-6 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
                                                     {/* Hotel Info */}
                                                     <div className="flex-1">
                                                         <div className="flex items-start space-x-4">
@@ -955,14 +961,14 @@ const InfoUser = () => {
                                                                 <img
                                                                     src={hb.hotelId?.hotelImages?.[0] || '/default-hotel.jpg'}
                                                                     alt={hb.hotelId?.hotelName || 'Hotel'}
-                                                                    className="w-20 h-20 rounded-xl object-cover border-2 border-gray-200"
+                                                                    className="object-cover w-20 h-20 border-2 border-gray-200 rounded-xl"
                                                                 />
                                                             </div>
                                                             <div className="flex-1 min-w-0">
-                                                                <h3 className="text-xl font-bold text-gray-900 mb-2 truncate">
+                                                                <h3 className="mb-2 text-xl font-bold text-gray-900 truncate">
                                                                     {hb.hotelId?.hotelName || 'Khách sạn'}
                                                                 </h3>
-                                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
+                                                                <div className="grid grid-cols-1 gap-3 text-sm text-gray-600 sm:grid-cols-2">
                                                                     <div className="flex items-center space-x-2">
                                                                         <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -989,15 +995,15 @@ const InfoUser = () => {
                                                     </div>
 
                                                     {/* Status and Actions */}
-                                                    <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                                                    <div className="flex flex-col items-start space-y-4 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
                                                         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(hb.payment_status)}`}>
                                                             {getStatusText(hb.payment_status)}
                                                         </span>
 
-                                                        <div className="flex space-x-2 flex-wrap gap-2">
+                                                        <div className="flex flex-wrap gap-2 space-x-2">
                                                             <button
                                                                 onClick={() => openHotelDetailModal(hb)}
-                                                                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 text-sm font-medium"
+                                                                className="px-4 py-2 text-sm font-medium text-white transition-colors duration-200 bg-blue-500 rounded-lg hover:bg-blue-600"
                                                             >
                                                                 Chi tiết
                                                             </button>
@@ -1008,7 +1014,7 @@ const InfoUser = () => {
                                                               hb.payment_status === 'deposit_paid') && (
                                                                 <button
                                                                     onClick={() => openHotelCancelModal(hb)}
-                                                                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 text-sm font-medium"
+                                                                    className="px-4 py-2 text-sm font-medium text-white transition-colors duration-200 bg-red-500 rounded-lg hover:bg-red-600"
                                                                 >
                                                                     Hủy đặt phòng
                                                                 </button>
@@ -1016,13 +1022,13 @@ const InfoUser = () => {
 
                                                             {/* Hiển thị trạng thái chờ thanh toán */}
                                                             {hb.payment_status === 'pending' && (
-                                                                <span className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg text-sm font-medium">
+                                                                <span className="px-4 py-2 text-sm font-medium text-gray-800 bg-gray-100 rounded-lg">
                                                                     Chờ thanh toán
                                                                 </span>
                                                             )}
 
                                                             {hb.payment_status === 'refund_pending' && (
-                                                                <span className="px-4 py-2 bg-orange-100 text-orange-800 rounded-lg text-sm font-medium">
+                                                                <span className="px-4 py-2 text-sm font-medium text-orange-800 bg-orange-100 rounded-lg">
                                                                     Chờ xử lý hoàn tiền
                                                                 </span>
                                                             )}
@@ -1033,15 +1039,15 @@ const InfoUser = () => {
                                         </div>
                                     ))
                                 ) : (
-                                    <div className="text-center py-12">
-                                        <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="py-12 text-center">
+                                        <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
-                                        <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có đặt phòng nào</h3>
-                                        <p className="text-gray-600 mb-6">Bạn chưa có lịch sử đặt khách sạn nào. Hãy khám phá và đặt phòng ngay!</p>
+                                        <h3 className="mb-2 text-lg font-medium text-gray-900">Chưa có đặt phòng nào</h3>
+                                        <p className="mb-6 text-gray-600">Bạn chưa có lịch sử đặt khách sạn nào. Hãy khám phá và đặt phòng ngay!</p>
                                         <Link
                                             to="/hotels"
-                                            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+                                            className="inline-flex items-center px-6 py-3 font-medium text-white transition-colors duration-200 bg-blue-600 rounded-lg hover:bg-blue-700"
                                         >
                                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -1063,13 +1069,13 @@ const InfoUser = () => {
 
             {/* Detail Modal */}
             {showDetailModal && selectedBill && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full border border-gray-200 max-h-screen overflow-y-auto relative">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-40 backdrop-blur-sm">
+                    <div className="relative w-full max-w-4xl max-h-screen overflow-y-auto bg-white border border-gray-200 shadow-2xl rounded-2xl">
                         {/* Modal Header */}
-                        <div className="relative bg-gradient-to-r from-blue-500 to-indigo-600 p-6 rounded-t-2xl">
+                        <div className="relative p-6 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-t-2xl">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
-                                    <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                                    <div className="flex items-center justify-center w-12 h-12 bg-white rounded-full bg-opacity-20 backdrop-blur-sm">
                                         <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
@@ -1081,7 +1087,7 @@ const InfoUser = () => {
                                 </div>
                                 <button
                                     onClick={closeDetailModal}
-                                    className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition-all duration-200 shadow-lg"
+                                    className="flex items-center justify-center w-8 h-8 transition-all duration-200 bg-red-500 rounded-full shadow-lg hover:bg-red-600"
                                 >
                                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1093,18 +1099,20 @@ const InfoUser = () => {
                         {/* Modal Content */}
                         <div className="p-6 space-y-6">
                             {/* Tour Information */}
-                            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-200">
+                            <div className="p-5 border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
                                 <div className="flex items-start space-x-4">
-                                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                                    <div className="flex items-center justify-center flex-shrink-0 w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl">
                                         <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="font-bold text-2xl text-gray-900 mb-3">
-                                            {selectedBill?.slotId?.tour?.nameTour || 'Tour không xác định'}
-                                        </h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <h3 className="mb-3 text-2xl font-bold text-gray-900">
+                                                {selectedBill?.slotId?.tour?.nameTour || 'Tour không xác định'}
+                                            </h3>
+                                        </div>
+                                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                             <div className="space-y-2">
                                                 <div className="flex items-center space-x-2">
                                                     <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1130,12 +1138,15 @@ const InfoUser = () => {
                                                     <span className="text-sm font-semibold text-gray-900">{selectedBill?.slotId?.tour?.duration || 'N/A'}</span>
                                                 </div>
                                                 <div className="flex items-center space-x-2">
-                                                    <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                    <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
-                                                    <span className="text-sm text-gray-600">Loại tour:</span>
-                                                    <span className="text-sm font-semibold text-gray-900">{selectedBill?.slotId?.tour?.tourType || 'N/A'}</span>
+                                                    <span className="text-sm text-gray-600">Ngày đặt:</span>
+                                                    <span className="text-sm font-semibold text-gray-900">
+                                                        {selectedBill?.createdAt ? new Date(selectedBill.createdAt).toLocaleDateString('vi-VN') : 'N/A'}
+                                                    </span>
                                                 </div>
+                                                
                                             </div>
                                             <div className="space-y-2">
                                                 <div className="flex items-center space-x-2">
@@ -1164,14 +1175,22 @@ const InfoUser = () => {
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center space-x-2">
-                                                    <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                     </svg>
-                                                    <span className="text-sm text-gray-600">Ngày đặt:</span>
+                                                    <span className="text-sm text-gray-600">Ngày về:</span>
                                                     <span className="text-sm font-semibold text-gray-900">
-                                                        {selectedBill?.createdAt ? new Date(selectedBill.createdAt).toLocaleDateString('vi-VN') : 'N/A'}
+                                                        {selectedBill?.slotId?.dateTour && selectedBill?.slotId?.tour?.duration
+                                                        ? new Date(
+                                                            new Date(selectedBill.slotId.dateTour).setDate(
+                                                                new Date(selectedBill.slotId.dateTour).getDate() +
+                                                                getDurationDays(selectedBill.slotId.tour.duration)
+                                                            )
+                                                            ).toLocaleDateString("vi-VN")
+                                                        : "N/A"}
                                                     </span>
                                                 </div>
+                                                
                                             </div>
                                         </div>
                                     </div>
@@ -1179,14 +1198,14 @@ const InfoUser = () => {
                             </div>
 
                             {/* Booking Details */}
-                            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 border border-green-200">
-                                <h4 className="font-bold text-lg text-gray-900 mb-4 flex items-center">
+                            <div className="p-5 border border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
+                                <h4 className="flex items-center mb-4 text-lg font-bold text-gray-900">
                                     <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
                                     Chi tiết đặt chỗ
                                 </h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                     <div className="space-y-3">
                                         <div className="flex justify-between">
                                             <span className="text-sm text-gray-600">Trạng thái thanh toán:</span>
@@ -1243,8 +1262,8 @@ const InfoUser = () => {
                                 (selectedBill?.childPassengers && selectedBill.childPassengers.length > 0) ||
                                 (selectedBill?.toddlerPassengers && selectedBill.toddlerPassengers.length > 0) ||
                                 (selectedBill?.infantPassengers && selectedBill.infantPassengers.length > 0) ? (
-                                <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-5 border border-purple-200">
-                                    <h4 className="font-bold text-lg text-gray-900 mb-4 flex items-center">
+                                <div className="p-5 border border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl">
+                                    <h4 className="flex items-center mb-4 text-lg font-bold text-gray-900">
                                         <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                         </svg>
@@ -1254,11 +1273,11 @@ const InfoUser = () => {
                                     {/* Adult Passengers */}
                                     {selectedBill?.adultPassengers && selectedBill.adultPassengers.length > 0 && (
                                         <div className="mb-4">
-                                            <h5 className="font-semibold text-gray-800 mb-3 text-sm">Người lớn ({selectedBill.adultPassengers.length})</h5>
+                                            <h5 className="mb-3 text-sm font-semibold text-gray-800">Người lớn ({selectedBill.adultPassengers.length})</h5>
                                             <div className="space-y-3">
                                                 {selectedBill.adultPassengers.map((passenger, index) => (
-                                                    <div key={index} className="bg-white rounded-lg p-4 border border-purple-200 shadow-sm">
-                                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                    <div key={index} className="p-4 bg-white border border-purple-200 rounded-lg shadow-sm">
+                                                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                                                             <div>
                                                                 <span className="text-xs text-gray-500">Họ và tên:</span>
                                                                 <p className="text-sm font-semibold text-gray-900">{passenger.fullName}</p>
@@ -1290,11 +1309,11 @@ const InfoUser = () => {
                                     {/* Child Passengers */}
                                     {selectedBill?.childPassengers && selectedBill.childPassengers.length > 0 && (
                                         <div className="mb-4">
-                                            <h5 className="font-semibold text-gray-800 mb-3 text-sm">Trẻ em ({selectedBill.childPassengers.length})</h5>
+                                            <h5 className="mb-3 text-sm font-semibold text-gray-800">Trẻ em ({selectedBill.childPassengers.length})</h5>
                                             <div className="space-y-3">
                                                 {selectedBill.childPassengers.map((passenger, index) => (
-                                                    <div key={index} className="bg-white rounded-lg p-4 border border-blue-200 shadow-sm">
-                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    <div key={index} className="p-4 bg-white border border-blue-200 rounded-lg shadow-sm">
+                                                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                                             <div>
                                                                 <span className="text-xs text-gray-500">Họ và tên:</span>
                                                                 <p className="text-sm font-semibold text-gray-900">{passenger.fullName || 'N/A'}</p>
@@ -1313,11 +1332,11 @@ const InfoUser = () => {
                                     {/* Toddler Passengers */}
                                     {selectedBill?.toddlerPassengers && selectedBill.toddlerPassengers.length > 0 && (
                                         <div className="mb-4">
-                                            <h5 className="font-semibold text-gray-800 mb-3 text-sm">Trẻ nhỏ ({selectedBill.toddlerPassengers.length})</h5>
+                                            <h5 className="mb-3 text-sm font-semibold text-gray-800">Trẻ nhỏ ({selectedBill.toddlerPassengers.length})</h5>
                                             <div className="space-y-3">
                                                 {selectedBill.toddlerPassengers.map((passenger, index) => (
-                                                    <div key={index} className="bg-white rounded-lg p-4 border border-green-200 shadow-sm">
-                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    <div key={index} className="p-4 bg-white border border-green-200 rounded-lg shadow-sm">
+                                                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                                             <div>
                                                                 <span className="text-xs text-gray-500">Họ và tên:</span>
                                                                 <p className="text-sm font-semibold text-gray-900">{passenger.fullName || 'N/A'}</p>
@@ -1336,11 +1355,11 @@ const InfoUser = () => {
                                     {/* Infant Passengers */}
                                     {selectedBill?.infantPassengers && selectedBill.infantPassengers.length > 0 && (
                                         <div>
-                                            <h5 className="font-semibold text-gray-800 mb-3 text-sm">Em bé ({selectedBill.infantPassengers.length})</h5>
+                                            <h5 className="mb-3 text-sm font-semibold text-gray-800">Em bé ({selectedBill.infantPassengers.length})</h5>
                                             <div className="space-y-3">
                                                 {selectedBill.infantPassengers.map((passenger, index) => (
-                                                    <div key={index} className="bg-white rounded-lg p-4 border border-pink-200 shadow-sm">
-                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    <div key={index} className="p-4 bg-white border border-pink-200 rounded-lg shadow-sm">
+                                                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                                             <div>
                                                                 <span className="text-xs text-gray-500">Họ và tên:</span>
                                                                 <p className="text-sm font-semibold text-gray-900">{passenger.fullName || 'N/A'}</p>
@@ -1360,25 +1379,25 @@ const InfoUser = () => {
 
                             {/* Tour Images */}
                             {selectedBill?.slotId?.tour?.imageTour && selectedBill.slotId.tour.imageTour.length > 0 && (
-                                <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
-                                    <h4 className="font-bold text-lg text-gray-900 mb-4 flex items-center">
+                                <div className="p-5 border border-gray-200 bg-gray-50 rounded-xl">
+                                    <h4 className="flex items-center mb-4 text-lg font-bold text-gray-900">
                                         <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                         Hình ảnh tour
                                     </h4>
-                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
                                         {selectedBill.slotId.tour.imageTour.slice(0, 6).map((image, index) => (
                                             <img
                                                 key={index}
                                                 src={image}
                                                 alt={`Tour image ${index + 1}`}
-                                                className="w-full h-32 object-cover rounded-lg border border-gray-200 hover:scale-105 transition-transform duration-200"
+                                                className="object-cover w-full h-32 transition-transform duration-200 border border-gray-200 rounded-lg hover:scale-105"
                                             />
                                         ))}
                                         {selectedBill.slotId.tour.imageTour.length > 6 && (
-                                            <div className="w-full h-32 bg-gray-200 rounded-lg border border-gray-200 flex items-center justify-center">
-                                                <span className="text-gray-600 font-medium">
+                                            <div className="flex items-center justify-center w-full h-32 bg-gray-200 border border-gray-200 rounded-lg">
+                                                <span className="font-medium text-gray-600">
                                                     +{selectedBill.slotId.tour.imageTour.length - 6} ảnh khác
                                                 </span>
                                             </div>
@@ -1388,14 +1407,14 @@ const InfoUser = () => {
                             )}
 
                             {/* Customer Information */}
-                            <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
-                                <h4 className="font-bold text-lg text-gray-900 mb-4 flex items-center">
+                            <div className="p-5 border border-gray-200 bg-gray-50 rounded-xl">
+                                <h4 className="flex items-center mb-4 text-lg font-bold text-gray-900">
                                     <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
                                     Thông tin khách hàng
                                 </h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                     <div>
                                         <label className="text-sm font-medium text-gray-600">Họ và tên:</label>
                                         <p className="text-sm font-semibold text-gray-900">{selectedBill?.fullNameUser || 'N/A'}</p>
@@ -1417,10 +1436,10 @@ const InfoUser = () => {
                         </div>
 
                                                  {/* Modal Footer */}
-                         <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200">
+                         <div className="flex items-center justify-end p-6 space-x-3 border-t border-gray-200">
                              <button
                                  onClick={closeDetailModal}
-                                 className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200"
+                                 className="px-4 py-2 text-white transition-colors duration-200 bg-gray-500 rounded-lg hover:bg-gray-600"
                              >
                                  Đóng
                              </button>
@@ -1431,13 +1450,13 @@ const InfoUser = () => {
 
             {/* Cancel Modal */}
             {showCancelModal && bookingToCancel && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full border border-gray-200 max-h-screen overflow-y-auto relative">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-40 backdrop-blur-sm">
+                    <div className="relative w-full max-w-lg max-h-screen overflow-y-auto bg-white border border-gray-200 shadow-2xl rounded-2xl">
                         {/* Header */}
-                        <div className="relative bg-gradient-to-r from-red-500 to-red-600 p-6 rounded-t-2xl">
+                        <div className="relative p-6 bg-gradient-to-r from-red-500 to-red-600 rounded-t-2xl">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
-                                    <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                                    <div className="flex items-center justify-center w-12 h-12 bg-white rounded-full bg-opacity-20 backdrop-blur-sm">
                                         <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                                         </svg>
@@ -1449,7 +1468,7 @@ const InfoUser = () => {
                                 </div>
                                 <button
                                     onClick={closeCancelModal}
-                                    className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition-all duration-200 shadow-lg"
+                                    className="flex items-center justify-center w-8 h-8 transition-all duration-200 bg-red-500 rounded-full shadow-lg hover:bg-red-600"
                                 >
                                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1461,18 +1480,18 @@ const InfoUser = () => {
                         {/* Content */}
                         <div className="p-6">
                             {/* Tour Info */}
-                            <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-xl p-5 border border-red-200 mb-6">
+                            <div className="p-5 mb-6 border border-red-200 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl">
                                 <div className="flex items-start space-x-4">
-                                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                                    <div className="flex items-center justify-center flex-shrink-0 w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl">
                                         <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="font-bold text-xl text-gray-900 mb-3">
+                                        <h3 className="mb-3 text-xl font-bold text-gray-900">
                                             {bookingToCancel?.slotId?.tour?.nameTour || 'Tour không xác định'}
                                         </h3>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                             <div className="flex items-center space-x-2">
                                                 <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -1497,41 +1516,41 @@ const InfoUser = () => {
                             </div>
 
                             {/* Cancellation Policy */}
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                            <div className="p-4 mb-6 border border-yellow-200 rounded-lg bg-yellow-50">
                                 <div className="flex items-start space-x-3">
                                     <svg className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                                     </svg>
                                     <div>
-                                        <h4 className="font-semibold text-yellow-800 mb-3">Chính sách hoàn tiền tour trong nước</h4>
-                                        <div className="text-sm text-yellow-700 space-y-2">
-                                            <div className="grid grid-cols-2 gap-4 font-medium border-b border-yellow-300 pb-2">
+                                        <h4 className="mb-3 font-semibold text-yellow-800">Chính sách hoàn tiền tour trong nước</h4>
+                                        <div className="space-y-2 text-sm text-yellow-700">
+                                            <div className="grid grid-cols-2 gap-4 pb-2 font-medium border-b border-yellow-300">
                                                 <span>Thời gian hủy</span>
                                                 <span>Mức hoàn tiền</span>
                                     </div>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <span>Trước 30 ngày</span>
-                                                <span className="text-green-700 font-medium">Hoàn 100% tiền đặt cọc</span>
+                                                <span className="font-medium text-green-700">Hoàn 100% tiền đặt cọc</span>
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <span>Từ 15-29 ngày</span>
-                                                <span className="text-blue-700 font-medium">Hoàn 70% tiền đặt cọc</span>
+                                                <span className="font-medium text-blue-700">Hoàn 70% tiền đặt cọc</span>
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <span>Từ 7-14 ngày</span>
-                                                <span className="text-yellow-700 font-medium">Hoàn 50% tiền đặt cọc</span>
+                                                <span className="font-medium text-yellow-700">Hoàn 50% tiền đặt cọc</span>
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <span>Từ 4-6 ngày</span>
-                                                <span className="text-orange-700 font-medium">Hoàn 30% tiền đặt cọc</span>
+                                                <span className="font-medium text-orange-700">Hoàn 30% tiền đặt cọc</span>
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <span>Dưới 3 ngày</span>
-                                                <span className="text-red-700 font-medium">Không hoàn tiền</span>
+                                                <span className="font-medium text-red-700">Không hoàn tiền</span>
                                             </div>
                                         </div>
-                                        <div className="mt-3 pt-2 border-t border-yellow-300">
-                                            <p className="text-xs text-yellow-600 italic">
+                                        <div className="pt-2 mt-3 border-t border-yellow-300">
+                                            <p className="text-xs italic text-yellow-600">
                                                 * Mọi yêu cầu hủy tour cần được gửi bằng văn bản và được xác nhận bởi công ty du lịch.
                                             </p>
                                         </div>
@@ -1540,21 +1559,21 @@ const InfoUser = () => {
                             </div>
 
                             {/* Flight Ticket Policy Warning */}
-                            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                            <div className="p-4 mb-6 border border-red-200 rounded-lg bg-red-50">
                                 <div className="flex items-start space-x-3">
                                     <svg className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                                     </svg>
                                     <div>
-                                        <h4 className="font-semibold text-red-800 mb-3">⚠️ Thông báo quan trọng về vé máy bay</h4>
-                                        <div className="text-sm text-red-700 space-y-2">
+                                        <h4 className="mb-3 font-semibold text-red-800">⚠️ Thông báo quan trọng về vé máy bay</h4>
+                                        <div className="space-y-2 text-sm text-red-700">
                                             <p className="font-medium">Nếu tour này bao gồm vé máy bay, vui lòng lưu ý:</p>
-                                            <ul className="list-disc list-inside space-y-1 ml-2">
+                                            <ul className="ml-2 space-y-1 list-disc list-inside">
                                                 <li><strong>Trong vòng 24 giờ đầu:</strong> Được phép hủy và hoàn tiền 100% vé máy bay</li>
                                                 <li><strong>Sau 24 giờ:</strong> Vé máy bay không thể hủy trên website</li>
                                                 <li><strong>Liên hệ hỗ trợ:</strong> Gọi <span className="font-semibold">0922222016</span> để được tư vấn xử lý vé theo quy định hãng bay</li>
                                             </ul>
-                                            <div className="mt-3 p-2 bg-red-100 rounded border border-red-300">
+                                            <div className="p-2 mt-3 bg-red-100 border border-red-300 rounded">
                                                 <p className="text-xs font-medium text-red-800">
                                                     💡 <strong>Lời khuyên:</strong> Nếu bạn đã đặt vé máy bay, hãy liên hệ ngay với chúng tôi để được hỗ trợ tốt nhất!
                                                 </p>
@@ -1566,14 +1585,14 @@ const InfoUser = () => {
 
                             {/* Reason Input */}
                             <div className="mb-6">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block mb-2 text-sm font-medium text-gray-700">
                                     Lý do hủy đặt chỗ *
                                 </label>
                                 <textarea
                                     value={cancelReason}
                                     onChange={(e) => setCancelReason(e.target.value)}
                                     placeholder="Vui lòng cho biết lý do hủy đặt chỗ..."
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                     rows={4}
                                     required
                                 />
@@ -1581,7 +1600,7 @@ const InfoUser = () => {
                         </div>
 
                         {/* Footer */}
-                        <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200">
+                        <div className="flex items-center justify-end p-6 space-x-3 border-t border-gray-200">
                             <button
                                 onClick={closeCancelModal}
                                 className="px-6 py-2.5 bg-gray-500 text-white rounded-xl hover:bg-gray-600 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-all duration-200 font-semibold"
@@ -1595,7 +1614,7 @@ const InfoUser = () => {
                             >
                                 {requestCancelMutation.isPending ? (
                                     <div className="flex items-center">
-                                        <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <svg className="w-4 h-4 mr-3 -ml-1 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
@@ -1612,13 +1631,13 @@ const InfoUser = () => {
 
             {/* Refund Modal */}
             {showRefundModal && bookingToRefund && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-gray-200 max-h-screen overflow-y-auto">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-40 backdrop-blur-sm">
+                    <div className="w-full max-w-2xl max-h-screen overflow-y-auto bg-white border border-gray-200 shadow-2xl rounded-2xl">
                         {/* Header */}
-                        <div className="relative bg-gradient-to-r from-green-500 to-emerald-600 p-6 rounded-t-2xl">
+                        <div className="relative p-6 bg-gradient-to-r from-green-500 to-emerald-600 rounded-t-2xl">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
-                                    <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                                    <div className="flex items-center justify-center w-12 h-12 bg-white rounded-full bg-opacity-20 backdrop-blur-sm">
                                         <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                                         </svg>
@@ -1630,7 +1649,7 @@ const InfoUser = () => {
                                 </div>
                                 <button
                                     onClick={closeRefundModal}
-                                    className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200 backdrop-blur-sm"
+                                    className="flex items-center justify-center w-8 h-8 transition-all duration-200 bg-white rounded-full bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm"
                                 >
                                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1642,18 +1661,18 @@ const InfoUser = () => {
                         {/* Content */}
                         <div className="p-6">
                             {/* Tour Info */}
-                            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 border border-green-200 mb-6">
+                            <div className="p-5 mb-6 border border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
                                 <div className="flex items-start space-x-4">
-                                    <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                                    <div className="flex items-center justify-center flex-shrink-0 w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl">
                                         <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="font-bold text-xl text-gray-900 mb-3">
+                                        <h3 className="mb-3 text-xl font-bold text-gray-900">
                                             {bookingToRefund?.slotId?.tour?.nameTour || 'Tour không xác định'}
                                         </h3>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                             <div className="flex items-center space-x-2">
                                                 <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -1680,16 +1699,16 @@ const InfoUser = () => {
                             {/* Bank Information Form */}
                             <div className="space-y-6">
                                 <div>
-                                    <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                    <h4 className="flex items-center mb-4 text-lg font-semibold text-gray-900">
                                         <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                                         </svg>
                                         Thông tin tài khoản ngân hàng
                                     </h4>
                                     
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <label className="block mb-2 text-sm font-medium text-gray-700">
                                                 Tên ngân hàng *
                                             </label>
                                             <select
@@ -1713,7 +1732,7 @@ const InfoUser = () => {
                                         </div>
                                         
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <label className="block mb-2 text-sm font-medium text-gray-700">
                                                 Số tài khoản *
                                             </label>
                                             <input
@@ -1727,7 +1746,7 @@ const InfoUser = () => {
                                         </div>
                                         
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <label className="block mb-2 text-sm font-medium text-gray-700">
                                                 Tên chủ tài khoản *
                                             </label>
                                             <input
@@ -1743,16 +1762,16 @@ const InfoUser = () => {
                                 </div>
 
                                 <div>
-                                    <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                    <h4 className="flex items-center mb-4 text-lg font-semibold text-gray-900">
                                         <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                         </svg>
                                         Thông tin liên hệ
                                     </h4>
                                     
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <label className="block mb-2 text-sm font-medium text-gray-700">
                                                 Số điện thoại *
                                             </label>
                                             <input
@@ -1766,7 +1785,7 @@ const InfoUser = () => {
                                         </div>
                                         
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <label className="block mb-2 text-sm font-medium text-gray-700">
                                                 Email *
                                             </label>
                                             <input
@@ -1782,24 +1801,24 @@ const InfoUser = () => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label className="block mb-2 text-sm font-medium text-gray-700">
                                         Lý do yêu cầu hoàn tiền *
                                     </label>
                                     <textarea
                                         value={refundFormData.refundReason}
                                         onChange={(e) => handleRefundFormChange('refundReason', e.target.value)}
                                         placeholder="Vui lòng cho biết lý do yêu cầu hoàn tiền..."
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                         rows={4}
                                         required
                                     />
                                 </div>
 
                                 {/* Policy Notice */}
-                                <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg">
+                                <div className="p-4 border-l-4 border-blue-400 rounded-lg bg-blue-50">
                                     <div className="flex">
                                         <div className="flex-shrink-0">
-                                            <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                            <svg className="w-5 h-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                                             </svg>
                                         </div>
@@ -1815,7 +1834,7 @@ const InfoUser = () => {
                         </div>
 
                         {/* Footer */}
-                        <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200">
+                        <div className="flex items-center justify-end p-6 space-x-3 border-t border-gray-200">
                             <button
                                 onClick={closeRefundModal}
                                 className="px-6 py-2.5 bg-gray-500 text-white rounded-xl hover:bg-gray-600 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-all duration-200 font-semibold"
@@ -1829,7 +1848,7 @@ const InfoUser = () => {
                             >
                                 {submitRefundMutation.isPending ? (
                                     <div className="flex items-center">
-                                        <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <svg className="w-4 h-4 mr-3 -ml-1 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
@@ -1846,18 +1865,18 @@ const InfoUser = () => {
 
             {/* Hotel Detail Modal */}
             {showHotelDetailModal && selectedHotel && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
                     <div className="bg-white rounded-3xl shadow-2xl max-w-6xl w-full max-h-[95vh] overflow-y-auto">
                         {/* Header with gradient */}
-                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-3xl">
+                        <div className="p-6 text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-t-3xl">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <h3 className="text-2xl font-bold mb-2">Chi tiết đặt phòng khách sạn</h3>
+                                    <h3 className="mb-2 text-2xl font-bold">Chi tiết đặt phòng khách sạn</h3>
                                     <p className="text-blue-100">Mã đặt phòng: #{selectedHotel._id?.slice(-8).toUpperCase()}</p>
                                 </div>
                                 <button
                                     onClick={closeHotelDetailModal}
-                                    className="text-white hover:text-gray-200 transition-colors p-2 hover:bg-white hover:bg-opacity-20 rounded-full"
+                                    className="p-2 text-white transition-colors rounded-full hover:text-gray-200 hover:bg-white hover:bg-opacity-20"
                                 >
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1869,17 +1888,17 @@ const InfoUser = () => {
                         {/* Content */}
                         <div className="p-6">
                             {/* Hotel Overview Card */}
-                            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 mb-6 border border-blue-100">
+                            <div className="p-6 mb-6 border border-blue-100 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl">
                                 <div className="flex items-start space-x-4">
                                     <div className="flex-shrink-0">
                                         <img
                                             src={selectedHotel.hotelId?.hotelImages?.[0] || '/default-hotel.jpg'}
                                             alt={selectedHotel.hotelId?.hotelName || 'Hotel'}
-                                            className="w-20 h-20 rounded-xl object-cover border-2 border-white shadow-md"
+                                            className="object-cover w-20 h-20 border-2 border-white shadow-md rounded-xl"
                                         />
                                     </div>
                                     <div className="flex-1">
-                                        <h4 className="text-xl font-bold text-gray-900 mb-2">{selectedHotel.hotelId?.hotelName || 'Khách sạn'}</h4>
+                                        <h4 className="mb-2 text-xl font-bold text-gray-900">{selectedHotel.hotelId?.hotelName || 'Khách sạn'}</h4>
                                         <div className="flex items-center space-x-4 text-sm text-gray-600">
                                             <div className="flex items-center space-x-1">
                                                 <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1905,10 +1924,10 @@ const InfoUser = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                                 {/* Booking Dates & Guests */}
-                                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                                    <h5 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <div className="p-6 bg-white border border-gray-100 shadow-sm rounded-2xl">
+                                    <h5 className="flex items-center mb-4 text-lg font-semibold text-gray-900">
                                         <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
@@ -1916,7 +1935,7 @@ const InfoUser = () => {
                                     </h5>
                                     
                                     <div className="space-y-4">
-                                        <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                                        <div className="flex items-center justify-between p-3 rounded-lg bg-green-50">
                                             <div className="flex items-center space-x-2">
                                                 <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -1928,7 +1947,7 @@ const InfoUser = () => {
                                             </span>
                                         </div>
                                         
-                                        <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                                        <div className="flex items-center justify-between p-3 rounded-lg bg-red-50">
                                             <div className="flex items-center space-x-2">
                                                 <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -1940,7 +1959,7 @@ const InfoUser = () => {
                                             </span>
                                         </div>
                                         
-                                        <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                                        <div className="flex items-center justify-between p-3 rounded-lg bg-blue-50">
                                             <div className="flex items-center space-x-2">
                                                 <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -1950,7 +1969,7 @@ const InfoUser = () => {
                                             <span className="font-semibold text-blue-800">{selectedHotel.numberOfNights || 'N/A'} đêm</span>
                                         </div>
                                         
-                                        <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                                        <div className="flex items-center justify-between p-3 rounded-lg bg-purple-50">
                                             <div className="flex items-center space-x-2">
                                                 <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
@@ -1963,8 +1982,8 @@ const InfoUser = () => {
                                 </div>
 
                                 {/* Room Details */}
-                                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                                    <h5 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <div className="p-6 bg-white border border-gray-100 shadow-sm rounded-2xl">
+                                    <h5 className="flex items-center mb-4 text-lg font-semibold text-gray-900">
                                         <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                         </svg>
@@ -1974,12 +1993,12 @@ const InfoUser = () => {
                                     {selectedHotel.roomBookings && selectedHotel.roomBookings.length > 0 ? (
                                         <div className="space-y-4">
                                             {selectedHotel.roomBookings.map((room: any, index: number) => (
-                                                <div key={index} className="bg-gray-50 rounded-lg p-4">
+                                                <div key={index} className="p-4 rounded-lg bg-gray-50">
                                                     <div className="flex items-center justify-between mb-2">
                                                         <div>
                                                             <h6 className="font-semibold text-gray-900">{room.roomTypeName || 'Loại phòng'}</h6>
                                                             {room.floorNumber && (
-                                                                <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full mt-1 inline-block">
+                                                                <span className="inline-block px-2 py-1 mt-1 text-xs text-blue-600 bg-blue-100 rounded-full">
                                                                     Tầng {room.floorNumber}
                                                                 </span>
                                                             )}
@@ -1989,16 +2008,16 @@ const InfoUser = () => {
                                                     <div className="grid grid-cols-2 gap-2 text-sm">
                                                         <div>
                                                             <span className="text-gray-600">Giá/đêm:</span>
-                                                            <span className="font-medium ml-1">{room.pricePerNight?.toLocaleString('vi-VN')} VND</span>
+                                                            <span className="ml-1 font-medium">{room.pricePerNight?.toLocaleString('vi-VN')} VND</span>
                                                         </div>
                                                         <div>
                                                             <span className="text-gray-600">Tổng:</span>
-                                                            <span className="font-medium ml-1">{room.totalPrice?.toLocaleString('vi-VN')} VND</span>
+                                                            <span className="ml-1 font-medium">{room.totalPrice?.toLocaleString('vi-VN')} VND</span>
                                                         </div>
                                                     </div>
                                                     {room.guests && room.guests.length > 0 && (
-                                                        <div className="mt-3 pt-3 border-t border-gray-200">
-                                                            <p className="text-sm font-medium text-gray-700 mb-2">Danh sách khách:</p>
+                                                        <div className="pt-3 mt-3 border-t border-gray-200">
+                                                            <p className="mb-2 text-sm font-medium text-gray-700">Danh sách khách:</p>
                                                             <div className="space-y-1">
                                                                 {room.guests.map((guest: any, guestIndex: number) => (
                                                                     <div key={guestIndex} className="text-sm text-gray-600">
@@ -2012,7 +2031,7 @@ const InfoUser = () => {
                                             ))}
                                         </div>
                                     ) : (
-                                        <div className="text-center py-4 text-gray-500">
+                                        <div className="py-4 text-center text-gray-500">
                                             <svg className="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                             </svg>
@@ -2022,8 +2041,8 @@ const InfoUser = () => {
                                 </div>
 
                                 {/* Payment & Contact Info */}
-                                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                                    <h5 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <div className="p-6 bg-white border border-gray-100 shadow-sm rounded-2xl">
+                                    <h5 className="flex items-center mb-4 text-lg font-semibold text-gray-900">
                                         <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                                         </svg>
@@ -2031,7 +2050,7 @@ const InfoUser = () => {
                                     </h5>
                                     
                                     <div className="space-y-4">
-                                        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4">
+                                        <div className="p-4 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50">
                                             <div className="flex items-center justify-between">
                                                 <span className="text-sm font-medium text-gray-700">Tổng tiền</span>
                                                 <span className="text-xl font-bold text-green-800">
@@ -2041,7 +2060,7 @@ const InfoUser = () => {
                                         </div>
                                         
                                         {selectedHotel.depositAmount && (
-                                            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-4">
+                                            <div className="p-4 rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50">
                                                 <div className="flex items-center justify-between">
                                                     <span className="text-sm font-medium text-gray-700">Tiền cọc</span>
                                                     <span className="text-lg font-semibold text-blue-800">
@@ -2051,7 +2070,7 @@ const InfoUser = () => {
                                             </div>
                                         )}
                                         
-                                        <div className="bg-gray-50 rounded-lg p-4">
+                                        <div className="p-4 rounded-lg bg-gray-50">
                                             <div className="flex items-center justify-between">
                                                 <span className="text-sm font-medium text-gray-700">Phương thức</span>
                                                 <span className="text-sm font-medium text-gray-800">
@@ -2060,7 +2079,7 @@ const InfoUser = () => {
                                             </div>
                                         </div>
                                         
-                                        <div className="bg-gray-50 rounded-lg p-4">
+                                        <div className="p-4 rounded-lg bg-gray-50">
                                             <div className="flex items-center justify-between">
                                                 <span className="text-sm font-medium text-gray-700">Loại thanh toán</span>
                                                 <span className="text-sm font-medium text-gray-800">
@@ -2071,8 +2090,8 @@ const InfoUser = () => {
                                         </div>
                                         
                                         {selectedHotel.fullNameUser && (
-                                            <div className="bg-gray-50 rounded-lg p-4">
-                                                <div className="flex items-center space-x-2 mb-2">
+                                            <div className="p-4 rounded-lg bg-gray-50">
+                                                <div className="flex items-center mb-2 space-x-2">
                                                     <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                     </svg>
@@ -2089,8 +2108,8 @@ const InfoUser = () => {
 
                             {/* Special Requests */}
                             {(selectedHotel.specialRequests || selectedHotel.note) && (
-                                <div className="mt-6 bg-yellow-50 rounded-2xl p-6 border border-yellow-200">
-                                    <h5 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+                                <div className="p-6 mt-6 border border-yellow-200 bg-yellow-50 rounded-2xl">
+                                    <h5 className="flex items-center mb-3 text-lg font-semibold text-gray-900">
                                         <svg className="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
@@ -2102,10 +2121,10 @@ const InfoUser = () => {
                         </div>
 
                         {/* Footer */}
-                        <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50 rounded-b-3xl">
+                        <div className="flex items-center justify-end p-6 space-x-3 border-t border-gray-200 bg-gray-50 rounded-b-3xl">
                             <button
                                 onClick={closeHotelDetailModal}
-                                className="px-8 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-xl hover:from-gray-600 hover:to-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                                className="px-8 py-3 font-semibold text-white transition-all duration-200 transform shadow-lg bg-gradient-to-r from-gray-500 to-gray-600 rounded-xl hover:from-gray-600 hover:to-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 hover:shadow-xl hover:scale-105"
                             >
                                 Đóng
                             </button>
@@ -2117,13 +2136,13 @@ const InfoUser = () => {
             {/* Hotel Cancel Modal */}
             {showHotelCancelModal && selectedHotel && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4">
+                    <div className="w-full max-w-md mx-4 bg-white shadow-2xl rounded-2xl">
                         {/* Header */}
                         <div className="flex items-center justify-between p-6 border-b border-gray-200">
                             <h3 className="text-xl font-bold text-gray-900">Hủy đặt phòng</h3>
                             <button
                                 onClick={closeHotelCancelModal}
-                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                                className="text-gray-400 transition-colors hover:text-gray-600"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -2134,7 +2153,7 @@ const InfoUser = () => {
                         {/* Content */}
                         <div className="p-6">
                             <div className="mb-4">
-                                <p className="text-gray-700 mb-2">
+                                <p className="mb-2 text-gray-700">
                                     Bạn có chắc chắn muốn hủy đặt phòng tại <strong>{selectedHotel.hotelId?.hotelName}</strong>?
                                 </p>
                                 <p className="text-sm text-gray-500">
@@ -2144,7 +2163,7 @@ const InfoUser = () => {
                         </div>
 
                         {/* Footer */}
-                        <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200">
+                        <div className="flex items-center justify-end p-6 space-x-3 border-t border-gray-200">
                             <button
                                 onClick={closeHotelCancelModal}
                                 className="px-6 py-2.5 bg-gray-500 text-white rounded-xl hover:bg-gray-600 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-all duration-200 font-semibold"
