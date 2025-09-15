@@ -135,13 +135,19 @@ const AddTour = () => {
                     {
                       validator: async (_, value) => {
                         if (!value) return Promise.resolve();
+                        const cleanValue = String(value)
+                          .replace(/\s+/g, " ") // gộp nhiều khoảng trắng
+                          .trim()
+                          .toLowerCase();
                         try {
                           const res = await instance.get("/tour");
                           const tours = res.data?.tours || [];
                           const dup = tours.some(
                             (t: any) =>
-                              t.nameTour.trim().toLowerCase() ===
-                              String(value).trim().toLowerCase()
+                              t.nameTour
+                                .replace(/\s+/g, " ")
+                                .trim()
+                                .toLowerCase() === cleanValue
                           );
                           return dup
                             ? Promise.reject(
@@ -188,6 +194,20 @@ const AddTour = () => {
                       name="departure_location"
                       rules={[
                         { required: true, message: "Nhập nơi xuất phát" },
+                        ({ getFieldValue }) => ({
+                          validator(_, value) {
+                            const destination = getFieldValue("destination");
+                            if (!destination || !value) return Promise.resolve();
+                            if (destination === value.trim()) {
+                              return Promise.reject(
+                                new Error(
+                                  "Nơi xuất phát không được trùng với điểm đến!"
+                                )
+                              );
+                            }
+                            return Promise.resolve();
+                          },
+                        }),
                       ]}
                     >
                       <Input placeholder="VD: Hà Nội" />
