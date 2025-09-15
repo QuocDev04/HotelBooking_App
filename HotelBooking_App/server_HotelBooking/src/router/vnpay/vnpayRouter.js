@@ -30,6 +30,12 @@ Vnpay.post('/create-payment', async (req, res) => {
             bookingData.totalPriceRoom = totalAmount;
         }
 
+        // Kiểm tra lại số tiền
+        if (!totalAmount || totalAmount < 1000) {
+            console.error('Số tiền booking không hợp lệ:', totalAmount, bookingData);
+            return res.status(400).json({ success: false, message: 'Số tiền booking không hợp lệ (tối thiểu 1.000 VND)' });
+        }
+
         // Lưu booking vào DB
         let booking;
         if (type === 'tour') booking = new TourBookingSchema(bookingData);
@@ -39,7 +45,7 @@ Vnpay.post('/create-payment', async (req, res) => {
 
         // Cấu hình VNPay
         const vnpay = new VNPay({
-            tmnCode: 'LH54Z11C',
+            tmnCode: 'LH54Z11C', // Sửa lại đúng tên trường
             secureSecret: 'PO0WDG07TJOGP1P8SO6Z9PHVPIBUWBGQ',
             vnpayHost: 'https://sandbox.vnpayment.vn',
             testMode: true,
@@ -47,16 +53,20 @@ Vnpay.post('/create-payment', async (req, res) => {
             loggerFn: ignoreLogger,
         });
 
+        // Số tiền phải là số nguyên và nhân 100
+        let vnpAmount = Math.round(totalAmount * 100);
+        // Đảm bảo số tiền hợp lệ
+        if (isNaN(vnpAmount) || vnpAmount < 100000) {
+            return res.status(400).json({ success: false, message: 'Số tiền thanh toán không hợp lệ (tối thiểu 1.000 VND)' });
+        }
 
         const Vnpays = await vnpay.buildPaymentUrl({
-            vnp_Amount: totalAmount,
+            vnp_Amount: vnpAmount,
             vnp_IpAddr: req.ip || '127.0.0.1',
             vnp_TxnRef: `${booking._id}-${Date.now()}`,
             vnp_OrderInfo: `${type} booking #${booking._id}`,
             vnp_OrderType: ProductCode.Other,
-            // Callback phải trỏ về backend
-            vnp_ReturnUrl: `http://localhost:5173/payment-result`
-            ,
+            vnp_ReturnUrl: `http://localhost:5173/payment-result`,
             vnp_Locale: VnpLocale.VN,
             vnp_CreateDate: dateFormat(new Date()),
             vnp_ExpireDate: dateFormat(new Date(Date.now() + 24 * 60 * 60 * 1000)),
@@ -74,6 +84,16 @@ Vnpay.post('/create-payment', async (req, res) => {
 Vnpay.get('/payment-callback', async (req, res) => {
     try {
         console.log('Nhận callback VNPay:', req.query);
+
+        // Thêm log chi tiết để debug
+        if (!req.query.vnp_Amount || isNaN(Number(req.query.vnp_Amount))) {
+            console.error('vnp_Amount không hợp lệ:', req.query.vnp_Amount);
+            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Invalid amount');
+        }
+        if (!req.query.vnp_TxnRef) {
+            console.error('vnp_TxnRef không hợp lệ:', req.query.vnp_TxnRef);
+            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Invalid txnRef');
+        }
 
         const vnpay = new VNPay({
             tmnCode: 'LH54Z11C',
@@ -116,7 +136,12 @@ Vnpay.get('/payment-callback', async (req, res) => {
                 ).populate({
                     path: 'slotId',
                     select: 'dateTour tour',
-                    populate: { path: 'tour', select: 'nameTour' }
+                    populate: {
+                        path: 'tour',
+                        select: 'nameTour location duration' // Chỉ populate tour, KHÔNG populate location
+                        // Nếu tour.location là ref thì mới cần populate tiếp, còn nếu là string/object thì bỏ dòng dưới
+                        // populate: { path: 'location', select: 'locationName country' }
+                    }
                 });
             }
 
@@ -170,89 +195,57 @@ Vnpay.get('/payment-callback', async (req, res) => {
             `;
                     } else {
                         // ========== TẠO DANH SÁCH KHÁCH ==========
+
                         const allGuests = [
                             ...(updatedBooking.adultPassengers || []),
                             ...(updatedBooking.childPassengers || []),
                             ...(updatedBooking.toddlerPassengers || []),
                             ...(updatedBooking.infantPassengers || [])
                         ];
-                        const tourDate = updatedBooking.slotId?.dateTour
-                            ? new Date(updatedBooking.slotId.dateTour).toLocaleDateString('vi-VN')
-                            : 'N/A';
-                        // Tách khách chọn singleRoom và khách ghép
-                        const singleRoomGuests = allGuests.filter(g => g.singleRoom);
-                        const guestsToCombine = allGuests.filter(g => !g.singleRoom);
+                        const tourName = updatedBooking.slotId?.tour?.nameTour || 'N/A';
+                        
+                        const slot = updatedBooking.slotId;
+                        const duration = tour?.duration || slot?.duration || 0;
+                        const tourDate = slot?.dateTour ? new Date(slot.dateTour).toLocaleDateString('vi-VN') : 'N/A';
 
-                        // ========== GHÉP PHÒNG ==========
-                        let remainingGuests = [...guestsToCombine];
-                        let roomInfoList = [];
-
-                        while (remainingGuests.length > 0) {
-                            let roomGuests = [];
-                            if (remainingGuests.length >= 4) {
-                                roomGuests = remainingGuests.splice(0, 4);
-                                roomInfoList.push(`1 phòng (4 khách) - Flamingo Đại Lải – Forest In The Sky Resort - Deluxe Sky Residence (2 phòng ngủ)<br/>
-            Khách: ${roomGuests.map(g => g.fullName).join(', ')}`);
-                            } else if (remainingGuests.length === 3) {
-                                roomGuests = remainingGuests.splice(0, 3);
-                                roomInfoList.push(`1 phòng (3 khách) - Flamingo Đại Lải – Forest In The Sky Resort - Premier Sky Residence<br/>
-            Khách: ${roomGuests.map(g => g.fullName).join(', ')}`);
-                            } else if (remainingGuests.length === 2) {
-                                roomGuests = remainingGuests.splice(0, 2);
-                                roomInfoList.push(`1 phòng (2 khách) - Flamingo Đại Lải – Forest In The Sky Resort - Deluxe Sky Residence<br/>
-            Khách: ${roomGuests.map(g => g.fullName).join(', ')}`);
-                            } else if (remainingGuests.length === 1) {
-                                roomGuests = remainingGuests.splice(0, 1);
-                                roomInfoList.push(`1 phòng (1 khách) - Flamingo Đại Lải – Forest In The Sky Resort - Deluxe Sky Residence<br/>
-            Khách: ${roomGuests.map(g => g.fullName).join(', ')}`);
-                            }
-                        }
-
-                        const roomInfo = roomInfoList.length > 0 ? roomInfoList.join('<br/><br/>') : '0 khách - Không có phòng ghép';
-
-                        // Thông báo khách chọn singleRoom
-                        let singleRoomInfo = '';
-                        if (singleRoomGuests.length > 0) {
-                            singleRoomInfo = `<p><strong>Lưu ý:</strong> Những khách đã chọn phòng đơn riêng: ${singleRoomGuests.map(g => g.fullName).join(', ')}</p>`;
-                        }
-
-                        // ========== EMAIL ==========
+                        // Thông tin khách hàng
+                        const customerInfoHtml = `
+                            <ul style="list-style: none; padding: 0;">
+                                <li><strong>Họ tên:</strong> ${updatedBooking.fullNameUser || 'N/A'}</li>
+                                <li><strong>Email:</strong> ${updatedBooking.email || 'N/A'}</li>
+                                <li><strong>Số điện thoại:</strong> ${updatedBooking.phone || 'N/A'}</li>
+                            </ul>
+                        `;
+                        const guestListHtml = allGuests.length > 0 ? `<ul style="list-style: none; padding: 0;">${allGuests.map(g => `<li>${g.fullName} (${g.type || ''})</li>`).join('')}</ul>` : '<i>Không có thông tin khách chi tiết</i>';
+                        // Nội dung emailHtml mới cho tour booking
                         emailHtml = `
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
     <h2 style="color: #28a745;">Thanh toán thành công!</h2>
     <p>Xin chào <strong>${updatedBooking.fullNameUser}</strong>,</p>
-    <p>Bạn đã <b>thanh toán thành công</b> cho tour 
-        <b>${updatedBooking.slotId?.tour?.nameTour || 'N/A'}</b>.
-    </p>
+    <p>Bạn đã <b>thanh toán thành công</b> cho tour <b>${tourName}</b>.</p>
     <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-        <h3>Thông tin đặt chỗ:</h3>
+        <h3>Thông tin đặt tour:</h3>
         <ul style="list-style: none; padding: 0;">
-            <li><strong>Mã đặt chỗ:</strong> ${bookingId}</li>
+            <li><strong>Mã booking:</strong> ${bookingId}</li>
+            <li><strong>Tên tour:</strong> ${tourName}</li>
+            
             <li><strong>Ngày đi:</strong> ${tourDate}</li>
-            <li><strong>Người lớn:</strong> ${updatedBooking.adultsTour} người</li>
+            <li><strong>Thời gian:</strong> ${duration} ngày</li>
+            <li><strong>Tổng giá:</strong> ${totalPriceVN} VNĐ</li>
+            <li><strong>Người lớn:</strong> ${updatedBooking.adultsTour || 0} người</li>
             <li><strong>Trẻ em:</strong> ${updatedBooking.childrenTour || 0} người</li>
             <li><strong>Trẻ nhỏ:</strong> ${updatedBooking.toddlerTour || 0} người</li>
             <li><strong>Em bé:</strong> ${updatedBooking.infantTour || 0} người</li>
-            <li><strong>Tổng giá:</strong> ${totalPriceVN} VNĐ</li>
             <li><strong>Loại thanh toán:</strong> ${updatedBooking.paymentType || 'Không xác định'}</li>
+            <li><strong>Trạng thái thanh toán:</strong> ${updatedBooking.payment_status || 'N/A'}</li>
         </ul>
-
-        <h3>Thông tin phòng khách sạn:</h3>
-        <p>${roomInfo}</p>
-        ${singleRoomInfo}
-
-        <h3>🛏️ Các hạng phòng tiêu biểu:</h3>
-        <ul style="list-style: none; padding: 0;">
-            <li><b>Deluxe Sky Residence</b> - 60 m², 2 người lớn + 2 trẻ em, Phòng ngủ riêng, phòng khách, sofa, ban công, bồn tắm, view Rừng.</li>
-            <li><b>Premier Sky Residence</b> - 66 m², 2 người lớn + 2 trẻ em, Phòng ngủ riêng, phòng khách, sofa, ban công, bồn tắm, view Toàn cảnh.</li>
-            <li><b>Executive Sky Residence</b> - 75 m², 2 người lớn + 2 trẻ em, Phòng ngủ riêng, phòng khách, sofa, ban công, bồn tắm, view Toàn cảnh.</li>
-            <li><b>Deluxe Sky Residence (2 phòng ngủ)</b> - 103 m², 4 người lớn + 4 trẻ em, 2 phòng ngủ, phòng khách, sofa, ban công, bồn tắm, view Toàn cảnh.</li>
-            <li><b>Premier Sky Residence (2 phòng ngủ)</b> - 134 m², 4 người lớn + 4 trẻ em, 2 phòng ngủ, phòng khách, sofa, ban công, bồn tắm, view Toàn cảnh.</li>
-            <li><b>Executive Sky Residence (2 phòng ngủ)</b> - 165 m², 4 người lớn + 4 trẻ em, 2 phòng ngủ, phòng khách, sofa, ban công, bồn tắm, view Toàn cảnh.</li>
-        </ul>
+        <h3>Thông tin khách hàng:</h3>
+        ${customerInfoHtml}
+        <h3>Danh sách khách:</h3>
+        ${guestListHtml}
     </div>
     <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi!</p>
-    <p>Nếu có thắc mắc, vui lòng liên hệ: <strong>support@example.com</strong></p>
+    <p>Nếu có thắc mắc, vui lòng liên hệ: <strong>support@example.com hoặc hotlien 0922222016</strong></p>
 </div>
 `;
                     }
@@ -281,7 +274,8 @@ Vnpay.get('/payment-callback', async (req, res) => {
         }
     } catch (error) {
         console.error('Lỗi callback VNPay:', error);
-        return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=System error');
+        // Thêm log lỗi chi tiết
+        return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=System error: ' + error.message);
     }
 });
 
@@ -576,8 +570,10 @@ Vnpay.get('/frontend-callback', async (req, res) => {
                                             <li><strong>Trẻ em:</strong> ${updatedBooking.childrenTour || 0} người</li>
                                             <li><strong>Trẻ nhỏ:</strong> ${updatedBooking.toddlerTour || 0} người</li>
                                             <li><strong>Em bé:</strong> ${updatedBooking.infantTour || 0} người</li>
-                          <li><strong>Tổng giá:</strong> ${totalPriceVN} VNĐ</li>
-                        </ul>
+                                            <li><strong>Tổng giá:</strong> ${totalPriceVN} VNĐ</li>
+                                            <li><strong>Loại thanh toán:</strong> ${updatedBooking.paymentType || 'Không xác định'}</li>
+                                            <li><strong>Trạng thái thanh toán:</strong> ${updatedBooking.payment_status || 'N/A'}</li>
+                                        </ul>
                                     </div>
                                     
                         <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi!</p>
@@ -1200,4 +1196,7 @@ Vnpay.get('/hotel-payment-callback', async (req, res) => {
     }
 });
 
+module.exports = Vnpay;
+module.exports = Vnpay;
+module.exports = Vnpay;
 module.exports = Vnpay;

@@ -5,8 +5,6 @@ import instanceClient from "../../../configs/instance";
 import TourList from "../../components/TourList";
 import type { Tour } from "../../type";
 
-const { Option } = Select;
-const { RangePicker } = DatePicker;
 
 const DestinationList = () => {
   const [searchTerm, setSearchTerm] = useState("");

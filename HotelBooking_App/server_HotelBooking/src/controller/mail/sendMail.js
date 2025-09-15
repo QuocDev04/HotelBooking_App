@@ -124,21 +124,23 @@ const sendMailBookingCashSuccess = async (booking, depositAmount, isFullPayment)
         await booking.populate({
             path: 'slotId',
             select: 'dateTour tour',
-            populate: { path: 'tour', select: 'nameTour price finalPrice' }
+            populate: { path: 'tour', select: 'nameTour price finalPrice duration' }
         });
 
         const tourName = booking.slotId?.tour?.nameTour || 'N/A';
         const tourDate = booking.slotId?.dateTour
             ? moment(booking.slotId.dateTour).tz("Asia/Ho_Chi_Minh").format("dddd, DD/MM/YYYY")
             : 'N/A';
-
+        const duration = booking.slotId?.tour?.duration || 0;
+        // Tính ngày về
+        const endDate = booking.slotId?.dateTour
+            ? moment(booking.slotId.dateTour).tz("Asia/Ho_Chi_Minh").add(duration, 'days').format("dddd, DD/MM/YYYY")
+            : 'N/A';
         const tourPrice = booking.slotId?.tour?.finalPrice ?? booking.slotId?.tour?.price ?? 0;
         const totalPrice = tourPrice.toLocaleString("vi-VN");
-
         const paymentDeadline = booking.cashPaymentDeadline
             ? moment(booking.cashPaymentDeadline).tz("Asia/Ho_Chi_Minh").format("HH:mm DD/MM/YYYY")
             : null;
-
         const paymentAddress = "Số 81A ngõ 295 - Phố Bằng Liệt - Phường Linh Nam - Quận Hoàng Mai - Hà Nội";
         const workingTime = "9h00 - 17h30 từ thứ 2 - đến thứ 6 và 9h00 - 12h00 thứ 7";
 
@@ -151,6 +153,8 @@ const sendMailBookingCashSuccess = async (booking, depositAmount, isFullPayment)
                     <p>Xin chào <b>${booking.fullNameUser}</b>,</p>
                     <p>Bạn đã đặt tour <b>${tourName}</b> thành công và chọn thanh toán tiền mặt tại văn phòng.</p>
                     <p><b>Ngày đi:</b> ${tourDate}</p>
+                    <p><b>Ngày về:</b> ${endDate}</p>
+                    <p><b>Thời lượng tour:</b> ${duration} ngày</p>
                     <h3>Thông tin thanh toán:</h3>
                     <ul>
                         <li><strong>Mã đặt tour:</strong> ${booking._id}</li>
@@ -160,14 +164,19 @@ const sendMailBookingCashSuccess = async (booking, depositAmount, isFullPayment)
                         <li><strong>Địa chỉ:</strong> ${paymentAddress}</li>
                         <li><strong>Thời gian:</strong> ${workingTime}</li>
                     </ul>
-
+                    <h3>Thông tin khách đặt:</h3>
+                    <ul>
+                        <li><strong>Họ tên:</strong> ${booking.fullNameUser}</li>
+                        <li><strong>Email:</strong> ${booking.email}</li>
+                        <li><strong>Số điện thoại:</strong> ${booking.phoneNumber || 'N/A'}</li>
+                        <li><strong>Số lượng người:</strong> ${booking.totalGuests || booking.numberOfGuests || 'N/A'}</li>
+                    </ul>
                     <h3>⚠️ LƯU Ý QUAN TRỌNG:</h3>
                     <ul>
                         <li>Bạn có 48 giờ để thanh toán tiền cọc kể từ thời điểm đặt tour</li>
                         <li>Tour sẽ tự động bị hủy nếu quá thời hạn thanh toán</li>
                         <li>Vui lòng đến văn phòng trước thời hạn để hoàn tất thanh toán</li>
                     </ul>
-
                     <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi!</p>
                 </div>
             `,
@@ -192,16 +201,18 @@ const sendMailHotelBookingCashSuccess = async (booking) => {
         const deadline = populatedBooking.cashPaymentDeadline
             ? moment(populatedBooking.cashPaymentDeadline).tz("Asia/Ho_Chi_Minh").format("HH:mm DD/MM/YYYY")
             : null;
-
         const workingTime = `9h00 - 17h30 (Thứ 2 - Thứ 6) | 9h00 - 12h00 (Thứ 7)`;
+        const checkInFormatted = populatedBooking.checkInDate ? moment(populatedBooking.checkInDate).tz("Asia/Ho_Chi_Minh").format("dddd, DD/MM/YYYY HH:mm") : 'N/A';
+        const checkOutFormatted = populatedBooking.checkOutDate ? moment(populatedBooking.checkOutDate).tz("Asia/Ho_Chi_Minh").format("dddd, DD/MM/YYYY HH:mm") : 'N/A';
 
-        // Tạo HTML chi tiết các phòng
+        // Tạo HTML chi tiết các phòng và khách
         const roomDetailsHtml = populatedBooking.roomBookings.map(rb => `
             <li style="margin-bottom: 10px;">
                 <b>${rb.roomTypeName}</b> - ${rb.numberOfRooms} phòng<br/>
                 Giá/đêm: ${rb.pricePerNight.toLocaleString('vi-VN')} VNĐ<br/>
                 Tổng: ${rb.totalPrice.toLocaleString('vi-VN')} VNĐ<br/>
-                Khách: ${rb.guests.map(g => g.fullName).join(', ') || 'Chưa nhập'}
+                Khách: ${rb.guests.map(g => g.fullName).join(', ') || 'Chưa nhập'}<br/>
+                Số lượng khách: ${rb.guests.length || 'N/A'}
             </li>
         `).join('');
 
@@ -213,28 +224,35 @@ const sendMailHotelBookingCashSuccess = async (booking) => {
                     <h2 style="color: #28a745;">Đặt phòng thành công!</h2>
                     <p>Xin chào <b>${populatedBooking.fullNameUser}</b>,</p>
                     <p>Bạn đã chọn thanh toán tiền mặt tại văn phòng cho khách sạn <b>${hotelName}</b>.</p>
-
-                    <h3>Thông tin thanh toán:</h3>
+                    <h3>Thông tin đặt phòng:</h3>
                     <ul>
                         <li><strong>Mã đặt phòng:</strong> ${populatedBooking._id}</li>
-                        <li><strong>Số tiền cần thanh toán:</strong> ${populatedBooking.totalPrice.toLocaleString('vi-VN')} VNĐ</li>
+                        <li><strong>Khách sạn:</strong> ${hotelName}</li>
+                        <li><strong>Địa chỉ khách sạn:</strong> ${hotelAddress}</li>
+                        <li><strong>Ngày nhận phòng:</strong> ${checkInFormatted}</li>
+                        <li><strong>Ngày trả phòng:</strong> ${checkOutFormatted}</li>
+                        <li><strong>Số đêm:</strong> ${populatedBooking.numberOfNights}</li>
+                        <li><strong>Số khách:</strong> ${populatedBooking.totalGuests}</li>
+                        <li><strong>Tổng tiền:</strong> ${populatedBooking.totalPrice.toLocaleString('vi-VN')} VNĐ</li>
                         ${deadline ? `<li><strong>Hạn thanh toán:</strong> ${deadline}</li>` : ""}
-                        <li><strong>Địa chỉ:</strong> ${hotelAddress}</li>
                         <li><strong>Thời gian làm việc:</strong> ${workingTime}</li>
                     </ul>
-
-                    <h3>Chi tiết phòng:</h3>
+                    <h3>Chi tiết phòng và khách:</h3>
                     <ul style="list-style: none; padding: 0;">
                         ${roomDetailsHtml}
                     </ul>
-
+                    <h3>Thông tin khách đặt:</h3>
+                    <ul>
+                        <li><strong>Họ tên:</strong> ${populatedBooking.fullNameUser}</li>
+                        <li><strong>Email:</strong> ${populatedBooking.email}</li>
+                        <li><strong>Số điện thoại:</strong> ${populatedBooking.phoneNumber || 'N/A'}</li>
+                    </ul>
                     <h3>⚠️ LƯU Ý QUAN TRỌNG:</h3>
                     <ul>
                         <li>Bạn có 48 giờ để thanh toán tiền cọc kể từ thời điểm đặt phòng</li>
                         <li>Đặt phòng sẽ tự động bị hủy nếu quá thời hạn thanh toán</li>
                         <li>Vui lòng đến văn phòng trước thời hạn để hoàn tất thanh toán</li>
                     </ul>
-
                     <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi!</p>
                 </div>
             `

@@ -185,10 +185,16 @@ const BookingTour = () => {
   };
 
   const onFinish: FormProps<any>["onFinish"] = (values) => {
+    // Kiểm tra giá tour
+    const price = bookingTour?.totalPriceBooking || bookingTour?.totalPriceTour || 0;
+    if (!price || price < 1000) {
+      message.error("Giá tour không hợp lệ, vui lòng kiểm tra lại.");
+      return;
+    }
     const newValues = {
       ...values,
       BookingTourId: bookingTour._id,
-
+      totalPriceBooking: price,
       isFullPayment: true, // Thanh toán phần còn lại
     };
     mutate(newValues);

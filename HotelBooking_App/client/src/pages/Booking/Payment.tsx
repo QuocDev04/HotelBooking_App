@@ -19,8 +19,12 @@ function PaymentResult() {
             setPaymentStatus('success');
             setMessageText(messageParam || "Thanh toán thành công!");
         } else {
+            let errorMsg = messageParam || "Đã có lỗi xảy ra trong quá trình thanh toán.";
+            if (responseCode && responseCode !== "00") {
+                errorMsg += ` (Mã lỗi: ${responseCode})`;
+            }
             setPaymentStatus('failed');
-            setMessageText(messageParam || "Đã có lỗi xảy ra trong quá trình thanh toán.");
+            setMessageText(errorMsg);
         }
 
         // Đếm ngược và chuyển hướng về trang chủ

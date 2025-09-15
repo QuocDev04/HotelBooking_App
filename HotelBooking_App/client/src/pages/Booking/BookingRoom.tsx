@@ -90,7 +90,12 @@ const BookingRoom = () => {
       message.error("Vui lòng chọn phòng trước khi đặt.");
       return;
     }
-
+    // Thêm kiểm tra giá phòng
+    const price = room?.finalPrice || room?.basePrice || 0;
+    if (!price || price < 1000) {
+      message.error("Giá phòng không hợp lệ, vui lòng chọn lại phòng.");
+      return;
+    }
     const payload = {
       userId: localStorage.getItem("userId"),
       itemRoom: [{ roomId: bookingData?.roomId }],
@@ -104,6 +109,7 @@ const BookingRoom = () => {
         birthDate: guest.birthDate ? dayjs(guest.birthDate).format('YYYY-MM-DD') : new Date('1990-01-01')
       })) : [],
       ...values,  // username, email, phone_number
+      totalPrice: price,
     };
 
     console.log("Payload gửi đi:", payload);
