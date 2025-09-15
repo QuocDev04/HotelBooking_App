@@ -237,7 +237,7 @@ Vnpay.get('/payment-callback', async (req, res) => {
             <li><strong>Trẻ nhỏ:</strong> ${updatedBooking.toddlerTour || 0} người</li>
             <li><strong>Em bé:</strong> ${updatedBooking.infantTour || 0} người</li>
             <li><strong>Loại thanh toán:</strong> ${updatedBooking.paymentType || 'Không xác định'}</li>
-            <li><strong>Trạng thái thanh toán:</strong> ${updatedBooking.payment_status || 'N/A'}</li>
+            
         </ul>
         <h3>Thông tin khách hàng:</h3>
         ${customerInfoHtml}
