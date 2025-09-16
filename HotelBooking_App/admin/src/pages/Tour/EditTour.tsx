@@ -171,34 +171,35 @@ const EditTour = () => {
             <Row gutter={[32, 32]}>
               {/* Cột trái */}
               <Col xs={24} lg={16}>
-              <Form.Item
-  label="Tên Tour"
-  name="nameTour"
-  rules={[
-    { required: true, message: "Không được để trống" },
-    {
-      validator: async (_, value) => {
-        if (!value) return;
-        try {
-          // Gọi API check trùng tên (ngoại trừ tour hiện tại)
-          const res = await instance.get(`/tour?search=${value}`);
-          const existed = res.data.tours.some(
-            (t: any) => t.nameTour === value && t._id !== id
-          );
-          if (existed) {
-            return Promise.reject("Tên tour đã tồn tại, vui lòng nhập tên khác!");
-          }
-        } catch (error) {
-          console.error(error);
-        }
-      },
-    },
-  ]}
->
-  <Input placeholder="VD: Tour Hạ Long 3N2Đ" size="large" />
-</Form.Item>
+                {/* Tên tour */}
+                <Form.Item
+                  label="Tên Tour"
+                  name="nameTour"
+                  rules={[
+                    { required: true, message: "Không được để trống" },
+                    {
+                      validator: async (_, value) => {
+                        if (!value) return;
+                        try {
+                          // Gọi API check trùng tên (ngoại trừ tour hiện tại)
+                          const res = await instance.get(`/tour?search=${value}`);
+                          const existed = res.data.tours.some(
+                            (t: any) => t.nameTour === value && t._id !== id
+                          );
+                          if (existed) {
+                            return Promise.reject("Tên tour đã tồn tại, vui lòng nhập tên khác!");
+                          }
+                        } catch (error) {
+                          console.error(error);
+                        }
+                      },
+                    },
+                  ]}
+                >
+                  <Input placeholder="VD: Tour Hạ Long 3N2Đ" size="large" />
+                </Form.Item>
 
-
+                {/* Điểm đến, nơi xuất phát, số ngày */}
                 <Row gutter={24}>
                   <Col span={8}>
                     <Form.Item
@@ -238,92 +239,93 @@ const EditTour = () => {
                   </Col>
                 </Row>
 
+                {/* Giá tour */}
                 <Row gutter={24}>
-  <Col span={8}>
-    <Form.Item label="Giá Tour" name="price">
-      <InputNumber
-        size="large"
-        style={{ width: "100%" }}
-        min={0}
-        formatter={(v) => (v ? `${Number(v).toLocaleString("vi-VN")} ₫` : "")}
-        parser={(v) => v?.replace(/[₫\s,.]/g, "") || ""}
-      />
-    </Form.Item>
-  </Col>
+                  <Col span={8}>
+                    <Form.Item label="Giá Tour" name="price">
+                      <InputNumber
+                        size="large"
+                        style={{ width: "100%" }}
+                        min={0}
+                        formatter={(v) => (v ? `${Number(v).toLocaleString("vi-VN")} ₫` : "")}
+                        parser={(v) => v?.replace(/[₫\s,.]/g, "") || ""}
+                      />
+                    </Form.Item>
+                  </Col>
 
-  <Col span={8}>
-    <Form.Item label="Giá Trẻ Em" name="priceChildren">
-      <InputNumber size="large" style={{ width: "100%" }} min={0} />
-    </Form.Item>
-  </Col>
+                  <Col span={8}>
+                    <Form.Item label="Giá Trẻ Em" name="priceChildren">
+                      <InputNumber size="large" style={{ width: "100%" }} min={0} />
+                    </Form.Item>
+                  </Col>
 
-  <Col span={8}>
-    <Form.Item label="Giá Trẻ Nhỏ" name="priceLittleBaby">
-      <InputNumber size="large" style={{ width: "100%" }} min={0} />
-    </Form.Item>
-  </Col>
-</Row>
+                  <Col span={8}>
+                    <Form.Item label="Giá Trẻ Nhỏ" name="priceLittleBaby">
+                      <InputNumber size="large" style={{ width: "100%" }} min={0} />
+                    </Form.Item>
+                  </Col>
+                </Row>
 
-{/* 🟢 Thêm giảm giá */}
-<Row gutter={24}>
-  <Col span={8}>
-    <Form.Item
-      label="Phần trăm giảm giá (%)"
-      name="discountPercent"
-      rules={[
-        {
-          type: "number",
-          min: 1,
-          max: 100,
-          message: "Phần trăm phải từ 1 đến 100",
-        },
-      ]}
-    >
-      <InputNumber
-        min={1}
-        max={100}
-        placeholder="VD: 15 (15%)"
-        size="large"
-        style={{ width: "100%" }}
-      />
-    </Form.Item>
-  </Col>
+                {/* Giảm giá */}
+                <Row gutter={24}>
+                  <Col span={8}>
+                    <Form.Item
+                      label="Phần trăm giảm giá (%)"
+                      name="discountPercent"
+                      rules={[
+                        {
+                          type: "number",
+                          min: 1,
+                          max: 100,
+                          message: "Phần trăm phải từ 1 đến 100",
+                        },
+                      ]}
+                    >
+                      <InputNumber
+                        min={1}
+                        max={100}
+                        placeholder="VD: 15 (15%)"
+                        size="large"
+                        style={{ width: "100%" }}
+                      />
+                    </Form.Item>
+                  </Col>
 
-  <Col span={8}>
-    <Form.Item
-      label="Ngày hết hạn giảm giá"
-      name="discountExpiryDate"
-      rules={[
-        ({ getFieldValue }) => ({
-          validator(_, value) {
-            const discount = getFieldValue("discountPercent");
-            if (!discount || discount <= 0) return Promise.resolve();
-            if (!value)
-              return Promise.reject(new Error("Vui lòng chọn ngày hết hạn"));
-            if (value.isBefore(dayjs())) {
-              return Promise.reject(
-                new Error("Ngày hết hạn phải lớn hơn hiện tại")
-              );
-            }
-            return Promise.resolve();
-          },
-        }),
-      ]}
-    >
-      <DatePicker
-        showTime
-        size="large"
-        style={{ width: "100%" }}
-        placeholder="Chọn ngày giờ hết hạn"
-        disabledDate={(current) =>
-          current && current < dayjs().startOf("day")
-        }
-      />
-    </Form.Item>
-  </Col>
-</Row>
+                  <Col span={8}>
+                    <Form.Item
+                      label="Ngày hết hạn giảm giá"
+                      name="discountExpiryDate"
+                      rules={[
+                        ({ getFieldValue }) => ({
+                          validator(_, value) {
+                            const discount = getFieldValue("discountPercent");
+                            if (!discount || discount <= 0) return Promise.resolve();
+                            if (!value)
+                              return Promise.reject(new Error("Vui lòng chọn ngày hết hạn"));
+                            if (value.isBefore(dayjs())) {
+                              return Promise.reject(
+                                new Error("Ngày hết hạn phải lớn hơn hiện tại")
+                              );
+                            }
+                            return Promise.resolve();
+                          },
+                        }),
+                      ]}
+                    >
+                      <DatePicker
+                        showTime
+                        size="large"
+                        style={{ width: "100%" }}
+                        placeholder="Chọn ngày giờ hết hạn"
+                        disabledDate={(current) =>
+                          current && current < dayjs().startOf("day")
+                        }
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
 
-
+                {/* Mô tả */}
                 <Form.Item label="Mô tả Tour" name="descriptionTour">
                   <ReactQuill
                     className="h-[300px]"
@@ -336,6 +338,24 @@ const EditTour = () => {
 
               {/* Cột phải */}
               <Col xs={24} lg={8}>
+                {/* 🟢 Phương tiện vận chuyển */}
+                <Form.Item
+                  label="Phương tiện vận chuyển"
+                  name="itemTransport"
+                  rules={[{ required: true, message: "Vui lòng chọn phương tiện" }]}
+                >
+                  <Select
+                    mode="multiple"
+                    size="large"
+                    placeholder="Chọn phương tiện"
+                    options={transports?.map((tran: any) => ({
+                      label: tran.transportName,
+                      value: tran._id,
+                    }))}
+                  />
+                </Form.Item>
+
+                {/* Ảnh Tour */}
                 <Form.Item label="Ảnh Tour" name="imageTour">
                   <Upload
                     listType="picture-card"
@@ -362,6 +382,7 @@ const EditTour = () => {
                   )}
                 </Form.Item>
 
+                {/* Nổi bật */}
                 <Form.Item
                   name="featured"
                   label="Sản phẩm nổi bật"
@@ -371,6 +392,7 @@ const EditTour = () => {
                 </Form.Item>
               </Col>
 
+              {/* Buttons */}
               <Col span={24}>
                 <Form.Item>
                   <Button

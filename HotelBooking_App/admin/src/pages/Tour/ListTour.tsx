@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { QuestionCircleOutlined, SearchOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Input, notification, Popconfirm, Table, Card, Select, type TableColumnsType } from 'antd';
+import { Button, Input, notification, Popconfirm, Table, Card, Select, Tag, type TableColumnsType } from 'antd';
 import { AiFillEdit, AiTwotoneDelete } from 'react-icons/ai';
 import { Link } from 'react-router-dom';
 import instance from '../../configs/axios';
@@ -110,6 +110,23 @@ const ListTour = () => {
       key: 'price',
       render: (price: number) =>
         price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }),
+    },
+    {
+      title: 'Phương Tiện',
+      dataIndex: 'itemTransport',
+      key: 'itemTransport',
+      render: (transports: any[]) => {
+        if (!transports || transports.length === 0) return "Không có";
+        return (
+          <>
+            {transports.map((t: any, i: number) => (
+              <Tag color="blue" key={i}>
+                {t.TransportId?.transportName || "Không rõ"}
+              </Tag>
+            ))}
+          </>
+        );
+      },
     },
     {
       title: 'Mô Tả Tour',

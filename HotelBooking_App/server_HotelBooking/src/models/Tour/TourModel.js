@@ -16,6 +16,7 @@ const TourModel = new mongoose.Schema({
     discountPercent: { type: Number },                     // Giá khuyến mãi (nếu có)
     finalPrice: { type: Number },                    // Giá cuối cùng sau áp dụng phiếu giảm giá
     discountExpiryDate: { type: Date },                    // Thời hạn phiếu giảm giá
+    itemTransport: [TransportItemSchema], // Phương tiện di chuyển
     
     // Thông tin vé máy bay     
     flightPrice: { type: Number, default: 0 },             // Giá vé máy bay người lớn

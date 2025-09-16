@@ -16,7 +16,6 @@ const TourPage = () => {
   const calendarRef = useRef<HTMLDivElement>(null);
   const { id } = useParams<{ id: string }>();
 
-  // Hàm scroll
   const scrollToCalendar = () => {
     calendarRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -29,7 +28,6 @@ const TourPage = () => {
     queryFn: () => instanceClient.get(`/date/tour/${tourId}`)
   })
   const slots = tourD?.data?.data || [];
-  console.log(slots);
 
   const { data: tour } = useQuery({
     queryKey: ['tour', id],
@@ -37,12 +35,7 @@ const TourPage = () => {
   })
   const tours = tour?.data?.tour
 
-  // Thêm useEffect để log các giá trị quan trọng
   useEffect(() => {
-    console.log("Selected date:", selectedDate);
-    console.log("Available slots:", slots);
-
-    // Tìm slot phù hợp với ngày đã chọn
     if (selectedDate && slots.length > 0) {
       const matchingSlot = slots.find(slot =>
         new Date(slot.dateTour).toDateString() === selectedDate.toDateString()
@@ -51,18 +44,13 @@ const TourPage = () => {
     }
   }, [selectedDate, slots]);
 
-  // Hàm vừa reset ngày vừa cuộn xuống lịch
   const handleChooseOtherDate = () => {
     setSelectedDate(null);
     scrollToCalendar();
   };
 
-  // Cập nhật hàm setSelectedDate để log thêm thông tin
   const handleDateSelect = (date: Date | null) => {
-    console.log("Date selected:", date);
     setSelectedDate(date);
-
-    // Kiểm tra xem có slot nào cho ngày này không
     if (date && slots.length > 0) {
       const matchingSlot = slots.find(slot =>
         new Date(slot.dateTour).toDateString() === date.toDateString()
@@ -70,9 +58,10 @@ const TourPage = () => {
       console.log("Matching slot after selection:", matchingSlot);
     }
   };
+
   return (
     <>
-      {/* Hero Section với gradient background */}
+      {/* Hero Section */}
       <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 text-white">
         <div className="max-w-7xl mx-auto px-4 py-12">
           {/* Breadcrumb */}
@@ -86,18 +75,21 @@ const TourPage = () => {
             </div>
           </nav>
 
-          {/* Tour Title & Basic Info */}
+          {/* Title & Info */}
           <div className="mb-8">
             <h1 className="text-4xl lg:text-5xl font-bold mb-4 leading-tight">
               {tours?.nameTour}
             </h1>
 
-            {/* Tour Highlights */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            {/* Highlights */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
+              {/* Khởi hành */}
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
                 <div className="flex items-center mb-3">
                   <div className="bg-blue-500/30 rounded-full p-3 mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                      viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                       <circle cx="12" cy="10" r="3" />
                     </svg>
@@ -109,10 +101,13 @@ const TourPage = () => {
                 </div>
               </div>
 
+              {/* Điểm đến */}
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
                 <div className="flex items-center mb-3">
                   <div className="bg-purple-500/30 rounded-full p-3 mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                      viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                       <circle cx="12" cy="10" r="3" />
                     </svg>
@@ -125,10 +120,13 @@ const TourPage = () => {
                 </div>
               </div>
 
+              {/* Thời gian */}
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
                 <div className="flex items-center mb-3">
                   <div className="bg-indigo-500/30 rounded-full p-3 mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                      viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" />
                       <polyline points="12,6 12,12 16,14" />
                     </svg>
@@ -136,6 +134,34 @@ const TourPage = () => {
                   <div>
                     <div className="text-blue-100 text-sm">Thời gian</div>
                     <div className="text-white font-bold text-lg">{tours?.duration}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Phương tiện */}
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                <div className="flex items-center mb-3">
+                  <div className="bg-green-500/30 rounded-full p-3 mr-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                      viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 17h16M4 17l2-5h12l2 5M6 12V7h12v5" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-blue-100 text-sm">Phương tiện</div>
+                    <div className="text-white font-bold text-lg">
+                      {tours?.itemTransport && tours.itemTransport.length > 0 ? (
+                        tours.itemTransport.map((t: any, i: number) => (
+                          <span key={i}>
+                            {t.TransportId?.transportName}
+                            {i < tours.itemTransport.length - 1 && ', '}
+                          </span>
+                        ))
+                      ) : (
+                        "Chưa có thông tin"
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -148,9 +174,7 @@ const TourPage = () => {
       <div className="bg-gray-50 min-h-screen">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Content - 2/3 width */}
             <div className="lg:col-span-2 space-y-8">
-              {/* Image Gallery */}
               <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
                 <LeftTourDetail
                   refDiv={calendarRef}
@@ -159,15 +183,13 @@ const TourPage = () => {
                 />
               </div>
 
-              {/* Content Tabs */}
               <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-                {/* Tab Headers */}
                 <div className="border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
                   <div className="flex">
                     <button
                       className={`px-8 py-4 font-semibold text-lg transition-all duration-300 relative ${activeTab === 'overview'
-                          ? 'text-blue-600 bg-white border-b-3 border-blue-600'
-                          : 'text-gray-600 hover:text-blue-500 hover:bg-blue-50'
+                        ? 'text-blue-600 bg-white border-b-3 border-blue-600'
+                        : 'text-gray-600 hover:text-blue-500 hover:bg-blue-50'
                         }`}
                       onClick={() => setActiveTab('overview')}
                     >
@@ -178,8 +200,8 @@ const TourPage = () => {
                     </button>
                     <button
                       className={`px-8 py-4 font-semibold text-lg transition-all duration-300 relative ${activeTab === 'schedule'
-                          ? 'text-blue-600 bg-white border-b-3 border-blue-600'
-                          : 'text-gray-600 hover:text-blue-500 hover:bg-blue-50'
+                        ? 'text-blue-600 bg-white border-b-3 border-blue-600'
+                        : 'text-gray-600 hover:text-blue-500 hover:bg-blue-50'
                         }`}
                       onClick={() => setActiveTab('schedule')}
                     >
@@ -190,8 +212,8 @@ const TourPage = () => {
                     </button>
                     <button
                       className={`px-8 py-4 font-semibold text-lg transition-all duration-300 relative ${activeTab === 'reviews'
-                          ? 'text-blue-600 bg-white border-b-3 border-blue-600'
-                          : 'text-gray-600 hover:text-blue-500 hover:bg-blue-50'
+                        ? 'text-blue-600 bg-white border-b-3 border-blue-600'
+                        : 'text-gray-600 hover:text-blue-500 hover:bg-blue-50'
                         }`}
                       onClick={() => setActiveTab('reviews')}
                     >
@@ -203,7 +225,6 @@ const TourPage = () => {
                   </div>
                 </div>
 
-                {/* Tab Content */}
                 <div className="p-8">
                   {activeTab === 'overview' && (
                     <div className="space-y-8 animate-fade-in">
@@ -224,7 +245,6 @@ const TourPage = () => {
               </div>
             </div>
 
-            {/* Right Sidebar - Booking Card */}
             <div className="lg:col-span-1">
               <div className="sticky top-24">
                 <RightTourDetail
@@ -239,26 +259,15 @@ const TourPage = () => {
         </div>
       </div>
 
-      {/* Custom CSS for animations */}
       <style jsx>{`
         .animate-fade-in {
           animation: fadeIn 0.5s ease-in-out;
         }
-        
         @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        
-        .border-b-3 {
-          border-bottom-width: 3px;
-        }
+        .border-b-3 { border-bottom-width: 3px; }
       `}</style>
     </>
   );
