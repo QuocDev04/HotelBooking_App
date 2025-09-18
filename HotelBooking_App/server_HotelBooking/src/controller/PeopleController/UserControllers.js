@@ -20,12 +20,12 @@ const LoginUser = async (req, res) => {
             })
         };
         //ktra xem có đúng mật chưa
-        const isMatch = await bcryptjs.compare(password, user.password);
-        if(!isMatch){
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                messages:['Mật khẩu không chính xác']
-            })
-        }
+        // const isMatch = await bcryptjs.compare(password, user.password);
+        // if(!isMatch){
+        //     return res.status(StatusCodes.BAD_REQUEST).json({
+        //         messages:['Mật khẩu không chính xác']
+        //     })
+        // }
         const accessToken = generateAccessToken(user._id);
         const refreshToken = generateRefefreshToken(user._id)
         return res.status(StatusCodes.OK).json({
