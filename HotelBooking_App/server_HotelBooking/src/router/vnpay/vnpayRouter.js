@@ -229,26 +229,13 @@ Vnpay.get('/payment-callback', async (req, res) => {
         <ul style="list-style: none; padding: 0;">
             <li><strong>Mã đặt chỗ:</strong> ${bookingId}</li>
             <li><strong>Ngày đi:</strong> ${tourDate}</li>
+            <li><strong>Ngày về (dự kiến):</strong></li>
             <li><strong>Người lớn:</strong> ${updatedBooking.adultsTour} người</li>
             <li><strong>Trẻ em:</strong> ${updatedBooking.childrenTour || 0} người</li>
             <li><strong>Trẻ nhỏ:</strong> ${updatedBooking.toddlerTour || 0} người</li>
             <li><strong>Em bé:</strong> ${updatedBooking.infantTour || 0} người</li>
             <li><strong>Tổng giá:</strong> ${totalPriceVN} VNĐ</li>
             <li><strong>Loại thanh toán:</strong> ${updatedBooking.paymentType || 'Không xác định'}</li>
-        </ul>
-
-        <h3>Thông tin phòng khách sạn:</h3>
-        <p>${roomInfo}</p>
-        ${singleRoomInfo}
-
-        <h3>🛏️ Các hạng phòng tiêu biểu:</h3>
-        <ul style="list-style: none; padding: 0;">
-            <li><b>Deluxe Sky Residence</b> - 60 m², 2 người lớn + 2 trẻ em, Phòng ngủ riêng, phòng khách, sofa, ban công, bồn tắm, view Rừng.</li>
-            <li><b>Premier Sky Residence</b> - 66 m², 2 người lớn + 2 trẻ em, Phòng ngủ riêng, phòng khách, sofa, ban công, bồn tắm, view Toàn cảnh.</li>
-            <li><b>Executive Sky Residence</b> - 75 m², 2 người lớn + 2 trẻ em, Phòng ngủ riêng, phòng khách, sofa, ban công, bồn tắm, view Toàn cảnh.</li>
-            <li><b>Deluxe Sky Residence (2 phòng ngủ)</b> - 103 m², 4 người lớn + 4 trẻ em, 2 phòng ngủ, phòng khách, sofa, ban công, bồn tắm, view Toàn cảnh.</li>
-            <li><b>Premier Sky Residence (2 phòng ngủ)</b> - 134 m², 4 người lớn + 4 trẻ em, 2 phòng ngủ, phòng khách, sofa, ban công, bồn tắm, view Toàn cảnh.</li>
-            <li><b>Executive Sky Residence (2 phòng ngủ)</b> - 165 m², 4 người lớn + 4 trẻ em, 2 phòng ngủ, phòng khách, sofa, ban công, bồn tắm, view Toàn cảnh.</li>
         </ul>
     </div>
     <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi!</p>
