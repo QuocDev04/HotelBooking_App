@@ -231,12 +231,45 @@ const AddTour = () => {
                     <Form.Item
                       label={req("Số Ngày")}
                       name="duration"
-                      rules={[
-                        { required: true, message: "Nhập số ngày" },
+                      rules={[{ required: true, message: "Nhập số ngày" },
                         {
-                          pattern: /^\d+\s*ngày(\s*\d+\s*đêm)?$/i,
+                          pattern: /^\s*(\d+)\s*ngày(?:\s+(\d+)\s*đêm)?\s*$/i,
                           message: "VD: 3 ngày 2 đêm",
                         },
+                        {
+                          validator: (_, value) => {
+                            if (!value) return Promise.reject("Nhập số ngày");
+                        
+                            const regex = /^\s*(\d+)\s*ngày(?:\s+(\d+)\s*đêm)?\s*$/i;
+                            const match = value.match(regex);
+                        
+                            if (!match) {
+                              return Promise.reject("Định dạng không hợp lệ. VD: 3 ngày 2 đêm");
+                            }
+                        
+                            const days = parseInt(match[1], 10);
+                            const nights = match[2] ? parseInt(match[2], 10) : 0;
+                        
+                            if (days <= 0) {
+                              return Promise.reject("Số ngày phải lớn hơn 0");
+                            }
+                        
+                            if (nights < 0) {
+                              return Promise.reject("Số đêm không được âm");
+                            }
+                        
+                            if (nights < days - 1) {
+                              return Promise.reject("Số đêm quá ít so với số ngày");
+                            }
+                            if (nights > days + 1) {
+                              return Promise.reject("Số đêm quá nhiều so với số ngày");
+                            }
+                            // ⚠️ Cho phép đêm >= ngày
+                            // Nếu muốn chặt hơn, có thể giới hạn đêm ≤ ngày + 1
+                        
+                            return Promise.resolve();
+                          }
+                        }
                       ]}
                     >
                       <Input placeholder="VD: 3 ngày 2 đêm" />

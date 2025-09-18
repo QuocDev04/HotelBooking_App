@@ -244,7 +244,7 @@ const TourDuocGiao = () => {
             console.log(`Tour ${tour._id} has no assignedDates. Fallback: fetch DateSlots by tourId and filter by assignedEmployee`);
             try {
               const slotResp = await axiosGuide.get(`date/tour/${tour._id}`);
-              const employeeId = user?.employeeId || user?._id || user?.employee_id;
+              const employeeId = user?.employeeId || user?.id || user?.employee_id;
               const raw = slotResp?.data;
               const list = Array.isArray(raw?.dates)
                 ? raw.dates
@@ -254,7 +254,7 @@ const TourDuocGiao = () => {
               const slots = Array.isArray(list)
                 ? list.filter((s) => {
                     const assigned = s.assignedEmployee;
-                    return assigned === employeeId || assigned?._id === employeeId;
+                    return assigned === employeeId || (assigned && assigned._id === employeeId);
                   })
                 : [];
               if (slots.length > 0) {
@@ -396,8 +396,108 @@ const TourDuocGiao = () => {
     setShowScheduleModal(false);
     setSelectedTour(null);
   };
+  
+  const isCurrentTimeInRange = (startDateStr, soNgay, soDem) => {
+    // 1. Tính toán ngày bắt đầu và kết thúc
+    const result = tinhNgayKetThucTour(startDateStr, soNgay, soDem);
+    
+    // 2. Lấy thời gian hiện tại
+    const currentTime = new Date();
+  
+    // 3. So sánh thời gian hiện tại với thời gian bắt đầu và kết thúc
+    const startTime = new Date(result.startDate.split(" ")[0].split("/").reverse().join("-") + " " + result.startDate.split(" ")[1]);
+    const endTime = new Date(result.endDate.split(" ")[0].split("/").reverse().join("-") + " " + result.endDate.split(" ")[1]);
+  
+    // Kiểm tra xem thời gian hiện tại có nằm trong khoảng thời gian này không
+    if (currentTime >= startTime && currentTime <= endTime) {
+      return 0;  // Thời gian hiện tại nằm trong khoảng
+    } 
+    if (currentTime < startTime) {
+      return -1;  // Thời gian hiện tại nằm trong khoảng
+    } 
+    if (currentTime > endTime) {
+      return 1;  // Thời gian hiện tại nằm trong khoảng
+    } 
+  }
+    
+    const formatDate = (date) => {
+      const dd = String(date.getDate()).padStart(2, '0');  // Ngày
+      const mm = String(date.getMonth() + 1).padStart(2, '0');  // Tháng (tính từ 0)
+      const yyyy = date.getFullYear();  // Năm (4 chữ số)
+    
+      const hh = String(date.getHours()).padStart(2, '0');  // Giờ
+      const min = String(date.getMinutes()).padStart(2, '0');  // Phút
+      const ss = String(date.getSeconds()).padStart(2, '0');  // Giây
+    
+      return `${dd}/${mm}/${yyyy} ${hh}:${min}:${ss}`;
+    }
+    
+    const tinhNgayKetThucTour = (startDateStr, soNgay, soDem) => {
+      if (!startDateStr || soNgay <= 0 || soDem < 0) {
+        throw new Error("Dữ liệu không hợp lệ");
+      }
+    
+      // Xác định giờ bắt đầu: Nếu số đêm > số ngày thì bắt đầu vào buổi tối (18:00)
+      // const startHour = soDem > soNgay ? 18 : 8;
+      // const start = parseDate(startDateStr, startHour);
+      const start = new Date(startDateStr); 
+      start.setHours(soDem > soNgay ? 18 : 8,0,0);
+      // Ngày kết thúc = ngày bắt đầu + (số ngày - 1),0,
+      const end = new Date(start);
+      end.setDate(end.getDate() + soNgay - 1);
+    
+      // Nếu có ở lại qua đêm cuối (số đêm >= số ngày) => kết thúc sáng hôm sau lúc 08:00
+      const oLaiQuaDemCuoi = soDem >= soNgay;
+      if (oLaiQuaDemCuoi) {
+        end.setDate(end.getDate() + 1); // sang hôm sau
+        end.setHours(8, 0, 0); // 08:00:00 sáng
+      } else {
+        end.setHours(18, 0, 0); // 18:00:00 chiều
+      }
+    
+      return {
+        startDate: formatDate(start),
+        endDate: formatDate(end),
+      };
+    }
 
-  const handleStatusChange = async (tourId, dateSlotId, newStatus) => {
+  const handleStatusChange = async (tour, dateSlot, newStatus) => {
+    const regex = /^\s*(\d+)\s*ngày(?:\s+(\d+)\s*đêm)?\s*$/i;
+    const match = tour.duration.match(regex);
+    const days = parseInt(match[1], 10);
+    const nights = match[2] ? parseInt(match[2], 10) : 0;
+    const isCurrentInRangeTimeTour = isCurrentTimeInRange(dateSlot.dateTour, days, nights);
+    if(isCurrentInRangeTimeTour != 0 && newStatus === 'ongoing' ){
+        alert('Không thể cập nhật trạng thái: Tour này chưa đến thời gian diễn ra');
+        return;
+    };
+    if(isCurrentInRangeTimeTour == 0){
+      if(newStatus === 'completed'){
+        alert('Không thể cập nhật trạng thái: Tour này chưa hết thời gian diễn ra');
+        return;
+      }
+
+      if(newStatus === 'preparing'){
+        alert('Không thể cập nhật trạng thái: Tour này đang trong thời gian diễn ra');
+        return;
+      }
+    };
+
+    if(isCurrentInRangeTimeTour == -1){
+      if(newStatus === 'completed'){
+        alert('Không thể cập nhật trạng thái: Tour này chưa diễn ra');
+        return;
+      }
+    };
+
+    if(isCurrentInRangeTimeTour == 1){
+      if(newStatus === 'preparing'){
+        alert('Không thể cập nhật trạng thái: Tour này đã diễn ra');
+        return;
+      }
+    };
+    const tourId = tour._id;
+    const dateSlotId = dateSlot._id;
     // Kiểm tra xem dateSlotId có phải là ID thật không (không phải default-xxx)
     if (!dateSlotId || dateSlotId.startsWith('default-')) {
       alert('Không thể cập nhật trạng thái: Tour này chưa có lịch trình cụ thể được phân công');
@@ -734,7 +834,7 @@ const TourDuocGiao = () => {
                               <select
                                 value={getTourStatusFromDateSlots(tour._id)}
                                 onChange={(e) => {
-                                  handleStatusChange(tour._id, firstRealSlot._id, e.target.value);
+                                  handleStatusChange(tour, firstRealSlot, e.target.value);
                                 }}
                                 disabled={updatingTours[tour._id]}
                                 className={`text-sm border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${getSelectBgColor(getTourStatusFromDateSlots(tour._id))}`}
@@ -742,7 +842,7 @@ const TourDuocGiao = () => {
                                 <option value="preparing">Chuẩn bị diễn ra</option>
                                 <option value="ongoing">Đang diễn ra</option>
                                 <option value="completed">Hoàn thành</option>
-                                <option value="postponed">Hoãn tour</option>
+                                {/* <option value="postponed">Hoãn tour</option> */}
                               </select>
                               {updatingTours[tour._id] && (
                                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>

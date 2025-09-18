@@ -55,7 +55,7 @@ Vnpay.post('/create-payment', async (req, res) => {
             vnp_OrderInfo: `${type} booking #${booking._id}`,
             vnp_OrderType: ProductCode.Other,
             // Callback phải trỏ về backend
-            vnp_ReturnUrl: `http://localhost:5173/payment-result`
+            vnp_ReturnUrl: `http://localhost:5175/payment-result`
             ,
             vnp_Locale: VnpLocale.VN,
             vnp_CreateDate: dateFormat(new Date()),
@@ -86,7 +86,7 @@ Vnpay.get('/payment-callback', async (req, res) => {
 
         const isValid = vnpay.verifyReturnUrl(req.query);
         if (!isValid) {
-            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Invalid signature');
+            return res.redirect('http://localhost:5175/payment-result?vnp_ResponseCode=99&success=false&message=Invalid signature');
         }
 
         const responseCode = req.query.vnp_ResponseCode;
@@ -121,7 +121,7 @@ Vnpay.get('/payment-callback', async (req, res) => {
             }
 
             if (!updatedBooking) {
-                return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Booking not found');
+                return res.redirect('http://localhost:5175/payment-result?vnp_ResponseCode=99&success=false&message=Booking not found');
             }
 
             // Gửi email xác nhận
@@ -269,7 +269,7 @@ Vnpay.get('/payment-callback', async (req, res) => {
             }
 
 
-            return res.redirect(`http://localhost:5173/payment-result?vnp_ResponseCode=00&success=true&bookingId=${bookingId}`);
+            return res.redirect(`http://localhost:5175/payment-result?vnp_ResponseCode=00&success=true&bookingId=${bookingId}`);
         } else {
             // Thanh toán thất bại
             if (isHotelBooking) {
@@ -277,11 +277,11 @@ Vnpay.get('/payment-callback', async (req, res) => {
             } else {
                 await TourBookingSchema.findByIdAndUpdate(bookingId, { payment_status: 'cancelled' });
             }
-            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Payment failed');
+            return res.redirect('http://localhost:5175/payment-result?vnp_ResponseCode=99&success=false&message=Payment failed');
         }
     } catch (error) {
         console.error('Lỗi callback VNPay:', error);
-        return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=System error');
+        return res.redirect('http://localhost:5175/payment-result?vnp_ResponseCode=99&success=false&message=System error');
     }
 });
 
@@ -519,11 +519,11 @@ Vnpay.get('/test-callback', async (req, res) => {
             console.log('Booking đã được cập nhật:', updatedBooking);
         }
 
-        return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=00&success=true');
+        return res.redirect('http://localhost:5175/payment-result?vnp_ResponseCode=00&success=true');
 
     } catch (error) {
         console.error('Lỗi test callback:', error);
-        return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Test error');
+        return res.redirect('http://localhost:5175/payment-result?vnp_ResponseCode=99&success=false&message=Test error');
     }
 });
 
@@ -591,10 +591,10 @@ Vnpay.get('/frontend-callback', async (req, res) => {
                     }
                 }
 
-                return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=00&success=true&bookingId=' + bookingId);
+                return res.redirect('http://localhost:5175/payment-result?vnp_ResponseCode=00&success=true&bookingId=' + bookingId);
             } else {
                 console.error('Không tìm thấy booking:', bookingId);
-                return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Booking not found');
+                return res.redirect('http://localhost:5175/payment-result?vnp_ResponseCode=99&success=false&message=Booking not found');
             }
         } else {
             // Thanh toán thất bại
@@ -605,12 +605,12 @@ Vnpay.get('/frontend-callback', async (req, res) => {
                 );
             }
 
-            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Payment failed');
+            return res.redirect('http://localhost:5175/payment-result?vnp_ResponseCode=99&success=false&message=Payment failed');
         }
 
     } catch (error) {
         console.error('Lỗi frontend callback:', error);
-        return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=System error');
+        return res.redirect('http://localhost:5175/payment-result?vnp_ResponseCode=99&success=false&message=System error');
     }
 });
 
@@ -1022,7 +1022,7 @@ Vnpay.get('/refund-callback', async (req, res) => {
 
             if (!updatedBooking) {
                 console.error('Không tìm thấy booking:', bookingId);
-                return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Booking not found');
+                return res.redirect('http://localhost:5175/payment-result?vnp_ResponseCode=99&success=false&message=Booking not found');
             }
 
             console.log('Booking đã được cập nhật hoàn tiền:', updatedBooking._id);
@@ -1063,7 +1063,7 @@ Vnpay.get('/refund-callback', async (req, res) => {
                 }
             }
 
-            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=00&success=true&type=refund');
+            return res.redirect('http://localhost:5175/payment-result?vnp_ResponseCode=00&success=true&type=refund');
 
         } else {
             // Hoàn tiền thất bại
@@ -1077,12 +1077,12 @@ Vnpay.get('/refund-callback', async (req, res) => {
                 }
             );
 
-            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Refund failed');
+            return res.redirect('http://localhost:5175/payment-result?vnp_ResponseCode=99&success=false&message=Refund failed');
         }
 
     } catch (error) {
         console.error('Lỗi xử lý callback hoàn tiền:', error);
-        return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=System error');
+        return res.redirect('http://localhost:5175/payment-result?vnp_ResponseCode=99&success=false&message=System error');
     }
 });
 
@@ -1105,7 +1105,7 @@ Vnpay.get('/hotel-payment-callback', async (req, res) => {
         const isValid = vnpay.verifyReturnUrl(req.query);
         if (!isValid) {
             console.error('Chữ ký không hợp lệ');
-            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Invalid signature');
+            return res.redirect('http://localhost:5175/payment-result?vnp_ResponseCode=99&success=false&message=Invalid signature');
         }
 
         const responseCode = req.query.vnp_ResponseCode;
@@ -1177,7 +1177,7 @@ Vnpay.get('/hotel-payment-callback', async (req, res) => {
                 }
             }
 
-            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=00&success=true&type=hotel');
+            return res.redirect('http://localhost:5175/payment-result?vnp_ResponseCode=00&success=true&type=hotel');
 
         } else {
             // Thanh toán thất bại
@@ -1191,12 +1191,12 @@ Vnpay.get('/hotel-payment-callback', async (req, res) => {
                 }
             );
 
-            return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=Hotel payment failed');
+            return res.redirect('http://localhost:5175/payment-result?vnp_ResponseCode=99&success=false&message=Hotel payment failed');
         }
 
     } catch (error) {
         console.error('Lỗi xử lý callback hotel:', error);
-        return res.redirect('http://localhost:5173/payment-result?vnp_ResponseCode=99&success=false&message=System error');
+        return res.redirect('http://localhost:5175/payment-result?vnp_ResponseCode=99&success=false&message=System error');
     }
 });
 

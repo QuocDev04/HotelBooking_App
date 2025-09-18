@@ -65,7 +65,53 @@ const SlotDetail = () => {
 
     const tour = slotData.tour;
     const bookings = bookingsData || [];
-    
+
+    const regex = /^\s*(\d+)\s*ngày(?:\s+(\d+)\s*đêm)?\s*$/i;
+    const match = slotData.tour.duration.match(regex);
+    const days = parseInt(match[1], 10);
+    const nights = match[2] ? parseInt(match[2], 10) : 0;
+      
+      const formatDate = (date) => {
+        const dd = String(date.getDate()).padStart(2, '0');  // Ngày
+        const mm = String(date.getMonth() + 1).padStart(2, '0');  // Tháng (tính từ 0)
+        const yyyy = date.getFullYear();  // Năm (4 chữ số)
+      
+        const hh = String(date.getHours()).padStart(2, '0');  // Giờ
+        const min = String(date.getMinutes()).padStart(2, '0');  // Phút
+        const ss = String(date.getSeconds()).padStart(2, '0');  // Giây
+      
+        return `${dd}/${mm}/${yyyy} ${hh}:${min}:${ss}`;
+      }
+      
+      const tinhNgayKetThucTour = (startDateStr, soNgay, soDem) => {
+        if (!startDateStr || soNgay <= 0 || soDem < 0) {
+          throw new Error("Dữ liệu không hợp lệ");
+        }
+      
+        // Xác định giờ bắt đầu: Nếu số đêm > số ngày thì bắt đầu vào buổi tối (18:00)
+        // const startHour = soDem > soNgay ? 18 : 8;
+        // const start = parseDate(startDateStr, startHour);
+        const start = new Date(startDateStr); 
+        start.setHours(soDem > soNgay ? 18 : 8,0,0);
+        // Ngày kết thúc = ngày bắt đầu + (số ngày - 1),0,
+        const end = new Date(start);
+        end.setDate(end.getDate() + soNgay - 1);
+      
+        // Nếu có ở lại qua đêm cuối (số đêm >= số ngày) => kết thúc sáng hôm sau lúc 08:00
+        const oLaiQuaDemCuoi = soDem >= soNgay;
+        if (oLaiQuaDemCuoi) {
+          end.setDate(end.getDate() + 1); // sang hôm sau
+          end.setHours(8, 0, 0); // 08:00:00 sáng
+        } else {
+          end.setHours(18, 0, 0); // 18:00:00 chiều
+        }
+      
+        return {
+          startDate: formatDate(start),
+          endDate: formatDate(end),
+        };
+      }
+      const timeTour = tinhNgayKetThucTour(slotData.dateTour, days, nights)
     // Demo data for testing - remove in production
     const demoBookings = [
         {
@@ -268,10 +314,10 @@ const SlotDetail = () => {
                             <Descriptions.Item label="Thời gian">
                                 <Space>
                                     <Tag icon={<ClockCircleOutlined />} color="blue">
-                                        Khởi hành: {tour?.departure_time || "N/A"}
+                                        Khởi hành: {timeTour?.startDate || "N/A"}
                                     </Tag>
                                     <Tag icon={<ClockCircleOutlined />} color="orange">
-                                        Kết thúc: {tour?.return_time || "N/A"}
+                                        Kết thúc: {timeTour?.endDate || "N/A"}
                                     </Tag>
                                 </Space>
                             </Descriptions.Item>
