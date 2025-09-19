@@ -119,7 +119,7 @@ const ListTime = () => {
             render: (date: string) => dayjs(date).format("YYYY-MM-DD"),
         },
         {
-            title: "Trạng thái Slot",
+            title: "Trạng thái Tour",
             dataIndex: "status",
             key: "status",
             render: (status: string) => {

@@ -223,23 +223,23 @@ const TourDuocGiao = () => {
             name: tour.nameTour,
             assignedDates: tour.assignedDates
           });
-          
+
           if (tour.assignedDates && tour.assignedDates.length > 0) {
-             // Chỉ hiển thị những ngày được phân công với đầy đủ thông tin
-             dateSlotsData[tour._id] = tour.assignedDates.map(assignedDate => ({
-               _id: assignedDate.dateSlotId,
-               dateTour: assignedDate.dateTour,
-               tourStatus: assignedDate.tourStatus,
-               status: assignedDate.status,
-               availableSeats: assignedDate.availableSeats,
-               bookedSeats: assignedDate.bookedSeats,
-               totalRevenue: assignedDate.totalRevenue,
-               depositAmount: assignedDate.depositAmount,
-               refundAmount: assignedDate.refundAmount,
-               statusNote: assignedDate.statusNote,
-               statusUpdatedAt: assignedDate.statusUpdatedAt
-             }));
-             console.log(`Tour ${tour._id} dateSlots:`, dateSlotsData[tour._id]);
+            // Chỉ hiển thị những ngày được phân công với đầy đủ thông tin
+            dateSlotsData[tour._id] = tour.assignedDates.map(assignedDate => ({
+              _id: assignedDate.dateSlotId,
+              dateTour: assignedDate.dateTour,
+              tourStatus: assignedDate.tourStatus,
+              status: assignedDate.status,
+              availableSeats: assignedDate.availableSeats,
+              bookedSeats: assignedDate.bookedSeats,
+              totalRevenue: assignedDate.totalRevenue,
+              depositAmount: assignedDate.depositAmount,
+              refundAmount: assignedDate.refundAmount,
+              statusNote: assignedDate.statusNote,
+              statusUpdatedAt: assignedDate.statusUpdatedAt
+            }));
+            console.log(`Tour ${tour._id} dateSlots:`, dateSlotsData[tour._id]);
           } else {
             console.log(`Tour ${tour._id} has no assignedDates. Fallback: fetch DateSlots by tourId and filter by assignedEmployee`);
             try {
@@ -253,9 +253,9 @@ const TourDuocGiao = () => {
                   : (Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw?.dateSlots) ? raw.dateSlots : []));
               const slots = Array.isArray(list)
                 ? list.filter((s) => {
-                    const assigned = s.assignedEmployee;
-                    return assigned === employeeId || (assigned && assigned._id === employeeId);
-                  })
+                  const assigned = s.assignedEmployee;
+                  return assigned === employeeId || (assigned && assigned._id === employeeId);
+                })
                 : [];
               if (slots.length > 0) {
                 dateSlotsData[tour._id] = slots.map(s => ({
@@ -286,7 +286,7 @@ const TourDuocGiao = () => {
         console.log('Final dateSlotsData:', dateSlotsData);
         setTourDateSlots(dateSlotsData);
         setTours(toursData);
-        
+
         // Debug log sau khi set state
         setTimeout(() => {
           console.log('tourDateSlots state after setting:', dateSlotsData);
@@ -396,70 +396,70 @@ const TourDuocGiao = () => {
     setShowScheduleModal(false);
     setSelectedTour(null);
   };
-  
+
   const isCurrentTimeInRange = (startDateStr, soNgay, soDem) => {
     // 1. Tính toán ngày bắt đầu và kết thúc
     const result = tinhNgayKetThucTour(startDateStr, soNgay, soDem);
-    
+
     // 2. Lấy thời gian hiện tại
     const currentTime = new Date();
-  
+
     // 3. So sánh thời gian hiện tại với thời gian bắt đầu và kết thúc
     const startTime = new Date(result.startDate.split(" ")[0].split("/").reverse().join("-") + " " + result.startDate.split(" ")[1]);
     const endTime = new Date(result.endDate.split(" ")[0].split("/").reverse().join("-") + " " + result.endDate.split(" ")[1]);
-  
+
     // Kiểm tra xem thời gian hiện tại có nằm trong khoảng thời gian này không
     if (currentTime >= startTime && currentTime <= endTime) {
       return 0;  // Thời gian hiện tại nằm trong khoảng
-    } 
+    }
     if (currentTime < startTime) {
       return -1;  // Thời gian hiện tại nằm trong khoảng
-    } 
+    }
     if (currentTime > endTime) {
       return 1;  // Thời gian hiện tại nằm trong khoảng
-    } 
+    }
   }
-    
-    const formatDate = (date) => {
-      const dd = String(date.getDate()).padStart(2, '0');  // Ngày
-      const mm = String(date.getMonth() + 1).padStart(2, '0');  // Tháng (tính từ 0)
-      const yyyy = date.getFullYear();  // Năm (4 chữ số)
-    
-      const hh = String(date.getHours()).padStart(2, '0');  // Giờ
-      const min = String(date.getMinutes()).padStart(2, '0');  // Phút
-      const ss = String(date.getSeconds()).padStart(2, '0');  // Giây
-    
-      return `${dd}/${mm}/${yyyy} ${hh}:${min}:${ss}`;
+
+  const formatDate = (date) => {
+    const dd = String(date.getDate()).padStart(2, '0');  // Ngày
+    const mm = String(date.getMonth() + 1).padStart(2, '0');  // Tháng (tính từ 0)
+    const yyyy = date.getFullYear();  // Năm (4 chữ số)
+
+    const hh = String(date.getHours()).padStart(2, '0');  // Giờ
+    const min = String(date.getMinutes()).padStart(2, '0');  // Phút
+    const ss = String(date.getSeconds()).padStart(2, '0');  // Giây
+
+    return `${dd}/${mm}/${yyyy} ${hh}:${min}:${ss}`;
+  }
+
+  const tinhNgayKetThucTour = (startDateStr, soNgay, soDem) => {
+    if (!startDateStr || soNgay <= 0 || soDem < 0) {
+      throw new Error("Dữ liệu không hợp lệ");
     }
-    
-    const tinhNgayKetThucTour = (startDateStr, soNgay, soDem) => {
-      if (!startDateStr || soNgay <= 0 || soDem < 0) {
-        throw new Error("Dữ liệu không hợp lệ");
-      }
-    
-      // Xác định giờ bắt đầu: Nếu số đêm > số ngày thì bắt đầu vào buổi tối (18:00)
-      // const startHour = soDem > soNgay ? 18 : 8;
-      // const start = parseDate(startDateStr, startHour);
-      const start = new Date(startDateStr); 
-      start.setHours(soDem > soNgay ? 18 : 8,0,0);
-      // Ngày kết thúc = ngày bắt đầu + (số ngày - 1),0,
-      const end = new Date(start);
-      end.setDate(end.getDate() + soNgay - 1);
-    
-      // Nếu có ở lại qua đêm cuối (số đêm >= số ngày) => kết thúc sáng hôm sau lúc 08:00
-      const oLaiQuaDemCuoi = soDem >= soNgay;
-      if (oLaiQuaDemCuoi) {
-        end.setDate(end.getDate() + 1); // sang hôm sau
-        end.setHours(8, 0, 0); // 08:00:00 sáng
-      } else {
-        end.setHours(18, 0, 0); // 18:00:00 chiều
-      }
-    
-      return {
-        startDate: formatDate(start),
-        endDate: formatDate(end),
-      };
+
+    // Xác định giờ bắt đầu: Nếu số đêm > số ngày thì bắt đầu vào buổi tối (18:00)
+    // const startHour = soDem > soNgay ? 18 : 8;
+    // const start = parseDate(startDateStr, startHour);
+    const start = new Date(startDateStr);
+    start.setHours(soDem > soNgay ? 18 : 8, 0, 0);
+    // Ngày kết thúc = ngày bắt đầu + (số ngày - 1),0,
+    const end = new Date(start);
+    end.setDate(end.getDate() + soNgay - 1);
+
+    // Nếu có ở lại qua đêm cuối (số đêm >= số ngày) => kết thúc sáng hôm sau lúc 08:00
+    const oLaiQuaDemCuoi = soDem >= soNgay;
+    if (oLaiQuaDemCuoi) {
+      end.setDate(end.getDate() + 1); // sang hôm sau
+      end.setHours(8, 0, 0); // 08:00:00 sáng
+    } else {
+      end.setHours(18, 0, 0); // 18:00:00 chiều
     }
+
+    return {
+      startDate: formatDate(start),
+      endDate: formatDate(end),
+    };
+  }
 
   const handleStatusChange = async (tour, dateSlot, newStatus) => {
     const regex = /^\s*(\d+)\s*ngày(?:\s+(\d+)\s*đêm)?\s*$/i;
@@ -467,31 +467,31 @@ const TourDuocGiao = () => {
     const days = parseInt(match[1], 10);
     const nights = match[2] ? parseInt(match[2], 10) : 0;
     const isCurrentInRangeTimeTour = isCurrentTimeInRange(dateSlot.dateTour, days, nights);
-    if(isCurrentInRangeTimeTour != 0 && newStatus === 'ongoing' ){
-        alert('Không thể cập nhật trạng thái: Tour này chưa đến thời gian diễn ra');
-        return;
+    if (isCurrentInRangeTimeTour != 0 && newStatus === 'ongoing') {
+      alert('Không thể cập nhật trạng thái: Tour này chưa đến thời gian diễn ra');
+      return;
     };
-    if(isCurrentInRangeTimeTour == 0){
-      if(newStatus === 'completed'){
+    if (isCurrentInRangeTimeTour == 0) {
+      if (newStatus === 'completed') {
         alert('Không thể cập nhật trạng thái: Tour này chưa hết thời gian diễn ra');
         return;
       }
 
-      if(newStatus === 'preparing'){
+      if (newStatus === 'preparing') {
         alert('Không thể cập nhật trạng thái: Tour này đang trong thời gian diễn ra');
         return;
       }
     };
 
-    if(isCurrentInRangeTimeTour == -1){
-      if(newStatus === 'completed'){
+    if (isCurrentInRangeTimeTour == -1) {
+      if (newStatus === 'completed') {
         alert('Không thể cập nhật trạng thái: Tour này chưa diễn ra');
         return;
       }
     };
 
-    if(isCurrentInRangeTimeTour == 1){
-      if(newStatus === 'preparing'){
+    if (isCurrentInRangeTimeTour == 1) {
+      if (newStatus === 'preparing') {
         alert('Không thể cập nhật trạng thái: Tour này đã diễn ra');
         return;
       }
@@ -784,6 +784,18 @@ const TourDuocGiao = () => {
                     </div>
                   </div>
                 </div>
+                {/* Ngày diễn ra tour: */}
+                {tourDateSlots[tour._id] && tourDateSlots[tour._id].length > 0 && (
+                  <div className="text-sm text-gray-700 mb-2 font-medium">
+                    Ngày diễn ra:{" "}
+                    {new Date(
+                      tourDateSlots[tour._id]
+                        .sort((a, b) => new Date(a.dateTour) - new Date(b.dateTour))[0]
+                        .dateTour
+                    ).toLocaleDateString("vi-VN")}
+                  </div>
+                )}
+
 
                 <div className="border-t border-gray-200 pt-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
@@ -811,7 +823,7 @@ const TourDuocGiao = () => {
                   <div className="mt-4">
                     <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4 border">
                       <div className="flex items-center space-x-4">
-                        <span className="text-sm font-medium text-gray-700">Trạng thái tour:</span>
+                        <span className="text-sm font-medium text-gray-700">Trạng thái hướng dẫn viên:</span>
                         <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getTourStatusColor(getTourStatusFromDateSlots(tour._id))}`}>
                           {getTourStatusText(getTourStatusFromDateSlots(tour._id))}
                         </span>

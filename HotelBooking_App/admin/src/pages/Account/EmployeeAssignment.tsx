@@ -7,6 +7,7 @@ interface Tour {
   destination: {
     _id: string;
     name: string;
+    locationName: string;
   };
   departure_location: string;
   duration: string;
@@ -372,7 +373,7 @@ const EmployeeAssignment: React.FC = () => {
                     <div>
                       <div className="text-sm font-medium text-gray-900">{tour.nameTour}</div>
                       <div className="text-sm text-gray-500">
-                        📍 {tour.departure_location} → {tour.destination?.name || 'N/A'}
+                        📍 {tour.departure_location} → {tour.destination?.locationName || 'N/A'}
                       </div>
                       <div className="text-sm text-gray-500">⏱️ {tour.duration}</div>
                       <div className="mt-1">
