@@ -917,76 +917,16 @@ const TourDuocGiao = () => {
                   {/* Danh sách khách hàng đơn giản */}
                   <div className="space-y-3">
                     {(() => {
-                      // Tạo danh sách tất cả khách hàng từ tất cả booking
-                      const allPassengers = [];
-                      let counter = 1;
-
-                      customerBookings.forEach(booking => {
-                        // Thêm người lớn
-                        if (booking.adultPassengers) {
-                          booking.adultPassengers.forEach(passenger => {
-                            allPassengers.push({
-                              ...passenger,
-                              type: 'Người lớn',
-                              color: 'bg-blue-100 text-blue-800',
-                              number: counter++
-                            });
-                          });
-                        }
-
-                        // Thêm trẻ em
-                        if (booking.childPassengers) {
-                          booking.childPassengers.forEach(passenger => {
-                            allPassengers.push({
-                              ...passenger,
-                              type: 'Trẻ em',
-                              color: 'bg-green-100 text-green-800',
-                              number: counter++
-                            });
-                          });
-                        }
-
-                        // Thêm trẻ nhỏ
-                        if (booking.toddlerPassengers) {
-                          booking.toddlerPassengers.forEach(passenger => {
-                            allPassengers.push({
-                              ...passenger,
-                              type: 'Trẻ nhỏ',
-                              color: 'bg-yellow-100 text-yellow-800',
-                              number: counter++
-                            });
-                          });
-                        }
-
-                        // Thêm em bé
-                        if (booking.infantPassengers) {
-                          booking.infantPassengers.forEach(passenger => {
-                            allPassengers.push({
-                              ...passenger,
-                              type: 'Em bé',
-                              color: 'bg-pink-100 text-pink-800',
-                              number: counter++
-                            });
-                          });
-                        }
-                      });
-
-                      return allPassengers.map((passenger, index) => (
+                      return customerBookings.filter(e => e.note).map((passenger, index) => (
                         <div key={index} className="flex items-center justify-between bg-white p-4 rounded-lg border hover:shadow-md transition-shadow">
                           <div className="flex items-center">
-                            <span className="inline-flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full text-sm font-bold mr-4">
-                              {passenger.number}
-                            </span>
                             <div>
-                              <h4 className="text-lg font-semibold text-gray-900">{passenger.fullName}</h4>
+                              <h4 className="text-lg font-semibold text-gray-900">Ghi chú {passenger.fullNameUser}</h4>
                               <p className="text-sm text-gray-500">
-                                {passenger.gender} • {new Date(passenger.birthDate).toLocaleDateString('vi-VN')}
+                                {passenger.note}
                               </p>
                             </div>
                           </div>
-                          <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${passenger.color}`}>
-                            {passenger.type}
-                          </span>
                         </div>
                       ));
                     })()}
