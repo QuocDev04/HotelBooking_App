@@ -40,11 +40,11 @@ AdminRouter.post("/syncUser", verifyClerkToken, async (req, res) => {
         }
 
         // Kiểm tra xem đã có admin nào chưa
-        const existingAdmins = await Admin.countDocuments();
+        // const existingAdmins = await Admin.countDocuments();
 
-        if (existingAdmins >= 1) {
-            return res.status(403).json({ message: "Chỉ cho phép 1 tài khoản admin." });
-        }
+        // if (existingAdmins >= 1) {
+        //     return res.status(403).json({ message: "Chỉ cho phép 1 tài khoản admin." });
+        // }
 
         // Tạo admin mới nếu chưa có admin nào và email chưa dùng
         admin = await Admin.create({

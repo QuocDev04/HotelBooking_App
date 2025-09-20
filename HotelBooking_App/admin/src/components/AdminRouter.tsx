@@ -9,7 +9,7 @@ interface AdminRouteProps {
     children: React.ReactNode;
 }
 
-const allowedAdminEmail = "toanltph49436@gmail.com";
+const allowedAdminEmail = ["toanltph49436@gmail.com","test@gmail.com","tienmin@gmail.com ","huyquoc2xx4@gmail.com tour@gmail.com"];
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     const { user, isLoaded } = useUser();
@@ -28,7 +28,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
             return;
         }
 
-        if (currentEmail === allowedAdminEmail) {
+        if (currentEmail && allowedAdminEmail.includes(currentEmail)) {
             if (location.pathname === "/admin") {
                 navigate("/admin/dashboad", { replace: true });
             }
@@ -48,7 +48,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
 
     // Nếu đúng admin thì render children (nếu chưa redirect kịp)
     const currentEmail = user?.emailAddresses?.[0]?.emailAddress;
-    if (currentEmail === allowedAdminEmail) {
+    if (currentEmail && allowedAdminEmail.includes(currentEmail)) {
         return <>{children}</>;
     }
 
