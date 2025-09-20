@@ -951,7 +951,7 @@ const TourDuocGiao = () => {
                       (!booking.infantPassengers || booking.infantPassengers.length === 0)
                     ) && (
                         <div className="text-center py-8 text-gray-500">
-                          <p>Chưa có thông tin chi tiết khách hàng</p>
+                          <p></p>
                         </div>
                       )}
                   </div>
